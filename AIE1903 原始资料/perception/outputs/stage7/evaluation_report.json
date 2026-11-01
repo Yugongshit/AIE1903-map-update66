@@ -1,0 +1,155 @@
+{
+  "stage": 7,
+  "consistency_validation": "PASS",
+  "errors": [],
+  "checks": [
+    {
+      "check": "all_29_source_candidates_preserved",
+      "passed": true
+    },
+    {
+      "check": "score_bounds",
+      "passed": true
+    },
+    {
+      "check": "behavior_samples_cover_vehicle_features",
+      "passed": true
+    },
+    {
+      "check": "vehicle_track_frame_unique",
+      "passed": true
+    },
+    {
+      "check": "association_pairs_unique",
+      "passed": true
+    },
+    {
+      "check": "distances_finite_nonnegative",
+      "passed": true
+    },
+    {
+      "check": "geometry_segment_interior",
+      "passed": true
+    },
+    {
+      "check": "geometry_segment_endpoint",
+      "passed": true
+    },
+    {
+      "check": "geometry_degenerate_segment",
+      "passed": true
+    },
+    {
+      "check": "geometry_polygon_inside",
+      "passed": true
+    },
+    {
+      "check": "geometry_polygon_outside",
+      "passed": true
+    },
+    {
+      "check": "synthetic_behavior_straight",
+      "passed": true
+    },
+    {
+      "check": "synthetic_behavior_stationary",
+      "passed": true
+    },
+    {
+      "check": "synthetic_behavior_turn",
+      "passed": true
+    },
+    {
+      "check": "synthetic_behavior_u_turn",
+      "passed": true
+    },
+    {
+      "check": "synthetic_track_gap_not_bridged",
+      "passed": true
+    },
+    {
+      "check": "associated_has_sufficient_evidence",
+      "passed": true
+    },
+    {
+      "check": "not_associated_has_far_observations",
+      "passed": true
+    },
+    {
+      "check": "candidate_evidence_labels_unique",
+      "passed": true
+    },
+    {
+      "check": "candidate_evidence_labels_known_ids",
+      "passed": true
+    },
+    {
+      "check": "candidate_evidence_label_vocabulary",
+      "passed": true
+    },
+    {
+      "check": "candidate_evidence_labels_provenance",
+      "passed": true
+    },
+    {
+      "check": "behavior_labels_unique",
+      "passed": true
+    },
+    {
+      "check": "behavior_labels_known_ids",
+      "passed": true
+    },
+    {
+      "check": "behavior_label_vocabulary",
+      "passed": true
+    },
+    {
+      "check": "behavior_labels_provenance",
+      "passed": true
+    },
+    {
+      "check": "association_labels_unique",
+      "passed": true
+    },
+    {
+      "check": "association_labels_known_ids",
+      "passed": true
+    },
+    {
+      "check": "association_label_vocabulary",
+      "passed": true
+    },
+    {
+      "check": "association_labels_provenance",
+      "passed": true
+    }
+  ],
+  "independent_evaluation": {
+    "candidate_evidence": {
+      "status": "AWAITING_INDEPENDENT_LABELS",
+      "labeled": 0,
+      "metrics": null,
+      "definition": "Independent sensor/map evidence adjudication; not historical map-change truth.",
+      "unknown_or_unadjudicated_labels": 29
+    },
+    "behavior": {
+      "status": "AWAITING_INDEPENDENT_LABELS",
+      "labeled": 0,
+      "metrics": null,
+      "definition": "Independently label the exact event interval from continuous observations.",
+      "unknown_or_unadjudicated_labels": 13
+    },
+    "association": {
+      "status": "AWAITING_INDEPENDENT_LABELS",
+      "labeled": 0,
+      "metrics": null,
+      "definition": "Independent space/time association, without a causal claim.",
+      "unknown_or_unadjudicated_labels": 175
+    }
+  },
+  "historical_map_change_evaluation": {
+    "status": "NOT_AVAILABLE",
+    "reason": "No independently verified prior/current change GT or held-out scenes supplied."
+  },
+  "protocol": "Preset rules; scene-0980 is a development scene. Do not report these outputs as held-out accuracy."
+}

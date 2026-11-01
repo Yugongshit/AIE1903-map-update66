@@ -1,0 +1,22 @@
+{
+  "stage": 3,
+  "candidate_count": 29,
+  "unique_event_count": 29,
+  "frame_evidence_rows": 332,
+  "levels": {
+    "HIGH_EVIDENCE": 20,
+    "MEDIUM_EVIDENCE": 3,
+    "INSUFFICIENT_EVIDENCE": 6
+  },
+  "nearby_links": 12,
+  "errors": [],
+  "validation": "PASS",
+  "limitations": [
+    "Evidence scores rank persistence and continuity, not probability of real map change.",
+    "No visibility-based N_valid is available; no M4 visibility support ratio is claimed.",
+    "Occupancy evidence is positive-only GT-derived; no false-positive rate can be inferred.",
+    "Lane ratios cover detected usable curves in candidate windows, not all visible frames.",
+    "Spatial links retain separate hypotheses; occupancy centers are not full footprints.",
+    "Thresholds are preset, not independently calibrated."
+  ]
+}

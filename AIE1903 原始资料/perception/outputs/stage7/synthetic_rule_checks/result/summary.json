@@ -1,0 +1,22 @@
+{
+  "stage": 5,
+  "vehicle_tracks": 5,
+  "vehicle_samples": 94,
+  "episodes": 6,
+  "behaviors": {
+    "straight": 3,
+    "stationary_presence": 1,
+    "turn": 1,
+    "u_turn_candidate": 1
+  },
+  "errors": [],
+  "validation": "PASS",
+  "limitations": [
+    "Uses existing nuScenes annotated positions and identities.",
+    "Episodes summarize consecutive motion-state runs; complex multi-maneuver runs may be uncertain.",
+    "No reference route or complete detour annotation; detour is not inferred.",
+    "Stationary presence is not a stop behavior event.",
+    "Censored episodes do not establish maneuver completeness.",
+    "Rules are preset and require independent behavior labels for accuracy evaluation."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "stage": 6,
+  "behavior_candidate_pairs": 175,
+  "associations": {
+    "associated": 5,
+    "not_associated": 81,
+    "uncertain": 89
+  },
+  "candidates_without_evaluable_behavior": 0,
+  "frame_evidence_rows": 1368,
+  "validation": "PASS",
+  "errors": [],
+  "limitations": [
+    "Associations describe observed space/time proximity only, not causation or verified map changes.",
+    "Distances use observed geometry in the exact same keyframe; missing frames are not interpolated.",
+    "Vehicle center distances are not clearance or collision distances.",
+    "Not-associated applies only to the observed simultaneous window.",
+    "Incomplete maneuver episodes and provisional marking identities remain upstream limitations."
+  ]
+}
