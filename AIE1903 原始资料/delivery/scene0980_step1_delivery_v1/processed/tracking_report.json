@@ -1,0 +1,37 @@
+{
+  "scene": "scene-0980",
+  "source": "nuScenes GT instance_token + 2Hz annotations; motion states are threshold heuristics",
+  "observed_frames": 41,
+  "unique_instances": 154,
+  "track_points": 2278,
+  "motion_state_counts": {
+    "stationary": 120,
+    "insufficient_observations": 10,
+    "moving": 21,
+    "uncertain": 3
+  },
+  "construction_related_states": {
+    "movable_object.barrier": {
+      "stationary": 61
+    },
+    "movable_object.debris": {
+      "stationary": 3
+    },
+    "movable_object.trafficcone": {
+      "stationary": 40,
+      "insufficient_observations": 2
+    },
+    "vehicle.construction": {
+      "stationary": 1
+    }
+  },
+  "motion_thresholds": {
+    "stationary_max_radius_m": 0.75,
+    "stationary_median_speed_mps": 0.8,
+    "moving_min_radius_m": 1.5,
+    "moving_min_median_speed_mps": 0.5,
+    "minimum_track_frames": 3,
+    "minimum_track_duration_s": 1.0,
+    "velocity_neighbor_gap_max_s": 1.1
+  }
+}

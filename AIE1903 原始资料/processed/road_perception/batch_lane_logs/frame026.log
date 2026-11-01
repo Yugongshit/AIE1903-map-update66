@@ -1,0 +1,16 @@
+
+====== 自动车道线提取 ======
+frame : 26
+method : sensor-only BEV RANSAC
+accepted_mask_pixels : 7882
+bev_candidate_points : 754
+ransac_inlier_points : 626
+supported_distance_bins : 24
+fit_range_m : [6.0, 30.0]
+median_inlier_residual_m : 0.03169497951372949
+map_used_for_detection : False
+verified_lane_marking : False
+
+CSV: /Volumes/初棠/nuScenes_HDMap_52/scene-0980/processed/road_perception/frame026_auto_lane_curve.csv
+诊断图: /Volumes/初棠/nuScenes_HDMap_52/scene-0980/processed/road_perception/frame026_auto_lane_extraction.png
+PASS: 自动车道线候选提取完成
