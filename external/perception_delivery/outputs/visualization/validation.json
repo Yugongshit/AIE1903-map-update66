@@ -1,0 +1,642 @@
+{
+  "source": "Nuscnenes已处理\\processed\\processed\\scene-0980_discrepancy_full_v2.rrd",
+  "output": "outputs\\visualization\\scene-0980_results_enhanced.rrd",
+  "sdk_version": "0.22.1",
+  "application_id": "scene0980_discrepancy_full_v2",
+  "recording_id": "8a8001d9-046d-435c-bf22-63c2568a80ba",
+  "source_sha256": "a1e76054b51342cf7d0578b82e354e3484864113e5b3f7f413e541a2e219c5ee",
+  "frames": 41,
+  "enriched_label_instances": 266,
+  "association_link_instances": 30,
+  "distance_plot_pairs": 5,
+  "score_color_encoding": false,
+  "preservation_checks": [
+    {
+      "entity": "/bev/discrepancy/lane_event_labels",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_event_labels",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_event_labels",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_event_labels",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/topology_review",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/topology_review",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/topology_review",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/topology_review",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/unreviewed",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/unreviewed",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/unreviewed",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/unreviewed",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/visual_support",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/visual_support",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/visual_support",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/lane_markings/visual_support",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/affected_lanes",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/affected_lanes",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/affected_lanes",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/affected_lanes",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/event_labels",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/event_labels",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/event_labels",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/discrepancy/road_occupancy/event_labels",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/current",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/current",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/current",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/current",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/trajectory",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/trajectory",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/ego/trajectory",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/lidar/points",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/lidar/points",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/lidar/points",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/drivable_area",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/drivable_area",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/drivable_area",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/drivable_area",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_connector",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_connector",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_connector",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_connector",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_divider",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_divider",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_divider",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/lane_divider",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/road_divider",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/road_divider",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/road_divider",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/road_divider",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/stop_line",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/stop_line",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/stop_line",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/map/stop_line",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/barrier",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/barrier",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/barrier",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/barrier",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/barrier",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/construction_vehicle",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/construction_vehicle",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/construction_vehicle",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/construction_vehicle",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/construction_vehicle",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/debris",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/debris",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/debris",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/debris",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/debris",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/other",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/other",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/other",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/other",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/other",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/pedestrian",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/pedestrian",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/pedestrian",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/pedestrian",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/pedestrian",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/trafficcone",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/trafficcone",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/trafficcone",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/trafficcone",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/trafficcone",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/vehicle",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/vehicle",
+      "component": "rerun.components.Text",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/vehicle",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/vehicle",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/objects/vehicle",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/current",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/current",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/current",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/current",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/trails",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/trails",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/trails",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/moving/trails",
+      "component": "rerun.components.LineStrip2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/other/current",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/other/current",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/other/current",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/other/current",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/stationary/current",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/stationary/current",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/stationary/current",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/stationary/current",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/track_id_labels",
+      "component": "rerun.components.Color",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/track_id_labels",
+      "component": "rerun.components.Position2D",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/track_id_labels",
+      "component": "rerun.components.Radius",
+      "preserved": true
+    },
+    {
+      "entity": "/bev/tracking/track_id_labels",
+      "component": "rerun.components.ShowLabels",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_BACK/image",
+      "component": "rerun.components.Blob",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_BACK/image",
+      "component": "rerun.components.MediaType",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_BACK_LEFT/image",
+      "component": "rerun.components.Blob",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_BACK_LEFT/image",
+      "component": "rerun.components.MediaType",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_BACK_RIGHT/image",
+      "component": "rerun.components.Blob",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_BACK_RIGHT/image",
+      "component": "rerun.components.MediaType",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_FRONT/image",
+      "component": "rerun.components.Blob",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_FRONT/image",
+      "component": "rerun.components.MediaType",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_FRONT_LEFT/image",
+      "component": "rerun.components.Blob",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_FRONT_LEFT/image",
+      "component": "rerun.components.MediaType",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_FRONT_RIGHT/image",
+      "component": "rerun.components.Blob",
+      "preserved": true
+    },
+    {
+      "entity": "/cameras/CAM_FRONT_RIGHT/image",
+      "component": "rerun.components.MediaType",
+      "preserved": true
+    }
+  ],
+  "errors": [],
+  "validation": "PASS"
+}

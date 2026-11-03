@@ -1,0 +1,60 @@
+{
+  "context": {
+    "map_id": "demo-road",
+    "map_version": "v0",
+    "visit_id": "visit-1",
+    "source": "controlled_synthetic_fixture",
+    "coordinate_reference": {
+      "frame": "City",
+      "city_id": "synthetic-local-road",
+      "units": "m"
+    }
+  },
+  "records": [
+    {
+      "record_id": "r1",
+      "change_id": "change-line-1",
+      "timestamp_ns": "1800000000000000000",
+      "map_element_id": "line-1",
+      "change_type": "geometry_change",
+      "geometry_city": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            4.3,
+            0
+          ],
+          [
+            4.3,
+            45
+          ]
+        ]
+      },
+      "observation": "supports_change",
+      "evidence_score": 1.0,
+      "valid_frame_count": 12,
+      "support_frame_count": 11,
+      "fully_observed": true
+    }
+  ],
+  "reliability_records": [
+    {
+      "map_id": "demo-road",
+      "map_version": "v0",
+      "visit_id": "visit-1",
+      "change_id": "change-line-1",
+      "map_element_id": "line-1",
+      "coordinate_reference": {
+        "frame": "City",
+        "city_id": "synthetic-local-road",
+        "units": "m"
+      },
+      "decision": "Suspected Map Change",
+      "effective_coverage": 0.95,
+      "alignment_valid": true,
+      "reason": "synthetic quality gate",
+      "window_start_ns": "1800000000000000000",
+      "window_end_ns": "1800000001000000000"
+    }
+  ]
+}

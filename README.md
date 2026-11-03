@@ -1,1 +1,142 @@
-# AIE1903-map-update66
+# 道路地图维护与变化持续性评估
+
+你的模块：接收感知与可靠性结果，累计跨访问证据，维护基础地图、临时事件和版本历史，并可视化更新过程。
+
+**当前是可运行的研究原型。** 已阅读五份 proposal，并将拆分上传的实际交付整理至 `external/perception_delivery/`。后续从 GitHub 提交 `06c2cff` 同步了 `AIE1903 原始资料/`，现已接入原始 nuScenes 地图、绝对时间和逐帧几何。`examples/` 全为受控合成数据，与 scene-0980 实际交付分开，不能用于报告真实检测精度或证明永久性。
+
+最新资料核查：提交 `ba59989` 已补入梅子衡的 M3 可靠性模块。本次 13 个输出文件复现后与交付字节一致，真实场景接入已经完成：7 个复核对象均证据不足、23 个占用候选保存到事件层、基础地图更新 0。Planning 不阻塞地图维护开发。架构、成员补交清单和教授问答见 [M3 接入与答辩说明](docs/m3_integration_and_architecture.md)。
+
+小组联调清单、已复现的运行问题及演示讲解见 [交付与运行检查](docs/team_handoff_and_runtime_review.md)。双模式演示可以用 `python3 scripts/build_project_demo.py --out outputs/project-demo-new` 生成；打开其中的 `演示.html`，分别查看真实场景，以及明确标注的模拟复访、地图更新和回退。
+
+## Evaluation and Evidence 可视化
+
+```bash
+python3 scripts/build_evidence_demo.py --out outputs/evidence-demo-new
+```
+
+打开输出目录中的 `index.html`：真实场景证据、三种方法评估对比、完整证据链三个页面。支持逐帧播放、候选联动、图层切换、评估分组、自动演示和按当前页面导出。页面无需第三方前端依赖或在线地图。详见 [可视化实现与评价口径](docs/evidence_dashboard.md)。
+
+## 最新：M3 可靠性与地图维护联调
+
+```bash
+python3 -m map_update integrate-m3 \
+  --raw-root 'AIE1903 原始资料' \
+  --handoff 'AIE1903 原始资料/M3_scene0980_proposal_supplement 2/results/real_scene_handoff.json' \
+  --out outputs/m3-integrated-new
+```
+
+打开输出目录中的 `index.html`。新增 `event_layer.json`、`reliability.json` 和 `maintenance.json`，保留参考地图及真实逐帧观测；T004 后段局部匹配不会覆盖 LD003 前段。事件层是保存策略，不证明障碍短期消失，也不推断封路。未知覆盖率和对齐状态保持未知。
+
+当前适配器严格对应该次“覆盖率未知”的 M3 交付。后续有效覆盖率需连同来源重新评估并扩展接入契约，不能手改 null 成 1 来绕过检查。真实长期写回仍需要覆盖/对齐、独立复访、目标修改几何与地图历史语义；准确性评价还需要独立真值。
+
+复跑 M3 需要 NumPy / Matplotlib，脚本只读取五个真实 CSV、地图和已有候选分数，不重跑相机推理，也不修改原资料：
+
+```bash
+python3 scripts/verify_m3.py \
+  --raw-root 'AIE1903 原始资料' \
+  --m3-root 'AIE1903 原始资料/M3_scene0980_proposal_supplement 2' \
+  --out outputs/m3-reproduced-new
+```
+
+## 原始场景模式（不加载 M3）
+
+```bash
+python3 -m map_update inspect-scene \
+  --raw-root 'AIE1903 原始资料' --out outputs/scene0980-map-new
+```
+
+打开生成目录里的 `index.html`：157 个局部地图要素、41 帧时间线、57 条有序观测标线和 311 条逐帧占用记录。可显示/隐藏地图、感知标线、物体定向轮廓、车辆和自车，查看候选证据，导出场景记录。
+
+此命令输出 `reference_map.json`、`replay.json`、`candidates.json`、`scene.json`、`summary.json` 和验证报告。参考地图保留来源版本与内容哈希，**未伪装成经过核验的历史地图**。23 个 OCC 已恢复关联车道/连接区 ID；6 个 LD 的确切地图修改目标仍未知。此模式不加载 M3，实际基础地图写回为 0；需要联合结果请使用上面的 `integrate-m3`。
+
+详见 [原始数据对接结果](docs/raw_scene_integration.md)。
+
+## 先看真实交付
+
+```bash
+python3 -m map_update inspect-delivery \
+  --root external/perception_delivery --out outputs/scene0980-new
+```
+
+这是保留的**仅交付结果模式**：不读取后续上传的原始地图。生成 `index.html`、`intake.json` 和检查报告，29 个候选全部保留，几何按原始 MultiPoint 绘制，不从中心点伪造轮廓。要查看完整地图和逐帧几何，请用上面的 `inspect-scene`。
+
+目录恢复、真实字段与缺失文件清单见 [交付整理说明](docs/delivery_findings.md)。
+
+## 直接运行
+
+Python 3.10+，核心程序只用标准库，无需下载模型、数据库或第三方 Python 依赖。在仓库根目录执行：
+
+```bash
+python3 -m map_update demo --out outputs/demo-new
+python3 -m unittest discover -s tests -v
+```
+
+打开生成的 `outputs/demo-new/index.html`：原始地图 / 当前地图 / 观测与候选 / 临时事件四层对比，证据时间线、事件详情、缩放平移及当前版本 JSON 导出。HTML 自包含，无需在线地图或 CDN。浏览器禁用本地文件时，可用 `python3 -m http.server 8000 --directory outputs/demo-new --bind 127.0.0.1` 提供本地静态文件。
+
+程序拒绝覆盖已存在的输出目录；重复运行时换一个 `--out` 路径。
+
+## 使用自己的输入
+
+```bash
+python3 -m map_update run \
+  --map examples/base_map.json \
+  --observations examples/observations.json \
+  --policy examples/policy.json \
+  --out outputs/replay-new
+
+# 回退会产生一个新版本，原结果和历史不被删除
+python3 -m map_update rollback \
+  --bundle outputs/replay-new/bundle.json \
+  --version v0 --out outputs/rollback-new
+```
+
+`run --as-of-ns <十进制纳秒时间戳>` 可截断回放：之后的证据不参与当前判断。整个输入按时间排序回放，相同 `record_id` 的完全相同记录幂等去重，冲突内容报错。
+
+每次 `run` 从指定 baseline 完整回放证据，**不是**向已有 bundle 增量追加。若改用新版本作 baseline，需要让上游按新地图重新匹配/核验；不能把旧版本记录的版本号直接改掉。
+
+输出目录：
+
+| 文件 | 用途 |
+| --- | --- |
+| `map.json` | 当前版本基础地图；保留未变化要素，删除操作仅停用 |
+| `events.json` | 持续性状态、原因、独立访问数、时长、来源记录 ID |
+| `planning.json` | 当前地图版本引用、临时事件、待核实事件；不推断封路 |
+| `audit.json` | 各输入记录的质量门控接受/拒绝原因；不等于写回批准 |
+| `versions.json` | 每个版本快照、父版本、更新前后对象及支持证据 |
+| `bundle.json` | 完整回放结果，支持回退与可视化 |
+| `index.html` | 无外部依赖的交互式二维地图 |
+
+## 判断原则
+
+- `score` 只保留作上游证据展示，不当作长期变化概率。截图中的加权分数与早期 proposal 的 `N_support/N_valid` **不是同一个量**，不能从分数反推出支持帧数。
+- 连续帧按 `visit_id` 合并；不同 visit 还需要时间间隔。跨车辆、同一时段的多份观测不自动等于长期复访。
+- 基础状态包括 `insufficient_evidence`（证据不足）、`temporary`（临时处理）、`long_term_candidate`（通过持续性门槛但写回检查受阻）、`applied`、`resolved`、`review_required`。
+- 道路占用永远进入事件层；`temporary` 是存储/处理策略，不断言障碍必定很快消失。标线差异 `line_discrepancy` 必须先明确成几何/属性/新增/删除操作。
+- 缺少 M3、对齐无效、覆盖不足、有效帧不足时不增加支持证据。缺测不等于恢复；恢复需要明确的充分观测及 `No Significant Mismatch`。
+- 写回 MVP 只支持 `lane_marking` 折线的新增、几何修改、标线属性修改与停用。几何修改要求跨访问几何稳定并覆盖原要素，不能用一小段观测替换完整边界。车道用途、拓扑、可通行性不在自动更新范围。
+- 采用 City 平面坐标（米），不是 WGS84 经纬度；不同城市或地图版本输入直接拒绝。
+
+默认参数：至少 3 次访问、相邻计数访问间隔 1 h、跨度 24 h、覆盖率 ≥ 0.7、有效帧 ≥ 3、支持比例 ≥ 0.7、跨访问折线距离 ≤ 0.35 m。**这些是保守演示初值，尚未调参或验证，不是永久变化判据。** 同一次经过即使超过 24 h，也只记一次；人为拆分 visit ID 不合规。
+
+## 对接和后续工作
+
+先看 [材料解读与实施计划](docs/project_plan.md)，再看 [输入接口及成员对接](docs/input_contract.md)。源码入口是 [engine.py](map_update/engine.py)。
+
+已经覆盖 63 项单元/集成测试（含 12 项真实 M3 接入测试和 7 项评估口径测试）：单次多帧、伪复访、质量不足、重复记录、坐标和版本不匹配、几何稳定性、部分几何、占用恢复、删除、新增关联、冲突更新、回退、M3 时间窗口匹配，以及真实地图、纳秒时间、定向物体轮廓、逐帧折线和缺失值语义保护。可选真实浏览器检查需要 Playwright 和 Chromium（不属于核心运行依赖）：
+
+```bash
+python3 scripts/browser_smoke.py outputs/demo-new/index.html
+python3 scripts/browser_smoke.py outputs/scene0980-new/index.html --mode intake
+python3 scripts/browser_smoke.py outputs/scene0980-map-new/index.html --mode scene
+```
+
+上游 stage3/5/6 已用原始输入完整复现，17 个输出文件的 JSON 值/CSV 字段与交付完全一致，stage7 的 30 项检查通过。Windows 与 Linux 的 JSON 序列化换行差异单独报告，不声称所有文件字节相同：
+
+```bash
+python3 scripts/verify_upstream.py \
+  --processed 'AIE1903 原始资料/processed' --out outputs/upstream-full-new
+```
+
+原交付接入做了 235 项完整性与一致性检查，原始地图接入另做了 1724 项哈希、连接、时序和几何检查；这些结果不表示检测精度，独立标注表目前为空。
+
+已完成本次真实 M3 结果接入。尚未完成：有来源的有效覆盖率与物理对齐评估、真实跨访问证据联调、LD 修改目标及地图 prior/current 语义核验、阈值校准和独立测试集 P/R/F1 / 几何误差 / 误更新率评估。当前存储为离线版本化 JSON，不支持多车辆并发写事务或生产部署。
