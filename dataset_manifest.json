@@ -1,0 +1,30 @@
+{
+  "active_dataset_id": "nuscenes",
+  "scene_id": "scene-0980",
+  "datasets": {
+    "nuscenes": {
+      "dataset_id": "nuscenes",
+      "label": "nuScenes",
+      "status": "active",
+      "enabled": true,
+      "scene_ids": [
+        "scene-0980"
+      ],
+      "raw_root": "AIE1903 原始资料",
+      "delivery_root": "external/perception_delivery",
+      "m3_root": "AIE1903 原始资料/M3_scene0980_proposal_supplement 2",
+      "note": "使用此前处理好的 scene-0980；允许运行不代表地图变化已确认。"
+    },
+    "argoverse": {
+      "dataset_id": "argoverse",
+      "label": "Argoverse",
+      "status": "pending_review",
+      "enabled": false,
+      "scene_ids": [],
+      "raw_root": null,
+      "delivery_root": null,
+      "m3_root": null,
+      "note": "场景待审核；本轮不运行、不纳入评估，也不复用 nuScenes 输出。"
+    }
+  }
+}

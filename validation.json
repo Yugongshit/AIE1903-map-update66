@@ -1,6 +1,7 @@
 {
   "status": "PASS",
   "checks": [
+    "nuScenes is active and Argoverse is visibly pending",
     "30 selectable evidence objects",
     "reference comparison is initially hidden",
     "map fills its workspace",
@@ -23,11 +24,15 @@
     "reviews survive reload",
     "review drafts cannot change real accuracy",
     "review export is explicitly not truth",
+    "review export has a dataset namespace",
+    "same-scene Argoverse review cannot contaminate nuScenes",
     "wrong-scene import is rejected atomically",
     "valid review import merges drafts",
     "shared view restores tab and frame",
     "returning from a shared evaluation view keeps a valid map",
     "playback speed control advances actual frames",
+    "current evidence export identifies nuScenes",
+    "existing nuScenes review drafts migrate without deleting old storage",
     "mobile layout scene",
     "mobile layout evaluation",
     "mobile layout evidence",
