@@ -4,11 +4,13 @@
 document.body.classList.add('workbench');
 document.title='AIE1903 · 地图证据复核工作台';
 document.querySelector('h1').textContent='地图证据复核工作台';
-document.querySelector('.topbar .sub').textContent='scene-0980 · Singapore one-north · 选择、对照、测量与复核';
+document.querySelector('.topbar .sub').textContent='nuScenes · scene-0980 · Singapore one-north · 选择、对照、测量与复核';
 const wb={family:'all',query:'',sort:'priority',visibleOnly:false,compare:false,tool:'browse',measure:[],
   reviews:new Map(),storage:true,inspector:'decision',vehicle:null,toast:null,dragStart:null};
 window.WB=wb;
-const storageKey='aie1903-review-v1:'+R.scene_id+':'+R.map.source_sha256;
+const storageKey='aie1903-review-v2:'+R.dataset_id+':'+R.scene_id+':'+R.map.source_sha256;
+const legacyStorageKey='aie1903-review-v1:'+R.scene_id+':'+R.map.source_sha256;
+const legacyNuScenes=R.dataset_id==='nuscenes'&&R.scene_id==='scene-0980'&&R.map.source_sha256==='17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02';
 const allowed=new Set(['unreviewed','needs_evidence','suspected_change','suspected_perception_issue']);
 const statuses={unreviewed:'未复核',needs_evidence:'需补证据',suspected_change:'疑似地图变化',suspected_perception_issue:'疑似感知 / 对齐问题'};
 const items=[...R.candidates.map(c=>({id:c.candidate_id,c,u:units.get(c.candidate_id)})),
@@ -39,15 +41,17 @@ const progress=div('span','wb-review-progress');progress.id='wb-review-progress'
 const share=div('button','', '复制当前视图');share.id='wb-share';document.querySelector('.actions').append(share);
 const help=div('button','','操作说明');help.id='wb-help';document.querySelector('.actions').append(help);
 function validatedReviewFile(payload){
- if(!payload||payload.schema!=='aie1903-human-review-draft-1.0'||payload.role!=='personal_review_not_ground_truth'||payload.scene_id!==R.scene_id||payload.map_sha256!==R.map.source_sha256)throw Error('记录的场景或地图版本不匹配');
+ const legacy=payload?.schema==='aie1903-human-review-draft-1.0'&&legacyNuScenes;
+ if(!payload||(!legacy&&payload.schema!=='aie1903-human-review-draft-1.1')||payload.role!=='personal_review_not_ground_truth'||payload.scene_id!==R.scene_id||payload.map_sha256!==R.map.source_sha256)throw Error('记录的场景或地图版本不匹配');
+ if(payload.dataset_id!==R.dataset_id&&!(legacy&&payload.dataset_id===undefined))throw Error('记录的数据集不匹配；nuScenes 与 Argoverse 分开复核');
  if(!Array.isArray(payload.records)||payload.records.length>items.length)throw Error('复核记录数量不正确');
  const result=new Map();for(const r of payload.records){if(!r||!itemMap.has(r.record_id)||result.has(r.record_id)||!allowed.has(r.status))throw Error('存在未知或重复的对象 / 意见类型');
   for(const[k,max]of [['note',3000],['author',80],['evidence_reference',500]])if(typeof r[k]!=='string'||r[k].length>max)throw Error('复核字段格式不正确');
   result.set(r.record_id,{record_id:r.record_id,status:r.status,note:r.note,author:r.author,evidence_reference:r.evidence_reference,updated_at:typeof r.updated_at==='string'?r.updated_at:''});}
  return result;
 }
-function reviewFile(){return {schema:'aie1903-human-review-draft-1.0',role:'personal_review_not_ground_truth',scene_id:R.scene_id,map_sha256:R.map.source_sha256,map_version:R.map.version,records:[...wb.reviews.values()]};}
-try{const raw=localStorage.getItem(storageKey);if(raw)wb.reviews=validatedReviewFile(JSON.parse(raw));}catch(e){wb.storage=false;toast('本地记录无法读取；可以继续操作并导出复核草稿。');}
+function reviewFile(){return {schema:'aie1903-human-review-draft-1.1',role:'personal_review_not_ground_truth',dataset_id:R.dataset_id,scene_id:R.scene_id,map_sha256:R.map.source_sha256,map_version:R.map.version,records:[...wb.reviews.values()]};}
+try{let raw=localStorage.getItem(storageKey);if(!raw&&legacyNuScenes){raw=localStorage.getItem(legacyStorageKey);if(raw){wb.reviews=validatedReviewFile(JSON.parse(raw));localStorage.setItem(storageKey,JSON.stringify(reviewFile()));}}else if(raw){wb.reviews=validatedReviewFile(JSON.parse(raw));}}catch(e){wb.storage=false;toast('本地记录无法读取；可以继续操作并导出复核草稿。');}
 function meaningful(r){return r&&(r.status!=='unreviewed'||r.note.trim()||r.author.trim()||r.evidence_reference.trim());}
 function saveReview(){const r={record_id:state.selected,status:$('wb-review-status').value,note:$('wb-review-note').value,author:$('wb-review-author').value,evidence_reference:$('wb-review-ref').value,updated_at:new Date().toISOString()};
  if(meaningful(r))wb.reviews.set(r.record_id,r);else wb.reviews.delete(r.record_id);
@@ -57,7 +61,7 @@ function saveReview(){const r={record_id:state.selected,status:$('wb-review-stat
 function updateProgress(){$('wb-review-progress').textContent=`我的复核 ${wb.reviews.size} / ${items.length}`;}
 function renderReview(){const r=wb.reviews.get(state.selected);$('wb-review-status').value=r?.status||'unreviewed';$('wb-review-author').value=r?.author||'';$('wb-review-note').value=r?.note||'';$('wb-review-ref').value=r?.evidence_reference||'';$('wb-review-saved').textContent=r?(wb.storage?'已保存在当前浏览器':'暂存于本次会话，请导出'):'还没有复核记录';}
 for(const id of ['wb-review-status','wb-review-author','wb-review-note','wb-review-ref'])$(id).addEventListener('input',saveReview);
-$('wb-export-reviews').onclick=()=>download('scene0980-my-review-drafts.json',reviewFile());
+$('wb-export-reviews').onclick=()=>download(R.dataset_id+'-'+R.scene_id+'-my-review-drafts.json',reviewFile());
 $('wb-import-reviews').onclick=()=>$('wb-import-file').click();
 $('wb-import-file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>1000000)throw Error('文件超过1MB，请选择复核 JSON 文件');const incoming=validatedReviewFile(JSON.parse(await f.text()));const conflicts=[...incoming.keys()].filter(k=>wb.reviews.has(k));if(conflicts.length&&!confirm(`导入将覆盖 ${conflicts.length} 条已有复核草稿。继续导入？`))return;for(const[k,v]of incoming)wb.reviews.set(k,v);try{localStorage.setItem(storageKey,JSON.stringify(reviewFile()));wb.storage=true;}catch{wb.storage=false;}renderReview();updateProgress();renderList();toast(`已导入 ${incoming.size} 条复核草稿；系统结论保持原样。`);}catch(err){toast('导入未执行：'+err.message);}finally{e.target.value='';}};
 function setInspector(tab){wb.inspector=tab;inspector.querySelector('.detail-body').hidden=tab!=='decision';observationPane.hidden=tab!=='observations';reviewPane.hidden=tab!=='review';tabs.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.inspector===tab));renderReview();renderObservations();}

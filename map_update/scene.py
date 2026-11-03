@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .delivery import inspect_delivery, read_csv, read_json
 from .geometry import validate_geometry
+from .datasets import require_active
 
 
 def index_unique(rows, key):
@@ -60,18 +61,21 @@ def load_map(path, bounds):
             elements.append({"element_id": layer+":"+record["token"], "layer": layer, "map_token": record["token"],
                              "geometry_city": geometry, "properties": record, "active": True})
     digest = sha256(Path(path).read_bytes()).hexdigest()
-    return {"schema_version": "reference-map-1.0", "map_id": Path(path).stem,
+    return {"schema_version": "reference-map-1.0", "dataset_id": "nuscenes", "map_id": Path(path).stem,
             "version": f"nuscenes-{raw['version']}-{digest[:12]}", "source_version": str(raw['version']), "source_sha256": digest,
             "map_role": "reference_unverified_temporal_role", "coordinate_reference": {"frame": "nuScenes_global", "city_id": Path(path).stem, "units": "m"},
             "bounds_xyxy": bounds, "selection_method": "bbox_intersection; original feature geometry retained without clipping",
             "elements": elements, "write_eligible": False}
 
 
-def inspect_scene(raw_root, delivery_root):
+def inspect_scene(raw_root, delivery_root, dataset_id='nuscenes'):
+    entry = require_active(dataset_id)
     root = Path(raw_root).resolve()
     processed = root/"processed"
     intake = inspect_delivery(delivery_root)
     scene_info = read_json(root/"scene_info.json")
+    if scene_info.get('dataset_id', dataset_id) != dataset_id or scene_info['scene'] not in entry['scene_ids']:
+        raise ValueError('Scene does not belong to the active dataset scope')
     if scene_info["scene"] != intake["scene_id"]:
         raise ValueError("raw scene and delivered scene differ")
     city = scene_info["location"]
@@ -210,7 +214,8 @@ def inspect_scene(raw_root, delivery_root):
     for f in replay.values():
         f["candidate_ids"] = sorted(set(f["candidate_ids"]))
     alignment = json_file("processed/alignment_check.json")
-    intake.update(schema_version="perception-scene-1.0", reference_map=context_map, replay=list(replay.values()),
+    intake.update(schema_version="perception-scene-1.0", dataset_id=dataset_id,
+                  scene_key=dataset_id+':'+scene_info['scene'], reference_map=context_map, replay=list(replay.values()),
                   coordinate_reference=context_map["coordinate_reference"],
                   time_reference="timestamp_us from frames.csv multiplied exactly by 1000; clip elapsed retained",
                   visit_id=scene["token"], scene_metadata={"scene": scene_info["scene"], "location": city, "scene_token": scene["token"], "log_token": scene["log_token"]},

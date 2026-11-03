@@ -12,7 +12,9 @@
 
 直接打开 https://yugongshit.github.io/AIE1903-map-update66/ 。可自行筛选对象、拖时间轴、缩放地图、同步对照、量距，并记录和导出个人复核草稿。无需下载文件或安装软件。详见 [工作台操作与实现](docs/workbench.md)。
 
-本地构建：`python3 scripts/build_evidence_demo.py --workbench --out outputs/workbench-new`。
+**当前仅运行 nuScenes / scene-0980，Argoverse 场景待审核。** 输入、输出、评估来源与人工复核记录分别标识，不合并结果。说明见 [数据集分离](docs/datasets.md)。
+
+本地构建：`python3 scripts/run_dataset.py --dataset nuscenes`。输出位于 `outputs/nuscenes/scene-0980/<运行名>/`；Argoverse 入口暂时拒绝运行。
 
 ## Evaluation and Evidence 可视化
 

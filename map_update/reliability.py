@@ -39,6 +39,9 @@ def attach_m3(scene, handoff):
     def finite(value):
         return type(value) in (int, float) and isfinite(value)
 
+    require('dataset_identity', data.get('dataset_id') == 'nuscenes'
+            and data['reference_map'].get('dataset_id') == 'nuscenes'
+            and handoff.get('dataset_id', 'nuscenes') == 'nuscenes')
     require('scene_identity', handoff['scene'] == data['scene_id'])
     require('real_lane_marking_scope', handoff['scope'] == 'lane-marking synthesis from one drive')
     require('decision_labels', handoff['decision_labels'] == LABELS)
@@ -164,11 +167,11 @@ def attach_m3(scene, handoff):
                        'planning_action': 'independent_passability_review_required',
                        'frame_window': c['frame_window'], 'observations': samples})
     data['schema_version'] = 'scene-m3-maintenance-1.0'
-    data['m3'] = {'adapter': 'scene0980-supplement-v1-unknown-coverage', 'summary': expected,
+    data['m3'] = {'dataset_id': data['dataset_id'], 'adapter': 'scene0980-supplement-v1-unknown-coverage', 'summary': expected,
                   'review_units': units, 'matched_frame_evidence': deepcopy(handoff['matched_frame_evidence']),
                   'source_map': deepcopy(source), 'statistical_scope': deepcopy(handoff['statistical_scope']),
                   'limitations': deepcopy(handoff['limitations']), 'validation': {'status': 'PASS', 'checks': checks}}
-    data['event_layer'] = {'schema_version': 'event-candidates-1.0', 'scene_id': data['scene_id'],
+    data['event_layer'] = {'schema_version': 'event-candidates-1.0', 'dataset_id': data['dataset_id'], 'scene_id': data['scene_id'],
                            'map_sha256': baseline['source_sha256'], 'map_version': baseline['version'],
                            'coordinate_reference': baseline['coordinate_reference'], 'visit_id': data['visit_id'],
                            'scope': 'Retrospective observations from one recorded visit, not current live obstacles.',

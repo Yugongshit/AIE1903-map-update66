@@ -14,6 +14,7 @@ from pathlib import Path
 from .delivery import read_csv, read_json
 from .reliability import integrate_m3
 from .output import _write_files
+from .datasets import require_active, registry_snapshot
 
 
 POSITIVE = 'SUSPECTED_MAP_CHANGE'
@@ -32,6 +33,8 @@ def controlled_metrics(rows, method):
     truth = []
     identifiers = set()
     for row in rows:
+        if row.get('dataset_id', 'nuscenes') != 'nuscenes' or row.get('source_dataset_id', 'nuscenes') != 'nuscenes':
+            raise ValueError('Cross-dataset controlled evaluation is not allowed')
         if row['case_id'] in identifiers:
             raise ValueError('Duplicate controlled case')
         identifiers.add(row['case_id'])
@@ -89,13 +92,18 @@ def evaluate_controlled(rows, comparisons):
             results[name].append(calculated)
     if len(expected) != len(strata)*len(METHODS):
         raise ValueError('Unexpected comparison strata')
-    return {'dataset_type': 'controlled_perturbation', 'cases': len(rows),
+    return {'dataset_type': 'controlled_perturbation', 'source_dataset_id': 'nuscenes',
+            'source_scene_id': 'scene-0980', 'cases': len(rows),
             'scope': '126 dependent perturbation variants derived from three windows in one scene; not an independent real test set.',
             'unchanged_label_scope': 'No injected offset, not independently verified unchanged-road truth.',
             'comparison_verified': True, 'strata': results}
 
 
 def dashboard_data(scene, controlled):
+    dataset_id = scene.get('dataset_id')
+    require_active(dataset_id)
+    if scene['reference_map'].get('dataset_id') != dataset_id or controlled.get('source_dataset_id') != dataset_id:
+        raise ValueError('Map, real scene and controlled evaluation must use the same source dataset')
     if scene.get('schema_version') != 'scene-m3-maintenance-1.0':
         raise ValueError('An integrated, validated real M3 scene is required')
     candidates = []
@@ -114,11 +122,13 @@ def dashboard_data(scene, controlled):
             value=float(row['difference_value']) if row['difference_value'] else None,
             unit=row['difference_unit'], source_file=row['source_file']))
     public_map = {k: deepcopy(scene['reference_map'][k]) for k in (
-        'map_id', 'version', 'source_version', 'source_sha256', 'map_role', 'bounds_xyxy', 'coordinate_reference')}
+        'dataset_id', 'map_id', 'version', 'source_version', 'source_sha256', 'map_role', 'bounds_xyxy', 'coordinate_reference')}
     public_map['elements'] = [{k: deepcopy(e[k]) for k in ('element_id', 'layer', 'geometry_city')}
                               for e in scene['reference_map']['elements']]
     labels = deepcopy(scene['summary']['labeled_rows'])
-    data = {'schema_version': 'evidence-dashboard-1.0', 'real': {
+    data = {'schema_version': 'evidence-dashboard-1.0', 'dataset_id': dataset_id,
+        'datasets': registry_snapshot(), 'real': {
+        'dataset_id': dataset_id, 'scene_key': scene['scene_key'],
         'scene_id': scene['scene_id'], 'visit_id': scene['visit_id'], 'map': public_map,
         'frames': deepcopy(scene['replay']), 'candidates': candidates,
         'frame_evidence': frame_evidence, 'behaviors': deepcopy(scene['behaviors']),
@@ -137,7 +147,8 @@ def dashboard_data(scene, controlled):
     return data
 
 
-def build_dashboard(raw_root, delivery_root, m3_root, output, workbench=False):
+def build_dashboard(raw_root, delivery_root, m3_root, output, workbench=False, dataset_id='nuscenes'):
+    require_active(dataset_id)
     raw, m3 = Path(raw_root), Path(m3_root)
     handoff = m3/'results/real_scene_handoff.json'
     cases = m3/'results/controlled_case_decisions.csv'
@@ -145,10 +156,14 @@ def build_dashboard(raw_root, delivery_root, m3_root, output, workbench=False):
     scene = integrate_m3(raw, delivery_root, handoff)
     evaluation = evaluate_controlled(read_csv(cases), read_csv(comparisons))
     payload = dashboard_data(scene, evaluation)
-    payload['provenance'] = [{ 'file': p.name, 'sha256': sha256(p.read_bytes()).hexdigest()}
+    payload['provenance'] = [{ 'dataset_id': dataset_id, 'scene_id': scene['scene_id'],
+                              'file': p.name, 'sha256': sha256(p.read_bytes()).hexdigest()}
                              for p in (handoff, cases, comparisons)]
-    files = {'evaluation': {'real': payload['real']['accuracy'], 'controlled': evaluation},
-             'provenance': payload['provenance']}
+    files = {'evaluation': {'dataset_id': dataset_id, 'scene_id': scene['scene_id'],
+                            'real': payload['real']['accuracy'], 'controlled': evaluation},
+             'provenance': payload['provenance'],
+             'dataset_manifest': {'active_dataset_id': dataset_id, 'scene_id': scene['scene_id'],
+                                  'datasets': registry_snapshot()}}
     if workbench:
         # Keep a standalone page: review state stays in the user's browser;
         # there is no server upload or dependency on a CDN.

@@ -26,6 +26,10 @@ try:
         errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
         url=f'http://127.0.0.1:{server.server_port}/index.html'
         page.goto(url)
+        check('nuScenes is active and Argoverse is visibly pending',
+              page.locator('#dataset-select').input_value()=='nuscenes'
+              and page.locator('#dataset-select option[value="argoverse"]').evaluate('(option)=>option.disabled')
+              and '未计入评估' in page.locator('#dataset-pending').inner_text())
         check('30 selectable evidence objects',page.locator('.wb-case-row').count()==30)
         check('reference comparison is initially hidden',page.locator('#wb-reference-map').is_hidden())
         stage=page.locator('#wb-map-stage').bounding_box();map_box=page.locator('#map').bounding_box()
@@ -88,6 +92,12 @@ try:
         with page.expect_download() as info:page.locator('#wb-export-reviews').click()
         export=root/'test_review_export.json';info.value.save_as(str(export));payload=json.loads(export.read_text())
         check('review export is explicitly not truth',payload['role']=='personal_review_not_ground_truth' and len(payload['records'])==1)
+        check('review export has a dataset namespace',payload['dataset_id']=='nuscenes'
+              and payload['schema']=='aie1903-human-review-draft-1.1')
+        invalid_dataset={**payload,'dataset_id':'argoverse'}
+        page.locator('#wb-import-file').set_input_files({'name':'wrong-dataset.json','mimeType':'application/json','buffer':json.dumps(invalid_dataset).encode()})
+        page.wait_for_function('document.getElementById("wb-toast").textContent.includes("数据集不匹配")')
+        check('same-scene Argoverse review cannot contaminate nuScenes',page.evaluate('WB.reviews.size')==1)
         invalid={**payload,'scene_id':'other-scene'}
         page.locator('#wb-import-file').set_input_files({'name':'wrong-scene.json','mimeType':'application/json','buffer':json.dumps(invalid).encode()})
         page.wait_for_function('document.getElementById("wb-toast").textContent.includes("导入未执行")')
@@ -106,6 +116,20 @@ try:
         page.locator('#wb-speed').select_option('4')
         page.locator('#play').click();page.wait_for_function('state.frame>=23');page.locator('#play').click()
         check('playback speed control advances actual frames',int(page.locator('#frame').input_value())>=23)
+        with page.expect_download() as info:page.locator('#export-current').click()
+        selected_export=root/'test_selected_evidence.json';info.value.save_as(str(selected_export))
+        check('current evidence export identifies nuScenes',json.loads(selected_export.read_text())['dataset_id']=='nuscenes')
+        legacy_context=browser.new_context()
+        legacy_page=legacy_context.new_page();legacy_page.goto(url)
+        legacy={**payload,'schema':'aie1903-human-review-draft-1.0'};legacy.pop('dataset_id')
+        legacy_page.evaluate('(p)=>localStorage.setItem("aie1903-review-v1:"+R.scene_id+":"+R.map.source_sha256,JSON.stringify(p))',legacy)
+        legacy_page.reload()
+        check('existing nuScenes review drafts migrate without deleting old storage',legacy_page.evaluate('''()=>{
+            const oldKey='aie1903-review-v1:'+R.scene_id+':'+R.map.source_sha256;
+            const newKey='aie1903-review-v2:nuscenes:'+R.scene_id+':'+R.map.source_sha256;
+            return WB.reviews.size===1 && !!localStorage.getItem(oldKey) && JSON.parse(localStorage.getItem(newKey)).dataset_id==='nuscenes';
+        }'''))
+        legacy_context.close()
         for tab in ['scene','evaluation','evidence']:
             page.set_viewport_size({'width':390,'height':844});page.locator(f'.tabs [data-tab="{tab}"]').click()
             check('mobile layout '+tab,page.evaluate('document.documentElement.scrollWidth<=innerWidth'))

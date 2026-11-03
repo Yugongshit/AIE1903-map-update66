@@ -6,6 +6,8 @@ https://yugongshit.github.io/AIE1903-map-update66/
 
 网站使用 `gh-pages` 分支发布，`main` 保留原资料。页面是自包含的静态应用，用户无需安装 Python、下载 ZIP 或运行终端命令。
 
+当前数据集为 **nuScenes / scene-0980**。Argoverse 场景待审核，入口禁用，不纳入当前结果。输入与运行、评估以及浏览器复核草稿的隔离规则见 [数据集分离](datasets.md)。
+
 ## 可操作功能
 
 1. 左侧搜索、筛选和排序：29 个候选，加 1 个独立局部匹配窗口。支持只看本帧、仅看占用、标线 / M3，以及优先复核。
@@ -14,7 +16,7 @@ https://yugongshit.github.io/AIE1903-map-update66/
 4. 同步对照：一侧仅显示参考地图，另一侧显示该帧观测。两侧视野、缩放、平移与时间保持同步；不是虚构的“更新前后地图”。
 5. 量距：点击两点计算城市平面坐标中的距离，按 Esc 退出。量距只是人工查看工具，不会生成改图证据或可靠性结论。
 6. 右侧切换系统结论、本帧观测、我的复核。原始 M3 的未知值保留未知；复核草稿和原结论完全分开。
-7. 复核意见自动保存在访问者浏览器。可导出 JSON，并导入相同场景、相同地图哈希的复核草稿。不同场景、重复 ID、非法字段会被拒绝；冲突记录覆盖前由使用者确认。
+7. 复核意见自动保存在访问者浏览器。可导出 JSON，并导入相同数据集、相同场景、相同地图哈希的复核草稿。不同数据集 / 场景、重复 ID、非法字段会被拒绝；冲突记录覆盖前由使用者确认。旧版已知 nuScenes 场景的草稿会迁移并保留旧副本。
 8. 复制当前视图链接，可以让别人打开同一对象、同一帧和同一页面。链接不包含个人复核笔记。
 
 个人草稿不是独立真值，不会自动改变 Precision / Recall / F1。浏览器清理本地数据会影响本地草稿；需要小组汇总时应导出。页面没有把个人笔记上传服务器的功能。
@@ -28,8 +30,8 @@ https://yugongshit.github.io/AIE1903-map-update66/
 ## 构建与验证
 
 ```bash
-python3 scripts/build_evidence_demo.py --workbench --out outputs/workbench-new
-python3 scripts/check_workbench.py outputs/workbench-new
+python3 scripts/run_dataset.py --dataset nuscenes --run-name review-new
+python3 scripts/check_workbench.py outputs/nuscenes/scene-0980/review-new
 python3 -m unittest discover -s tests -q
 ```
 
