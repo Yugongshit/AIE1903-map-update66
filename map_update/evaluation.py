@@ -137,7 +137,7 @@ def dashboard_data(scene, controlled):
     return data
 
 
-def build_dashboard(raw_root, delivery_root, m3_root, output):
+def build_dashboard(raw_root, delivery_root, m3_root, output, workbench=False):
     raw, m3 = Path(raw_root), Path(m3_root)
     handoff = m3/'results/real_scene_handoff.json'
     cases = m3/'results/controlled_case_decisions.csv'
@@ -149,4 +149,13 @@ def build_dashboard(raw_root, delivery_root, m3_root, output):
                              for p in (handoff, cases, comparisons)]
     files = {'evaluation': {'real': payload['real']['accuracy'], 'controlled': evaluation},
              'provenance': payload['provenance']}
+    if workbench:
+        # Keep a standalone page: review state stays in the user's browser;
+        # there is no server upload or dependency on a CDN.
+        template = Path(__file__).with_name('evidence_dashboard.html').read_text(encoding='utf-8')
+        css = Path(__file__).with_name('workbench.css').read_text(encoding='utf-8')
+        script = Path(__file__).with_name('workbench.js').read_text(encoding='utf-8')
+        template = template.replace('</head>', '<style>'+css+'</style></head>')
+        template = template.replace('</body>', '<script>'+script+'</script></body>')
+        return _write_files(files, None, payload, output, template_text=template)
     return _write_files(files, 'evidence_dashboard.html', payload, output)

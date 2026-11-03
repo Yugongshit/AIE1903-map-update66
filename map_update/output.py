@@ -7,7 +7,7 @@ import shutil
 import tempfile
 
 
-def _write_files(files, template_name, payload_object, output):
+def _write_files(files, template_name, payload_object, output, template_text=None):
     dest = Path(output).resolve()
     if dest.exists():
         raise ValueError(f"output already exists; choose a new directory: {dest}")
@@ -18,7 +18,7 @@ def _write_files(files, template_name, payload_object, output):
             (staging/f"{name}.json").write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+"\n", encoding="utf-8")
         # Escape markup delimiters so upstream text cannot terminate the JSON script.
         payload = json.dumps(payload_object, ensure_ascii=False, allow_nan=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-        template = Path(__file__).with_name(template_name).read_text(encoding="utf-8")
+        template = template_text if template_text is not None else Path(__file__).with_name(template_name).read_text(encoding="utf-8")
         (staging/"index.html").write_text(template.replace("__BUNDLE_JSON__", payload), encoding="utf-8")
         os.rename(staging, dest)
     finally:

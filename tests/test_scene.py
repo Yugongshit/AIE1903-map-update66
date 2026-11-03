@@ -65,6 +65,23 @@ class OriginalSceneTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             footprint(row)
 
+    def test_vehicle_shapes_preserve_real_annotation_center_size_and_heading(self):
+        raw = {(r['instance_token'], int(r['frame_index'])): r for r in read_csv(RAW/'processed/objects.csv')}
+        count = 0
+        for frame in self.scene['replay']:
+            for vehicle in frame['vehicles']:
+                source = raw[vehicle['track_id'], frame['frame_index']]
+                ring = vehicle['geometry_city']['coordinates'][0]
+                self.assertEqual(vehicle['geometry_city']['type'], 'Polygon')
+                self.assertEqual(ring[0], ring[-1])
+                self.assertAlmostEqual(sum(p[0] for p in ring[:4])/4, float(source['x_global_m']))
+                self.assertAlmostEqual(sum(p[1] for p in ring[:4])/4, float(source['y_global_m']))
+                area = abs(sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(ring,ring[1:])))/2
+                self.assertAlmostEqual(area, float(source['width_m'])*float(source['length_m']), places=6)
+                self.assertEqual(vehicle['yaw_deg'], float(source['yaw_global_deg']))
+                count += 1
+        self.assertEqual(count, 221)
+
     def test_occ_map_foreign_keys_resolved_but_ld_targets_unknown(self):
         elements = {e["element_id"] for e in self.scene["reference_map"]["elements"]}
         for c in self.scene["candidates"]:

@@ -197,8 +197,15 @@ def inspect_scene(raw_root, delivery_root):
     for row in intake["vehicle_features"]:
         i = int(row["frame"])
         require("vehicle_timestamp_matches_frame:"+row["track_id"]+":"+str(i), abs(float(row["time_s"])-replay[i]["elapsed_s"]) <= 1e-6)
+        obj = objects.get((row["track_id"], i))
+        require("vehicle_annotation_exists:"+row["track_id"]+":"+str(i), obj is not None)
+        require("vehicle_center_matches_annotation:"+row["track_id"]+":"+str(i),
+                abs(float(obj["x_global_m"])-float(row["x_m"])) <= 0.001
+                and abs(float(obj["y_global_m"])-float(row["y_m"])) <= 0.001)
         replay[i]["vehicles"].append({"track_id": row["track_id"], "xy": [float(row["x_m"]), float(row["y_m"])],
                                      "speed_mps": float(row["speed_mps"]) if row["speed_mps"] else None,
+                                     "geometry_city": footprint(obj), "category": obj["category"],
+                                     "yaw_deg": float(obj["yaw_global_deg"]),
                                      "source": "NUSCENES_GT_DERIVED"})
     for f in replay.values():
         f["candidate_ids"] = sorted(set(f["candidate_ids"]))

@@ -8,6 +8,12 @@
 
 小组联调清单、已复现的运行问题及演示讲解见 [交付与运行检查](docs/team_handoff_and_runtime_review.md)。双模式演示可以用 `python3 scripts/build_project_demo.py --out outputs/project-demo-new` 生成；打开其中的 `演示.html`，分别查看真实场景，以及明确标注的模拟复访、地图更新和回退。
 
+## 在线复核工作台（2026-11-04）
+
+直接打开 https://yugongshit.github.io/AIE1903-map-update66/ 。可自行筛选对象、拖时间轴、缩放地图、同步对照、量距，并记录和导出个人复核草稿。无需下载文件或安装软件。详见 [工作台操作与实现](docs/workbench.md)。
+
+本地构建：`python3 scripts/build_evidence_demo.py --workbench --out outputs/workbench-new`。
+
 ## Evaluation and Evidence 可视化
 
 ```bash
@@ -122,7 +128,7 @@ python3 -m map_update rollback \
 
 先看 [材料解读与实施计划](docs/project_plan.md)，再看 [输入接口及成员对接](docs/input_contract.md)。源码入口是 [engine.py](map_update/engine.py)。
 
-已经覆盖 63 项单元/集成测试（含 12 项真实 M3 接入测试和 7 项评估口径测试）：单次多帧、伪复访、质量不足、重复记录、坐标和版本不匹配、几何稳定性、部分几何、占用恢复、删除、新增关联、冲突更新、回退、M3 时间窗口匹配，以及真实地图、纳秒时间、定向物体轮廓、逐帧折线和缺失值语义保护。可选真实浏览器检查需要 Playwright 和 Chromium（不属于核心运行依赖）：
+已经覆盖 64 项单元/集成测试（含 12 项真实 M3 接入测试和 7 项评估口径测试）：单次多帧、伪复访、质量不足、重复记录、坐标和版本不匹配、几何稳定性、部分几何、占用恢复、删除、新增关联、冲突更新、回退、M3 时间窗口匹配，以及真实地图、纳秒时间、定向物体轮廓、逐帧折线和缺失值语义保护。可选真实浏览器检查需要 Playwright 和 Chromium（不属于核心运行依赖）：
 
 ```bash
 python3 scripts/browser_smoke.py outputs/demo-new/index.html
