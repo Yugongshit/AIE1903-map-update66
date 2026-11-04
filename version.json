@@ -1,11 +1,72 @@
 {
-  "release": "2026-11-04-dataset-separation",
-  "interface": "user-operated-review-workbench",
+  "schema": "visual-studio-release-1.0",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
+  "camera_frames": 41,
+  "camera_images_available": 0,
+  "original_video_included": true,
+  "real_map_updates": 0,
+  "controlled_variants": 3,
   "argoverse": "pending_review_not_executed",
-  "browser_checks": 36,
-  "unit_tests": 70,
-  "map_updates": 0,
-  "source_commit": "bdc856d"
+  "planning": "not_integrated",
+  "issues": 11,
+  "source_checks": 2166,
+  "m3_checks": 251,
+  "camera_source_files": [
+    {
+      "path": "v1.0-trainval/sample_data.json",
+      "sha256": "bf017677bda70fcf4b8c6f50018ca87e2b10ac507a7f83ee644eac46a40b4036"
+    },
+    {
+      "path": "v1.0-trainval/calibrated_sensor.json",
+      "sha256": "27b282c20c53dd40fe2b796bbde5c68e947e8d4b48d298e54634b13bf1262b5c"
+    },
+    {
+      "path": "v1.0-trainval/ego_pose.json",
+      "sha256": "1a68e172ae0e3a97bc77ef7584a30954f68ad6dd7d62075eaaebf4256efd965e"
+    },
+    {
+      "path": "v1.0-trainval/sensor.json",
+      "sha256": "8d5238626c05998586f0b4afb152c00bddf15f62c19eb6aff2135704ed8b6f38"
+    },
+    {
+      "path": "processed/frames.csv",
+      "sha256": "2459d09854271492aa4f6865a7a767ce8e8ffd6e328858e689645449ff68f329"
+    },
+    {
+      "path": "processed/objects.csv",
+      "sha256": "6c8041f1b0e065d3341b381189f396376d80be20f7dda7f20269adbc2b387367"
+    }
+  ],
+  "source_map_sha256": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
+  "evaluation_source_files": [
+    {
+      "dataset_id": "nuscenes",
+      "scene_id": "scene-0980",
+      "file": "real_scene_handoff.json",
+      "sha256": "f49751187d4d085f0a95efe79cf2c86b1eb7f968636c613eb3a4516546e79ef1"
+    },
+    {
+      "dataset_id": "nuscenes",
+      "scene_id": "scene-0980",
+      "file": "controlled_case_decisions.csv",
+      "sha256": "f80987fc2a9f5990770836de7b98765ca64f701f993044ba1de323fbb4d722e3"
+    },
+    {
+      "dataset_id": "nuscenes",
+      "scene_id": "scene-0980",
+      "file": "controlled_comparison.csv",
+      "sha256": "277e664c51aeb83476a186b46f6828cf9713a1dc2006e3410bdd6609da60741c"
+    }
+  ],
+  "perception_video": {
+    "path": "assets/scene0980-perception.mp4",
+    "source_name": "1368f655c534d97224a1f417aed524eb.mp4",
+    "sha256": "a679133bae926b105fd53b1d7e0733e3da4821b54b787aca07e6ff333e72ee98",
+    "role": "original supplied screen recording, no inferred camera frames or automatic timeline synchronization"
+  },
+  "source_commit": "88c185b",
+  "unit_tests": 80,
+  "studio_interaction_checks": 40,
+  "workbench_interaction_checks": 36
 }

@@ -1,0 +1,3052 @@
+{
+  "dataset_type": "controlled_map_write_test",
+  "source_dataset_id": "nuscenes",
+  "source_scene_id": "scene-0980",
+  "source_map_sha256": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
+  "target_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+  "baseline": {
+    "schema_version": "1.0",
+    "map_id": "controlled-copy-of-nuscenes-scene0980",
+    "version": "experiment-v0",
+    "dataset_id": "controlled_test",
+    "source_dataset_id": "nuscenes",
+    "map_role": "controlled_synthetic_prior",
+    "coordinate_reference": {
+      "frame": "City",
+      "city_id": "singapore-onenorth",
+      "units": "m"
+    },
+    "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+    "elements": [
+      {
+        "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+        "element_type": "lane_marking",
+        "geometry_city": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              408.7765582883987,
+              1173.4845175030432
+            ],
+            [
+              397.3403723888354,
+              1146.4025888917274
+            ]
+          ]
+        },
+        "active": true,
+        "properties": {
+          "source_layer": "lane_divider"
+        }
+      }
+    ]
+  },
+  "variants": [
+    {
+      "offset_m": 0.6,
+      "measured_geometry_delta_m": 0.600000000000067,
+      "records": [
+        {
+          "record_id": "controlled-shift-0",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-0",
+          "timestamp_ns": "1800000000000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.3292963678852,
+                1173.2511066732054
+              ],
+              [
+                397.89311046832194,
+                1146.1691780618896
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        },
+        {
+          "record_id": "controlled-shift-1",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-1",
+          "timestamp_ns": "1800043200000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.3292963678852,
+                1173.2511066732054
+              ],
+              [
+                397.89311046832194,
+                1146.1691780618896
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        },
+        {
+          "record_id": "controlled-shift-2",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-2",
+          "timestamp_ns": "1800093600000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.3292963678852,
+                1173.2511066732054
+              ],
+              [
+                397.89311046832194,
+                1146.1691780618896
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        }
+      ],
+      "stages": [
+        {
+          "stage": 0,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 1,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "insufficient_evidence",
+              "reason": "need_independent_revisits_and_time_span",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800000000000000000",
+              "last_valid_ns": "1800000000000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.3292963678852,
+                    1173.2511066732054
+                  ],
+                  [
+                    397.89311046832194,
+                    1146.1691780618896
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0"
+              ],
+              "independent_visits": 1,
+              "span_s": 0.0,
+              "applied_version": null,
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 2,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "insufficient_evidence",
+              "reason": "need_independent_revisits_and_time_span",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800043200000000000",
+              "last_valid_ns": "1800043200000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.3292963678852,
+                    1173.2511066732054
+                  ],
+                  [
+                    397.89311046832194,
+                    1146.1691780618896
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1"
+              ],
+              "independent_visits": 2,
+              "span_s": 43200.0,
+              "applied_version": null,
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 3,
+          "version": "experiment-v0.u0001-72e388c5",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0.u0001-72e388c5",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      409.3292963678852,
+                      1173.2511066732054
+                    ],
+                    [
+                      397.89311046832194,
+                      1146.1691780618896
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            },
+            {
+              "version": "experiment-v0.u0001-72e388c5",
+              "parent": "experiment-v0",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.u0001-72e388c5",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          409.3292963678852,
+                          1173.2511066732054
+                        ],
+                        [
+                          397.89311046832194,
+                          1146.1691780618896
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "event_id": "event-0001",
+                "operation": "geometry_change",
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "before": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        408.7765582883987,
+                        1173.4845175030432
+                      ],
+                      [
+                        397.3403723888354,
+                        1146.4025888917274
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "after": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        409.3292963678852,
+                        1173.2511066732054
+                      ],
+                      [
+                        397.89311046832194,
+                        1146.1691780618896
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "evidence_record_ids": [
+                  "controlled-shift-0",
+                  "controlled-shift-1",
+                  "controlled-shift-2"
+                ],
+                "timestamp_ns": "1800093600000000000",
+                "reason": "configured_revisit_and_geometry_gates_passed"
+              }
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "applied",
+              "reason": "long_term_rule_passed_not_permanence_guarantee",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800093600000000000",
+              "last_valid_ns": "1800093600000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.3292963678852,
+                    1173.2511066732054
+                  ],
+                  [
+                    397.89311046832194,
+                    1146.1691780618896
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1",
+                "controlled-shift-2"
+              ],
+              "independent_visits": 3,
+              "span_s": 93600.0,
+              "applied_version": "experiment-v0.u0001-72e388c5",
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 4,
+          "version": "experiment-v0.r0002",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0.r0002",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            },
+            {
+              "version": "experiment-v0.u0001-72e388c5",
+              "parent": "experiment-v0",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.u0001-72e388c5",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          409.3292963678852,
+                          1173.2511066732054
+                        ],
+                        [
+                          397.89311046832194,
+                          1146.1691780618896
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "event_id": "event-0001",
+                "operation": "geometry_change",
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "before": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        408.7765582883987,
+                        1173.4845175030432
+                      ],
+                      [
+                        397.3403723888354,
+                        1146.4025888917274
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "after": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        409.3292963678852,
+                        1173.2511066732054
+                      ],
+                      [
+                        397.89311046832194,
+                        1146.1691780618896
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "evidence_record_ids": [
+                  "controlled-shift-0",
+                  "controlled-shift-1",
+                  "controlled-shift-2"
+                ],
+                "timestamp_ns": "1800093600000000000",
+                "reason": "configured_revisit_and_geometry_gates_passed"
+              }
+            },
+            {
+              "version": "experiment-v0.r0002",
+              "parent": "experiment-v0.u0001-72e388c5",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.r0002",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "operation": "rollback",
+                "restored_from": "experiment-v0",
+                "reason": "explicit_user_rollback"
+              }
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "review_required",
+              "reason": "rollback_requires_evidence_reassessment",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800093600000000000",
+              "last_valid_ns": "1800093600000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.3292963678852,
+                    1173.2511066732054
+                  ],
+                  [
+                    397.89311046832194,
+                    1146.1691780618896
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1",
+                "controlled-shift-2"
+              ],
+              "independent_visits": 3,
+              "span_s": 93600.0,
+              "applied_version": "experiment-v0.u0001-72e388c5",
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        }
+      ]
+    },
+    {
+      "offset_m": 0.8,
+      "measured_geometry_delta_m": 0.8000000000000607,
+      "records": [
+        {
+          "record_id": "controlled-shift-0",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-0",
+          "timestamp_ns": "1800000000000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.5135423943807,
+                1173.1733030632595
+              ],
+              [
+                398.0773564948174,
+                1146.0913744519437
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        },
+        {
+          "record_id": "controlled-shift-1",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-1",
+          "timestamp_ns": "1800043200000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.5135423943807,
+                1173.1733030632595
+              ],
+              [
+                398.0773564948174,
+                1146.0913744519437
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        },
+        {
+          "record_id": "controlled-shift-2",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-2",
+          "timestamp_ns": "1800093600000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.5135423943807,
+                1173.1733030632595
+              ],
+              [
+                398.0773564948174,
+                1146.0913744519437
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        }
+      ],
+      "stages": [
+        {
+          "stage": 0,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 1,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "insufficient_evidence",
+              "reason": "need_independent_revisits_and_time_span",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800000000000000000",
+              "last_valid_ns": "1800000000000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.5135423943807,
+                    1173.1733030632595
+                  ],
+                  [
+                    398.0773564948174,
+                    1146.0913744519437
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0"
+              ],
+              "independent_visits": 1,
+              "span_s": 0.0,
+              "applied_version": null,
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 2,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "insufficient_evidence",
+              "reason": "need_independent_revisits_and_time_span",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800043200000000000",
+              "last_valid_ns": "1800043200000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.5135423943807,
+                    1173.1733030632595
+                  ],
+                  [
+                    398.0773564948174,
+                    1146.0913744519437
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1"
+              ],
+              "independent_visits": 2,
+              "span_s": 43200.0,
+              "applied_version": null,
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 3,
+          "version": "experiment-v0.u0001-c6c146cc",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0.u0001-c6c146cc",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      409.5135423943807,
+                      1173.1733030632595
+                    ],
+                    [
+                      398.0773564948174,
+                      1146.0913744519437
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            },
+            {
+              "version": "experiment-v0.u0001-c6c146cc",
+              "parent": "experiment-v0",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.u0001-c6c146cc",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          409.5135423943807,
+                          1173.1733030632595
+                        ],
+                        [
+                          398.0773564948174,
+                          1146.0913744519437
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "event_id": "event-0001",
+                "operation": "geometry_change",
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "before": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        408.7765582883987,
+                        1173.4845175030432
+                      ],
+                      [
+                        397.3403723888354,
+                        1146.4025888917274
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "after": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        409.5135423943807,
+                        1173.1733030632595
+                      ],
+                      [
+                        398.0773564948174,
+                        1146.0913744519437
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "evidence_record_ids": [
+                  "controlled-shift-0",
+                  "controlled-shift-1",
+                  "controlled-shift-2"
+                ],
+                "timestamp_ns": "1800093600000000000",
+                "reason": "configured_revisit_and_geometry_gates_passed"
+              }
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "applied",
+              "reason": "long_term_rule_passed_not_permanence_guarantee",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800093600000000000",
+              "last_valid_ns": "1800093600000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.5135423943807,
+                    1173.1733030632595
+                  ],
+                  [
+                    398.0773564948174,
+                    1146.0913744519437
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1",
+                "controlled-shift-2"
+              ],
+              "independent_visits": 3,
+              "span_s": 93600.0,
+              "applied_version": "experiment-v0.u0001-c6c146cc",
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 4,
+          "version": "experiment-v0.r0002",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0.r0002",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            },
+            {
+              "version": "experiment-v0.u0001-c6c146cc",
+              "parent": "experiment-v0",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.u0001-c6c146cc",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          409.5135423943807,
+                          1173.1733030632595
+                        ],
+                        [
+                          398.0773564948174,
+                          1146.0913744519437
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "event_id": "event-0001",
+                "operation": "geometry_change",
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "before": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        408.7765582883987,
+                        1173.4845175030432
+                      ],
+                      [
+                        397.3403723888354,
+                        1146.4025888917274
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "after": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        409.5135423943807,
+                        1173.1733030632595
+                      ],
+                      [
+                        398.0773564948174,
+                        1146.0913744519437
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "evidence_record_ids": [
+                  "controlled-shift-0",
+                  "controlled-shift-1",
+                  "controlled-shift-2"
+                ],
+                "timestamp_ns": "1800093600000000000",
+                "reason": "configured_revisit_and_geometry_gates_passed"
+              }
+            },
+            {
+              "version": "experiment-v0.r0002",
+              "parent": "experiment-v0.u0001-c6c146cc",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.r0002",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "operation": "rollback",
+                "restored_from": "experiment-v0",
+                "reason": "explicit_user_rollback"
+              }
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "review_required",
+              "reason": "rollback_requires_evidence_reassessment",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800093600000000000",
+              "last_valid_ns": "1800093600000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.5135423943807,
+                    1173.1733030632595
+                  ],
+                  [
+                    398.0773564948174,
+                    1146.0913744519437
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1",
+                "controlled-shift-2"
+              ],
+              "independent_visits": 3,
+              "span_s": 93600.0,
+              "applied_version": "experiment-v0.u0001-c6c146cc",
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        }
+      ]
+    },
+    {
+      "offset_m": 1.2,
+      "measured_geometry_delta_m": 1.2000000000000757,
+      "records": [
+        {
+          "record_id": "controlled-shift-0",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-0",
+          "timestamp_ns": "1800000000000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.8820344473717,
+                1173.0176958433676
+              ],
+              [
+                398.44584854780845,
+                1145.9357672320518
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        },
+        {
+          "record_id": "controlled-shift-1",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-1",
+          "timestamp_ns": "1800043200000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.8820344473717,
+                1173.0176958433676
+              ],
+              [
+                398.44584854780845,
+                1145.9357672320518
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        },
+        {
+          "record_id": "controlled-shift-2",
+          "change_id": "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "map_id": "controlled-copy-of-nuscenes-scene0980",
+          "map_version": "experiment-v0",
+          "coordinate_reference": {
+            "frame": "City",
+            "city_id": "singapore-onenorth",
+            "units": "m"
+          },
+          "visit_id": "invented-visit-2",
+          "timestamp_ns": "1800093600000000000",
+          "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+          "change_type": "geometry_change",
+          "geometry_city": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                409.8820344473717,
+                1173.0176958433676
+              ],
+              [
+                398.44584854780845,
+                1145.9357672320518
+              ]
+            ]
+          },
+          "observation": "supports_change",
+          "evidence_score": 1.0,
+          "valid_frame_count": 12,
+          "support_frame_count": 11,
+          "fully_observed": true,
+          "source": "explicitly_invented_observation_for_write_engine_test",
+          "reliability": {
+            "decision": "Suspected Map Change",
+            "effective_coverage": 0.95,
+            "alignment_valid": true,
+            "reason": "synthetic quality gate"
+          }
+        }
+      ],
+      "stages": [
+        {
+          "stage": 0,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 1,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "insufficient_evidence",
+              "reason": "need_independent_revisits_and_time_span",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800000000000000000",
+              "last_valid_ns": "1800000000000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.8820344473717,
+                    1173.0176958433676
+                  ],
+                  [
+                    398.44584854780845,
+                    1145.9357672320518
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0"
+              ],
+              "independent_visits": 1,
+              "span_s": 0.0,
+              "applied_version": null,
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 2,
+          "version": "experiment-v0",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "insufficient_evidence",
+              "reason": "need_independent_revisits_and_time_span",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800043200000000000",
+              "last_valid_ns": "1800043200000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.8820344473717,
+                    1173.0176958433676
+                  ],
+                  [
+                    398.44584854780845,
+                    1145.9357672320518
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1"
+              ],
+              "independent_visits": 2,
+              "span_s": 43200.0,
+              "applied_version": null,
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 3,
+          "version": "experiment-v0.u0001-4e4dc7de",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0.u0001-4e4dc7de",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      409.8820344473717,
+                      1173.0176958433676
+                    ],
+                    [
+                      398.44584854780845,
+                      1145.9357672320518
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            },
+            {
+              "version": "experiment-v0.u0001-4e4dc7de",
+              "parent": "experiment-v0",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.u0001-4e4dc7de",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          409.8820344473717,
+                          1173.0176958433676
+                        ],
+                        [
+                          398.44584854780845,
+                          1145.9357672320518
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "event_id": "event-0001",
+                "operation": "geometry_change",
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "before": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        408.7765582883987,
+                        1173.4845175030432
+                      ],
+                      [
+                        397.3403723888354,
+                        1146.4025888917274
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "after": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        409.8820344473717,
+                        1173.0176958433676
+                      ],
+                      [
+                        398.44584854780845,
+                        1145.9357672320518
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "evidence_record_ids": [
+                  "controlled-shift-0",
+                  "controlled-shift-1",
+                  "controlled-shift-2"
+                ],
+                "timestamp_ns": "1800093600000000000",
+                "reason": "configured_revisit_and_geometry_gates_passed"
+              }
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "applied",
+              "reason": "long_term_rule_passed_not_permanence_guarantee",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800093600000000000",
+              "last_valid_ns": "1800093600000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.8820344473717,
+                    1173.0176958433676
+                  ],
+                  [
+                    398.44584854780845,
+                    1145.9357672320518
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1",
+                "controlled-shift-2"
+              ],
+              "independent_visits": 3,
+              "span_s": 93600.0,
+              "applied_version": "experiment-v0.u0001-4e4dc7de",
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        },
+        {
+          "stage": 4,
+          "version": "experiment-v0.r0002",
+          "map": {
+            "schema_version": "1.0",
+            "map_id": "controlled-copy-of-nuscenes-scene0980",
+            "version": "experiment-v0.r0002",
+            "dataset_id": "controlled_test",
+            "source_dataset_id": "nuscenes",
+            "map_role": "controlled_synthetic_prior",
+            "coordinate_reference": {
+              "frame": "City",
+              "city_id": "singapore-onenorth",
+              "units": "m"
+            },
+            "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+            "elements": [
+              {
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "element_type": "lane_marking",
+                "geometry_city": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      408.7765582883987,
+                      1173.4845175030432
+                    ],
+                    [
+                      397.3403723888354,
+                      1146.4025888917274
+                    ]
+                  ]
+                },
+                "active": true,
+                "properties": {
+                  "source_layer": "lane_divider"
+                }
+              }
+            ]
+          },
+          "versions": [
+            {
+              "version": "experiment-v0",
+              "parent": null,
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": null
+            },
+            {
+              "version": "experiment-v0.u0001-4e4dc7de",
+              "parent": "experiment-v0",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.u0001-4e4dc7de",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          409.8820344473717,
+                          1173.0176958433676
+                        ],
+                        [
+                          398.44584854780845,
+                          1145.9357672320518
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "event_id": "event-0001",
+                "operation": "geometry_change",
+                "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                "before": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        408.7765582883987,
+                        1173.4845175030432
+                      ],
+                      [
+                        397.3403723888354,
+                        1146.4025888917274
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "after": {
+                  "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                  "element_type": "lane_marking",
+                  "geometry_city": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        409.8820344473717,
+                        1173.0176958433676
+                      ],
+                      [
+                        398.44584854780845,
+                        1145.9357672320518
+                      ]
+                    ]
+                  },
+                  "active": true,
+                  "properties": {
+                    "source_layer": "lane_divider"
+                  }
+                },
+                "evidence_record_ids": [
+                  "controlled-shift-0",
+                  "controlled-shift-1",
+                  "controlled-shift-2"
+                ],
+                "timestamp_ns": "1800093600000000000",
+                "reason": "configured_revisit_and_geometry_gates_passed"
+              }
+            },
+            {
+              "version": "experiment-v0.r0002",
+              "parent": "experiment-v0.u0001-4e4dc7de",
+              "map": {
+                "schema_version": "1.0",
+                "map_id": "controlled-copy-of-nuscenes-scene0980",
+                "version": "experiment-v0.r0002",
+                "dataset_id": "controlled_test",
+                "source_dataset_id": "nuscenes",
+                "map_role": "controlled_synthetic_prior",
+                "coordinate_reference": {
+                  "frame": "City",
+                  "city_id": "singapore-onenorth",
+                  "units": "m"
+                },
+                "provenance": "Real reference geometry copied into an isolated test. Observations and time spans are invented.",
+                "elements": [
+                  {
+                    "element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+                    "element_type": "lane_marking",
+                    "geometry_city": {
+                      "type": "LineString",
+                      "coordinates": [
+                        [
+                          408.7765582883987,
+                          1173.4845175030432
+                        ],
+                        [
+                          397.3403723888354,
+                          1146.4025888917274
+                        ]
+                      ]
+                    },
+                    "active": true,
+                    "properties": {
+                      "source_layer": "lane_divider"
+                    }
+                  }
+                ]
+              },
+              "patch": {
+                "operation": "rollback",
+                "restored_from": "experiment-v0",
+                "reason": "explicit_user_rollback"
+              }
+            }
+          ],
+          "events": [
+            {
+              "event_id": "event-0001",
+              "change_ids": [
+                "change-lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac"
+              ],
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "change_type": "geometry_change",
+              "status": "review_required",
+              "reason": "rollback_requires_evidence_reassessment",
+              "first_seen_ns": "1800000000000000000",
+              "last_seen_ns": "1800093600000000000",
+              "last_valid_ns": "1800093600000000000",
+              "geometry_city": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    409.8820344473717,
+                    1173.0176958433676
+                  ],
+                  [
+                    398.44584854780845,
+                    1145.9357672320518
+                  ]
+                ]
+              },
+              "record_ids": [
+                "controlled-shift-0",
+                "controlled-shift-1",
+                "controlled-shift-2"
+              ],
+              "independent_visits": 3,
+              "span_s": 93600.0,
+              "applied_version": "experiment-v0.u0001-4e4dc7de",
+              "stale": false,
+              "clearance_confirmed": false
+            }
+          ],
+          "policy": {
+            "min_visits": 3,
+            "min_visit_gap_s": 3600,
+            "min_span_s": 86400,
+            "min_valid_frames": 3,
+            "min_support_ratio": 0.7,
+            "min_coverage": 0.7,
+            "geometry_stability_m": 0.35,
+            "min_geometry_change_m": 0.5,
+            "association_distance_m": 1.5,
+            "temporary_stale_after_s": 3600
+          }
+        }
+      ]
+    }
+  ],
+  "real_candidate_id": null,
+  "real_map_modified": false,
+  "independent_real_visits_added": 0,
+  "scope": "Only engine mechanics: invented offsets, complete coverage, valid alignment and three independent visits over 26 hours. Not a real change detection result.",
+  "assumptions": [
+    "目标身份与整段观测在试验中指定，并非自动核实的真实 LD 匹配。",
+    "0 / 12 / 26 小时的三次访问及 95% 有效覆盖率是人为设置。",
+    "只修改试验副本的一条标线，不修改道路拓扑，也不证明规划可行性。"
+  ]
+}

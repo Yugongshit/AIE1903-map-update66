@@ -1,9 +1,15 @@
-# AIE1903 地图证据复核工作台
+# AIE1903 scene and map-maintenance studio
 
-该分支用于 GitHub Pages 网页托管。请在仓库 Settings → Pages 中选择 Deploy from a branch，Branch 选择 gh-pages，Folder 选择 / (root)，保存。
+Live site: https://yugongshit.github.io/AIE1903-map-update66/
 
-网页包含真实场景数据，支持候选筛选、时间轴、地图拖动缩放、同步对照、量距、本帧观测和个人复核草稿。复核草稿仅保存在访问者浏览器；不会发送到服务器，也不会更改 M3 系统结论。
+Current dataset: nuScenes / scene-0980. Argoverse remains pending review.
 
-main 分支保持原样。
+The scene view uses actual map geometry, camera-exposure poses, annotations and recorded ego positions. It is explicitly a geometric reconstruction, not camera photography or a planning recommendation. The original supplied perception screen recording is included separately. Camera photos can be selected locally in the browser.
 
-Current dataset: nuScenes / scene-0980. Argoverse is pending review and excluded from this release. Dataset-scoped reviews and exports prevent mixing results.
+The write experiment runs the existing maintenance engine on a copy of one source map line, with explicitly invented offsets, coverage and revisit evidence. Before/after geometries, patches, version history and rollback are inspectable. No real base-map updates are claimed.
+
+The third page has eleven concrete data / implementation / evaluation issues and a one-click Word report. Existing evidence review and local draft storage remain available in `review/index.html`.
+
+Source branch: `feature/evidence-workbench-20261104` at `88c185b`.
+
+Validation: 80 unit tests; 40 studio interaction checks; 36 evidence-workbench checks. 17 upstream structured outputs and 13 M3 files reproduce. See `validation.json`.
