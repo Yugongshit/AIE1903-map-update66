@@ -1,5 +1,5 @@
 {
-  "schema": "visual-studio-release-1.0",
+  "schema": "bilingual-evidence-studio-1.0",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -65,12 +65,24 @@
     "sha256": "a679133bae926b105fd53b1d7e0733e3da4821b54b787aca07e6ff333e72ee98",
     "role": "original supplied screen recording, no inferred camera frames or automatic timeline synchronization"
   },
-  "source_commit": "baa3205",
+  "source_commit": "4938c5c",
   "unit_tests": 84,
   "studio_interaction_checks": 40,
   "workbench_interaction_checks": 36,
   "semantic_annotation_checks": 28,
   "semantic_source_rows": 2278,
   "semantic_category_count": 14,
-  "release": "named-source-objects-20261104"
+  "release": "bilingual-websites-20261104",
+  "default_language": "en",
+  "languages": [
+    "en",
+    "zh"
+  ],
+  "routes": {
+    "en": "en/index.html",
+    "zh": "zh/index.html"
+  },
+  "source_category_policy": "English: exact original category; Chinese: translated display name; source identity and geometry unchanged",
+  "shared_source_sha256": "ff50ded5064938b3fa845bdbbf86136d40acfdf32df95990df28965e1ed11377",
+  "bilingual_interaction_checks": 40
 }
