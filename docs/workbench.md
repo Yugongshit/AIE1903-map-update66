@@ -2,7 +2,7 @@
 
 2026-11-04 更新。访问地址：
 
-https://yugongshit.github.io/AIE1903-map-update66/
+https://yugongshit.github.io/AIE1903-map-update66/review/index.html
 
 网站使用 `gh-pages` 分支发布，`main` 保留原资料。页面是自包含的静态应用，用户无需安装 Python、下载 ZIP 或运行终端命令。
 
