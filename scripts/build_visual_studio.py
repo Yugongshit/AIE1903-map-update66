@@ -122,7 +122,7 @@ def build(output, paths, video=None):
             'AIE1903 · EVALUATION & EVIDENCE <a href="../index.html" style="margin-left:12px;color:#327b85;letter-spacing:0">← 场景与地图维护</a></div>'),encoding='utf-8')
         package=ROOT/'map_update'
         serialized=json.dumps(payload,ensure_ascii=False,allow_nan=False).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
-        template=(package/'studio.html').read_text(encoding='utf-8').replace('__STUDIO_CSS__',(package/'studio.css').read_text(encoding='utf-8')).replace('__STUDIO_JS__',(package/'studio.js').read_text(encoding='utf-8')).replace('__STUDIO_JSON__',serialized)
+        template=(package/'studio.html').read_text(encoding='utf-8').replace('__STUDIO_CSS__',(package/'studio.css').read_text(encoding='utf-8')+'\n'+(package/'studio_objects.css').read_text(encoding='utf-8')).replace('__STUDIO_JS__',(package/'studio.js').read_text(encoding='utf-8')+'\n'+(package/'studio_objects.js').read_text(encoding='utf-8')).replace('__STUDIO_JSON__',serialized)
         (staging/'index.html').write_text(template,encoding='utf-8')
         (assets/'write_experiment.json').write_text(json.dumps(payload['write_experiment'],ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         manifest={'schema':'visual-studio-release-1.0','dataset_id':'nuscenes','scene_id':scene['scene_id'],

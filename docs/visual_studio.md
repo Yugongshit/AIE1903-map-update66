@@ -58,3 +58,17 @@ python3 -m unittest discover -s tests -q
 本轮重新运行上游规则与 M3：17 个 stage3/5/6 文件结构化内容完全一致；stage7 的 30 项内置检查通过；M3 的 13 个 CSV / JSON 与交付一致，原文件未改动。这没有重跑 YOLOP 相机模型，也不等于真实准确率验证。
 
 源码：`map_update/camera.py`、`studio.py`、`studio.html`、`studio.css`、`studio.js`。旧的证据和个人复核入口位于 `/review/index.html`；本地复核存储仍使用原数据集 / 场景 / 地图哈希键。
+
+## 物体名称与形状（2026-11-04）
+
+场景视图读取 `processed/objects.csv` 的 2,278 条原始标注，共 14 个类别。蓝色表示车辆，暖黄色表示人员及行人相关物体，红色表示道路物体，灰色表示其他或未细分类别。紫色虚线单独表示占用候选范围；物体类别与是否影响通行不是同一个判断。
+
+前视与鸟瞰均按标注的长宽高、位置和朝向绘制包围框，使用一致的中文名称、颜色和跨帧实例编号。名称旁的图标只辅助识别类别。点名称、轮廓或物体列表可查看尺寸、原始类别与标注来源，支持分类筛选、地图定位和隐藏名称。标签会避让；密集场景未显示的名称可在本帧物体列表中查找。
+
+这些名称来自 nuScenes 标注，不是本轮模型预测。包围框不是精细三维模型；未在下一帧找到同一实例的标注也不等于该物体已消失。前视投影未做遮挡验证；原始感知视频没有可靠时间对齐，故不叠加这些新标签。该展示改动不改变真实地图更新数量、M3 结论或评估准确率。
+
+新增语义模块：`map_update/semantics.py`、`studio_objects.js`、`studio_objects.css`；验证命令：
+
+```bash
+python3 scripts/check_object_labels.py outputs/nuscenes/scene-0980/visual-studio-new
+```

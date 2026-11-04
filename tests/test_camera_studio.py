@@ -6,6 +6,8 @@ import unittest
 from map_update.camera import camera_point, inverse_pose, pixel, project_segment, project_ground, rotation, build_camera_views
 from map_update.reliability import integrate_m3
 from map_update.studio import build_write_experiment, issue_register
+from map_update.semantics import describe_category
+from map_update.delivery import read_csv
 
 ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'AIE1903 原始资料'
@@ -14,6 +16,16 @@ CALIBRATION={**IDENTITY,'camera_intrinsic':[[50,0,50],[0,50,50],[0,0,1]]}
 
 
 class ProjectionMathTests(unittest.TestCase):
+    def test_semantic_names_do_not_guess_more_than_source_category(self):
+        self.assertEqual(describe_category('movable_object.barrier')['name_zh'],'路障 / 隔离栏')
+        self.assertEqual(describe_category('movable_object.trafficcone')['name_zh'],'交通锥')
+        self.assertEqual(describe_category('static_object.bicycle_rack')['name_zh'],'自行车架')
+        self.assertEqual(describe_category('movable_object.pushable_pullable')['name_zh'],'可推拉物体')
+        unknown=describe_category('a-new-unmapped-class')
+        self.assertEqual(unknown['family'],'other')
+        self.assertEqual(unknown['category'],'a-new-unmapped-class')
+        self.assertEqual(unknown['name_zh'],'未细分类别')
+
     def test_inverse_pose_respects_rotation_translation_and_order(self):
         pose={'translation':[10,20,3],'rotation':[math.sqrt(.5),0,0,math.sqrt(.5)]}
         point=inverse_pose([10,22,3],pose)
@@ -68,6 +80,38 @@ class ActualSceneStudioTests(unittest.TestCase):
                     self.assertTrue(0<=x<=1600 and 0<=y<=900)
                 total+=1
         self.assertGreater(total,1000)
+
+    def test_names_sizes_and_heading_match_each_original_annotation(self):
+        original={(int(r['frame_index']),r['instance_token']):r for r in read_csv(RAW/'processed/objects.csv')}
+        seen=set();display_ids={}
+        for view in self.camera['views']:
+            for a in view['annotations']:
+                key=(view['frame_index'],a['instance_token']);row=original[key];seen.add(key)
+                self.assertEqual(a['category'],row['category'])
+                self.assertEqual(a['dimensions_lwh_m'],[float(row[k]) for k in ('length_m','width_m','height_m')])
+                self.assertEqual(a['yaw_deg'],float(row['yaw_global_deg']))
+                self.assertEqual(a['annotation_token'],row['annotation_token'])
+                self.assertEqual(a['timestamp_ns'],self.scene['replay'][view['frame_index']]['timestamp_ns'])
+                self.assertNotEqual(a['name_zh'],'未细分类别')
+                self.assertEqual(a['display_id'],display_ids.setdefault(a['instance_token'],a['display_id']))
+                self.assertEqual(a['footprint_xy'][0],a['footprint_xy'][-1])
+        self.assertEqual(seen,set(original))
+        self.assertEqual(len(set(display_ids.values())),len(display_ids))
+
+    def test_object_to_occupancy_link_uses_exact_instance_and_frame(self):
+        for view,f in zip(self.camera['views'],self.scene['replay']):
+            for a in view['annotations']:
+                expected={o['candidate_id'] for o in f['occupancy'] if any(x['instance_token']==a['instance_token'] for x in o['objects'])}
+                self.assertEqual(set(a['occupancy_candidate_ids']),expected)
+
+    def test_projected_box_faces_use_bounded_finite_coordinates(self):
+        for view in self.camera['views']:
+            tokens={a['instance_token'] for a in view['annotations']}
+            for box in view['boxes']:
+                self.assertIn(box['instance_token'],tokens)
+                for face in box['faces']:
+                    self.assertGreaterEqual(len(face),3)
+                    self.assertTrue(all(math.isfinite(x) and math.isfinite(y) and 0<=x<=1600 and 0<=y<=900 for x,y in face))
 
     def test_experiment_uses_real_geometry_but_separate_invented_evidence(self):
         lab=self.experiment

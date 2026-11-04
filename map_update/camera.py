@@ -8,6 +8,7 @@ from math import isfinite, sqrt
 from pathlib import Path
 
 from .delivery import read_csv, read_json
+from .semantics import describe_category, FAMILIES
 
 
 def rotation(quaternion):
@@ -90,11 +91,8 @@ def project_segment(a, b, ego, calibration, width=1600, height=900):
     return screen_segment(pixel(a, calibration['camera_intrinsic']), pixel(b, calibration['camera_intrinsic']), width, height)
 
 
-def project_ground(points, ego, calibration, closed=False, width=1600, height=900):
-    if not closed:
-        return [segment for a, b in zip(points, points[1:])
-                if (segment := project_segment([*a, 0.], [*b, 0.], ego, calibration, width, height))]
-    camera = [camera_point([*p, 0.], ego, calibration) for p in points]
+def project_polygon_3d(points, ego, calibration, width=1600, height=900):
+    camera = [camera_point(p, ego, calibration) for p in points]
     for depth, minimum in [(.5, True), (100., False)]:
         camera = clip_polygon(camera, lambda p: p[2] >= depth if minimum else p[2] <= depth,
                               lambda a, b: cut_axis(a, b, 2, depth))
@@ -103,6 +101,13 @@ def project_ground(points, ego, calibration, closed=False, width=1600, height=90
         projected = clip_polygon(projected, lambda p: p[axis] >= value if minimum else p[axis] <= value,
                                  lambda a, b: cut_axis(a, b, axis, value))
     return [[round(v, 3) for v in p] for p in projected] if len(projected) >= 3 else []
+
+
+def project_ground(points, ego, calibration, closed=False, width=1600, height=900):
+    if not closed:
+        return [segment for a, b in zip(points, points[1:])
+                if (segment := project_segment([*a, 0.], [*b, 0.], ego, calibration, width, height))]
+    return project_polygon_3d([[*p, 0.] for p in points], ego, calibration, width, height)
 
 
 def box_corners(row):
@@ -129,6 +134,7 @@ def build_camera_views(raw_root, scene):
     if len(by_sample) != len(samples):
         raise ValueError('Duplicate CAM_FRONT sample')
     frame_rows, objects = read_csv(root/files[-2]), read_csv(root/files[-1])
+    display_ids = {token: f'{i+1:03d}' for i, token in enumerate(sorted({o['instance_token'] for o in objects}))}
     result, checks = [], []
     for row, frame in zip(frame_rows, scene['replay']):
         sample = by_sample[row['sample_token']]
@@ -141,7 +147,7 @@ def build_camera_views(raw_root, scene):
         delta = (sample['timestamp']-int(row['timestamp_us']))/1000
         if abs(delta) > 50:
             raise ValueError('Unexpected camera / frame timestamp difference')
-        surfaces, lines, observations, boxes = [], [], [], []
+        surfaces, lines, observations, boxes, annotations = [], [], [], [], []
         for element in scene['reference_map']['elements']:
             geometry = element['geometry_city']
             if geometry['type'] == 'LineString':
@@ -162,10 +168,25 @@ def build_camera_views(raw_root, scene):
             if int(obj['frame_index']) != frame['frame_index']:
                 continue
             corners = box_corners(obj)
+            annotation = {**describe_category(obj['category']),
+                          'instance_token': obj['instance_token'], 'annotation_token': obj['annotation_token'],
+                          'display_id': display_ids[obj['instance_token']], 'frame_index': frame['frame_index'],
+                          'timestamp_ns': frame['timestamp_ns'], 'center_xyz_m': [float(obj[k]) for k in ('x_global_m','y_global_m','z_global_m')],
+                          'dimensions_lwh_m': [float(obj[k]) for k in ('length_m','width_m','height_m')],
+                          'yaw_deg': float(obj['yaw_global_deg']), 'attributes': obj['attributes'],
+                          'footprint_xy': [[p[0],p[1]] for p in corners[:4]]+[[corners[0][0],corners[0][1]]],
+                          'occupancy_candidate_ids': sorted({o['candidate_id'] for o in frame['occupancy']
+                                                           if any(p['instance_token']==obj['instance_token'] for p in o['objects'])}),
+                          'source_file': 'processed/objects.csv'}
+            annotation['distance_from_ego_m'] = round(sqrt(sum((a-b)**2 for a,b in zip(annotation['center_xyz_m'][:2],frame['ego']['xy']))),3)
+            annotations.append(annotation)
             segments = [p for a, b in edges if (p := project_segment(corners[a], corners[b], ego, calibration))]
             if segments:
+                faces = [p for indices in [(0,1,2,3),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+                         if (p := project_polygon_3d([corners[i] for i in indices],ego,calibration))]
                 boxes.append({'instance_token': obj['instance_token'], 'category': obj['category'],
-                              'segments': segments, 'source': 'nuScenes annotation; lidar-frame timestamp'})
+                              'segments': segments, 'faces': faces,
+                              'source': 'nuScenes annotation; lidar-frame timestamp'})
         recorded_route = [f['ego']['xy'] for f in scene['replay'] if f['frame_index'] >= frame['frame_index']]
         result.append({'frame_index': frame['frame_index'], 'sample_token': row['sample_token'],
                        'sample_data_token': sample['token'], 'filename': sample['filename'],
@@ -174,11 +195,13 @@ def build_camera_views(raw_root, scene):
                        'image_available': (root/sample['filename']).is_file(),
                        'calibration_token': sample['calibrated_sensor_token'], 'ego_pose_token': sample['ego_pose_token'],
                        'surfaces': surfaces, 'lines': lines, 'observations': observations, 'boxes': boxes,
+                       'annotations': annotations,
                        'recorded_route': project_ground(recorded_route, ego, calibration)})
         checks.append({'frame': frame['frame_index'], 'sensor_pose_timestamp_dimensions_valid': True})
     if len(result) != len(scene['replay']) or len(result) != len(samples):
         raise ValueError('Missing camera metadata')
     return {'dataset_id': 'nuscenes', 'channel': 'CAM_FRONT', 'views': result, 'checks': checks,
+            'semantic_families': FAMILIES,
             'available_images': sum(v['image_available'] for v in result),
             'route_type': 'recorded_ego_path_not_planned',
             'projection_scope': '2D map uses z=0; camera-time ego pose; boxes retain annotation time; no occlusion test or physical alignment validation.',
