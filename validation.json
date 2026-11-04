@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "unit_tests": 80,
+  "unit_tests": 84,
   "studio_interaction_checks": 40,
   "workbench_interaction_checks": 36,
   "studio": {
@@ -111,5 +111,46 @@
     ],
     "ground_truth_status": "217 rows awaiting independent labels",
     "upstream_byte_difference_reason": "Nine JSON files differ only by CRLF versus LF line endings; parsed contents identical."
+  },
+  "semantic_annotation_checks": 28,
+  "semantic_annotations": {
+    "status": "PASS",
+    "checks": [
+      "legend separates object class from occupancy region",
+      "front view displays actual Chinese names",
+      "default browser lists source objects within the camera projection",
+      "labels carry the exact source category color",
+      "front labels do not overlap each other",
+      "bird-view labels select their own annotated instance",
+      "dragging over a name label still pans the map",
+      "selecting a truck exposes its identity and measurements",
+      "displayed dimensions preserve source values",
+      "source dialog distinguishes annotations from predictions",
+      "map locates the selected source object",
+      "front and bird view share one selected instance",
+      "names can be hidden while geometry remains selectable",
+      "an actual projected barrier edge is available for picking",
+      "clicking the projected object selects its source record",
+      "vehicle filter affects both rendered objects and list",
+      "hidden selection is explained rather than relabeled",
+      "all source annotations remain available outside front view",
+      "missing frame annotation is never presented as disappearance",
+      "construction workers retain their more specific label",
+      "cones debris and bicycle racks keep distinct source names",
+      "occupancy associations remain distinct from object identity",
+      "shape switch also hides associated name tags",
+      "new labels do not falsely annotate the unsynchronized source video",
+      "semantic controls fit a mobile viewport",
+      "mobile labels stay inside their image",
+      "real map and evaluation are unaffected by annotation controls",
+      "no JavaScript errors"
+    ],
+    "javascript_errors": []
+  },
+  "verification_scope": {
+    "source_commit": "baa3205",
+    "current_checks": "84 unit tests; 40 studio and 28 semantic browser checks",
+    "unchanged_review": "36 interaction checks retained from preceding release; review HTML byte-identical",
+    "reproduction": "downstream and M3 reproduction retained from preceding release; unchanged inputs and evaluation outputs"
   }
 }
