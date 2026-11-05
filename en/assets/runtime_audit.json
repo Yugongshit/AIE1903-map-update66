@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-05",
+  "bugs": [
+    {
+      "id": "B01",
+      "status": "fixed",
+      "title": "Invalid polygon rings passed input validation",
+      "finding": "A closed collinear polygon with nonzero perimeter and a crossing polygon were both accepted. Such input can distort occupancy and geometry checks.",
+      "fix": "Reject zero-area and self-intersecting rings; retain valid concave rings, holes and original coordinates. Eight regression cases cover invalid and valid input. This check does not claim complete cross-ring topology validation.",
+      "reproduce": "validate_geometry({'type':'Polygon','coordinates':[[[0,0],[1,0],[2,0],[0,0]]]}) previously returned successfully. See tests/test_geometry_validation.py."
+    },
+    {
+      "id": "B02",
+      "status": "fixed",
+      "title": "Installed wheel could not import the language module",
+      "finding": "The built wheel omitted website_en.tsv. Importing map_update.website_languages from an isolated installation raised FileNotFoundError, although source-checkout imports worked.",
+      "fix": "Include TSV resources in package data; rebuild the wheel and verify an isolated import and all 728 translation entries.",
+      "reproduce": "Build a wheel with pip wheel --no-deps --no-build-isolation, extract it into an empty directory, and import map_update.website_languages with Python -I."
+    },
+    {
+      "id": "B03",
+      "status": "fixed",
+      "title": "Rerun export could drop or truncate source metadata",
+      "finding": "With Rerun 0.22.1 and NumPy 2.x, AnyValues emitted copy=False warnings and omitted custom fields. A separate string-type inference issue truncated human.pedestrian.construction_worker after frame 16 when later values exceeded the first frame's string width.",
+      "fix": "Use an isolated NumPy 1.26.4 / PyArrow 19.0.1 / Rerun 0.22.1 environment, strict logging and object-typed string arrays. Read the saved RRD back and compare all 2,278 annotations, tokens, categories, positions, dimensions and quaternions with the source. Failed intermediate exports are not published.",
+      "reproduce": "The first export with NumPy 2.x warned about copy=False. With fixed-width inferred strings, the category at frame 16 became human.pedestrian.construct. The exporter now fails if any saved value differs."
+    },
+    {
+      "id": "B04",
+      "status": "fixed",
+      "title": "Unbundled viewer used an extensionless module URL",
+      "finding": "The 0.22.1 npm entry imports ./re_viewer. A plain static site serves re_viewer.js and returns 404 for that extensionless URL, preventing startup. This is a direct-static-hosting integration issue, not a claim that bundled applications are broken.",
+      "fix": "Host the pinned viewer on the same site and change only that import to ./re_viewer.js. Preserve the package integrity, file hashes and licenses, and test the actual WebGL viewer in Chromium.",
+      "reproduce": "Serve the npm package with a plain static HTTP server and request /re_viewer. The corrected module resolves /re_viewer.js."
+    }
+  ],
+  "limits": [
+    "Only nuScenes scene-0980 is active: 41 frames, about 19.85 seconds, one visit. Argoverse remains pending review and has not been run.",
+    "Real base-map writes remain zero; all seven M3 units are Insufficient Evidence. Independent revisits, valid coverage and alignment evidence are still needed before a persistent update can be justified.",
+    "217 real evaluation label rows lack independent ground truth; real accuracy remains unknown. Controlled offsets and invented revisit times test engine behavior, not real long-term road change.",
+    "No matching camera JPGs are readable in this workspace. The supplied full recording exceeded the transfer limit; the readable original RRD is only an incremental overlay. The supplied MP4 remains available in the scene tab.",
+    "The default RRD is a re-export of real delivered geometry and original nuScenes annotations, not a new perception run. Map outlines are clipped for display only. Projection uses calibration and a z=0 map approximation; it is not a camera photograph.",
+    "Local RRD files stay in the browser. Their scene and time alignment are unverified, so they do not drive evaluation or the site frame controls. Large recordings may exceed browser memory; unload or use the matching native Rerun application.",
+    "English uses original category strings; Chinese translates the website and its source-object list. Rerun's native controls remain English, and its bundled font may not render every Chinese character.",
+    "Recorded ego trajectories are not planned routes. Planning, collision checks and cross-vehicle deployment are not integrated. Core geometry validation does not yet validate relationships between polygon holes."
+  ]
+}

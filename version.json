@@ -1,5 +1,5 @@
 {
-  "schema": "bilingual-evidence-studio-1.0",
+  "schema": "rerun-evidence-studio-1.0",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -65,14 +65,6 @@
     "sha256": "a679133bae926b105fd53b1d7e0733e3da4821b54b787aca07e6ff333e72ee98",
     "role": "original supplied screen recording, no inferred camera frames or automatic timeline synchronization"
   },
-  "source_commit": "4938c5c",
-  "unit_tests": 84,
-  "studio_interaction_checks": 40,
-  "workbench_interaction_checks": 36,
-  "semantic_annotation_checks": 28,
-  "semantic_source_rows": 2278,
-  "semantic_category_count": 14,
-  "release": "bilingual-websites-20261104",
   "default_language": "en",
   "languages": [
     "en",
@@ -84,5 +76,29 @@
   },
   "source_category_policy": "English: exact original category; Chinese: translated display name; source identity and geometry unchanged",
   "shared_source_sha256": "ff50ded5064938b3fa845bdbbf86136d40acfdf32df95990df28965e1ed11377",
-  "bilingual_interaction_checks": 40
+  "release_date": "2026-11-05",
+  "rerun_version": "0.22.1",
+  "real_base_map_writes": 0,
+  "rerun_recordings": {
+    "en": {
+      "file": "scene0980-delivered-en.rrd",
+      "recording_id": "95283c74-39f1-5964-a6a6-b187dc1848cc",
+      "bytes": 5057296,
+      "sha256": "a9b4ec495c22d70735d241065c9918a826b7f2299cfbb773df5ee06f3dba328e",
+      "annotation_rows_verified_from_saved_file": 2278,
+      "clear_components_present": true,
+      "image_components": 0
+    },
+    "zh": {
+      "file": "scene0980-delivered-zh.rrd",
+      "recording_id": "8508eda8-6a91-51f6-b282-630f0bfeced7",
+      "bytes": 5079766,
+      "sha256": "a4720f47d2f218c5056b54bc1c0293d07bfc2eec646d6341c0d624353cb83b46",
+      "annotation_rows_verified_from_saved_file": 2278,
+      "clear_components_present": true,
+      "image_components": 0
+    }
+  },
+  "source_commit": "79df066",
+  "validation_file": "assets/runtime_validation.json"
 }
