@@ -3,6 +3,38 @@
 from math import atan2, degrees, hypot, isfinite
 
 
+def _segments_intersect(a, b, c, d):
+    """Include endpoint touches and collinear overlap (local metric coordinates)."""
+    def cross(p, q, r):
+        return (q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0])
+    def on(p, q, r):
+        return (min(p[0],q[0])-1e-9 <= r[0] <= max(p[0],q[0])+1e-9
+                and min(p[1],q[1])-1e-9 <= r[1] <= max(p[1],q[1])+1e-9)
+    x,y,z,w = cross(a,b,c),cross(a,b,d),cross(c,d,a),cross(c,d,b)
+    return ((x*y < 0 and z*w < 0)
+            or (abs(x) <= 1e-9 and on(a,b,c))
+            or (abs(y) <= 1e-9 and on(a,b,d))
+            or (abs(z) <= 1e-9 and on(c,d,a))
+            or (abs(w) <= 1e-9 and on(c,d,b)))
+
+
+def _validate_ring(ring):
+    # Repeated consecutive points do not change a ring's shape.
+    points = [p for i,p in enumerate(ring) if i == 0 or p != ring[i-1]]
+    origin = points[0]
+    area2 = sum((a[0]-origin[0])*(b[1]-origin[1])-(b[0]-origin[0])*(a[1]-origin[1])
+                for a,b in zip(points,points[1:]))
+    if abs(area2) <= 1e-9:
+        raise ValueError("polygon ring has zero area")
+    edges = list(zip(points,points[1:]))
+    for i,(a,b) in enumerate(edges):
+        for j in range(i+2,len(edges)):
+            if i == 0 and j == len(edges)-1:
+                continue  # adjacent closing edges share a legitimate vertex
+            if _segments_intersect(a,b,*edges[j]):
+                raise ValueError("polygon ring is self-intersecting")
+
+
 def validate_geometry(geometry, line_only=False):
     if not isinstance(geometry, dict):
         raise ValueError("geometry must be a GeoJSON-like geometry object")
@@ -25,6 +57,8 @@ def validate_geometry(geometry, line_only=False):
             raise ValueError("degenerate geometry")
         if kind == "Polygon" and ring[0] != ring[-1]:
             raise ValueError("polygon rings must be closed")
+        if kind == "Polygon":
+            _validate_ring(ring)
     return geometry
 
 

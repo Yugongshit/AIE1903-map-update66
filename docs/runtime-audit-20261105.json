@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-05",
+  "scope": "Map-maintenance engine, packaging and the Rerun website integration; not a full retraining or re-evaluation of member models.",
+  "bugs": [
+    {
+      "id": "B01", "origin": "existing core input validation", "status": "fixed",
+      "en": {"title": "Invalid polygon rings passed input validation", "finding": "A closed collinear polygon with nonzero perimeter and a crossing polygon were both accepted. Such input can distort occupancy and geometry checks.", "fix": "Reject zero-area and self-intersecting rings; retain valid concave rings, holes and original coordinates. Eight regression cases cover invalid and valid input. This check does not claim complete cross-ring topology validation.", "reproduce": "validate_geometry({'type':'Polygon','coordinates':[[[0,0],[1,0],[2,0],[0,0]]]}) previously returned successfully. See tests/test_geometry_validation.py."},
+      "zh": {"title": "无效多边形通过了输入检查", "finding": "闭合但零面积的多边形，以及自交多边形，之前都会被接受，可能使占用和几何判断失真。", "fix": "加入零面积和环自交检查，保留有效凹多边形、孔洞和原始坐标；新增八个回归案例。此项不代表已经完成多环之间的全部拓扑校验。", "reproduce": "对坐标 [[0,0],[1,0],[2,0],[0,0]] 的 Polygon 调用 validate_geometry，修复前会成功。复现文件：tests/test_geometry_validation.py。"}
+    },
+    {
+      "id": "B02", "origin": "existing distribution packaging", "status": "fixed",
+      "en": {"title": "Installed wheel could not import the language module", "finding": "The built wheel omitted website_en.tsv. Importing map_update.website_languages from an isolated installation raised FileNotFoundError, although source-checkout imports worked.", "fix": "Include TSV resources in package data; rebuild the wheel and verify an isolated import and all 728 translation entries.", "reproduce": "Build a wheel with pip wheel --no-deps --no-build-isolation, extract it into an empty directory, and import map_update.website_languages with Python -I."},
+      "zh": {"title": "安装后的包无法导入翻译模块", "finding": "打包遗漏 website_en.tsv。在源代码目录可运行，但独立安装后的导入会报 FileNotFoundError。", "fix": "把 TSV 翻译表加入安装资源，重新打包并检查隔离导入和全部 728 条翻译。", "reproduce": "用 pip wheel --no-deps --no-build-isolation 构建安装包，解压到空目录，再用 Python -I 导入 map_update.website_languages。"}
+    },
+    {
+      "id": "B03", "origin": "new Rerun export integration, caught before release", "status": "fixed",
+      "en": {"title": "Rerun export could drop or truncate source metadata", "finding": "With Rerun 0.22.1 and NumPy 2.x, AnyValues emitted copy=False warnings and omitted custom fields. A separate string-type inference issue truncated human.pedestrian.construction_worker after frame 16 when later values exceeded the first frame's string width.", "fix": "Use an isolated NumPy 1.26.4 / PyArrow 19.0.1 / Rerun 0.22.1 environment, strict logging and object-typed string arrays. Read the saved RRD back and compare all 2,278 annotations, tokens, categories, positions, dimensions and quaternions with the source. Failed intermediate exports are not published.", "reproduce": "The first export with NumPy 2.x warned about copy=False. With fixed-width inferred strings, the category at frame 16 became human.pedestrian.construct. The exporter now fails if any saved value differs."},
+      "zh": {"title": "新增 Rerun 导出可能丢失或截短原始属性", "finding": "Rerun 0.22.1 配合 NumPy 2.x 时，AnyValues 会警告并漏掉属性。另一个字符串类型推断问题会把第 16 帧起出现的施工人员长类别名截成 human.pedestrian.construct。", "fix": "隔离并固定依赖版本，开启严格报错，字符串用 object 类型数组；从最终 RRD 反读全部 2,278 条标注，对比类别、标识、位置、尺寸、旋转。中间失败版本不发布。", "reproduce": "NumPy 2.x 导出出现 copy=False 警告；自动推断定长字符串时，human.pedestrian.construction_worker 被截短。导出脚本现会对任何实际保存值差异报错。"}
+    },
+    {
+      "id": "B04", "origin": "new static-site Rerun integration, caught before release", "status": "fixed",
+      "en": {"title": "Unbundled viewer used an extensionless module URL", "finding": "The 0.22.1 npm entry imports ./re_viewer. A plain static site serves re_viewer.js and returns 404 for that extensionless URL, preventing startup. This is a direct-static-hosting integration issue, not a claim that bundled applications are broken.", "fix": "Host the pinned viewer on the same site and change only that import to ./re_viewer.js. Preserve the package integrity, file hashes and licenses, and test the actual WebGL viewer in Chromium.", "reproduce": "Serve the npm package with a plain static HTTP server and request /re_viewer. The corrected module resolves /re_viewer.js."},
+      "zh": {"title": "静态网站的 Rerun 模块路径会返回 404", "finding": "0.22.1 的 npm 入口导入 ./re_viewer，但普通静态服务器只提供 re_viewer.js，导致查看器无法启动。这属于直接接入静态网站时的问题，不能据此说使用打包器的应用也有故障。", "fix": "固定版本并同站托管，仅将导入补为 ./re_viewer.js；保留包校验、文件哈希和许可证，使用真实 Chromium WebGL 查看器验证。", "reproduce": "直接用静态服务器提供原 npm 包，访问 /re_viewer 会返回 404；修正后加载 /re_viewer.js。"}
+    }
+  ],
+  "limits": {
+    "en": [
+      "Only nuScenes scene-0980 is active: 41 frames, about 19.85 seconds, one visit. Argoverse remains pending review and has not been run.",
+      "Real base-map writes remain zero; all seven M3 units are Insufficient Evidence. Independent revisits, valid coverage and alignment evidence are still needed before a persistent update can be justified.",
+      "217 real evaluation label rows lack independent ground truth; real accuracy remains unknown. Controlled offsets and invented revisit times test engine behavior, not real long-term road change.",
+      "No matching camera JPGs are readable in this workspace. The supplied full recording exceeded the transfer limit; the readable original RRD is only an incremental overlay. The supplied MP4 remains available in the scene tab.",
+      "The default RRD is a re-export of real delivered geometry and original nuScenes annotations, not a new perception run. Map outlines are clipped for display only. Projection uses calibration and a z=0 map approximation; it is not a camera photograph.",
+      "Local RRD files stay in the browser. Their scene and time alignment are unverified, so they do not drive evaluation or the site frame controls. Large recordings may exceed browser memory; unload or use the matching native Rerun application.",
+      "English uses original category strings; Chinese translates the website and its source-object list. Rerun's native controls remain English, and its bundled font may not render every Chinese character.",
+      "Recorded ego trajectories are not planned routes. Planning, collision checks and cross-vehicle deployment are not integrated. Core geometry validation does not yet validate relationships between polygon holes."
+    ],
+    "zh": [
+      "当前只运行 nuScenes scene-0980：41 帧、约 19.85 秒、一次访问。Argoverse 仍待审核，未运行。",
+      "真实基础地图修改仍为 0；M3 七项全部证据不足。确认长期变化仍缺独立复访、有效覆盖率和对齐依据。",
+      "217 条真实评估标签缺独立真值，因此真实准确率未知。受控偏移和人为复访时间只测试引擎行为，不能证明真实长期道路变化。",
+      "当前工作区没有可读的对应相机 JPG；用户提供过的完整录制受传输上限影响。可读取的原始 RRD 只有增量叠加内容；原始 MP4 在场景页保留。",
+      "默认 RRD 重新封装成员交付的真实几何与 nuScenes 原标注，不是新跑的感知结果。地图轮廓仅为显示而裁切；前视投影用标定及地图 z=0 近似，不是相机实拍。",
+      "本地 RRD 只在浏览器读取。其场景和时间对齐未核实，不联动评估或网站帧控制。大文件仍可能超过浏览器内存，可卸载或使用对应版本的原生 Rerun。",
+      "英文沿用原类别字符串；中文翻译网页及原始物体列表。Rerun 内置菜单仍为英文，其自带字体可能无法显示全部中文。",
+      "实际 ego 轨迹不是规划路线。规划、碰撞检查及跨车部署尚未接入；核心几何校验也尚未覆盖多边形孔洞之间的关系。"
+    ]
+  }
+}
