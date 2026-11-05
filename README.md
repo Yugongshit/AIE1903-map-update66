@@ -1,15 +1,19 @@
-# AIE1903 scene and map-maintenance studio
+# AIE1903 map decisions, evidence and evaluation
 
-Live site: https://yugongshit.github.io/AIE1903-map-update66/
+English: https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions
 
-Current dataset: nuScenes / scene-0980. Argoverse remains pending review.
+Chinese: https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions
 
-The scene view uses actual map geometry, camera-exposure poses, annotations and recorded ego positions. It is explicitly a geometric reconstruction, not camera photography or a planning recommendation. The original supplied perception screen recording is included separately. Camera photos can be selected locally in the browser.
+Release: 2026-11-06. Current dataset: nuScenes / scene-0980. Argoverse remains pending review.
 
-The write experiment runs the existing maintenance engine on a copy of one source map line, with explicitly invented offsets, coverage and revisit evidence. Before/after geometries, patches, version history and rollback are inspectable. No real base-map updates are claimed.
+The default workspace lets you select all 29 source candidates, drag a map comparison divider, inspect exact-frame evidence and open the source artifacts behind verification, reliability and map decisions. English retains the original object categories; Chinese translates their display names. The evidence workspace synchronizes known candidates and frames with the existing source scene and embedded official Rerun viewer.
 
-The third page has eleven concrete data / implementation / evaluation issues and a one-click Word report. Existing evidence review and local draft storage remain available in `review/index.html`.
+The evaluation workspace separates unknown real accuracy from 126 controlled perturbation cases. Resolved F1, decision coverage and recall over all positive cases appear together. Errors and abstentions can be inspected case by case and source CSV files can be downloaded.
 
-Source branch: `feature/evidence-workbench-20261104` at `88c185b`.
+Real base-map writes remain zero. The separate write lab displays saved maintenance-engine outputs on an isolated copy with explicitly invented offsets, coverage and revisits. Actual copy edits, versions and exact geometry rollback are inspectable. The source scene includes the original perception video; geometric projections are not camera photographs or planning recommendations. Planning and cross-vehicle sharing are not integrated.
 
-Validation: 80 unit tests; 40 studio interaction checks; 36 evidence-workbench checks. 17 upstream structured outputs and 13 M3 files reproduce. See `validation.json`.
+Source branch: `feature/evidence-workbench-20261104` at `0d90d1fe429b2e36ec4ef2b901aba45a1fc1b626`.
+
+Current validation: 99 core tests; 56 decision-workspace checks; 40 bilingual regression checks; 35 real Rerun/WebGL checks. See `assets/runtime_validation.json` and `version.json`. The older root `validation.json` describes an earlier release. Browser validation covers cloud Chromium and SwiftShader, not physical Mac/Safari or vehicle operation.
+
+Architecture, walkthrough, limits and rebuild commands: [decision-studio.md](https://github.com/Yugongshit/AIE1903-map-update66/blob/feature/evidence-workbench-20261104/docs/decision-studio.md).

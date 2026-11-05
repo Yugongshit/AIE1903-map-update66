@@ -13,7 +13,7 @@
  function context(){
   slider.value=S.frame;byId('rerun-frame-text').textContent=`${T.frame} ${S.frame} / 40 · ${R.frames[S.frame].elapsed_s.toFixed(2)} s`;
   const box=byId('rerun-candidates');box.replaceChildren();
-  for(const id of R.frames[S.frame].candidate_ids){const b=document.createElement('button');b.textContent=id.split('-').at(-1);b.onclick=()=>{selectCandidate(id);context();};b.classList.toggle('active',S.selected===id);box.append(b);}
+  for(const id of R.frames[S.frame].candidate_ids){const b=document.createElement('button');b.textContent=id.split('-').at(-1);b.onclick=()=>{selectCandidate(id);window.DECISION_STUDIO?.pickCase(id,S.frame);context();};b.classList.toggle('active',S.selected===id);box.append(b);}
   byId('rerun-review').href='review/index.html#'+new URLSearchParams({case:S.selected||R.frames[S.frame].candidate_ids[0]||'',frame:S.frame,tab:'scene'});
   byId('rerun-context').hidden=mode!=='scene';
  }

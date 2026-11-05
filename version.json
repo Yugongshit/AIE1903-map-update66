@@ -1,5 +1,5 @@
 {
-  "schema": "rerun-evidence-studio-1.0",
+  "schema": "decision-evidence-studio-1.0",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -76,7 +76,7 @@
   },
   "source_category_policy": "English: exact original category; Chinese: translated display name; source identity and geometry unchanged",
   "shared_source_sha256": "ff50ded5064938b3fa845bdbbf86136d40acfdf32df95990df28965e1ed11377",
-  "release_date": "2026-11-05",
+  "release_date": "2026-11-06",
   "rerun_version": "0.22.1",
   "real_base_map_writes": 0,
   "rerun_recordings": {
@@ -99,6 +99,20 @@
       "image_components": 0
     }
   },
-  "source_commit": "79df066",
+  "default_workspace": "decisions",
+  "new_workspaces": [
+    "decisions",
+    "evaluation"
+  ],
+  "controlled_case_rows": 126,
+  "distance_preview_scope": {
+    "source_labels": "original nuScenes annotations",
+    "scores": "whole-window preset-rule evidence scores; not probabilities",
+    "m3_join": "candidate ID and exact window; never track-wide propagation",
+    "missing_frame": "no source row, not observed clearance",
+    "controlled_write": "existing engine outputs on a copied map; no real candidate match"
+  },
+  "unchanged_evidence_sha256": "1b71b9ad3a9ed6eeee527ec5cccd62552bd88d6ecf0ee608875cc3e89d560056",
+  "source_commit": "0d90d1fe429b2e36ec4ef2b901aba45a1fc1b626",
   "validation_file": "assets/runtime_validation.json"
 }
