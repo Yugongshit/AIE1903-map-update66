@@ -29,6 +29,8 @@ try:
         base=f'http://127.0.0.1:{server.server_port}/'
         page.goto(base);page.wait_for_url('**/en/index.html*')
         check('default entry opens the English website',page.locator('html').get_attribute('lang')=='en')
+        # The decision studio is now the entry page; retain the legacy scene regression scope.
+        page.locator('[data-page="drive"]').click()
         english=page.evaluate('({real:R,camera:CAM,experiment:LAB})')
         check('English scene view has no untranslated Chinese UI',no_han(page.locator('body').inner_text()))
         check('English object labels use exact original categories',page.evaluate('''()=>[...document.querySelectorAll('#front-object-labels button')].every(b=>{const a=CAM.views[S.frame].annotations.find(a=>a.instance_token===b.dataset.objectToken);return b.innerText===a.category+' #'+a.display_id;})'''))
@@ -96,7 +98,9 @@ try:
         for language in ['en','zh']:
             page.goto(base+language+'/index.html');page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(150)
             for tab in ['drive','changes','issues']:
-                page.locator(f'[data-page="{tab}"]').click()
+                if tab=='changes':
+                    page.locator('[data-page="drive"]').click();page.locator('#go-changes').click()
+                else:page.locator(f'[data-page="{tab}"]').click()
                 check(language+' mobile layout fits: '+tab,page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
                 if language=='en':check('English mobile UI translated: '+tab,no_han(page.locator('body').inner_text()))
             page.locator('[data-page="drive"]').click();page.screenshot(path=str(root/(language+'_mobile.png')),full_page=True)

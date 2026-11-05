@@ -41,6 +41,10 @@ try:
     page.evaluate("AIE_RERUN.viewer.set_current_time(AIE_RERUN.recordingId,'elapsed_s',R.frames[12].elapsed_s*1e9)")
     page.wait_for_function('S.frame===12',timeout=15000)
     check('native time updates select the matching evidence frame',page.locator('#rerun-frame').input_value()=='12')
+    if page.evaluate('!!window.DECISION_STUDIO'):
+        check('native timeline also updates the new decision workspace',page.evaluate('DECISION_STUDIO.state.frame===12'))
+        page.locator('#rerun-candidates button').first.click()
+        check('Rerun candidate selection reaches the decision workspace',page.evaluate('DECISION_STUDIO.state.caseId===S.selected'))
     page.locator('#rerun-frame').fill('0');page.locator('#rerun-frame').dispatch_event('input');page.wait_for_timeout(700)
     page.screenshot(path=str(root/'rerun_english.png'),full_page=True)
     canvas=page.locator('#rerun-host canvas');rect=canvas.bounding_box();before=canvas.screenshot()

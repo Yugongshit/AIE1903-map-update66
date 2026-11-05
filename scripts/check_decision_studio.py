@@ -1,0 +1,126 @@
+"""End-to-end checks of the map decision, evidence and evaluation workspaces."""
+import argparse
+from functools import partial
+from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
+from threading import Thread
+from pathlib import Path
+from hashlib import sha256
+import json
+import re
+from playwright.sync_api import sync_playwright
+
+p=argparse.ArgumentParser();p.add_argument('directory',type=Path);root=p.parse_args().directory.resolve()
+checks=[];errors=[];bad_requests=[]
+class Quiet(SimpleHTTPRequestHandler):
+    def log_message(self,*args):pass
+server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(root)));Thread(target=server.serve_forever,daemon=True).start()
+base=f'http://127.0.0.1:{server.server_port}/'
+def check(name,result):
+    if not result:raise AssertionError(name)
+    checks.append(name);print('PASS '+name,flush=True)
+def no_han(text):return re.search('[\u3400-\u9fff]',text) is None
+def get_download(page,selector):
+    with page.expect_download() as event:page.locator(selector).click()
+    return json.loads(Path(event.value.path()).read_text())
+try:
+ with sync_playwright() as pw:
+    browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+    context=browser.new_context(viewport={'width':1600,'height':1150});page=context.new_page()
+    page.on('pageerror',lambda e:errors.append(str(e)))
+    page.on('response',lambda r:bad_requests.append([r.url,r.status]) if r.status>=400 else None)
+    page.goto(base+'en/index.html');page.wait_for_function('window.DECISION_STUDIO&&S.page==="decisions"')
+    baseline=page.evaluate('JSON.stringify({real:R,camera:CAM,lab:LAB,evaluation:DATA.controlled_evaluation})')
+    check('default entry is the decision workspace with real LD003',page.evaluate('DECISION_STUDIO.state.caseId==="S0980-LD-003"&&DECISION_STUDIO.state.mode==="real"'))
+    check('all 29 source candidates are available',page.locator('#ds-cases [data-case]').count()==29)
+    check('English main workspace is English',no_han(page.locator('body').inner_text()))
+    check('high source score is not mistaken for permission to write','1.00' in page.locator('#ds-decision-numbers').inner_text() and 'Defer' in page.locator('#ds-verdict').inner_text())
+    check('frame controls expose 41 frames and eight supporting rows for LD003',page.locator('#ds-timeline button').count()==41 and page.locator('#ds-timeline .support').count()==8)
+    canvas=page.locator('#ds-map');a=canvas.screenshot()
+    page.locator('#ds-wipe').fill('80');page.locator('#ds-wipe').dispatch_event('input');b=canvas.screenshot()
+    check('wipe changes the actual map pixels',sha256(a).digest()!=sha256(b).digest())
+    divider=page.locator('#ds-wipe-line');rect=canvas.bounding_box();drag=divider.bounding_box();page.mouse.move(drag['x']+8,drag['y']+180);page.mouse.down();page.mouse.move(rect['x']+rect['width']*.34,drag['y']+180,steps=8);page.mouse.up()
+    check('comparison divider is directly draggable',abs(page.evaluate('DECISION_STUDIO.state.wipe')-34)<2)
+    page.locator('[data-dview="overlay"]').click();center=page.evaluate('DECISION_STUDIO.state.center')
+    rect=canvas.bounding_box();page.mouse.move(rect['x']+100,rect['y']+200);page.mouse.down();page.mouse.move(rect['x']+150,rect['y']+225,steps=5);page.mouse.up()
+    check('map supports manual panning',page.evaluate('DECISION_STUDIO.state.center')!=center)
+    scale=page.evaluate('DECISION_STUDIO.state.scale');page.locator('#ds-zoom-in').click();check('map zoom changes the metric scale',page.evaluate('DECISION_STUDIO.state.scale')>scale)
+    page.locator('#ds-fit').click();page.locator('[data-dright="decision"]').click()
+    check('real decision view explicitly preserves base geometry','retained' in page.locator('#ds-right-label').inner_text().lower() and 'unchanged' in page.locator('#ds-map-note').inner_text())
+    page.locator('[data-chain="reliability"]').click();detail=page.locator('#ds-chain-detail').inner_text()
+    check('M3 detail keeps LD003 distinct from later matched T004 window','S0980-LD-003' in detail and '26–40' in detail and 'Unknown' in detail and 'Unavailable' in detail)
+    page.locator('[data-chain="verification"]').click()
+    check('multi-frame detail qualifies source scores and behavior association','not independent revisits' in page.locator('#ds-chain-detail').inner_text() and 'not evidence' in page.locator('#ds-chain-detail').inner_text())
+    page.locator('[data-dright="observation"]').click();page.locator('#ds-timeline [data-frame="30"]').click()
+    check('absent candidate frame is shown as missing, not clearance','No observation row' in page.locator('#ds-map-note').inner_text() and 'No row' in page.locator('#ds-observation-state').inner_text())
+    export=get_download(page,'#ds-export')
+    check('real export preserves missing-frame status and zero writes',export['selected_frame']==30 and export['selected_frame_evidence']==[] and export['real_base_map_writes']==0 and export['real_accuracy']['f1'] is None)
+    check('point distance preview is not a claimed verified edit',export['point_distance_is_verified_edit'] is False)
+    check('case export includes verified scoring and association artifacts',any(x['path'].endswith('/stage3/rules.json') for x in export['source_files']) and any(x['path'].endswith('/stage6/associations.csv') for x in export['source_files']))
+    page.locator('#ds-search').fill('LD003');check('short display IDs can be searched',page.locator('#ds-cases [data-case]').count()==1)
+    page.locator('#ds-search').fill('does-not-exist');check('empty search has an explicit state','No matching' in page.locator('#ds-cases').inner_text())
+    page.locator('#ds-search').fill('');page.locator('[data-dfilter="occupancy"]').click();check('occupancy filter contains exactly 23 candidates',page.locator('#ds-cases [data-case]').count()==23)
+    page.locator('[data-case="S0980-OCC-scene-0980-O001"]').click();page.locator('[data-dview="overlay"]').click();page.locator('[data-chain="perception"]').click()
+    check('occupancy uses original source categories','movable_object.barrier' in page.locator('#ds-chain-detail').inner_text())
+    rect=canvas.bounding_box();hit=page.evaluate('DECISION_STUDIO.state.hits[0]');page.mouse.click(rect['x']+hit['p'][0],rect['y']+hit['p'][1])
+    check('clicking a real object exposes its original token and dimensions',page.evaluate('DECISION_STUDIO.state.objectToken')==hit['token'] and hit['token'] in page.locator('#ds-chain-detail').inner_text() and 'height' in page.locator('#ds-chain-detail').inner_text())
+    page.locator('[data-chain="reliability"]').click();check('occupancy is outside marking M3 scope, never relabeled reliable','Outside scope' in page.locator('#ds-chain-detail').inner_text())
+    export=get_download(page,'#ds-export');check('event export preserves unknown duration and unconfirmed clearance',export['event_candidate']['duration_class']=='unknown' and export['event_candidate']['clearance_confirmed'] is False and export['m3'] is None)
+    page.locator('#ds-timeline [data-frame="15"]').click();check('expired source footprint is not kept as a ghost object',page.evaluate('DECISION_STUDIO.state.hits.length')==0)
+    page.locator('#ds-timeline [data-frame="3"]').click();page.locator('#language-switch').click();page.wait_for_url('**/zh/index.html*')
+    check('language switch preserves case, frame and inspector',page.evaluate('DECISION_STUDIO.state.caseId.endsWith("O001")&&DECISION_STUDIO.state.frame===3&&DECISION_STUDIO.state.node==="reliability"'))
+    page.locator('[data-chain="perception"]').click();check('Chinese names translate the same original classes','路障' in page.locator('#ds-chain-detail').inner_text())
+    page.locator('#ds-search').fill('路障');check('translated categories are searchable',page.locator('#ds-cases [data-case]').count()>0)
+    page.locator('#ds-search').fill('');page.screenshot(path=str(root/'decision_chinese.png'),full_page=True)
+    page.locator('#language-switch').click();page.wait_for_url('**/en/index.html*')
+    page.locator('[data-dmode="lab"]').click();check('controlled write has a prominent boundary',page.locator('#ds-lab-banner').is_visible() and 'invented inputs' in page.locator('#ds-lab-banner').inner_text())
+    page.locator('[data-labstage="2"]').click();check('two visits cannot create a versioned write','Waiting' in page.locator('#ds-verdict').inner_text() and page.evaluate('LAB.variants[DECISION_STUDIO.state.variant].stages[DECISION_STUDIO.state.stage].versions.length')==1)
+    page.locator('[data-labstage="3"]').click();check('third test visit displays actual engine write output','Written' in page.locator('#ds-verdict').inner_text() and page.evaluate('JSON.stringify(LAB.variants[DECISION_STUDIO.state.variant].stages[3].map.elements)!==JSON.stringify(LAB.baseline.elements)'))
+    export=get_download(page,'#ds-export');check('controlled patch export identifies the isolated map and stage',export['real_map_modified'] is False and export['real_candidate_id'] is None and export['stage']['versions'][-1]['patch']['operation']=='geometry_change')
+    page.screenshot(path=str(root/'decision_controlled_write.png'),full_page=True)
+    page.locator('[data-variant="2"]').click();check('offset selection uses its own saved engine result',page.evaluate('DECISION_STUDIO.state.variant')==2 and '1.20 m' in page.locator('#ds-case-title').inner_text())
+    page.locator('[data-labstage="4"]').click();check('rollback restores exact source geometry and retains history',page.evaluate('JSON.stringify(LAB.variants[2].stages[4].map.elements)===JSON.stringify(LAB.baseline.elements)&&LAB.variants[2].stages[4].versions.length===3') and 'restored' in page.locator('#ds-verdict').inner_text())
+    check('controlled mode does not imply a matched real source frame',page.locator('#ds-source-rerun').is_disabled() and not page.locator('#ds-frame-controls').is_visible())
+    page.locator('#de-nav').click();check('real evaluation shows unknown accuracy and missing independent labels','0 / 217' in page.locator('#de-real-metrics').inner_text() and 'Unavailable' in page.locator('#de-real-metrics').inner_text())
+    page.locator('#de-matched').click();check('matched-window diagnostic is separately reviewable','18–25' in page.locator('#de-matched-detail').inner_text() and '26–40' in page.locator('#de-matched-detail').inner_text() and 'Insufficient Evidence' in page.locator('#de-matched-detail').inner_text())
+    page.locator('[data-review-case="S0980-LD-004"]').click();check('evaluation case opens its actual map window',page.evaluate('S.page==="decisions"&&DECISION_STUDIO.state.caseId==="S0980-LD-004"&&DECISION_STUDIO.state.frame===27'))
+    page.locator('#de-nav').click();page.locator('[data-detab="controlled"]').click()
+    check('controlled F1 is accompanied by coverage and all-positive recall',all(x in page.locator('[data-method="quality_gated_repeated_evidence"]').inner_text() for x in ['94.1%','28.6%','22.2%']))
+    check('controlled outcomes total 126 without dropping abstentions',page.evaluate('Object.keys({tp:0,fp:0,tn:0,fn:0,insufficient:0,needs_review:0}).reduce((s,k)=>s+DATA.controlled_evaluation.strata.all[2][k],0)')==126)
+    page.locator('[data-outcome="fn"]').click();check('false-negative drilldown opens a real source case',page.locator('#de-cases [data-controlled-case]').count()==3 and 'False negative' in page.locator('#de-case-detail .de-result').inner_text())
+    page.locator('[data-method="normalized_test"]').click();check('changing method updates errors and case outcomes',page.locator('#de-cases [data-controlled-case]').count()==12)
+    page.locator('[data-method="quality_gated_repeated_evidence"]').click();page.locator('#de-stratum').select_option('low')
+    check('no resolved decisions are not displayed as perfect or zero F1','—' in page.locator('[data-method="quality_gated_repeated_evidence"] .de-score').inner_text() and '0/42' in page.locator('#de-denominators').inner_text())
+    check('empty error subset is explicit under low coverage','No cases' in page.locator('#de-cases').inner_text())
+    page.locator('#de-case-filter').select_option('abstain');check('low-coverage abstentions remain inspectable',page.locator('#de-cases [data-controlled-case]').count()==42)
+    export=get_download(page,'#de-export');check('evaluation export preserves scripted labels and unknown real accuracy',export['dataset_type']=='controlled_perturbation' and len(export['case_rows'])==42 and export['real_accuracy']['f1'] is None)
+    page.locator('#language-switch').click();page.wait_for_url('**/zh/index.html*')
+    check('evaluation language switch preserves method and coverage stratum',page.evaluate('S.page==="evaluation"&&DECISION_STUDIO.evaluation.stratum==="low"&&DECISION_STUDIO.evaluation.method==="quality_gated_repeated_evidence"'))
+    page.locator('#de-stratum').select_option('all');page.screenshot(path=str(root/'decision_evaluation_chinese.png'),full_page=True)
+    page.locator('#language-switch').click();page.wait_for_url('**/en/index.html*');check('English expanded evaluation stays English',no_han(page.locator('body').inner_text()))
+    page.screenshot(path=str(root/'decision_evaluation_english.png'),full_page=True)
+    check('all source geometry, labels, metrics and engine outputs are immutable',page.evaluate('JSON.stringify({real:R,camera:CAM,lab:LAB,evaluation:DATA.controlled_evaluation})')==baseline)
+    # Open all source cases and inspectors: a missing field must not silently break a case.
+    page.locator('#ds-nav').click();page.locator('[data-dmode="real"]').click()
+    all_cases=page.evaluate('R.candidates.map(c=>c.candidate_id)')
+    for cid in all_cases:
+        page.evaluate('(id)=>DECISION_STUDIO.pickCase(id)',cid)
+        for node in ['source','perception','verification','reliability','decision']:
+            page.locator(f'[data-chain="{node}"]').click()
+            assert no_han(page.locator('#ds-chain-detail').inner_text()),(cid,node)
+    check('all 29 cases and five evidence panels render without untranslated English text',True)
+    page.evaluate('DECISION_STUDIO.pickCase("S0980-LD-003")');page.screenshot(path=str(root/'decision_english.png'),full_page=True)
+    link=page.locator('#ds-source-review').get_attribute('href')
+    check('full review link preserves candidate and frame','case=S0980-LD-003' in link and 'frame=18' in link)
+    page.locator('#ds-source-scene').click();check('original scene bridge selects the same source frame',page.evaluate('S.page==="drive"&&S.frame===18&&S.selected==="S0980-LD-003"'))
+    page.locator('#ds-nav').click();page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(100)
+    check('mobile decision layout has no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
+    page.screenshot(path=str(root/'decision_mobile.png'),full_page=True)
+    page.locator('#de-nav').click();check('mobile evaluation layout has no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
+    page.goto(base+'en/index.html?case=missing&frame=999&stage=-1&variant=NaN&mode=bad&node=bad#decisions')
+    check('invalid deep-link parameters recover to valid source state',page.evaluate('DECISION_STUDIO.state.caseId==="S0980-LD-003"&&DECISION_STUDIO.state.frame===18&&DECISION_STUDIO.state.stage===0&&DECISION_STUDIO.state.variant===1&&DECISION_STUDIO.state.mode==="real"'))
+    check('normal flows have no failed asset requests',not bad_requests)
+    check('all tested interactions have no uncaught JavaScript errors',not errors)
+    browser.close()
+    result={'status':'PASS','count':len(checks),'checks':checks,'page_errors':errors,'failed_requests':bad_requests,'scope':'Cloud Chromium, two language routes; underlying source data unchanged'}
+    (root/'decision_checks.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n');print('PASS '+str(len(checks))+' decision-workspace checks')
+finally:server.shutdown()
