@@ -1,5 +1,8 @@
 # AIE1903 map comparison and structural evidence
 
+Latest update: Argoverse confirmation repair. [Chinese known-change replay](algorithms/zh/index.html?dataset=argoverse) · [English](algorithms/en/index.html?dataset=argoverse). The reference view replays 98 delivered ground-truth changes on an isolated map copy. The separate model view has 14 local detections: 9 changed-boundary identity hits, 5 false positives, and only 3 detections within the 0.5 m same-anchor geometry tolerance. Model map patches remain 0; reference-copy patches are 98. Validated with 245 core tests and 153 browser checks. [Validation](algorithms/confirmation_release_validation.json). Earlier entries below describe prior releases.
+
+
 Source: `f41880667d7cf026f9fb1eee4aa7599f56bb4985` on `feat/structure-state-routing`.
 
 [English map](algorithms/en/index.html) · [中文地图](algorithms/zh/index.html) · [Method and threshold audit](https://github.com/Yugongshit/AIE1903-map-update66/blob/feat/structure-state-routing/docs/structural_evidence_revision_20261108.md)

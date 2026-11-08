@@ -12,6 +12,8 @@
     "all 219 lane fills and 27 crossings use actual prior-boundary coordinates",
     "nuscenes reference bounds equal independently measured source extents",
     "argoverse reference bounds equal independently measured source extents",
+    "the separate reference replay contains exactly the 98 independently read confirmed truth objects",
+    "all red reference-change geometries preserve the supplied current-map coordinates and attributes",
     "nuScenes perception guide exactly reports 14 source categories, 2278 frame records and 154 instances",
     "Argoverse guide reports 4976 coarse vehicle boxes, without invented object classes or GT labels",
     "the prominent map is visible before the detailed evidence panels",
@@ -19,7 +21,7 @@
     "first view shows the comparison while technical analysis starts collapsed",
     "selected map card identifies a barrier in plain language rather than only its source ID",
     "layer options start collapsed to keep the comparison readable",
-    "red confirmation needs an actual patch or both write gates, never support or class assignment alone",
+    "model red follows the computed detection independently from structural patch execution",
     "an explicitly synthetic detached render fixture uses red for a confirmed structure",
     "perception details stay collapsed until requested",
     "English perception details render all 14 actual source labels and their annotation provenance",
@@ -58,19 +60,25 @@
     "opening evidence after a map click shows the same selected source event",
     "newly supported LD004 still renders its source curve as green, never confirmed red",
     "LD004 map selection opens the exact-window reference counterevidence",
-    "Argoverse opens 589 prior features, no states and all 71 unconfirmed structural candidates",
+    "Argoverse starts in the explicitly labeled data-confirmed map replay",
+    "all 98 red reference overlays use the exact independently exported truth geometry",
+    "the reference updated map is a real patched copy with a separately exported rollback",
+    "data-confirmed changes produce visible red pixels on their actual city geometry",
+    "selected confirmed truth object has red source-coordinate pixels and explicit provenance",
+    "far-right divider shows only the original map and hides reference change hit targets",
+    "far-left divider restores the actual updated reference copy and red change overlays",
+    "switching to model results removes every truth overlay from the drawable map",
     "Argoverse perception view distinguishes vehicle detections from unique objects and ground truth",
-    "the selected supported Argoverse claim has a visible false-positive warning",
-    "local-support scope isolates one candidate without upgrading it to confirmed structure",
-    "Argoverse supported false positive remains visibly green with no red confirmed structure",
-    "the map evidence action opens the detailed source analysis and selected evaluation",
-    "Argoverse fit uses its own actual M2 prior bounds",
-    "all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases",
-    "all 64 unpainted-reference hypotheses have explicit paint-presence semantics",
-    "paint-presence map card and green source geometry do not claim a confirmed old-line displacement",
-    "cross-dataset interactions preserve data and do not turn overlays into base-map edits",
+    "model structure counts come from computed classifications rather than the 98 known answers",
+    "model-supported scope isolates detections without inventing full-map writes",
+    "computed structural detections are visibly red even while full-map write eligibility is false",
+    "a model detection can be red and still show its explicit false-positive evaluation",
+    "remaining unresolved observations stay green rather than all becoming confirmed",
+    "NONE references no longer force every observation into an unconfirmed paint-presence category",
+    "the formerly blocked 46-frame curve renders red at its measured coordinates",
+    "source switches preserve immutable predictions and distinguish reference writes from model writes",
     "Chinese map keeps the same dataset, selected source event and exact data",
-    "Chinese selected card gives the marking meaning and unconfirmed status",
+    "Chinese selected card distinguishes the model detection from confirmed truth and a full-map write",
     "Chinese map controls describe state and structure separately",
     "mobile map and controls fit without horizontal document overflow",
     "mobile fit-selected retains visible selected-source geometry",
@@ -83,7 +91,7 @@
   ],
   "page_errors": [],
   "failed_requests": [],
-  "result_sha256": "ea1f66d8e81e22ac0e3778c3d9fd7c875bec5483c1a5f79718a987c78fb8c9e5",
+  "result_sha256": "58bb904be8460b12a7d12c8c7af9ec3b293dc716d20babf2cb2eec1356123b89",
   "source_bounds_xyxy": {
     "nuscenes": [
       245.75157373658558,
@@ -103,9 +111,8 @@
       false,
       false,
       false,
+      true,
       false,
-      true,
-      true,
       false
     ],
     "color": "#ff5c65",
@@ -363,7 +370,7 @@
     "selected": "S0980-OCC-scene-0980-O022",
     "canvas_box": {
       "x": 25,
-      "y": 189.984375,
+      "y": 234.96875,
       "width": 1450,
       "height": 560
     },
@@ -375,10 +382,15 @@
     "hits": 147,
     "fraction": 1
   },
-  "paint_presence_source_coordinate_pixels": {
-    "tested": 66,
-    "hits": 65,
-    "fraction": 0.9848484848484849
+  "reference_change_source_coordinate_pixels": {
+    "tested": 204,
+    "hits": 201,
+    "fraction": 0.9852941176470589
   },
-  "count": 79
+  "model_detected_source_coordinate_pixels": {
+    "tested": 109,
+    "hits": 109,
+    "fraction": 1
+  },
+  "count": 87
 }

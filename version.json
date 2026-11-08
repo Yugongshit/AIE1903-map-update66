@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.3",
+  "schema": "decision-evidence-studio-3.4",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -126,12 +126,12 @@
     "en": "argoverse/en/index.html",
     "zh": "argoverse/zh/index.html"
   },
-  "algorithm_result_sha256": "ea1f66d8e81e22ac0e3778c3d9fd7c875bec5483c1a5f79718a987c78fb8c9e5",
+  "algorithm_result_sha256": "58bb904be8460b12a7d12c8c7af9ec3b293dc716d20babf2cb2eec1356123b89",
   "algorithm_routes": {
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "f41880667d7cf026f9fb1eee4aa7599f56bb4985",
+  "source_commit": "ed8733aa11851361a9571ccf00617698988b2247",
   "source_branch": "feat/structure-state-routing",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
@@ -142,7 +142,7 @@
     "confirmed_structure": "red",
     "unconfirmed_structure": "green"
   },
-  "current_presentation_validation": "algorithms/structural_evidence_release_validation.json",
+  "current_presentation_validation": "algorithms/confirmation_release_validation.json",
   "previous_full_site_validation": "release_validation.json",
   "map_comparison": {
     "left_region": "original_reference_map",
@@ -158,9 +158,9 @@
     "original_side_overlay_hits_disabled": true,
     "legend_before_canvas": true,
     "detailed_analysis_collapsed_by_default": true,
-    "confirmed_structure_requires": "Executed structural patch, or explicit eligibility after structural edit conditions; local conflict support alone does not confirm a change."
+    "confirmed_structure_requires": "Source-explicit: delivered ground-truth change in reference replay, or computed local structural detection in model view. Patch execution is separate."
   },
-  "previous_presentation_validation": "algorithms/swipe_release_validation.json",
+  "previous_presentation_validation": "algorithms/structural_evidence_release_validation.json",
   "structural_evidence_revision": {
     "nuscenes_supported_local_marking_discrepancies": 1,
     "nuscenes_unconfirmed_structure_candidates": 6,
@@ -168,6 +168,25 @@
     "argoverse_supported_local_discrepancies": 1,
     "argoverse_geometry_false_positives": 1,
     "confirmed_structural_edits": 0,
-    "base_map_writes": 0
+    "base_map_writes": 0,
+    "historical_revision": "superseded_by_argoverse_confirmation_repair"
+  },
+  "argoverse_confirmation_repair": {
+    "reference_copy_patches": 98,
+    "reference_additions": 27,
+    "reference_replacements": 71,
+    "model_local_detections": 14,
+    "model_insufficient_geometry": 40,
+    "model_geometrically_consistent": 22,
+    "changed_boundary_identity_metrics": {
+      "true_positives": 9,
+      "false_positives": 5,
+      "false_negatives": 22,
+      "truth_positives": 31
+    },
+    "local_geometry_within_0_5m": 3,
+    "model_map_patches": 0,
+    "truth_read_after_prediction_freeze": true,
+    "rollback_verified": true
   }
 }
