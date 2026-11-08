@@ -1,0 +1,18 @@
+{
+  "version": "m4_fusion_v1",
+  "minimum_repeated_frames": 5,
+  "minimum_duration_s": 1.0,
+  "minimum_valid_frames": 5,
+  "minimum_visibility_support_ratio": 0.7,
+  "addition_cluster_distance_m": 3.0,
+  "addition_direction_difference_deg": 20.0,
+  "map_object_grouping": [
+    "scene_id",
+    "clip_id",
+    "change_type",
+    "map_element_id",
+    "boundary_side"
+  ],
+  "score_definition": "S=N_support/N_valid using verified visible frames only; null if denominator unknown",
+  "gt_used": false
+}

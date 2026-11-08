@@ -1,0 +1,29 @@
+{
+  "frames": 582,
+  "detection_count": 4976,
+  "localization_status": {
+    "localized_3d": 4005,
+    "two_d_only": 971
+  },
+  "two_d_only_reasons": {
+    "INSUFFICIENT_NON_GROUND_POINTS": 725,
+    "NO_PLAUSIBLE_FOREGROUND_CLUSTER": 246
+  },
+  "merged_3d_measurements": 3407,
+  "tracks": 126,
+  "confirmed_tracks": 96,
+  "two_d_track_ids": 256,
+  "track_samples": 4469,
+  "observed_samples": 3407,
+  "predicted_samples": 1062,
+  "elapsed_seconds": 35.23814389994368,
+  "gt_read": false,
+  "limitations": [
+    "Coarse vehicle class, no car/truck/bus distinction",
+    "Visible point median is not amodal box center",
+    "Potential background contamination and ID switches",
+    "Only three front cameras; short and fragmented trajectories possible",
+    "Predicted samples are not measurements",
+    "No independent 3D/tracking GT, no accuracy or IDF1 claim"
+  ]
+}

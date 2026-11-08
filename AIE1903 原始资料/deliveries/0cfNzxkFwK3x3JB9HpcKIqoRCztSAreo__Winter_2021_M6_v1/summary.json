@@ -1,0 +1,36 @@
+{
+  "tracks": 126,
+  "source_samples": 4469,
+  "predicted_samples_excluded": 1062,
+  "behavior_usable_samples": 2508,
+  "feature_exclusion_reasons": {
+    "M5_VELOCITY_NOT_READY": 700,
+    "INSUFFICIENT_OBSERVED_REGRESSION_WINDOW": 276,
+    "PREDICTED_SAMPLE_EXCLUDED": 1062,
+    "REGRESSION_VS_KALMAN_VELOCITY_DISAGREE": 173,
+    "REGRESSION_WINDOW_HAS_LONG_GAP": 41,
+    "POSITION_FIT_TOO_NOISY": 76
+  },
+  "episodes": 166,
+  "behaviors": {
+    "uncertain": 143,
+    "straight": 4,
+    "stationary_presence": 16,
+    "stop": 3
+  },
+  "episode_statuses": {
+    "uncertain": 143,
+    "candidate": 7,
+    "observed_presence": 16
+  },
+  "candidate_behavior_events": 7,
+  "tracks_without_usable_samples": 83,
+  "gt_read": false,
+  "limitations": [
+    "Rule-based observed trajectory candidates, not driver intent",
+    "No reliable reference lane, no lateral offset or detour inference",
+    "ID switches, parked-vehicle point-center drift and false detections can create spurious behavior",
+    "Motion-state runs are not fine-grained turn segmentation",
+    "No independent behavior labels or accuracy metrics"
+  ]
+}

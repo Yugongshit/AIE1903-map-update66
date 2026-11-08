@@ -1,0 +1,108 @@
+{
+  "signature": "6b07cf940ebf40cd5919b9ca8aef476e98ba1c07f030940e308f352375389edd",
+  "view": {
+    "schema_version": "1.0.0",
+    "run_id": "yolop640_v1",
+    "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969131760009000:ring_front_right",
+    "frame_id": "315969131760009000",
+    "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+    "camera": "ring_front_right",
+    "image_timestamp_ns": "315969131762451240",
+    "source_image_ref": "Argoverse_tvy代表数据/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021/sensors/cameras/ring_front_right/315969131762451240.jpg",
+    "image_size_wh": [
+      1024,
+      775
+    ],
+    "offset_ms": 2.44224,
+    "city_from_ego_at_image": [
+      [
+        0.4810635895727765,
+        -0.8764086701227782,
+        -0.022037824778747366,
+        1149.2296269144238
+      ],
+      [
+        0.8766417036502432,
+        0.48063558885046465,
+        0.022107784863404773,
+        -301.2753768405295
+      ],
+      [
+        -0.008783291441980461,
+        -0.029954526602678822,
+        0.9995126713191058,
+        15.98636076439999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "masks": {
+      "road": "masks/0196_ring_front_right_road.png",
+      "lane_raw": "masks/0196_ring_front_right_lane_raw.png",
+      "lane_vehicle_filtered": "masks/0196_ring_front_right_lane_vehicle_filtered.png"
+    },
+    "overlay": null,
+    "inference_seconds": 0.22122009983286262,
+    "visibility": "unknown",
+    "visibility_reason": "model masks and vehicle boxes are hints, not verified visibility",
+    "observation_count": 0,
+    "detection_count": 2,
+    "status": "processed"
+  },
+  "observations": [],
+  "matches": [],
+  "detections": [
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "detection_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969131760009000:ring_front_right:vehicle:000",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969131760009000:ring_front_right",
+      "frame_id": "315969131760009000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "camera": "ring_front_right",
+      "image_timestamp_ns": "315969131762451240",
+      "bbox_xyxy_px": [
+        0.3024169921875,
+        350.2048828125,
+        106.89344482421875,
+        474.63369140625
+      ],
+      "score": 0.8796505928039551,
+      "class_name": "vehicle",
+      "track_id": null,
+      "geometry_city": null,
+      "quality_flags": [
+        "untracked_2d_detection",
+        "coarse_vehicle_class"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "detection_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969131760009000:ring_front_right:vehicle:001",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969131760009000:ring_front_right",
+      "frame_id": "315969131760009000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "camera": "ring_front_right",
+      "image_timestamp_ns": "315969131762451240",
+      "bbox_xyxy_px": [
+        131.08055419921874,
+        297.3587890625,
+        524.774072265625,
+        630.69365234375
+      ],
+      "score": 0.5223188996315002,
+      "class_name": "vehicle",
+      "track_id": null,
+      "geometry_city": null,
+      "quality_flags": [
+        "untracked_2d_detection",
+        "coarse_vehicle_class"
+      ]
+    }
+  ]
+}

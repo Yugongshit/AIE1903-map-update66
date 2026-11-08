@@ -1,0 +1,84 @@
+{
+  "signature": "6b07cf940ebf40cd5919b9ca8aef476e98ba1c07f030940e308f352375389edd",
+  "view": {
+    "schema_version": "1.0.0",
+    "run_id": "yolop640_v1",
+    "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969156659903000:ring_front_right",
+    "frame_id": "315969156659903000",
+    "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+    "camera": "ring_front_right",
+    "image_timestamp_ns": "315969156662451249",
+    "source_image_ref": "Argoverse_tvy代表数据/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021/sensors/cameras/ring_front_right/315969156662451249.jpg",
+    "image_size_wh": [
+      1024,
+      775
+    ],
+    "offset_ms": 2.548249,
+    "city_from_ego_at_image": [
+      [
+        0.46784655165613614,
+        -0.883635722292861,
+        -0.017536088259247268,
+        1157.9721919079077
+      ],
+      [
+        0.8836580498714035,
+        0.46730662564987285,
+        0.027802311436244724,
+        -284.2406220848411
+      ],
+      [
+        -0.016372385315849988,
+        -0.028503121087056306,
+        0.9994596125343764,
+        15.76567555334266
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "masks": {
+      "road": "masks/0445_ring_front_right_road.png",
+      "lane_raw": "masks/0445_ring_front_right_lane_raw.png",
+      "lane_vehicle_filtered": "masks/0445_ring_front_right_lane_vehicle_filtered.png"
+    },
+    "overlay": null,
+    "inference_seconds": 0.2318828001152724,
+    "visibility": "unknown",
+    "visibility_reason": "model masks and vehicle boxes are hints, not verified visibility",
+    "observation_count": 0,
+    "detection_count": 1,
+    "status": "processed"
+  },
+  "observations": [],
+  "matches": [],
+  "detections": [
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "detection_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969156659903000:ring_front_right:vehicle:000",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969156659903000:ring_front_right",
+      "frame_id": "315969156659903000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "camera": "ring_front_right",
+      "image_timestamp_ns": "315969156662451249",
+      "bbox_xyxy_px": [
+        0.9003173828125,
+        321.958935546875,
+        203.81407470703124,
+        502.352001953125
+      ],
+      "score": 0.9145604968070984,
+      "class_name": "vehicle",
+      "track_id": null,
+      "geometry_city": null,
+      "quality_flags": [
+        "untracked_2d_detection",
+        "coarse_vehicle_class"
+      ]
+    }
+  ]
+}

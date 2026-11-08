@@ -1,0 +1,996 @@
+{
+  "signature": "6b07cf940ebf40cd5919b9ca8aef476e98ba1c07f030940e308f352375389edd",
+  "view": {
+    "schema_version": "1.0.0",
+    "run_id": "yolop640_v1",
+    "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+    "frame_id": "315969128760078000",
+    "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+    "camera": "ring_front_left",
+    "image_timestamp_ns": "315969128737425441",
+    "source_image_ref": "Argoverse_tvy代表数据/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021/sensors/cameras/ring_front_left/315969128737425441.jpg",
+    "image_size_wh": [
+      1024,
+      775
+    ],
+    "offset_ms": -22.652559,
+    "city_from_ego_at_image": [
+      [
+        0.41262546282466417,
+        -0.9098823405932671,
+        -0.04306220738942325,
+        1140.2602014907773
+      ],
+      [
+        0.9108114303658809,
+        0.41146157834707164,
+        0.03349489302856131,
+        -317.9317466868474
+      ],
+      [
+        -0.012757967847187445,
+        -0.05304239644524552,
+        0.9985107603004364,
+        16.17910164346842
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "masks": {
+      "road": "masks/0166_ring_front_left_road.png",
+      "lane_raw": "masks/0166_ring_front_left_lane_raw.png",
+      "lane_vehicle_filtered": "masks/0166_ring_front_left_lane_vehicle_filtered.png"
+    },
+    "overlay": null,
+    "inference_seconds": 0.2242413000203669,
+    "visibility": "unknown",
+    "visibility_reason": "model masks and vehicle boxes are hints, not verified visibility",
+    "observation_count": 5,
+    "detection_count": 0,
+    "status": "processed"
+  },
+  "observations": [
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:000",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "frame_id": "315969128760078000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "clip_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021__clip000",
+      "camera": "ring_front_left",
+      "image_timestamp_ns": "315969128737425441",
+      "element_type": "lane_boundary_candidate",
+      "pixel_curve_xy": [
+        [
+          1019.2,
+          440.3409090909091
+        ],
+        [
+          1012.8000000000001,
+          443.5433884297521
+        ],
+        [
+          1008.0,
+          445.1446280991736
+        ],
+        [
+          1003.2,
+          446.7458677685951
+        ],
+        [
+          996.8000000000001,
+          448.34710743801656
+        ],
+        [
+          992.0,
+          449.94834710743805
+        ],
+        [
+          987.2,
+          453.15082644628103
+        ],
+        [
+          980.8000000000001,
+          453.15082644628103
+        ],
+        [
+          974.4000000000001,
+          454.7520661157025
+        ],
+        [
+          969.6,
+          456.353305785124
+        ],
+        [
+          963.2,
+          459.555785123967
+        ],
+        [
+          956.8000000000001,
+          461.1570247933885
+        ],
+        [
+          950.4000000000001,
+          462.7582644628099
+        ],
+        [
+          944.0,
+          465.9607438016529
+        ],
+        [
+          939.2,
+          467.56198347107437
+        ],
+        [
+          932.8000000000001,
+          467.56198347107437
+        ],
+        [
+          926.4000000000001,
+          470.76446280991735
+        ],
+        [
+          920.0,
+          472.36570247933884
+        ],
+        [
+          913.6,
+          473.9669421487603
+        ],
+        [
+          907.2,
+          475.5681818181818
+        ],
+        [
+          900.8000000000001,
+          477.1694214876033
+        ],
+        [
+          894.4000000000001,
+          478.7706611570248
+        ],
+        [
+          888.0,
+          480.3719008264463
+        ],
+        [
+          881.6,
+          481.97314049586777
+        ],
+        [
+          875.2,
+          483.57438016528926
+        ],
+        [
+          868.8000000000001,
+          485.17561983471074
+        ],
+        [
+          862.4000000000001,
+          486.77685950413223
+        ],
+        [
+          856.0,
+          488.3780991735537
+        ],
+        [
+          849.6,
+          489.9793388429752
+        ],
+        [
+          843.2,
+          491.5805785123967
+        ],
+        [
+          838.4000000000001,
+          493.1818181818182
+        ],
+        [
+          832.0,
+          494.7830578512397
+        ],
+        [
+          825.6,
+          496.38429752066116
+        ],
+        [
+          819.2,
+          497.98553719008265
+        ],
+        [
+          812.8000000000001,
+          499.58677685950414
+        ],
+        [
+          806.4000000000001,
+          501.18801652892563
+        ],
+        [
+          800.0,
+          502.7892561983471
+        ],
+        [
+          793.6,
+          504.3904958677686
+        ],
+        [
+          787.2,
+          507.5929752066116
+        ],
+        [
+          780.8000000000001,
+          507.5929752066116
+        ],
+        [
+          774.4000000000001,
+          509.1942148760331
+        ],
+        [
+          768.0,
+          512.3966942148761
+        ],
+        [
+          763.2,
+          513.9979338842975
+        ],
+        [
+          756.8000000000001,
+          515.599173553719
+        ],
+        [
+          750.4000000000001,
+          517.2004132231405
+        ],
+        [
+          744.0,
+          518.801652892562
+        ],
+        [
+          737.6,
+          522.0041322314049
+        ],
+        [
+          731.2,
+          522.0041322314049
+        ],
+        [
+          726.4000000000001,
+          523.6053719008264
+        ],
+        [
+          720.0,
+          525.2066115702479
+        ],
+        [
+          713.6,
+          526.8078512396694
+        ],
+        [
+          707.2,
+          528.4090909090909
+        ],
+        [
+          702.4000000000001,
+          530.0103305785124
+        ],
+        [
+          696.0,
+          531.6115702479339
+        ],
+        [
+          689.6,
+          533.2128099173553
+        ],
+        [
+          684.8000000000001,
+          534.8140495867768
+        ],
+        [
+          678.4000000000001,
+          536.4152892561983
+        ],
+        [
+          672.0,
+          538.0165289256198
+        ],
+        [
+          665.6,
+          539.6177685950413
+        ],
+        [
+          659.2,
+          541.2190082644628
+        ],
+        [
+          652.8000000000001,
+          541.2190082644628
+        ],
+        [
+          646.4000000000001,
+          542.8202479338843
+        ],
+        [
+          644.8000000000001,
+          542.8202479338843
+        ]
+      ],
+      "geometry_city": [
+        [
+          1143.5134850208437,
+          -300.95725478178423,
+          15.568812952921824
+        ],
+        [
+          1143.3607704139365,
+          -301.33147291327543,
+          15.558445651094708
+        ],
+        [
+          1143.2622212053595,
+          -301.5295104838662,
+          15.55379372033143
+        ],
+        [
+          1143.1670133913206,
+          -301.7164180328175,
+          15.548332795070055
+        ],
+        [
+          1143.0486661178193,
+          -301.9226853679953,
+          15.544305117488808
+        ],
+        [
+          1142.9569378861877,
+          -302.106522159448,
+          15.539775851139797
+        ],
+        [
+          1142.846213421985,
+          -302.4311797981716,
+          15.532132058824832
+        ],
+        [
+          1142.7471143958646,
+          -302.5383435570316,
+          15.540042928810017
+        ],
+        [
+          1142.6344703395148,
+          -302.7566124714876,
+          15.540790557506249
+        ],
+        [
+          1142.5464182254861,
+          -302.9586028519999,
+          15.541807305492778
+        ],
+        [
+          1142.425649882511,
+          -303.2785968561227,
+          15.536966726135201
+        ],
+        [
+          1142.3173540069324,
+          -303.5152338553043,
+          15.543557283036167
+        ],
+        [
+          1142.2129250406254,
+          -303.7400794732156,
+          15.549228286120709
+        ],
+        [
+          1142.1088434125393,
+          -303.994495819159,
+          15.53900127207057
+        ],
+        [
+          1142.0354370101534,
+          -304.15250372672574,
+          15.537754295271256
+        ],
+        [
+          1141.9475808360178,
+          -304.2684992000264,
+          15.549431867649584
+        ],
+        [
+          1141.8504841095566,
+          -304.51559447913553,
+          15.541275637457728
+        ],
+        [
+          1141.7636191165416,
+          -304.6668131594455,
+          15.538930536643603
+        ],
+        [
+          1141.6768458814345,
+          -304.8336132512691,
+          15.539847676423856
+        ],
+        [
+          1141.5938583547752,
+          -304.9748302458574,
+          15.536933894757535
+        ],
+        [
+          1141.5137556173304,
+          -305.0962145425848,
+          15.531030908580988
+        ],
+        [
+          1141.4301792057709,
+          -305.2834373311063,
+          15.537416065789081
+        ],
+        [
+          1141.3491198125741,
+          -305.4620855245988,
+          15.543000896589012
+        ],
+        [
+          1141.271101542153,
+          -305.62049196279185,
+          15.545572392471897
+        ],
+        [
+          1141.1954274943341,
+          -305.7650619209488,
+          15.546186943316911
+        ],
+        [
+          1141.1212797843918,
+          -305.90845982796725,
+          15.54715023725165
+        ],
+        [
+          1141.0485962399193,
+          -306.05203046542255,
+          15.548716667144788
+        ],
+        [
+          1140.9776023257184,
+          -306.18918817383917,
+          15.54960980635478
+        ],
+        [
+          1140.908669172776,
+          -306.30093237205347,
+          15.54603872389232
+        ],
+        [
+          1140.8406198646076,
+          -306.42381684451897,
+          15.545117121596821
+        ],
+        [
+          1140.7904327435283,
+          -306.5336985109531,
+          15.543833957170238
+        ],
+        [
+          1140.7245121886178,
+          -306.68003904437387,
+          15.548650381025736
+        ],
+        [
+          1140.6601774852936,
+          -306.8176414729393,
+          15.552268008204887
+        ],
+        [
+          1140.597176192824,
+          -306.93059474135475,
+          15.55128657641024
+        ],
+        [
+          1140.5353924895596,
+          -307.0483473636378,
+          15.551773319163965
+        ],
+        [
+          1140.474991092117,
+          -307.17395539148157,
+          15.554426389885757
+        ],
+        [
+          1140.415759598261,
+          -307.29267112133806,
+          15.556102506506146
+        ],
+        [
+          1140.3573924490863,
+          -307.39909449619654,
+          15.555562405723887
+        ],
+        [
+          1140.3023729968522,
+          -307.5380637945844,
+          15.546211290488673
+        ],
+        [
+          1140.243821297794,
+          -307.6082258257604,
+          15.55493739124867
+        ],
+        [
+          1140.1899354327938,
+          -307.7362938868625,
+          15.560627086495028
+        ],
+        [
+          1140.140355445359,
+          -307.8971342324345,
+          15.558471043147925
+        ],
+        [
+          1140.101794921893,
+          -307.9847459768817,
+          15.557792896869438
+        ],
+        [
+          1140.049454304783,
+          -308.0771094873029,
+          15.556836597723654
+        ],
+        [
+          1139.9973482071168,
+          -308.1602244644576,
+          15.554030243330315
+        ],
+        [
+          1139.9485865739698,
+          -308.2722423821604,
+          15.55859028208443
+        ],
+        [
+          1139.9049975963335,
+          -308.4173480572329,
+          15.556572658611787
+        ],
+        [
+          1139.8535809750856,
+          -308.48349248147065,
+          15.566005240744145
+        ],
+        [
+          1139.81979165768,
+          -308.566614636922,
+          15.566490137282123
+        ],
+        [
+          1139.7737368178305,
+          -308.6610831998214,
+          15.568454026717896
+        ],
+        [
+          1139.7297121213937,
+          -308.76367421998526,
+          15.572915997147355
+        ],
+        [
+          1139.6869524114268,
+          -308.8669437383612,
+          15.578012593137746
+        ],
+        [
+          1139.6562662378337,
+          -308.9475204555623,
+          15.57934739469891
+        ],
+        [
+          1139.6139574184806,
+          -309.03892247390485,
+          15.582157466258128
+        ],
+        [
+          1139.5716409238978,
+          -309.12326086045186,
+          15.583475330438064
+        ],
+        [
+          1139.5412404280535,
+          -309.19007382744803,
+          15.582142211273101
+        ],
+        [
+          1139.498929671454,
+          -309.2640445255358,
+          15.581302942837997
+        ],
+        [
+          1139.4580786581475,
+          -309.3419109968178,
+          15.5818550345544
+        ],
+        [
+          1139.416869435264,
+          -309.4128369726996,
+          15.580801186173346
+        ],
+        [
+          1139.3768958663675,
+          -309.4862948695696,
+          15.58076329438805
+        ],
+        [
+          1139.3313746059587,
+          -309.5298208346501,
+          15.58613355167617
+        ],
+        [
+          1139.2939456326962,
+          -309.6089146129286,
+          15.588157821375448
+        ],
+        [
+          1139.2831366699006,
+          -309.62152787668646,
+          15.590039000612272
+        ]
+      ],
+      "geometry_pixel_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62
+      ],
+      "length_m": 9.678128336854625,
+      "model_score_mean": 0.9912382364273071,
+      "color": "unknown",
+      "marking_pattern": "unknown",
+      "visibility": "unknown",
+      "projection_status": "projected",
+      "quality_flags": [
+        "model_candidate",
+        "curb_confusion_possible",
+        "no_independent_accuracy",
+        "not_temporally_fused"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:001",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "frame_id": "315969128760078000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "clip_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021__clip000",
+      "camera": "ring_front_left",
+      "image_timestamp_ns": "315969128737425441",
+      "element_type": "lane_boundary_candidate",
+      "pixel_curve_xy": [
+        [
+          633.6,
+          547.6239669421487
+        ],
+        [
+          627.2,
+          547.6239669421487
+        ],
+        [
+          622.4000000000001,
+          550.8264462809917
+        ],
+        [
+          616.0,
+          552.4276859504132
+        ],
+        [
+          614.4000000000001,
+          552.4276859504132
+        ]
+      ],
+      "geometry_city": null,
+      "geometry_pixel_indices": [],
+      "length_m": null,
+      "model_score_mean": 0.6136912107467651,
+      "color": "unknown",
+      "marking_pattern": "unknown",
+      "visibility": "unknown",
+      "projection_status": "projection_failed",
+      "quality_flags": [
+        "model_candidate",
+        "curb_confusion_possible",
+        "no_independent_accuracy",
+        "not_temporally_fused",
+        "ground_curve_partial_or_invalid"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:002",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "frame_id": "315969128760078000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "clip_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021__clip000",
+      "camera": "ring_front_left",
+      "image_timestamp_ns": "315969128737425441",
+      "element_type": "lane_boundary_candidate",
+      "pixel_curve_xy": [
+        [
+          608.0,
+          550.8264462809917
+        ],
+        [
+          603.2,
+          555.6301652892562
+        ],
+        [
+          596.8000000000001,
+          557.2314049586777
+        ],
+        [
+          592.0,
+          558.8326446280992
+        ],
+        [
+          587.2,
+          562.0351239669421
+        ],
+        [
+          582.4,
+          565.2376033057851
+        ],
+        [
+          577.6,
+          566.8388429752066
+        ],
+        [
+          571.2,
+          568.4400826446281
+        ],
+        [
+          569.6,
+          568.4400826446281
+        ]
+      ],
+      "geometry_city": null,
+      "geometry_pixel_indices": [],
+      "length_m": null,
+      "model_score_mean": 0.49325311183929443,
+      "color": "unknown",
+      "marking_pattern": "unknown",
+      "visibility": "unknown",
+      "projection_status": "projection_failed",
+      "quality_flags": [
+        "model_candidate",
+        "curb_confusion_possible",
+        "no_independent_accuracy",
+        "not_temporally_fused",
+        "ground_curve_partial_or_invalid"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:003",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "frame_id": "315969128760078000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "clip_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021__clip000",
+      "camera": "ring_front_left",
+      "image_timestamp_ns": "315969128737425441",
+      "element_type": "lane_boundary_candidate",
+      "pixel_curve_xy": [
+        [
+          569.6,
+          568.4400826446281
+        ],
+        [
+          564.8000000000001,
+          570.0413223140496
+        ],
+        [
+          558.4,
+          573.2438016528926
+        ],
+        [
+          552.0,
+          573.2438016528926
+        ],
+        [
+          547.2,
+          576.4462809917355
+        ]
+      ],
+      "geometry_city": null,
+      "geometry_pixel_indices": [],
+      "length_m": null,
+      "model_score_mean": 0.6379786729812622,
+      "color": "unknown",
+      "marking_pattern": "unknown",
+      "visibility": "unknown",
+      "projection_status": "projection_failed",
+      "quality_flags": [
+        "model_candidate",
+        "curb_confusion_possible",
+        "no_independent_accuracy",
+        "not_temporally_fused",
+        "ground_curve_partial_or_invalid"
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:004",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "frame_id": "315969128760078000",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "clip_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021__clip000",
+      "camera": "ring_front_left",
+      "image_timestamp_ns": "315969128737425441",
+      "element_type": "lane_boundary_candidate",
+      "pixel_curve_xy": [
+        [
+          545.6,
+          576.4462809917355
+        ],
+        [
+          539.2,
+          576.4462809917355
+        ],
+        [
+          532.8000000000001,
+          578.047520661157
+        ],
+        [
+          526.4,
+          579.6487603305785
+        ],
+        [
+          523.2,
+          579.6487603305785
+        ]
+      ],
+      "geometry_city": null,
+      "geometry_pixel_indices": [],
+      "length_m": null,
+      "model_score_mean": 0.6940166354179382,
+      "color": "unknown",
+      "marking_pattern": "unknown",
+      "visibility": "unknown",
+      "projection_status": "projection_failed",
+      "quality_flags": [
+        "model_candidate",
+        "curb_confusion_possible",
+        "no_independent_accuracy",
+        "not_temporally_fused",
+        "ground_curve_partial_or_invalid"
+      ]
+    }
+  ],
+  "matches": [
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:000",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "status": "matched",
+      "candidates": [
+        {
+          "map_element_id": "ls-168083096",
+          "boundary_side": "right",
+          "mean_distance_m": 0.10407206603778305,
+          "direction_difference_deg": 0.21818366385582516,
+          "sample_fraction_within_3m": 1.0
+        }
+      ],
+      "best_map_element_id": "ls-168083096",
+      "visibility": "unknown",
+      "change_type": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:001",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "status": "projection_failed",
+      "candidates": [],
+      "best_map_element_id": null,
+      "visibility": "unknown",
+      "change_type": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:002",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "status": "projection_failed",
+      "candidates": [],
+      "best_map_element_id": null,
+      "visibility": "unknown",
+      "change_type": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:003",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "status": "projection_failed",
+      "candidates": [],
+      "best_map_element_id": null,
+      "visibility": "unknown",
+      "change_type": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "run_id": "yolop640_v1",
+      "observation_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left:line:004",
+      "view_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021:315969128760078000:ring_front_left",
+      "status": "projection_failed",
+      "candidates": [],
+      "best_map_element_id": null,
+      "visibility": "unknown",
+      "change_type": null
+    }
+  ],
+  "detections": []
+}

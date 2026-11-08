@@ -1,0 +1,21 @@
+{
+  "review_kind": "manual inspection of three sampled source images per event; not independent GT",
+  "notes": [
+    {
+      "event_id": "behavior:vehicle3d_00005:0001",
+      "review_status": "suspected_false_motion",
+      "note": "框指向路边白色SUV，图像表现更像停放车辆。该直行候选可能来自可见点簇中心漂移，需连续视频或独立定位核实；不作为已验证直行。"
+    },
+    {
+      "event_id": "behavior:vehicle3d_00040:0002",
+      "review_status": "not_verified",
+      "note": "抽样框指向前方红色皮卡；仅凭三张自车运动中的图像不能独立证明其静止或停车时刻。"
+    },
+    {
+      "event_id": "behavior:vehicle3d_00040:0020",
+      "review_status": "visually_plausible_not_verified",
+      "note": "抽样图中红色皮卡与自车距离变化，规则输出直行具有可解释性，但未独立核实身份连续性与City位移。"
+    }
+  ],
+  "effect_on_predictions": "Rule predictions retained for reproducibility. Downstream must retain these review notes and cannot treat candidate labels as GT."
+}

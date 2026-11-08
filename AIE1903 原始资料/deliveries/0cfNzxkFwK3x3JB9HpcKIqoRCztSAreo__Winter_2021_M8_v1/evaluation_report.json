@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "m8_evaluation_v1",
+  "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+  "dataset_pool": "constructed_train",
+  "independent_test_scene": false,
+  "stage_consistency_checks": {
+    "2": "PASS",
+    "3": "PASS",
+    "4": "PASS",
+    "5": "PASS",
+    "6": "PASS",
+    "7": "PASS"
+  },
+  "map_gt_inventory": {
+    "objects": 288,
+    "official_changed_objects": 98,
+    "unchanged_objects": 190,
+    "changed_by_layer": {
+      "laneSegments": 89,
+      "pedCrossings": 9
+    },
+    "derived_update_type_counts": {
+      "added": 27,
+      "marking_changed": 11,
+      "lane_type_changed": 35,
+      "geometry_changed": 30,
+      "connectivity_changed": 16
+    },
+    "unresolved_raw_numeric_codes": [
+      4,
+      6,
+      7,
+      9,
+      10
+    ],
+    "note": "State-delta types are independently computed field differences, not a claim to resolve all official numeric codes."
+  },
+  "map_prediction_diagnostics": {
+    "m4_groups": 1,
+    "confirmed_predictions": 0,
+    "uncertain_groups": 1,
+    "candidate_groups_on_official_unchanged_objects": 1,
+    "note": "An uncertain candidate on unchanged GT is an erroneous candidate; it is not a confirmed final positive."
+  },
+  "map_binary_evaluation": {
+    "status": "AWAITING_REVIEWED_EVALUATION_SCOPE",
+    "reviewed_objects": 0,
+    "metrics": null,
+    "reason": "Three front cameras do not establish visibility coverage for all map objects; no automatic full-map recall."
+  },
+  "map_type_evaluation": {
+    "status": "NOT_FORMALLY_EVALUATED",
+    "metrics": null,
+    "reason": "Complete numeric mapping, reviewed scope and final positive predictions unavailable."
+  },
+  "vehicle_detection_evaluation": {
+    "status": "AWAITING_INDEPENDENT_2D_LABELS",
+    "metrics": null,
+    "proposed_annotation_images": 189
+  },
+  "vehicle_tracking_evaluation": {
+    "status": "AWAITING_INDEPENDENT_IDENTITIES",
+    "metrics": null
+  },
+  "absolute_3d_localization_evaluation": {
+    "status": "NO_INDEPENDENT_3D_GT",
+    "metrics": null
+  },
+  "behavior_evaluation": {
+    "status": "AWAITING_INDEPENDENT_BEHAVIOR_LABELS",
+    "metrics": null
+  },
+  "association_evaluation": {
+    "status": "AWAITING_INDEPENDENT_ASSOCIATION_LABELS",
+    "metrics": null
+  },
+  "overall_status": "PARTIAL_GT_AUDIT_COMPLETE_FORMAL_EVALUATION_PENDING",
+  "limitations": [
+    "This is a development constructed_train scene, not an independent test",
+    "Prediction/GT scope and visibility must be fixed without viewing prediction correctness",
+    "Do not fill manual GT with pipeline predictions",
+    "No meaningful accuracy, IDF1, AP or F1 claimed without corresponding independent labels"
+  ]
+}

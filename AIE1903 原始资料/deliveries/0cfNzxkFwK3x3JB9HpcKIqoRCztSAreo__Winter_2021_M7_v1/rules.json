@@ -1,0 +1,18 @@
+{
+  "version": "m7_association_v1",
+  "change_region_buffer_m": 3.0,
+  "near_line_distance_m": 3.0,
+  "far_line_distance_m": 5.0,
+  "minimum_simultaneous_samples": 3,
+  "minimum_simultaneous_duration_s": 1.0,
+  "maximum_support_gap_s": 0.35,
+  "requires_confirmed_change": true,
+  "requires_candidate_behavior": true,
+  "blocked_manual_review_statuses": [
+    "suspected_false_motion"
+  ],
+  "time_alignment": "exact LiDAR reference timestamps, same scene and clip; no interpolation",
+  "static_geometry_screening_only": true,
+  "gt_read": false,
+  "causal_claim": false
+}
