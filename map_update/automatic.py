@@ -140,7 +140,8 @@ def build_automatic_decisions(real):
             'action': ('event_recorded' if occupancy else 'difference_recorded') if observations else 'no_usable_observation',
             'target_layer': ('event' if occupancy else 'observation') if observations else None,
             'observation_status': ('observed_occupancy' if occupancy else 'observed_difference') if observations else 'no_usable_geometry',
-            'persistence': 'unknown', 'map_action': 'unchanged', 'base_map_write_eligible': False,
+            'persistence': 'unknown', 'persistence_classifier_status': 'not_run',
+            'map_action': 'unchanged', 'base_map_write_eligible': False,
             'structural_outcome': 'not_supported_by_supplied_data',
             'reasons': reasons, 'evidence': evidence,
         }

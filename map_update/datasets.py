@@ -17,10 +17,14 @@ REGISTRY = {
         'note': '使用此前处理好的 scene-0980；允许运行不代表地图变化已确认。',
     },
     'argoverse': {
-        'dataset_id': 'argoverse', 'label': 'Argoverse', 'status': 'pending_review',
-        'enabled': False, 'scene_ids': [],
-        'raw_root': None, 'delivery_root': None, 'm3_root': None,
-        'note': '场景待审核；本轮不运行、不纳入评估，也不复用 nuScenes 输出。',
+        'dataset_id': 'argoverse', 'label': 'Argoverse', 'status': 'active_rerun',
+        'enabled': True,
+        'scene_ids': ['0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021'],
+        'raw_root': 'AIE1903 原始资料',
+        'delivery_root': 'AIE1903 原始资料/deliveries',
+        'm3_root': 'AIE1903 原始资料/Python代码',
+        'adapter': 'argoverse_frozen_observation_rerun',
+        'note': '用户已提供并授权运行：复跑冻结观测的差异与融合，真值只用于独立评价。',
     },
 }
 

@@ -16,7 +16,7 @@ def extract(document):
     return json.loads(re.search(r'id="studio-data">(.*?)</script>',document,re.S)[1])
 
 
-def build(source,output,cases,comparison):
+def build(source,output,cases,comparison,argoverse_result=None):
     if output.exists():raise ValueError('Choose a new output directory')
     for name in ['rerun_checks.json','bilingual_checks.json']:
         if not (source/name).exists():raise ValueError('A checked Rerun release is required: '+name)
@@ -44,11 +44,18 @@ def build(source,output,cases,comparison):
         page=page.replace('<main>','<main>'+template,1)
         labels=['01 Change decisions','02 Evaluation'] if language=='en' else ['01 地图决策','02 评估检查']
         nav=f'<button id="ds-nav" data-page="decisions">{labels[0]}</button><button id="de-nav" data-page="evaluation">{labels[1]}</button>'
+        if argoverse_result is not None:
+            nav+=f'<a class="ds-dataset-link" href="../argoverse/{language}/index.html">Argoverse ↗</a>'
         page=page.replace('<button id="rerun-nav"',nav+'<button id="rerun-nav"',1)
         page=page.replace('<button data-page="changes">','<button data-page="changes" class="ds-legacy-nav">',1)
         page=page.replace('<a href="review/index.html">','<a href="review/index.html" class="ds-legacy-nav">',1)
         page=page.replace('01 <span>Scene view</span>','<span>Source scene</span>').replace('01 <span>场景驾驶</span>','<span>原始场景</span>')
         page=page.replace('03 <span>Issues</span>','<span>Issues</span>').replace('03 <span>问题清单</span>','<span>问题清单</span>')
+        if argoverse_result is not None:
+            page=page.replace('Argoverse Pending review; not run.', 'Argoverse: separate rerun and evaluation available.')
+            page=page.replace('Argoverse Pending review · real and controlled results are separate', 'Argoverse available separately · real and controlled results are separate')
+            page=page.replace('Argoverse 待审核，未运行。', 'Argoverse 已接入独立复跑与评价。')
+            page=page.replace('Argoverse 待审核 · 真实与受控结果分开', 'Argoverse 独立运行 · 真实与受控结果分开')
         page=page.replace('</body>','<script type="application/json" id="decision-data">'+serialized+f'</script><script src="../assets/decision_studio.js?v={asset_revision}"></script></body>')
         path.write_text(page)
         for key in ['real','camera','write_experiment','controlled_evaluation']:
@@ -61,6 +68,11 @@ def build(source,output,cases,comparison):
     manifest=json.loads((output/'version.json').read_text());manifest.update(schema='decision-evidence-studio-2.0',release_date='2026-11-08',default_workspace='decisions',new_workspaces=['decisions','evaluation'],controlled_case_rows=len(data['controlled_cases']),distance_preview_scope=data['semantics'],automatic_processing=automatic['summary'],manual_review_required=False)
     manifest.pop('source_commit',None)
     manifest['unchanged_evidence_sha256']=sha256(json.dumps({key:en[key] for key in ['real','camera','write_experiment','controlled_evaluation']},sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    if argoverse_result is not None:
+        from scripts.build_argoverse_studio import build as build_argoverse
+        build_argoverse(argoverse_result,output/'argoverse')
+        manifest['argoverse']='independent_frozen_observation_rerun_available'
+        manifest['argoverse_routes']={'en':'argoverse/en/index.html','zh':'argoverse/zh/index.html'}
     (output/'version.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'output':str(output),'candidates':len(en['real']['candidates']),'controlled_rows':len(data['controlled_cases']),'source_geometry':'unchanged'},ensure_ascii=False))
 
@@ -68,4 +80,5 @@ def build(source,output,cases,comparison):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for key in ['source','out','cases','comparison']:p.add_argument('--'+key,type=Path,required=True)
-    a=p.parse_args();build(a.source,a.out,a.cases,a.comparison)
+    p.add_argument('--argoverse-result',type=Path)
+    a=p.parse_args();build(a.source,a.out,a.cases,a.comparison,a.argoverse_result)

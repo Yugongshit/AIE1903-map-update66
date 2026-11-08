@@ -28,6 +28,7 @@ class AutomaticRecordedProcessingTests(unittest.TestCase):
             self.assertEqual(result['processing_status'], 'complete')
             self.assertFalse(result['manual_review_required'])
             self.assertEqual(result['persistence'], 'unknown')
+            self.assertEqual(result['persistence_classifier_status'], 'not_run')
             self.assertEqual(result['map_action'], 'unchanged')
             self.assertFalse(result['base_map_write_eligible'])
 

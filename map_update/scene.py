@@ -70,6 +70,8 @@ def load_map(path, bounds):
 
 def inspect_scene(raw_root, delivery_root, dataset_id='nuscenes'):
     entry = require_active(dataset_id)
+    if dataset_id != 'nuscenes':
+        raise ValueError('Argoverse requires its separate adapter: scripts/run_dataset.py --dataset argoverse')
     root = Path(raw_root).resolve()
     processed = root/"processed"
     intake = inspect_delivery(delivery_root)

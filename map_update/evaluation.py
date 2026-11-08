@@ -149,6 +149,8 @@ def dashboard_data(scene, controlled):
 
 def build_dashboard(raw_root, delivery_root, m3_root, output, workbench=False, dataset_id='nuscenes'):
     require_active(dataset_id)
+    if dataset_id != 'nuscenes':
+        raise ValueError('Argoverse requires its separate adapter: scripts/run_dataset.py --dataset argoverse')
     raw, m3 = Path(raw_root), Path(m3_root)
     handoff = m3/'results/real_scene_handoff.json'
     cases = m3/'results/controlled_case_decisions.csv'

@@ -41,6 +41,7 @@ try:
     check('high-evidence filter returns all 20 source highs including barrier O001',len(filtered_ids)==20 and set(filtered_ids)==set(high_source_ids) and 'S0980-OCC-scene-0980-O001' in filtered_ids)
     page.locator('[data-dfilter="all"]').click()
     check('English main workspace is English',no_han(page.locator('body').inner_text()))
+    check('observation completion does not pretend a duration classifier ran','Not run in this observation workflow' in page.locator('#ds-automatic-status').inner_text())
     automatic=page.evaluate('JSON.parse(document.getElementById("decision-data").textContent).automatic_decisions')
     check('finite dataset completes all candidates without a human review queue',automatic['summary']['processed']==29 and automatic['summary']['event_records']==23 and automatic['summary']['difference_records']==6 and automatic['summary']['base_map_updates']==0 and automatic['summary']['pending_manual_reviews']==0 and all(r['processing_status']=='complete' and r['manual_review_required'] is False for r in automatic['candidates'].values()))
     check('high score records a difference without authorizing a structural write','1.00' in page.locator('#ds-decision-numbers').inner_text() and 'difference recorded' in page.locator('#ds-verdict').inner_text() and automatic['candidates']['S0980-LD-003']['map_action']=='unchanged')

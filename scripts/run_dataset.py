@@ -1,4 +1,4 @@
-"""Run processed nuScenes separately; keep Argoverse pending review."""
+"""Run each supplied dataset through its own adapter and output namespace."""
 import argparse
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,10 +17,14 @@ def main():
     args = parser.parse_args()
     try:
         paths = run_paths(ROOT, args.dataset, args.run_name)
-        output = build_dashboard(**paths, dataset_id=args.dataset, workbench=True)
+        if args.dataset == 'argoverse':
+            from map_update.argoverse import run_argoverse
+            output = run_argoverse(paths['raw_root'], paths['output'])
+        else:
+            output = build_dashboard(**paths, dataset_id=args.dataset, workbench=True)
     except ValueError as error:
         parser.exit(2, str(error)+'\n')
-    print(f'{args.dataset}: {output}/index.html')
+    print(f'{args.dataset}: {output}')
 
 
 if __name__ == '__main__':

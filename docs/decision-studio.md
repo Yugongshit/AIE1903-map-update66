@@ -2,6 +2,8 @@
 
 当前版本完成自动处理后直接保存事件与观测结果，不再要求人工复核。29 个候选对应 23 个占用事件、6 个标线差异；基础图结构写入仍为 0。原诊断、真实准确率和受控实验指标保持原义。详见 [自动处理方法与输出](automatic_processing.md)。
 
+同日新增 Argoverse 独立复跑页面，入口为 `/argoverse/en/index.html` 与 `/argoverse/zh/index.html`。它读取重新运行得到的 `result.json`，地图预测与评估真值分开展示。nuScenes 页面也明确标注“当前观测流程未运行长短期分类器”。详见 [Argoverse 复跑诊断](argoverse_rerun_20261108.md)。
+
 英文入口：https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions
 
 中文入口：https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions
@@ -74,6 +76,8 @@ python scripts/check_bilingual_studio.py outputs/nuscenes/scene-0980/decision-re
 python scripts/check_rerun_site.py outputs/nuscenes/scene-0980/decision-release-new
 ```
 
-本次结果：核心 114 项、决策工作台 65 项、原双语功能 40 项、Rerun 35 项，全部通过。检查覆盖全部 29 个候选的自动结果与五个证据面板、20 个高证据候选筛选、几何导出、双语切换、手机宽度、地图拖动、实际几何回退、CSV 统计和 Rerun 双向同步；正常流程无 JavaScript 异常或资源请求失败。机器可读结果见 [验证记录](decision-validation-20261108.json)。
+接入 Argoverse 后结果：核心 121 项、决策工作台 66 项、原双语功能 40 项、Rerun 35 项、Argoverse 页面 33 项、跨数据集导航 3 项，全部通过。检查覆盖全部 29 个候选的自动结果与五个证据面板、20 个高证据候选筛选、几何导出、双语切换、手机宽度、地图拖动、实际几何回退、CSV 统计和 Rerun 双向同步；正常流程无 JavaScript 异常或资源请求失败。机器可读结果见 [验证记录](argoverse-validation-20261108.json)。
 
 浏览器范围是云端 Chromium / SwiftShader；没有声称验证实体 Mac、Safari 或车辆。静态页面部署由 GitHub Pages 工作流的准确提交状态另行确认，不把上一版本的部署记录当成本次结果。
+
+组合站点构建时，先按 [数据集说明](datasets.md) 运行 Argoverse，再给上述 `build_decision_studio.py` 命令增加 `--argoverse-result outputs/argoverse/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021/argoverse-run-001/result.json`。构建器会生成独立的 `argoverse/` 子站并加入双向数据集入口。只构建 Argoverse 可使用 `python3 scripts/build_argoverse_studio.py --result <result.json路径> --out <新目录>`。

@@ -25,14 +25,14 @@ class DatasetIsolationTests(unittest.TestCase):
         cls.rows = read_csv(RESULTS/'controlled_case_decisions.csv')
         cls.controlled = evaluate_controlled(cls.rows, read_csv(RESULTS/'controlled_comparison.csv'))
 
-    def test_argoverse_rejected_before_read_or_output_creation(self):
+    def test_argoverse_cannot_enter_nuscenes_adapter(self):
         with TemporaryDirectory() as directory, patch('map_update.evaluation.integrate_m3') as integrate:
             dest = Path(directory)/'must-not-exist'
-            with self.assertRaisesRegex(ValueError, '待审核'):
+            with self.assertRaisesRegex(ValueError, 'separate adapter'):
                 build_dashboard('missing', 'missing', 'missing', dest, dataset_id='argoverse')
             integrate.assert_not_called()
             self.assertFalse(dest.exists())
-        with self.assertRaisesRegex(ValueError, '待审核'):
+        with self.assertRaisesRegex(ValueError, 'separate adapter'):
             inspect_scene('missing', 'missing', dataset_id='argoverse')
 
     def test_output_namespace_and_path_traversal_guard(self):
@@ -40,8 +40,9 @@ class DatasetIsolationTests(unittest.TestCase):
         self.assertEqual(paths['output'], ROOT/'outputs/nuscenes/scene-0980/review-1')
         with self.assertRaises(ValueError):
             run_paths(ROOT, 'nuscenes', '../../argoverse')
-        with self.assertRaisesRegex(ValueError, '待审核'):
-            run_paths(ROOT, 'argoverse', 'review-1')
+        argo = run_paths(ROOT, 'argoverse', 'rerun-1')
+        self.assertEqual(argo['output'], ROOT/'outputs/argoverse/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021/rerun-1')
+        self.assertNotEqual(argo['delivery_root'], paths['delivery_root'])
         with self.assertRaisesRegex(ValueError, 'Unknown dataset'):
             require_active('unknown')
 
@@ -51,7 +52,8 @@ class DatasetIsolationTests(unittest.TestCase):
         self.assertEqual(data['real']['scene_key'], 'nuscenes:scene-0980')
         self.assertEqual(data['controlled']['source_dataset_id'], 'nuscenes')
         self.assertEqual(data['controlled']['dataset_type'], 'controlled_perturbation')
-        self.assertFalse(data['datasets']['argoverse']['enabled'])
+        self.assertTrue(data['datasets']['argoverse']['enabled'])
+        self.assertEqual(data['datasets']['argoverse']['status'], 'active_rerun')
         self.assertEqual(len(data['real']['frames']), 41)
         self.assertEqual(len(data['real']['candidates']), 29)
         self.assertEqual(len(data['real']['m3']['review_units']), 7)
