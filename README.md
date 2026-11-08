@@ -1,12 +1,14 @@
-# 道路地图维护与变化持续性评估
+# 道路地图结构变更与状态事件
 
-本仓库包括地图维护原型和 Evaluation & Evidence 工作台。用户黄子明负责最终评估与证据汇总；地图维护原型接收感知与可靠性结果，累计跨访问证据，维护地图、事件和版本历史。
+本仓库包括地图维护原型和 Evaluation & Evidence 工作台。用户黄子明负责最终评估与证据汇总；地图维护原型接收感知与可靠性结果，区分底图结构变更和地图状态事件，维护观测证据、事件有效性与版本历史。
 
 ## 新对话接续入口（2026-11-08）
 
-**先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 当前开发分支是 `feat/argoverse-rerun`，包含此前 `fix/automatic-map-decisions` 的网站与自动记录修正，以及用户在 `main` 提交 `9c6f86e` 的 Argoverse 交付。
+**最新：结构/状态分类已重写并运行。** 按用户修正的定义，区分“底图结构变更”和“地图状态事件”，不再用持续时间选择图层。nuScenes 23 个占用事件进入状态层，6 个标线结构假设未证实；Argoverse 新支持的 1 个结构候选经真值核对为几何误报。实际底图写入 0，不生成等待人工复核的队列。没有独立结构/状态分类标签，旧 23/29 长短期分数不再使用。新实现与原因见 [结构/状态算法说明](docs/map_structure_state.md)，[中文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [英文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html)。下方旧 M3、自动记录与长短期状态属于历史记录，以此条为准。
 
-**Argoverse 已接入并实际复跑：** 582 帧、10,278 条冻结观测 → 4 条逐帧差异候选 → 1 个 uncertain 融合组 → 0 个确认变化。已有 M8 地图真值用于自动评价：候选命中 0/1，全供给地图 98 个变化中确认检出 0。该数值是整图任务完成度，不是可见区域准确率。方法、原因和运行命令见 [复跑诊断](docs/argoverse_rerun_20261108.md) 与 [独立数据集入口](docs/datasets.md)。长短期分类器尚未接入真实数据流程，不能将处理完成误称为分类完成。
+**先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 当前开发分支是 `feat/structure-state-routing`，包含此前 `fix/automatic-map-decisions` 的网站与自动记录修正，以及用户在 `main` 提交 `9c6f86e` 的 Argoverse 交付。
+
+**原始 Argoverse 基线复现：** 582 帧、10,278 条冻结观测 → 4 条逐帧差异候选 → 1 个 uncertain 融合组 → 0 个确认变化。已有 M8 地图真值用于自动评价：候选命中 0/1，全供给地图 98 个变化中确认检出 0。该数值是整图任务完成度，不是可见区域准确率。方法、原因和运行命令见 [复跑诊断](docs/argoverse_rerun_20261108.md) 与 [独立数据集入口](docs/datasets.md)。原始基线未执行持续性分类；最新版已按用户修正的结构/状态定义运行，见上方新入口。
 
 **自动处理更新：** 当前 29 个候选全部处理完成，23 个占用事件和 6 个标线差异分别保存，不再生成“等待人工复核”的任务。基础地图结构写入仍为 0；持续性未知与已经观测到物体分开表达。另修复同一车道不同占用事件被合并清除的问题。方法、输出与边界见 [自动处理说明](docs/automatic_processing.md)。
 

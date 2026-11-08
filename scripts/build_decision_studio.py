@@ -16,7 +16,7 @@ def extract(document):
     return json.loads(re.search(r'id="studio-data">(.*?)</script>',document,re.S)[1])
 
 
-def build(source,output,cases,comparison,argoverse_result=None):
+def build(source,output,cases,comparison,argoverse_result=None,algorithm_result=None):
     if output.exists():raise ValueError('Choose a new output directory')
     for name in ['rerun_checks.json','bilingual_checks.json']:
         if not (source/name).exists():raise ValueError('A checked Rerun release is required: '+name)
@@ -46,6 +46,12 @@ def build(source,output,cases,comparison,argoverse_result=None):
         nav=f'<button id="ds-nav" data-page="decisions">{labels[0]}</button><button id="de-nav" data-page="evaluation">{labels[1]}</button>'
         if argoverse_result is not None:
             nav+=f'<a class="ds-dataset-link" href="../argoverse/{language}/index.html">Argoverse ↗</a>'
+        if algorithm_result is not None:
+            label='New algorithm results ↗' if language=='en' else '新版算法结果 ↗'
+            nav+=f'<a class="ds-dataset-link" href="../algorithms/{language}/index.html">{label}</a>'
+            note=('This page preserves the original baseline. The new reliability and structure/state classifiers have now run.' if language=='en'
+                  else '本页保留原始基线结果。新版可靠性与结构/状态分类器已经实际运行。')
+            page=page.replace('<main>',f'<main><aside class="algorithm-baseline-note" style="padding:16px;background:#edf6f1;color:#183b32">{note} <a href="../algorithms/{language}/index.html">{label}</a></aside>',1)
         page=page.replace('<button id="rerun-nav"',nav+'<button id="rerun-nav"',1)
         page=page.replace('<button data-page="changes">','<button data-page="changes" class="ds-legacy-nav">',1)
         page=page.replace('<a href="review/index.html">','<a href="review/index.html" class="ds-legacy-nav">',1)
@@ -73,6 +79,19 @@ def build(source,output,cases,comparison,argoverse_result=None):
         build_argoverse(argoverse_result,output/'argoverse')
         manifest['argoverse']='independent_frozen_observation_rerun_available'
         manifest['argoverse_routes']={'en':'argoverse/en/index.html','zh':'argoverse/zh/index.html'}
+    if algorithm_result is not None:
+        from scripts.build_pipeline_studio import build as build_pipeline
+        build_pipeline(algorithm_result,output/'algorithms')
+        manifest['algorithm_result_sha256']=sha256(algorithm_result.read_bytes()).hexdigest()
+        manifest['algorithm_routes']={'en':'algorithms/en/index.html','zh':'algorithms/zh/index.html'}
+        if argoverse_result is not None:
+            for language in ['en','zh']:
+                path=output/'argoverse'/language/'index.html'
+                label='New algorithm results ↗' if language=='en' else '新版算法结果 ↗'
+                note=('Original M3/M4 baseline below; the new reliability and structure/state run is available separately.' if language=='en'
+                      else '下方保留原始 M3/M4 基线；新版可靠性与结构/状态分类请打开新结果。')
+                page=path.read_text().replace('<main>',f'<main><aside class="algorithm-baseline-note context">{note} <a href="../../algorithms/{language}/index.html">{label}</a></aside>',1)
+                path.write_text(page)
     (output/'version.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'output':str(output),'candidates':len(en['real']['candidates']),'controlled_rows':len(data['controlled_cases']),'source_geometry':'unchanged'},ensure_ascii=False))
 
@@ -81,4 +100,5 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for key in ['source','out','cases','comparison']:p.add_argument('--'+key,type=Path,required=True)
     p.add_argument('--argoverse-result',type=Path)
-    a=p.parse_args();build(a.source,a.out,a.cases,a.comparison,a.argoverse_result)
+    p.add_argument('--algorithm-result',type=Path)
+    a=p.parse_args();build(a.source,a.out,a.cases,a.comparison,a.argoverse_result,a.algorithm_result)

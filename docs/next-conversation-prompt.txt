@@ -1,10 +1,11 @@
+最新定义：底图结构变更 vs 地图状态事件，不是长期 vs 短期。先读 docs/map_structure_state.md；不要重新把寿命预测作为图层分类器。新版状态层会区分观测存在、明确恢复、未知和过期，旧23/29长短期评价不再适用。
 请继续我的 AIE1903 Evaluation and Evidence 项目。
 仓库：https://github.com/Yugongshit/AIE1903-map-update66
-继续开发使用分支：feat/argoverse-rerun（包含 fix/automatic-map-decisions 及 main 的 9c6f86e Argoverse 交付）。
+继续开发使用分支：feat/structure-state-routing（包含 fix/automatic-map-decisions 及 main 的 9c6f86e Argoverse 交付）。
 先读取这个分支根目录的 CONTINUE_HERE.md，再读取 docs/decision-studio.md 和 archives/session-20261108/README.md。
 本轮代码、数据边界、已通过的检查、全部历史文件恢复方法和待办都在那里。原始资料在 AIE1903 原始资料/，在线网站与下载包在 gh-pages 分支。
 保留英文/中文两个可交互网站，使用 nuScenes scene-0980 的真实来源；Argoverse 已授权并通过独立适配器复跑。真实改图仍为 0，受控写入是隔离副本实验，不能当作真实长期变化或实车规划。
 2026-11-08 已取消当前自动处理流程的人工待办：29 个候选处理完成，23 个占用事件和 6 个标线差异分别保存。持续性未知不能覆盖已经看到路障的事实；不能因此伪造永久变化或已清除。先读 docs/automatic_processing.md；旧 M3 诊断保留原义。
-随后已接入 Argoverse M2–M8 交付，实际复跑 M3/M4，冻结预测后自动评价已有 M8 GT：4 条逐帧候选、1 个 uncertain 组、0 确认变化，候选命中 0/1，全供给 98 个变化对象确认检出 0。先读 docs/argoverse_rerun_20261108.md 和 docs/datasets.md。长短期分类器尚未接入真实数据流程；“处理完成”不代表“分类完成”。
+随后已接入 Argoverse M2–M8 交付，实际复跑 M3/M4，冻结预测后自动评价已有 M8 GT：4 条逐帧候选、1 个 uncertain 组、0 确认变化，候选命中 0/1，全供给 98 个变化对象确认检出 0。先读 docs/argoverse_rerun_20261108.md 和 docs/datasets.md。这段是原始基线记录；最新版已运行结构/状态分类，不能恢复用持续时间决定图层。
 我是黄子明，负责最后的 Evaluation and Evidence 汇总。先核对当前仓库和进度，接着根据我新提供的成员交付继续做，不要重做已有 demo，也不要把旧工作区草稿覆盖到最新版代码。
 Planning 后续交付已在 main 分支的 17ee2c1 中收到：AIE1903 原始资料/Planning_M4_scene0980_handoff。先读 docs/planning_intake_20261108.md；它目前尚未复现或接入网站。

@@ -1,5 +1,7 @@
 # 地图决策、证据链与评估工作台（2026-11-08）
 
+最新结构/状态算法与可交互结果见 [map_structure_state.md](map_structure_state.md)。组合构建增加 `--algorithm-result outputs/pipeline-v3/structure-state-20261108/result.json`，会生成 `algorithms/` 双语子站，并在原始基线页加明确入口。下文保留原基线构建与操作。
+
 当前版本完成自动处理后直接保存事件与观测结果，不再要求人工复核。29 个候选对应 23 个占用事件、6 个标线差异；基础图结构写入仍为 0。原诊断、真实准确率和受控实验指标保持原义。详见 [自动处理方法与输出](automatic_processing.md)。
 
 同日新增 Argoverse 独立复跑页面，入口为 `/argoverse/en/index.html` 与 `/argoverse/zh/index.html`。它读取重新运行得到的 `result.json`，地图预测与评估真值分开展示。nuScenes 页面也明确标注“当前观测流程未运行长短期分类器”。详见 [Argoverse 复跑诊断](argoverse_rerun_20261108.md)。

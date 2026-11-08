@@ -1,8 +1,10 @@
 # 新对话从这里继续（2026-11-08）
 
+**最新：结构/状态分类已重写并运行。** 按用户修正的定义，区分“底图结构变更”和“地图状态事件”，不再用持续时间选择图层。nuScenes 23 个占用事件进入状态层，6 个标线结构假设未证实；Argoverse 新支持的 1 个结构候选经真值核对为几何误报。实际底图写入 0，不生成等待人工复核的队列。没有独立结构/状态分类标签，旧 23/29 长短期分数不再使用。新实现与原因见 [结构/状态算法说明](docs/map_structure_state.md)，[中文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [英文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html)。下方旧 M3、自动记录与长短期状态属于历史记录，以此条为准。
+
 本文件用于接续此前的 AIE1903 对话。2026-11-08 在完整归档后，按用户要求修正自动处理与网站展示：29 个候选处理完成，23 个占用事件与 6 个标线差异保存到独立图层，不创建人工复核待办。没有重新训练模型或生成新的真实准确率结论。详见 [自动处理说明](docs/automatic_processing.md)。
 
-**2026-11-08 Argoverse 后续更新：** 用户已授权运行，并 push `main` 提交 `9c6f86e`。当前分支接收了全部 1,878 个新增文件；独立复跑冻结 M2 输入的 M3/M4 数值流程，并在冻结预测后读取已交付 M8 GT 自动评价。结果是 4 条候选、1 个 uncertain 组、0 个确认变化，候选目标命中 0/1。已有 98 个变化真值；当前持续性分类器未接入，不能称这些候选已被分类为暂时或永久。详见 [Argoverse 复跑诊断](docs/argoverse_rerun_20261108.md)。
+**2026-11-08 Argoverse 后续更新：** 用户已授权运行，并 push `main` 提交 `9c6f86e`。当前分支接收了全部 1,878 个新增文件；独立复跑冻结 M2 输入的 M3/M4 数值流程，并在冻结预测后读取已交付 M8 GT 自动评价。结果是 4 条候选、1 个 uncertain 组、0 个确认变化，候选目标命中 0/1。已有 98 个变化真值；该原始基线未执行持续性分类。最新版已按用户修正的结构/状态定义运行，见本文件开头。详见 [Argoverse 复跑诊断](docs/argoverse_rerun_20261108.md)。
 
 **2026-11-08 后续更新：Planning 已收到。** 用户新推送的 `main` 提交 `17ee2c1` 包含 `AIE1903 原始资料/Planning_M4_scene0980_handoff/`，共 44 个文件、123 条三策略规划结果。已初步核对场景、地图身份、记录数和汇总；尚未复现或接入网站。完整接收记录见 [Planning 初步核对](docs/planning_intake_20261108.md)。这些新文件在 `main`，不在先前的归档或当前应用开发分支中。
 
@@ -10,7 +12,7 @@
 
 用户是黄子明，负责 **Evaluation and Evidence 的最终汇总**。展示需要串起成员的感知、多帧验证、可靠性和地图处理结果，能看清差异位置、判断依据和评估失败案例。用户已经完成 pre，目前继续完善项目和等待/接入成员的新交付，不需要重新寻找旧 demo 或自动重做全部 PPT。
 
-- **当前开发分支：`feat/argoverse-rerun`**，包含 `fix/automatic-map-decisions`、完整归档及新增 Argoverse 交付与适配器。
+- **当前开发分支：`feat/structure-state-routing`**，包含 `fix/automatic-map-decisions`、完整归档及新增 Argoverse 交付与适配器。
 - [英文工作台](https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions) · [中文工作台](https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions)
 - [直接下载网站、代码与说明 ZIP，约 18 MB](https://github.com/Yugongshit/AIE1903-map-update66/raw/d5c61b5ec9c813d1af6837fadcca38e50923cb52/downloads/AIE1903_Evidence_Studio_20261106.zip)
 - [Word 使用说明](https://github.com/Yugongshit/AIE1903-map-update66/raw/d5c61b5ec9c813d1af6837fadcca38e50923cb52/downloads/AIE1903_Quick_Start_CN_20261106.docx)
@@ -72,7 +74,7 @@
 
 ## 5. 新环境怎么恢复并继续
 
-先切到 `feat/argoverse-rerun`。不要依赖旧对话中的 `/tmp/...` 或 `/workspace/...` 必然存在。归档包含 1,229 个 outputs 文件，以及现存上传附件、旧下载、生成图片、工作区备份和未提交根目录代码快照；不包含虚拟环境、缓存、凭据或从未成功读取到的文件。归档中的 11 月 6 日网站是历史产物；要运行本次页面，恢复 Rerun 构建输入后按 [工作台说明](docs/decision-studio.md) 重新构建。Argoverse 新交付已在当前 Git 树中，运行见 [数据集说明](docs/datasets.md)。
+先切到 `feat/structure-state-routing`。不要依赖旧对话中的 `/tmp/...` 或 `/workspace/...` 必然存在。归档包含 1,229 个 outputs 文件，以及现存上传附件、旧下载、生成图片、工作区备份和未提交根目录代码快照；不包含虚拟环境、缓存、凭据或从未成功读取到的文件。归档中的 11 月 6 日网站是历史产物；要运行本次页面，恢复 Rerun 构建输入后按 [工作台说明](docs/decision-studio.md) 重新构建。Argoverse 新交付已在当前 Git 树中，运行见 [数据集说明](docs/datasets.md)。
 
 ```bash
 # 查看可恢复的目录
@@ -98,7 +100,7 @@ python3 scripts/restore_session_archive.py --destination restored_session
 
 ## 6. 验证与待办
 
-当前应用已完成 **121 项核心测试、66 项决策工作台检查、40 项双语回归、35 项 Rerun 检查、33 项 Argoverse 页面检查及 3 项跨数据集导航检查**。最近验证记录见 [argoverse-validation-20261108.json](docs/argoverse-validation-20261108.json)。范围为云端 Chromium / SwiftShader，未宣称验证实体 Mac、Safari 或车辆。此前归档另逐一恢复并核对 1,449 个文件，检查了已有文件保护、路径安全和损坏归档拒绝。
+当前应用已完成 **200 项核心测试及 232 项浏览器检查**（66 决策、40 双语、35 Rerun、33 原 Argoverse、47 新结构/状态页面、11 导航/下载）。最近验证记录见 [structure-state-validation-20261108.json](docs/structure-state-validation-20261108.json)。范围为云端 Chromium / SwiftShader，未宣称验证实体 Mac、Safari 或车辆。此前归档另逐一恢复并核对 1,449 个文件，检查了已有文件保护、路径安全和损坏归档拒绝。
 
 已修复并记录的运行问题包括：无效多边形通过检查、wheel 漏装翻译表、旧 SDK 属性/类别丢失，以及静态模块导入路径 404。详见 [运行审查](docs/runtime-audit-20261105.json)。网站仍保留 11 个数据/实现/评估问题，不能把“应用能跑”写成“全部科研问题解决”。
 
@@ -110,7 +112,7 @@ python3 scripts/restore_session_archive.py --destination restored_session
 4. 补独立真值、正常/遮挡/偏移负例和按场景划分的测试集，统计误更新、覆盖、几何误差和延迟。
 5. 若新交付含 CAM_FRONT 原图或完整带图像的 RRD，先核对帧/时间/标定，再接入真实前视显示；原视频不自动等于逐帧相机数据。
 6. 复现新收到的 Planning 模块，核对三策略逐帧路线、代价、失败和不可评估记录，再接入可视化。三策略目前的可行帧/行为汇总相同，不能宣称规划改善；候选路线不能称为安全推荐路线。
-7. Argoverse 已完成独立接入与复跑；下一步修复共享物理边界的匹配歧义、全局风险标签硬拒绝和固定未知的可见性输入，之后接入真正的长短期分类及独立场景评价。不能用数据集名直接输出暂时／永久类别。
+7. 新版已修正物理边界身份和全局风险标签处理，并按用户新定义接通结构/状态分类与状态生命周期。下一步是扩大感知语义范围、校准对齐/路沿风险、补独立结构/状态标签与真实修改几何。不要恢复用持续时间或数据集名决定图层。
 
 ## 7. 用户明确的偏好
 
