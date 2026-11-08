@@ -1,6 +1,14 @@
 # 道路地图维护与变化持续性评估
 
-你的模块：接收感知与可靠性结果，累计跨访问证据，维护基础地图、临时事件和版本历史，并可视化更新过程。
+本仓库包括地图维护原型和 Evaluation & Evidence 工作台。用户黄子明负责最终评估与证据汇总；地图维护原型接收感知与可靠性结果，累计跨访问证据，维护地图、事件和版本历史。
+
+## 新对话接续入口（2026-11-08）
+
+**先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 当前开发分支是 `feature/evidence-workbench-20261104`；最新应用包括地图滑动对比、候选证据追溯、逐例评估、Rerun 联动和中英文网站。应用验证为 99 项核心检查及 131 项浏览器检查；真实基础地图写入仍为 0。
+
+[英文网站](https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions) · [中文网站](https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions) · [当前实现说明](docs/decision-studio.md) · [1,449 个工作文件的归档与恢复](archives/session-20261108/README.md) · [给新对话的短指令](docs/next-conversation-prompt.txt)
+
+以下保留各阶段的运行说明。旧日期、旧测试数量和旧交付状态以接续说明中的当前记录为准。历史 Proposal、PPT、讲稿、生成脚本和原始附件已一并归档，旧工作区快照不会覆盖当前源代码。
 
 **当前是可运行的研究原型。** 已阅读五份 proposal，并将拆分上传的实际交付整理至 `external/perception_delivery/`。后续从 GitHub 提交 `06c2cff` 同步了 `AIE1903 原始资料/`，现已接入原始 nuScenes 地图、绝对时间和逐帧几何。`examples/` 全为受控合成数据，与 scene-0980 实际交付分开，不能用于报告真实检测精度或证明永久性。
 

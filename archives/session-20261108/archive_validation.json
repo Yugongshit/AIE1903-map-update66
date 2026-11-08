@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "file_count": 1449,
+  "archive_count": 61,
+  "checks": [
+    {
+      "name": "all files restored with identical contents",
+      "count": 1449,
+      "status": "PASS"
+    },
+    {
+      "name": "identical existing files are skipped",
+      "status": "PASS"
+    },
+    {
+      "name": "existing different files are not overwritten",
+      "status": "PASS"
+    },
+    {
+      "name": "unsafe member path rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "changed archive bytes rejected",
+      "status": "PASS"
+    }
+  ],
+  "application_regression": "No application logic was changed in this archival task; previous application validation remains separately dated."
+}
