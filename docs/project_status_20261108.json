@@ -15,7 +15,7 @@
   "candidates": 29,
   "m3_review_units": 7,
   "independent_label_rows_missing": 217,
-  "planning": "not_integrated",
+  "planning": "received_pending_reproduction_and_website_integration",
   "validation_as_of": "2026-11-06",
   "tests": {
     "core": 99,
@@ -37,6 +37,21 @@
     "Obtain independent revisit observations",
     "Add independent labels and held-out evaluation",
     "Integrate actual camera images if provided",
-    "Keep Argoverse and planning extensions separate"
-  ]
+    "Reproduce and integrate received Planning static baseline; keep Argoverse separate"
+  ],
+  "planning_handoff": {
+    "branch": "main",
+    "commit": "17ee2c19d9d99919ca9f9d0e5f277f585e177115",
+    "path": "AIE1903 原始资料/Planning_M4_scene0980_handoff",
+    "files": 44,
+    "planning_records": 123,
+    "policy_count": 3,
+    "snapshots_per_policy": 41,
+    "basic_structure_checks": "PASS",
+    "algorithm_reproduction": "NOT_RUN",
+    "website_integration": "NOT_DONE",
+    "observed_space_verified_records": 0,
+    "execution_authorized_records": 0,
+    "intake_note": "docs/planning_intake_20261108.md"
+  }
 }

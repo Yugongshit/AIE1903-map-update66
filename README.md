@@ -6,6 +6,8 @@
 
 **先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 当前开发分支是 `feature/evidence-workbench-20261104`；最新应用包括地图滑动对比、候选证据追溯、逐例评估、Rerun 联动和中英文网站。应用验证为 99 项核心检查及 131 项浏览器检查；真实基础地图写入仍为 0。
 
+**Planning 后续交付已收到：** `main` 的 `17ee2c1` 新增 44 个文件，包含三种策略各 41 帧的规划结果。当前已做基本结构核对，尚未复现或接入网站；见 [接收记录](docs/planning_intake_20261108.md)。
+
 [英文网站](https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions) · [中文网站](https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions) · [当前实现说明](docs/decision-studio.md) · [1,449 个工作文件的归档与恢复](archives/session-20261108/README.md) · [给新对话的短指令](docs/next-conversation-prompt.txt)
 
 以下保留各阶段的运行说明。旧日期、旧测试数量和旧交付状态以接续说明中的当前记录为准。历史 Proposal、PPT、讲稿、生成脚本和原始附件已一并归档，旧工作区快照不会覆盖当前源代码。
