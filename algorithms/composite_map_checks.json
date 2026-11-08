@@ -25,6 +25,7 @@
     "English perception details render all 14 actual source labels and their annotation provenance",
     "nuScenes opens all three layers with 157 base features, 23 states and 6 structure hypotheses",
     "all state and structural overlay geometries preserve their frozen prediction values",
+    "LD004 local support is saved separately from its unresolved structural operation",
     "nuscenes drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
     "argoverse drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
     "real nuScenes pixels use yellow states and green unconfirmed structures, with no red confirmation",
@@ -55,6 +56,8 @@
     "an overlay hidden behind the original side cannot be selected through the swipe clip",
     "clicking a visible map event selects the matching source event in its map card",
     "opening evidence after a map click shows the same selected source event",
+    "newly supported LD004 still renders its source curve as green, never confirmed red",
+    "LD004 map selection opens the exact-window reference counterevidence",
     "Argoverse opens 589 prior features, no states and all 71 unconfirmed structural candidates",
     "Argoverse perception view distinguishes vehicle detections from unique objects and ground truth",
     "the selected supported Argoverse claim has a visible false-positive warning",
@@ -63,6 +66,8 @@
     "the map evidence action opens the detailed source analysis and selected evaluation",
     "Argoverse fit uses its own actual M2 prior bounds",
     "all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases",
+    "all 64 unpainted-reference hypotheses have explicit paint-presence semantics",
+    "paint-presence map card and green source geometry do not claim a confirmed old-line displacement",
     "cross-dataset interactions preserve data and do not turn overlays into base-map edits",
     "Chinese map keeps the same dataset, selected source event and exact data",
     "Chinese selected card gives the marking meaning and unconfirmed status",
@@ -78,7 +83,7 @@
   ],
   "page_errors": [],
   "failed_requests": [],
-  "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
+  "result_sha256": "ea1f66d8e81e22ac0e3778c3d9fd7c875bec5483c1a5f79718a987c78fb8c9e5",
   "source_bounds_xyxy": {
     "nuscenes": [
       245.75157373658558,
@@ -365,5 +370,15 @@
     "split": 0,
     "element_at_click": "<canvas id=\"composite-map\" aria-label=\"Shared-coordinate original and updated map comparison\" width=\"1450\" height=\"560\"></canvas>"
   },
-  "count": 74
+  "ld004_source_coordinate_pixels": {
+    "tested": 147,
+    "hits": 147,
+    "fraction": 1
+  },
+  "paint_presence_source_coordinate_pixels": {
+    "tested": 66,
+    "hits": 65,
+    "fraction": 0.9848484848484849
+  },
+  "count": 79
 }

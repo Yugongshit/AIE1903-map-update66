@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.2",
+  "schema": "decision-evidence-studio-3.3",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -126,12 +126,12 @@
     "en": "argoverse/en/index.html",
     "zh": "argoverse/zh/index.html"
   },
-  "algorithm_result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
+  "algorithm_result_sha256": "ea1f66d8e81e22ac0e3778c3d9fd7c875bec5483c1a5f79718a987c78fb8c9e5",
   "algorithm_routes": {
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "14a75beec49ef84184ff7d39df450de8a7efb15e",
+  "source_commit": "f41880667d7cf026f9fb1eee4aa7599f56bb4985",
   "source_branch": "feat/structure-state-routing",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
@@ -142,7 +142,7 @@
     "confirmed_structure": "red",
     "unconfirmed_structure": "green"
   },
-  "current_presentation_validation": "algorithms/swipe_release_validation.json",
+  "current_presentation_validation": "algorithms/structural_evidence_release_validation.json",
   "previous_full_site_validation": "release_validation.json",
   "map_comparison": {
     "left_region": "original_reference_map",
@@ -160,5 +160,14 @@
     "detailed_analysis_collapsed_by_default": true,
     "confirmed_structure_requires": "Executed structural patch, or explicit eligibility after structural edit conditions; local conflict support alone does not confirm a change."
   },
-  "previous_presentation_validation": "algorithms/composite_release_validation.json"
+  "previous_presentation_validation": "algorithms/swipe_release_validation.json",
+  "structural_evidence_revision": {
+    "nuscenes_supported_local_marking_discrepancies": 1,
+    "nuscenes_unconfirmed_structure_candidates": 6,
+    "nuscenes_stored_states": 23,
+    "argoverse_supported_local_discrepancies": 1,
+    "argoverse_geometry_false_positives": 1,
+    "confirmed_structural_edits": 0,
+    "base_map_writes": 0
+  }
 }

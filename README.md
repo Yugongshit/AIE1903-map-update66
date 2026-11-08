@@ -1,9 +1,13 @@
-# AIE1903 before/after map comparison
+# AIE1903 map comparison and structural evidence
 
-Source: `14a75beec49ef84184ff7d39df450de8a7efb15e` on `feat/structure-state-routing`.
+Source: `f41880667d7cf026f9fb1eee4aa7599f56bb4985` on `feat/structure-state-routing`.
 
-[English map](algorithms/en/index.html) · [中文地图对照](algorithms/zh/index.html) · [Perception labels and map guide](https://github.com/Yugongshit/AIE1903-map-update66/blob/feat/structure-state-routing/docs/perception_and_composite_map.md)
+[English map](algorithms/en/index.html) · [中文地图](algorithms/zh/index.html) · [Method and threshold audit](https://github.com/Yugongshit/AIE1903-map-update66/blob/feat/structure-state-routing/docs/structural_evidence_revision_20261108.md)
 
-Drag the vertical divider to the far right for the original map, or far left for the updated presentation. Both sides share the same projection, pan and zoom. The legend is above the map: yellow state events, red confirmed structural changes, and green unconfirmed structural candidates. Current data contain no confirmed structural edits. Click a labeled marker to inspect its details; technical analysis starts collapsed.
+Drag the divider right for the original map and left for the updated presentation. Yellow identifies state events, red confirmed structural changes, and green unconfirmed structural candidates. All real structural candidates remain unconfirmed; no base-map patch was executed.
 
-This presentation update does not rerun inference or alter saved predictions. Current validation: 3 builder identity tests and 123 local Chromium checks (49 pipeline, 74 map interaction/source checks), in `algorithms/swipe_release_validation.json`. The previous presentation validation remains in `algorithms/composite_release_validation.json`; its 208 core tests were not rerun for this display-only update. The previous full-site validation remains in `release_validation.json`. Original baseline views and historical downloads are preserved. Live Pages delivery was not verified from this environment.
+The revised nuScenes adapter computes exact-window correspondence instead of assigning every marking unknown. LD004 has six fixed-anchor frames supporting a local discrepancy; the reference divider is also observed in the same window, so an old-line displacement or replacement is not confirmed. The other five marking candidates retain explicit reasons. All 23 state records are unchanged. Argoverse NONE references produce explicit paint-presence hypotheses; its deployed geometric thresholds and 1/70/5 reliability counts remain unchanged. The threshold audit records that raising MAD tolerance adds a false positive, not a verified improvement.
+
+Structural eligibility now depends on the edit operation: geometry requires complete geometry, attributes require verified properties, and deletion requires fully observed same-target support. Shared physical references remain blocked until synchronized edits are verified.
+
+Validation: 232 core tests and 142 local Chromium checks (63 pipeline, 79 map), in `algorithms/structural_evidence_release_validation.json`. Sensor neural-network inference was not rerun; existing observations were reprocessed. Prior validation records, baseline views and historical downloads are retained. Live GitHub Pages delivery was not verified from this environment.

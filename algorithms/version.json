@@ -1,29 +1,14 @@
 {
-  "schema": "change-pipeline-studio-3.2",
-  "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
-  "asset_revision": "9f49c565b17c",
+  "schema": "change-pipeline-studio-3.3",
+  "result_sha256": "ea1f66d8e81e22ac0e3778c3d9fd7c875bec5483c1a5f79718a987c78fb8c9e5",
+  "asset_revision": "494bbfea5e00",
   "map_context_sha256": {
     "nuscenes": "eadd93fcd65e01e3db6901e1c449c9f2ff61766acfded429a1687dd1b24266c8",
     "argoverse": "1835e5f348fb8c1fc127db63621bf0923119c595607bb3ff844c0217f0dae2ad"
   },
   "perception_guide_sha256": "925ae1e456e583ecede1c0554f43b23cd830032662665c71f0e58480a24e08a6",
-  "source_commit": "14a75beec49ef84184ff7d39df450de8a7efb15e",
+  "source_commit": "f41880667d7cf026f9fb1eee4aa7599f56bb4985",
   "source_branch": "feat/structure-state-routing",
-  "comparison_contract": {
-    "left_region": "original_reference_map",
-    "right_region": "updated_presentation",
-    "divider_leftmost": "full_updated_presentation",
-    "divider_rightmost": "full_original_reference_map",
-    "shared_coordinate_projection": true,
-    "colors": {
-      "map_state_event": "yellow",
-      "confirmed_structure": "red",
-      "unconfirmed_structure": "green"
-    },
-    "original_side_overlay_hits_disabled": true,
-    "legend_before_canvas": true,
-    "detailed_analysis_collapsed_by_default": true,
-    "confirmed_structure_requires": "Executed structural patch, or explicit eligibility after structural edit conditions; local conflict support alone does not confirm a change."
-  },
-  "validation": "swipe_release_validation.json"
+  "validation": "structural_evidence_release_validation.json",
+  "algorithm_revision": "local_correspondence_and_typed_hypotheses_20261108"
 }
