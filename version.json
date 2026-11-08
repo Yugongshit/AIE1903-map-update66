@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.4",
+  "schema": "decision-evidence-studio-3.5",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -126,12 +126,12 @@
     "en": "argoverse/en/index.html",
     "zh": "argoverse/zh/index.html"
   },
-  "algorithm_result_sha256": "58bb904be8460b12a7d12c8c7af9ec3b293dc716d20babf2cb2eec1356123b89",
+  "algorithm_result_sha256": "bb308e9c206ac1382bb8e45e90b5550166620451ebff95694f0bbc7b5485897a",
   "algorithm_routes": {
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "ed8733aa11851361a9571ccf00617698988b2247",
+  "source_commit": "53a4c2209fe40b3307508f3895b33628712da932",
   "source_branch": "feat/structure-state-routing",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
@@ -142,7 +142,7 @@
     "confirmed_structure": "red",
     "unconfirmed_structure": "green"
   },
-  "current_presentation_validation": "algorithms/confirmation_release_validation.json",
+  "current_presentation_validation": "algorithms/nuscenes_confirmation_release_validation.json",
   "previous_full_site_validation": "release_validation.json",
   "map_comparison": {
     "left_region": "original_reference_map",
@@ -160,7 +160,7 @@
     "detailed_analysis_collapsed_by_default": true,
     "confirmed_structure_requires": "Source-explicit: delivered ground-truth change in reference replay, or computed local structural detection in model view. Patch execution is separate."
   },
-  "previous_presentation_validation": "algorithms/structural_evidence_release_validation.json",
+  "previous_presentation_validation": "algorithms/confirmation_release_validation.json",
   "structural_evidence_revision": {
     "nuscenes_supported_local_marking_discrepancies": 1,
     "nuscenes_unconfirmed_structure_candidates": 6,
@@ -188,5 +188,18 @@
     "model_map_patches": 0,
     "truth_read_after_prediction_freeze": true,
     "rollback_verified": true
+  },
+  "nuscenes_confirmation_repair": {
+    "annotation_backed_state_events": 23,
+    "model_local_detections": 1,
+    "insufficient_structural_candidates": 5,
+    "structural_candidate_denominator": 6,
+    "structural_insufficient_fraction": 0.8333333333333334,
+    "requested_final_structure_uncertainty_target": 0.05,
+    "target_met": false,
+    "semantic_layer_unassigned": 0,
+    "model_structural_map_patches": 0,
+    "motion_uncertainty_not_used_as_structural_rate": true,
+    "argoverse_predictions_unchanged": true
   }
 }

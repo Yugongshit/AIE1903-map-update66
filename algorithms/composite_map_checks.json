@@ -15,6 +15,10 @@
     "the separate reference replay contains exactly the 98 independently read confirmed truth objects",
     "all red reference-change geometries preserve the supplied current-map coordinates and attributes",
     "nuScenes perception guide exactly reports 14 source categories, 2278 frame records and 154 instances",
+    "nuScenes structural uncertainty denominator is the six actual source candidate windows",
+    "the displayed 5 of 6 unresolved result counts actual model decisions and does not claim the 5 percent goal is met",
+    "motion uncertainty is independently traced to the tracking source and not reused as the structure error rate",
+    "all nuScenes status-audit source hashes match the original files independently of rendered labels",
     "Argoverse guide reports 4976 coarse vehicle boxes, without invented object classes or GT labels",
     "the prominent map is visible before the detailed evidence panels",
     "the yellow, red and green meaning is visible above the canvas in the first viewport",
@@ -30,7 +34,7 @@
     "LD004 local support is saved separately from its unresolved structural operation",
     "nuscenes drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
     "argoverse drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
-    "real nuScenes pixels use yellow states and green unconfirmed structures, with no red confirmation",
+    "real nuScenes pixels distinguish 23 yellow states, one red local detection and five green candidates",
     "fit all contains actual source extents without confusing the two city coordinate systems",
     "base geometry remains pixel-identical at before",
     "base geometry remains pixel-identical at compare",
@@ -58,7 +62,7 @@
     "an overlay hidden behind the original side cannot be selected through the swipe clip",
     "clicking a visible map event selects the matching source event in its map card",
     "opening evidence after a map click shows the same selected source event",
-    "newly supported LD004 still renders its source curve as green, never confirmed red",
+    "LD004 renders its actual measured curve red as a local detection without asserting an executable edit",
     "LD004 map selection opens the exact-window reference counterevidence",
     "Argoverse starts in the explicitly labeled data-confirmed map replay",
     "all 98 red reference overlays use the exact independently exported truth geometry",
@@ -91,7 +95,7 @@
   ],
   "page_errors": [],
   "failed_requests": [],
-  "result_sha256": "58bb904be8460b12a7d12c8c7af9ec3b293dc716d20babf2cb2eec1356123b89",
+  "result_sha256": "bb308e9c206ac1382bb8e45e90b5550166620451ebff95694f0bbc7b5485897a",
   "source_bounds_xyxy": {
     "nuscenes": [
       245.75157373658558,
@@ -370,7 +374,7 @@
     "selected": "S0980-OCC-scene-0980-O022",
     "canvas_box": {
       "x": 25,
-      "y": 234.96875,
+      "y": 411.265625,
       "width": 1450,
       "height": 560
     },
@@ -392,5 +396,5 @@
     "hits": 109,
     "fraction": 1
   },
-  "count": 87
+  "count": 91
 }

@@ -1,7 +1,7 @@
 {
   "schema": "change-pipeline-v3",
   "run_id": "robust_geometry_structure_state_v3",
-  "generated_at_utc": "2026-11-08T14:07:09.961985+00:00",
+  "generated_at_utc": "2026-11-08T14:31:53.864464+00:00",
   "method": {
     "reliability": {
       "candidate_distance_m": 3.0,
@@ -48,6 +48,7 @@
       "minimum_independent_visits": null
     },
     "structural_evidence_revision": "geometry_detection_without_paint_veto_and_separate_reference_replay_20261108",
+    "nuscenes_confirmation_revision": "computed_local_model_decision_passthrough_and_separate_status_denominators_20261108",
     "confirmation_contract": {
       "model_detection": "Computed local geometric decision; independent of map-write eligibility.",
       "reference_confirmation": "Delivered M8 labels and current states, read only after prediction freeze.",
@@ -73,7 +74,7 @@
         "missing_observation": "unknown_not_clearance",
         "manual_review_required": false,
         "temporal_scope": "completed_offline_recording_not_live_feed",
-        "structural_hypothesis_scope": "local_discrepancy_does_not_verify_a_map_edit"
+        "structural_hypothesis_scope": "computed_local_model_decision_with_independent_unresolved_edit_operation"
       },
       "summary": {
         "events": 29,
@@ -92,7 +93,7 @@
         "stored_state_events": 23,
         "base_map_updates": 0,
         "pending_manual_reviews": 0,
-        "model_detected_local_structure": 0
+        "model_detected_local_structure": 1
       },
       "events": [
         {
@@ -43071,13 +43072,54 @@
             },
             "change_assessment": {
               "status": "insufficient_geometry",
-              "confirmed_map_change": false
+              "model_detected_local_change": false,
+              "map_edit_verified": false
             }
+          },
+          "model_change_decision": {
+            "status": "insufficient_evidence",
+            "detected": false,
+            "source": "model_prediction",
+            "scope": "local_boundary_correspondence",
+            "target_property": "boundary_geometry",
+            "evidence_basis": "exact_window_curve_quality_reference_correspondence_and_fixed_anchor_consensus",
+            "does_not_assess": [
+              "paint_presence",
+              "marking_color_or_pattern",
+              "lane_use",
+              "connectivity",
+              "new_unmatched_objects",
+              "deletion",
+              "exact_edit_operation"
+            ],
+            "map_edit_verified": false,
+            "reason_codes": [
+              "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "claim": "local_curve_relation_not_detected_as_change"
           },
           "structural_hypothesis": {
             "target_property": "paint_presence_or_boundary_geometry",
             "operation": "unresolved_parallel_marking_or_insertion",
+            "status": "unconfirmed",
             "confirmed": false,
+            "confirmation_source": "model_prediction",
+            "confirmation_scope": "local_boundary_correspondence",
+            "assessment": "insufficient_geometry",
+            "operation_resolved": false,
+            "map_edit_verified": false,
+            "operation_alternatives": [
+              "parallel_marking",
+              "new_marking",
+              "reference_or_projection_error"
+            ],
+            "required_evidence": [
+              "resolve_parallel_marking_vs_new_marking_vs_reference_error",
+              "physical_alignment_and_operation_specific_edit_evidence"
+            ],
             "scope": "observed_local_segment"
           },
           "correspondence_policy": {
@@ -43187,7 +43229,10 @@
             },
             "map_action": "unchanged",
             "processing_status": "complete",
-            "manual_review_required": false
+            "manual_review_required": false,
+            "model_detected_local_change": false,
+            "confirmation_scope": "local_boundary_correspondence",
+            "write_status": "not_executed"
           }
         },
         {
@@ -43688,6 +43733,34 @@
               "map_edit_verified": false
             }
           },
+          "model_change_decision": {
+            "status": "insufficient_evidence",
+            "detected": false,
+            "source": "model_prediction",
+            "scope": "local_boundary_correspondence",
+            "target_property": "boundary_geometry",
+            "evidence_basis": "quality_filtered_correspondence_fixed_anchor_median_mad_and_temporal_blocks",
+            "reason_codes": [
+              "INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS",
+              "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "thresholds_tuned_on_ground_truth": false,
+            "paint_semantics_used_to_veto_geometry": false,
+            "does_not_assess": [
+              "paint_presence",
+              "marking_color_or_pattern",
+              "lane_use",
+              "connectivity",
+              "new_unmatched_objects",
+              "deletion",
+              "exact_edit_operation"
+            ],
+            "map_edit_verified": false,
+            "claim": "local_curve_relation_not_detected_as_change"
+          },
           "representative_source_id": "processed/road_perception/frame017_multi_lane_02.csv",
           "fixed_anchor": {
             "arc_length_m": 2.5,
@@ -43738,7 +43811,22 @@
           "structural_hypothesis": {
             "target_property": "paint_presence_or_boundary_geometry",
             "operation": "unresolved_parallel_marking_or_insertion",
+            "status": "unconfirmed",
             "confirmed": false,
+            "confirmation_source": "model_prediction",
+            "confirmation_scope": "local_boundary_correspondence",
+            "assessment": "insufficient_geometry",
+            "operation_resolved": false,
+            "map_edit_verified": false,
+            "operation_alternatives": [
+              "parallel_marking",
+              "new_marking",
+              "reference_or_projection_error"
+            ],
+            "required_evidence": [
+              "resolve_parallel_marking_vs_new_marking_vs_reference_error",
+              "physical_alignment_and_operation_specific_edit_evidence"
+            ],
             "scope": "observed_local_segment"
           },
           "correspondence_policy": {
@@ -43847,7 +43935,10 @@
             },
             "map_action": "unchanged",
             "processing_status": "complete",
-            "manual_review_required": false
+            "manual_review_required": false,
+            "model_detected_local_change": false,
+            "confirmation_scope": "local_boundary_correspondence",
+            "write_status": "not_executed"
           }
         },
         {
@@ -46526,13 +46617,54 @@
             },
             "change_assessment": {
               "status": "insufficient_geometry",
-              "confirmed_map_change": false
+              "model_detected_local_change": false,
+              "map_edit_verified": false
             }
+          },
+          "model_change_decision": {
+            "status": "insufficient_evidence",
+            "detected": false,
+            "source": "model_prediction",
+            "scope": "local_boundary_correspondence",
+            "target_property": "boundary_geometry",
+            "evidence_basis": "exact_window_curve_quality_reference_correspondence_and_fixed_anchor_consensus",
+            "does_not_assess": [
+              "paint_presence",
+              "marking_color_or_pattern",
+              "lane_use",
+              "connectivity",
+              "new_unmatched_objects",
+              "deletion",
+              "exact_edit_operation"
+            ],
+            "map_edit_verified": false,
+            "reason_codes": [
+              "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "claim": "local_curve_relation_not_detected_as_change"
           },
           "structural_hypothesis": {
             "target_property": "paint_presence_or_boundary_geometry",
             "operation": "unresolved_parallel_marking_or_insertion",
+            "status": "unconfirmed",
             "confirmed": false,
+            "confirmation_source": "model_prediction",
+            "confirmation_scope": "local_boundary_correspondence",
+            "assessment": "insufficient_geometry",
+            "operation_resolved": false,
+            "map_edit_verified": false,
+            "operation_alternatives": [
+              "parallel_marking",
+              "new_marking",
+              "reference_or_projection_error"
+            ],
+            "required_evidence": [
+              "resolve_parallel_marking_vs_new_marking_vs_reference_error",
+              "physical_alignment_and_operation_specific_edit_evidence"
+            ],
             "scope": "observed_local_segment"
           },
           "correspondence_policy": {
@@ -46642,7 +46774,10 @@
             },
             "map_action": "unchanged",
             "processing_status": "complete",
-            "manual_review_required": false
+            "manual_review_required": false,
+            "model_detected_local_change": false,
+            "confirmation_scope": "local_boundary_correspondence",
+            "write_status": "not_executed"
           }
         },
         {
@@ -48233,6 +48368,34 @@
               "map_edit_verified": false
             }
           },
+          "model_change_decision": {
+            "status": "detected",
+            "detected": true,
+            "source": "model_prediction",
+            "scope": "local_boundary_correspondence",
+            "target_property": "boundary_geometry",
+            "evidence_basis": "quality_filtered_correspondence_fixed_anchor_median_mad_and_temporal_blocks",
+            "reason_codes": [
+              "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+              "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "thresholds_tuned_on_ground_truth": false,
+            "paint_semantics_used_to_veto_geometry": false,
+            "does_not_assess": [
+              "paint_presence",
+              "marking_color_or_pattern",
+              "lane_use",
+              "connectivity",
+              "new_unmatched_objects",
+              "deletion",
+              "exact_edit_operation"
+            ],
+            "map_edit_verified": false,
+            "claim": "extra_or_differently_positioned_curve_not_verified_existing_boundary_movement"
+          },
           "representative_source_id": "processed/road_perception/frame031_multi_lane_02.csv",
           "fixed_anchor": {
             "arc_length_m": 22.5,
@@ -48343,7 +48506,22 @@
           "structural_hypothesis": {
             "target_property": "paint_presence_or_boundary_geometry",
             "operation": "unresolved_parallel_marking_or_insertion",
-            "confirmed": false,
+            "status": "model_detected",
+            "confirmed": true,
+            "confirmation_source": "model_prediction",
+            "confirmation_scope": "local_boundary_correspondence",
+            "assessment": "supported_conflict",
+            "operation_resolved": false,
+            "map_edit_verified": false,
+            "operation_alternatives": [
+              "parallel_marking",
+              "new_marking",
+              "reference_or_projection_error"
+            ],
+            "required_evidence": [
+              "resolve_parallel_marking_vs_new_marking_vs_reference_error",
+              "physical_alignment_and_operation_specific_edit_evidence"
+            ],
             "scope": "observed_local_segment"
           },
           "correspondence_policy": {
@@ -48450,7 +48628,10 @@
             },
             "map_action": "unchanged",
             "processing_status": "complete",
-            "manual_review_required": false
+            "manual_review_required": false,
+            "model_detected_local_change": true,
+            "confirmation_scope": "local_boundary_correspondence",
+            "write_status": "not_executed"
           }
         },
         {
@@ -48718,13 +48899,54 @@
             },
             "change_assessment": {
               "status": "insufficient_geometry",
-              "confirmed_map_change": false
+              "model_detected_local_change": false,
+              "map_edit_verified": false
             }
+          },
+          "model_change_decision": {
+            "status": "insufficient_evidence",
+            "detected": false,
+            "source": "model_prediction",
+            "scope": "local_boundary_correspondence",
+            "target_property": "boundary_geometry",
+            "evidence_basis": "exact_window_curve_quality_reference_correspondence_and_fixed_anchor_consensus",
+            "does_not_assess": [
+              "paint_presence",
+              "marking_color_or_pattern",
+              "lane_use",
+              "connectivity",
+              "new_unmatched_objects",
+              "deletion",
+              "exact_edit_operation"
+            ],
+            "map_edit_verified": false,
+            "reason_codes": [
+              "DISTINCT_PHYSICAL_REFERENCE_AMBIGUITY",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "claim": "local_curve_relation_not_detected_as_change"
           },
           "structural_hypothesis": {
             "target_property": "paint_presence_or_boundary_geometry",
             "operation": "unresolved_parallel_marking_or_insertion",
+            "status": "unconfirmed",
             "confirmed": false,
+            "confirmation_source": "model_prediction",
+            "confirmation_scope": "local_boundary_correspondence",
+            "assessment": "insufficient_geometry",
+            "operation_resolved": false,
+            "map_edit_verified": false,
+            "operation_alternatives": [
+              "parallel_marking",
+              "new_marking",
+              "reference_or_projection_error"
+            ],
+            "required_evidence": [
+              "resolve_parallel_marking_vs_new_marking_vs_reference_error",
+              "physical_alignment_and_operation_specific_edit_evidence"
+            ],
             "scope": "observed_local_segment"
           },
           "correspondence_policy": {
@@ -48834,7 +49056,10 @@
             },
             "map_action": "unchanged",
             "processing_status": "complete",
-            "manual_review_required": false
+            "manual_review_required": false,
+            "model_detected_local_change": false,
+            "confirmation_scope": "local_boundary_correspondence",
+            "write_status": "not_executed"
           }
         },
         {
@@ -49126,13 +49351,54 @@
             },
             "change_assessment": {
               "status": "insufficient_geometry",
-              "confirmed_map_change": false
+              "model_detected_local_change": false,
+              "map_edit_verified": false
             }
+          },
+          "model_change_decision": {
+            "status": "insufficient_evidence",
+            "detected": false,
+            "source": "model_prediction",
+            "scope": "local_boundary_correspondence",
+            "target_property": "boundary_geometry",
+            "evidence_basis": "exact_window_curve_quality_reference_correspondence_and_fixed_anchor_consensus",
+            "does_not_assess": [
+              "paint_presence",
+              "marking_color_or_pattern",
+              "lane_use",
+              "connectivity",
+              "new_unmatched_objects",
+              "deletion",
+              "exact_edit_operation"
+            ],
+            "map_edit_verified": false,
+            "reason_codes": [
+              "LOCAL_REFERENCE_OVERLAP_TOO_SHORT",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "claim": "local_curve_relation_not_detected_as_change"
           },
           "structural_hypothesis": {
             "target_property": "paint_presence_or_boundary_geometry",
             "operation": "unresolved_parallel_marking_or_insertion",
+            "status": "unconfirmed",
             "confirmed": false,
+            "confirmation_source": "model_prediction",
+            "confirmation_scope": "local_boundary_correspondence",
+            "assessment": "insufficient_geometry",
+            "operation_resolved": false,
+            "map_edit_verified": false,
+            "operation_alternatives": [
+              "parallel_marking",
+              "new_marking",
+              "reference_or_projection_error"
+            ],
+            "required_evidence": [
+              "resolve_parallel_marking_vs_new_marking_vs_reference_error",
+              "physical_alignment_and_operation_specific_edit_evidence"
+            ],
             "scope": "observed_local_segment"
           },
           "correspondence_policy": {
@@ -49242,7 +49508,10 @@
             },
             "map_action": "unchanged",
             "processing_status": "complete",
-            "manual_review_required": false
+            "manual_review_required": false,
+            "model_detected_local_change": false,
+            "confirmation_scope": "local_boundary_correspondence",
+            "write_status": "not_executed"
           }
         }
       ],
@@ -68665,6 +68934,10 @@
         },
         "supported_conflict": 24,
         "insufficient_geometry": 5,
+        "marking_model_decisions": {
+          "insufficient_evidence": 5,
+          "detected": 1
+        },
         "base_map_updates": 0
       },
       "scene_id": "scene-0980"
@@ -394970,7 +395243,7 @@
               "role": "evaluation_only_after_prediction_freeze"
             }
           ],
-          "prediction_freeze_sha256": "364047df03a696b512a1a6d15418ffc6393681a80e8c56a73edce0983d1ff82b",
+          "prediction_freeze_sha256": "8c8cae0a81d9a0a815d4ed623c72e6ae869c55bf23dee566138e309dbd5dc52d",
           "used_for_model_prediction": false
         },
         "updated_map_context": {
@@ -429387,7 +429660,7 @@
                   "role": "evaluation_only_after_prediction_freeze"
                 }
               ],
-              "prediction_freeze_sha256": "364047df03a696b512a1a6d15418ffc6393681a80e8c56a73edce0983d1ff82b",
+              "prediction_freeze_sha256": "8c8cae0a81d9a0a815d4ed623c72e6ae869c55bf23dee566138e309dbd5dc52d",
               "used_for_model_prediction": false
             }
           }
@@ -429585,7 +429858,383 @@
         "Semantic routing is not proof that the candidate change is real.",
         "Old temporary/permanent labels are not structure/state ground truth.",
         "No scene identity or event lifetime is used to choose a map layer."
-      ]
+      ],
+      "status_audit": {
+        "schema": "nuscenes-separated-status-audit-1.0",
+        "scene_id": "scene-0980",
+        "source_files": [
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/scene.json",
+            "sha256": "06e0a061c141428d83075740c3775fcb68ad18b89acbfa498f4f1e6e192493e0",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/sample.json",
+            "sha256": "ee27bd4c9d8c8591f4a166118ca6cdad19b0bb3491dd8ba0b1ef61c23e074d1d",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/sample_annotation.json",
+            "sha256": "9a6adbc07f66f71d21ba7bd94b9abd259072c420ad4fcffe324452df32e43a3b",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/category.json",
+            "sha256": "8205122ea476e44f997f5522481bf9405d3c3c375734a0a4a6fdfcc02a2bffe9",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "processed/tracking_report.json",
+            "sha256": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "processed/scene0980_unified_candidates_v1.csv",
+            "sha256": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "processed/road_perception/scene0980_discrepancy_candidates_v1.csv",
+            "sha256": "d9f89697835563e1d40d799e71274ed58ed2d1b940f5c1ddb31c98d08a83e59b",
+            "role": "audit_only"
+          },
+          {
+            "root": "delivery_root",
+            "path": "outputs/stage3/scored_candidates.csv",
+            "sha256": "1c931c3e528d2d2db189b3c2b8e07f48bd36722c700265a6e1a582200afc252d",
+            "role": "audit_only"
+          },
+          {
+            "root": "delivery_root",
+            "path": "evaluation_labels/candidate_evidence.csv",
+            "sha256": "1403f462dabb1f2bae4673d839b36eba71f0125669abe3bad854853fac229f88",
+            "role": "audit_only"
+          },
+          {
+            "root": "delivery_root",
+            "path": "outputs/stage7/evaluation_report.json",
+            "sha256": "96e86ad0fd816aaab17f6c4f46a5efcbf31e8cc9fea4daac10af5c1b64bd1f7a",
+            "role": "audit_only"
+          }
+        ],
+        "source_provenance": [
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/scene.json",
+            "sha256": "06e0a061c141428d83075740c3775fcb68ad18b89acbfa498f4f1e6e192493e0",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/sample.json",
+            "sha256": "ee27bd4c9d8c8591f4a166118ca6cdad19b0bb3491dd8ba0b1ef61c23e074d1d",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/sample_annotation.json",
+            "sha256": "9a6adbc07f66f71d21ba7bd94b9abd259072c420ad4fcffe324452df32e43a3b",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "v1.0-trainval/category.json",
+            "sha256": "8205122ea476e44f997f5522481bf9405d3c3c375734a0a4a6fdfcc02a2bffe9",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "processed/tracking_report.json",
+            "sha256": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "processed/scene0980_unified_candidates_v1.csv",
+            "sha256": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee",
+            "role": "audit_only"
+          },
+          {
+            "root": "raw_root",
+            "path": "processed/road_perception/scene0980_discrepancy_candidates_v1.csv",
+            "sha256": "d9f89697835563e1d40d799e71274ed58ed2d1b940f5c1ddb31c98d08a83e59b",
+            "role": "audit_only"
+          },
+          {
+            "root": "delivery_root",
+            "path": "outputs/stage3/scored_candidates.csv",
+            "sha256": "1c931c3e528d2d2db189b3c2b8e07f48bd36722c700265a6e1a582200afc252d",
+            "role": "audit_only"
+          },
+          {
+            "root": "delivery_root",
+            "path": "evaluation_labels/candidate_evidence.csv",
+            "sha256": "1403f462dabb1f2bae4673d839b36eba71f0125669abe3bad854853fac229f88",
+            "role": "audit_only"
+          },
+          {
+            "root": "delivery_root",
+            "path": "outputs/stage7/evaluation_report.json",
+            "sha256": "96e86ad0fd816aaab17f6c4f46a5efcbf31e8cc9fea4daac10af5c1b64bd1f7a",
+            "role": "audit_only"
+          }
+        ],
+        "prediction_inputs_modified": false,
+        "labels_used_for_model_prediction": false,
+        "annotation_categories": {
+          "total_annotations": 2278,
+          "known_category_annotations": 2278,
+          "unknown_category_annotations": 0,
+          "unique_instances": 154,
+          "category_counts": {
+            "movable_object.barrier": 890,
+            "human.pedestrian.adult": 235,
+            "movable_object.trafficcone": 561,
+            "vehicle.car": 104,
+            "vehicle.truck": 103,
+            "movable_object.debris": 107,
+            "human.pedestrian.stroller": 32,
+            "static_object.bicycle_rack": 27,
+            "human.pedestrian.construction_worker": 144,
+            "vehicle.construction": 19,
+            "human.pedestrian.personal_mobility": 18,
+            "vehicle.bus.rigid": 14,
+            "vehicle.motorcycle": 16,
+            "movable_object.pushable_pullable": 8
+          },
+          "scope": "Supplied object-category annotations; not road-structure change labels."
+        },
+        "object_motion_states": {
+          "total_instances": 154,
+          "counts": {
+            "stationary": 120,
+            "insufficient_observations": 10,
+            "moving": 21,
+            "uncertain": 3
+          },
+          "uncertain_count": 3,
+          "uncertain_fraction": 0.01948051948051948,
+          "insufficient_observations_count": 10,
+          "source_description": "nuScenes GT instance_token + 2Hz annotations; motion states are threshold heuristics",
+          "scope": "Derived motion-state heuristics over object instances; not structural-change uncertainty."
+        },
+        "source_candidates": {
+          "total_candidates": 29,
+          "structural_candidates": 6,
+          "source_status_counts": {
+            "CANDIDATE_UNVERIFIED": 6
+          },
+          "structural_evidence_level_counts": {
+            "INSUFFICIENT_EVIDENCE": 4,
+            "HIGH_EVIDENCE": 2
+          }
+        },
+        "independent_labels": {
+          "candidate_rows": 29,
+          "verified_candidate_labels": 0,
+          "blank_candidate_labels": 29,
+          "verified_structural_change_labels": null,
+          "structural_change_truth_available": false,
+          "scope": "Candidate evidence-support labels cannot substitute for independently verified prior/current map changes.",
+          "source_reason": "No independently verified prior/current change GT or held-out scenes supplied."
+        },
+        "semantic_routing": {
+          "total_candidates": 29,
+          "state_events": 23,
+          "structural_candidates": 6,
+          "unassigned": 0,
+          "unassigned_fraction": 0.0,
+          "scope": "Semantic layer identity over all delivered candidates; not truth of the proposed change."
+        },
+        "structural_quality": {
+          "total_candidates": 6,
+          "detected": 1,
+          "insufficient_evidence": 5,
+          "geometrically_consistent": 0,
+          "insufficient_fraction": 0.8333333333333334,
+          "scope": "Local geometric model decision over structural candidate windows, not a ground-truth uncertainty rate."
+        },
+        "structural_write": {
+          "total_candidates": 6,
+          "eligible": 0,
+          "executed": 0,
+          "scope": "Full structural edit eligibility/execution, separate from local detection."
+        },
+        "five_percent_claim": {
+          "structural_truth_rate_verified": false,
+          "target_fraction": 0.05,
+          "structural_model_insufficient_fraction": 0.8333333333333334,
+          "model_candidate_target_met": false,
+          "meaning": "The 5% value is the user-requested comparison target, not a verified dataset statistic. Motion uncertainty and model candidate insufficiency have different denominators."
+        },
+        "candidate_diagnostics": [
+          {
+            "candidate_id": "S0980-LD-001",
+            "frame_window": [
+              11,
+              12
+            ],
+            "source_observed_frames": 2,
+            "model_recorded_frames": 2,
+            "track_id": "T002",
+            "track_identity_verified": false,
+            "source_review_status": "CANDIDATE_UNVERIFIED",
+            "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+            "source_support_frames": 0,
+            "source_map_change_status": "UNVERIFIED",
+            "model_status": "insufficient_evidence",
+            "model_detected": false,
+            "model_status_source": "model_change_decision",
+            "reason_codes": [
+              "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "write_eligible": false,
+            "map_patch_executed": false
+          },
+          {
+            "candidate_id": "S0980-LD-002",
+            "frame_window": [
+              16,
+              17
+            ],
+            "source_observed_frames": 2,
+            "model_recorded_frames": 2,
+            "track_id": "T003",
+            "track_identity_verified": false,
+            "source_review_status": "CANDIDATE_UNVERIFIED",
+            "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+            "source_support_frames": 2,
+            "source_map_change_status": "UNVERIFIED",
+            "model_status": "insufficient_evidence",
+            "model_detected": false,
+            "model_status_source": "model_change_decision",
+            "reason_codes": [
+              "INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS",
+              "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "write_eligible": false,
+            "map_patch_executed": false
+          },
+          {
+            "candidate_id": "S0980-LD-003",
+            "frame_window": [
+              18,
+              25
+            ],
+            "source_observed_frames": 8,
+            "model_recorded_frames": 8,
+            "track_id": "T004",
+            "track_identity_verified": false,
+            "source_review_status": "CANDIDATE_UNVERIFIED",
+            "source_evidence_level": "HIGH_EVIDENCE",
+            "source_support_frames": 8,
+            "source_map_change_status": "UNVERIFIED",
+            "model_status": "insufficient_evidence",
+            "model_detected": false,
+            "model_status_source": "model_change_decision",
+            "reason_codes": [
+              "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "write_eligible": false,
+            "map_patch_executed": false
+          },
+          {
+            "candidate_id": "S0980-LD-004",
+            "frame_window": [
+              27,
+              33
+            ],
+            "source_observed_frames": 7,
+            "model_recorded_frames": 7,
+            "track_id": "T005",
+            "track_identity_verified": false,
+            "source_review_status": "CANDIDATE_UNVERIFIED",
+            "source_evidence_level": "HIGH_EVIDENCE",
+            "source_support_frames": 7,
+            "source_map_change_status": "UNVERIFIED",
+            "model_status": "detected",
+            "model_detected": true,
+            "model_status_source": "model_change_decision",
+            "reason_codes": [
+              "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+              "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "write_eligible": false,
+            "map_patch_executed": false
+          },
+          {
+            "candidate_id": "S0980-LD-005",
+            "frame_window": [
+              28,
+              28
+            ],
+            "source_observed_frames": 1,
+            "model_recorded_frames": 1,
+            "track_id": "T006",
+            "track_identity_verified": false,
+            "source_review_status": "CANDIDATE_UNVERIFIED",
+            "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+            "source_support_frames": 1,
+            "source_map_change_status": "UNVERIFIED",
+            "model_status": "insufficient_evidence",
+            "model_detected": false,
+            "model_status_source": "model_change_decision",
+            "reason_codes": [
+              "DISTINCT_PHYSICAL_REFERENCE_AMBIGUITY",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "write_eligible": false,
+            "map_patch_executed": false
+          },
+          {
+            "candidate_id": "S0980-LD-006",
+            "frame_window": [
+              38,
+              38
+            ],
+            "source_observed_frames": 1,
+            "model_recorded_frames": 1,
+            "track_id": "T007",
+            "track_identity_verified": false,
+            "source_review_status": "CANDIDATE_UNVERIFIED",
+            "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+            "source_support_frames": 1,
+            "source_map_change_status": "UNVERIFIED",
+            "model_status": "insufficient_evidence",
+            "model_detected": false,
+            "model_status_source": "model_change_decision",
+            "reason_codes": [
+              "LOCAL_REFERENCE_OVERLAP_TOO_SHORT",
+              "PHYSICAL_ALIGNMENT_UNVERIFIED",
+              "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+              "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+            ],
+            "write_eligible": false,
+            "map_patch_executed": false
+          }
+        ]
+      }
     },
     "argoverse": {
       "scope": "fixed_prior_painted_physical_boundary_geometry",
@@ -434272,7 +434921,7 @@
         "stored_state_events": 23,
         "base_map_updates": 0,
         "pending_manual_reviews": 0,
-        "model_detected_local_structure": 0
+        "model_detected_local_structure": 1
       },
       "unit": "same 29 delivered source candidates"
     },
@@ -434354,17 +435003,17 @@
     },
     {
       "path": "map_update/pipeline_v2.py",
-      "sha256": "4e2c4d63a7790728f8d43cfb7add77ee526fe10f2a323a863c7fff68d64637de",
+      "sha256": "5dabbee2be9369b734e54af26ed9163d0e7efca1d87fd1cadd841a0e8238f45b",
       "role": "executed_code"
     },
     {
       "path": "map_update/nuscenes_v2.py",
-      "sha256": "97f4d558aff02e845e948a9349a8fd9a831120e0b7d1b9a611e201edfd859ea1",
+      "sha256": "028485789f20cd004422fff39085edb02f61304a5b6cd33bd2fe898e7391e1fb",
       "role": "executed_code"
     },
     {
       "path": "map_update/local_correspondence.py",
-      "sha256": "d7bf24c925a554bc6d1894bdb43c834084791c8a272325aa9d188d83a470ea7d",
+      "sha256": "115ff3c0139f412449b8ae14bde1dfbb74c63d27cf435597aca81cc1d3898602",
       "role": "executed_code"
     },
     {
@@ -434385,6 +435034,11 @@
     {
       "path": "map_update/reference_replay.py",
       "sha256": "7addf43e9e4e3c535df2e9790ba285bb6119ffc96d9271bc676c8b9eedbb3d13",
+      "role": "executed_code"
+    },
+    {
+      "path": "map_update/nuscenes_status_audit.py",
+      "sha256": "2bd2d49d34937357720dcf81ff95a047c384b36bf032598643eb4e2f80d5bb06",
       "role": "executed_code"
     },
     {
@@ -434831,14 +435485,64 @@
       "path": "deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M4_v1/change_records.jsonl",
       "sha256": "aedd877f4d9440ab81af76b25aafc20731f76dd1ac6d1b1c760c8479637dbb03",
       "role": "baseline_prediction_after_freeze"
+    },
+    {
+      "path": "v1.0-trainval/scene.json",
+      "sha256": "06e0a061c141428d83075740c3775fcb68ad18b89acbfa498f4f1e6e192493e0",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "v1.0-trainval/sample.json",
+      "sha256": "ee27bd4c9d8c8591f4a166118ca6cdad19b0bb3491dd8ba0b1ef61c23e074d1d",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "v1.0-trainval/sample_annotation.json",
+      "sha256": "9a6adbc07f66f71d21ba7bd94b9abd259072c420ad4fcffe324452df32e43a3b",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "v1.0-trainval/category.json",
+      "sha256": "8205122ea476e44f997f5522481bf9405d3c3c375734a0a4a6fdfcc02a2bffe9",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "processed/tracking_report.json",
+      "sha256": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "processed/scene0980_unified_candidates_v1.csv",
+      "sha256": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "processed/road_perception/scene0980_discrepancy_candidates_v1.csv",
+      "sha256": "d9f89697835563e1d40d799e71274ed58ed2d1b940f5c1ddb31c98d08a83e59b",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "external/perception_delivery/outputs/stage3/scored_candidates.csv",
+      "sha256": "1c931c3e528d2d2db189b3c2b8e07f48bd36722c700265a6e1a582200afc252d",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "external/perception_delivery/evaluation_labels/candidate_evidence.csv",
+      "sha256": "1403f462dabb1f2bae4673d839b36eba71f0125669abe3bad854853fac229f88",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
+    },
+    {
+      "path": "external/perception_delivery/outputs/stage7/evaluation_report.json",
+      "sha256": "96e86ad0fd816aaab17f6c4f46a5efcbf31e8cc9fea4daac10af5c1b64bd1f7a",
+      "role": "nuscenes_status_audit_only_after_prediction_freeze"
     }
   ],
   "prediction_freeze": {
     "gt_read": false,
-    "created_at_utc": "2026-11-08T14:07:04.133537+00:00",
+    "created_at_utc": "2026-11-08T14:31:47.245021+00:00",
     "files_sha256": {
-      "method.json": "f40b9189c0534a594cff6c5e2c9a1f9b3a7f35fa9a16fe868352e6a8e3a83935",
-      "nuscenes_predictions.json": "b0c137f83b09cd0397721a921e11167c1d74083652a63cf34a7c576d26abeb00",
+      "method.json": "87fdbe6f45ba1ee60c78d90c62bc55c7db86a2fbf99599a2cba991602170ad68",
+      "nuscenes_predictions.json": "12f22967258f515afe2b50b3c05180843093eb7cca51f9755cc013b0a59fb187",
       "nuscenes_state_layer.geojson": "a169545f011329ecfed26a5574f127cb46d177e04f0e880504d6cb7ea40a8561",
       "argoverse_predictions.json": "556e2cdc44f02f4f7a384e35f84800ad048779219f3357c8ed5f8d4a6ce9ed51",
       "argoverse_state_layer.geojson": "c7e75837967fb9807e15a121f74cf441c75e711cf29796627c6c7c755e21b9ab"

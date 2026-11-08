@@ -1,5 +1,8 @@
 # AIE1903 map comparison and structural evidence
 
+Latest update: nuScenes local detection and status audit. [Chinese nuScenes result](algorithms/zh/index.html?dataset=nuscenes&event=S0980-LD-004) · [English](algorithms/en/index.html?dataset=nuscenes&event=S0980-LD-004). The page now shows 23 annotation-backed states, 1 computed local structural detection, and 5 insufficient structural candidates. Final structural uncertainty is 5/6 (83.3%); the requested ≤5% target is explicitly not achieved. Object-motion uncertainty is a separate source statistic. Argoverse predictions, all four reference map exports, and both datasets' state-layer exports remain unchanged. Validated with 255 core tests and 166 browser checks. [Validation](algorithms/nuscenes_confirmation_release_validation.json).
+
+
 Latest update: Argoverse confirmation repair. [Chinese known-change replay](algorithms/zh/index.html?dataset=argoverse) · [English](algorithms/en/index.html?dataset=argoverse). The reference view replays 98 delivered ground-truth changes on an isolated map copy. The separate model view has 14 local detections: 9 changed-boundary identity hits, 5 false positives, and only 3 detections within the 0.5 m same-anchor geometry tolerance. Model map patches remain 0; reference-copy patches are 98. Validated with 245 core tests and 153 browser checks. [Validation](algorithms/confirmation_release_validation.json). Earlier entries below describe prior releases.
 
 
