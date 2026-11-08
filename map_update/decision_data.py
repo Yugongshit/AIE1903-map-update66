@@ -4,6 +4,7 @@ from math import hypot
 
 from .delivery import read_csv,read_json
 from .evaluation import evaluate_controlled, METHODS
+from .automatic import build_automatic_decisions
 
 
 def nearest_on_segment(point, a, b):
@@ -80,6 +81,7 @@ def build_decision_data(payload, cases_path, comparison_path, delivery_root=None
             'methods':METHODS,'controlled_cases':rows,'controlled_case_sha256':expected[cases_path.name],
             'controlled_metrics_reproduced':True,'source_map_sha256':real['map']['source_sha256'],
             'delivery_sources':delivery_sources,
+            'automatic_decisions':build_automatic_decisions(real),
             'candidate_categories':{k:sorted(v) for k,v in categories.items()},
             'candidate_names_zh':{k:[name_map.get(c,c) for c in sorted(v)] for k,v in categories.items()},
             'distance_samples':samples,

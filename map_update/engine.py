@@ -85,7 +85,10 @@ class Maintainer:
             if r["change_id"] in e["change_ids"] and (target, kind) != (e["map_element_id"], e["change_type"]):
                 raise ValueError("change_id reused for a different target/type")
             if (target, kind) == (e["map_element_id"], e["change_type"]):
-                if target is not None or r["change_id"] in e["change_ids"]:
+                # A road element can contain several independent obstacles.
+                # Only an explicit occupancy identity may accumulate or clear
+                # that event; sharing a lane does not establish identity.
+                if r["change_id"] in e["change_ids"] or (kind != "occupancy" and target is not None):
                     return e
         if kind == "add" and (r.get("geometry_city") or {}).get("type") == "LineString":
             candidates = []

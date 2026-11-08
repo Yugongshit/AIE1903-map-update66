@@ -16,11 +16,11 @@ COMPARISON=RESULTS/'controlled_comparison.csv'
 class DecisionPresentationDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.payload={'dataset_id':'nuscenes','real':{'scene_id':'scene-0980',
+        cls.payload={'dataset_id':'nuscenes','real':{'dataset_id':'nuscenes','scene_id':'scene-0980','visit_id':'fixture-visit',
             'maintenance':{'base_map_updates':[]},'accuracy':{'precision':None,'recall':None,'f1':None},
-            'map':{'source_sha256':'fixture-map','elements':[{'element_id':'reference-1','geometry_city':{'type':'LineString','coordinates':[[0,0],[10,0]]}}]},
-            'candidates':[{'candidate_id':'LD1'}],
-            'frames':[{'frame_index':0,'occupancy':[],'observed_lines':[{'candidate_ids':['LD1'],'geometry_city':{'coordinates':[[1,4],[3,4],[5,4]]},'line_id':1,'source_file':'fixture.csv'}]}]},
+            'map':{'dataset_id':'nuscenes','version':'fixture-v1','coordinate_reference':{'frame':'City','units':'m','city_id':'fixture'},'source_sha256':'fixture-map','elements':[{'element_id':'reference-1','geometry_city':{'type':'LineString','coordinates':[[0,0],[10,0]]}}]},
+            'candidates':[{'candidate_id':'LD1','change_type':'line_discrepancy','frame_window':[0,0],'map_element_id':None}],
+            'frames':[{'frame_index':0,'timestamp_ns':'1000000000','occupancy':[],'observed_lines':[{'candidate_ids':['LD1'],'geometry_city':{'type':'LineString','coordinates':[[1,4],[3,4],[5,4]]},'line_id':1,'source_file':'fixture.csv'}]}]},
             'camera':{'views':[{'annotations':[]}]},
             'provenance':[{'file':p.name,'sha256':sha256(p.read_bytes()).hexdigest()} for p in [CASES,COMPARISON]],
             'controlled_evaluation':evaluate_controlled(read_csv(CASES),read_csv(COMPARISON))}
@@ -35,6 +35,10 @@ class DecisionPresentationDataTests(unittest.TestCase):
         self.assertIn('not a verified edit target',sample['meaning'])
         self.assertEqual(self.payload,original)
         self.assertEqual(len(out['controlled_cases']),126)
+        decision=out['automatic_decisions']['candidates']['LD1']
+        self.assertEqual(decision['action'],'difference_recorded')
+        self.assertFalse(decision['manual_review_required'])
+        self.assertEqual(out['automatic_decisions']['difference_layer']['differences'][0]['observations'][0]['geometry_city']['coordinates'],[[1,4],[3,4],[5,4]])
 
     def test_changed_source_cannot_reuse_old_evaluation(self):
         data=deepcopy(self.payload);data['provenance'][0]['sha256']='wrong'

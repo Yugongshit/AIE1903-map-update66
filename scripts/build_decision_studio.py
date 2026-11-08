@@ -29,6 +29,10 @@ def build(source,output,cases,comparison):
     assets=output/'assets/decisions';assets.mkdir()
     for path in [cases,comparison]:shutil.copy2(path,assets/path.name)
     (assets/'presentation_data.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
+    automatic=data['automatic_decisions']
+    for name,value in [('automatic_decisions',automatic),('recorded_event_layer',automatic['event_layer']),
+                       ('observed_difference_layer',automatic['difference_layer'])]:
+        (assets/(name+'.json')).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
     template=(ROOT/'map_update/decision_studio.html').read_text()
     serialized=json.dumps(data,ensure_ascii=False,allow_nan=False).replace('<',r'\u003c').replace('>',r'\u003e').replace('&',r'\u0026')
     for language in ['en','zh']:
@@ -47,11 +51,12 @@ def build(source,output,cases,comparison):
         path.write_text(page)
         for key in ['real','camera','write_experiment','controlled_evaluation']:
             assert extract(page)[key]==en[key],key
-    for name in ['rerun_checks.json','bilingual_checks.json','runtime_validation.json']:
+    for name in ['rerun_checks.json','bilingual_checks.json','runtime_validation.json',
+                 'release_validation.json','wheel_checks.json']:
         if (output/name).exists():(output/name).rename(output/('input_'+name))
     # The old deployment record belongs to the input release, not this build.
     if (output/'deployment_check.json').exists():(output/'deployment_check.json').rename(output/'input_deployment_check.json')
-    manifest=json.loads((output/'version.json').read_text());manifest.update(schema='decision-evidence-studio-1.0',release_date='2026-11-06',default_workspace='decisions',new_workspaces=['decisions','evaluation'],controlled_case_rows=len(data['controlled_cases']),distance_preview_scope=data['semantics'])
+    manifest=json.loads((output/'version.json').read_text());manifest.update(schema='decision-evidence-studio-2.0',release_date='2026-11-08',default_workspace='decisions',new_workspaces=['decisions','evaluation'],controlled_case_rows=len(data['controlled_cases']),distance_preview_scope=data['semantics'],automatic_processing=automatic['summary'],manual_review_required=False)
     manifest.pop('source_commit',None)
     manifest['unchanged_evidence_sha256']=sha256(json.dumps({key:en[key] for key in ['real','camera','write_experiment','controlled_evaluation']},sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     (output/'version.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')

@@ -4,7 +4,9 @@
 
 ## 新对话接续入口（2026-11-08）
 
-**先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 当前开发分支是 `feature/evidence-workbench-20261104`；最新应用包括地图滑动对比、候选证据追溯、逐例评估、Rerun 联动和中英文网站。应用验证为 99 项核心检查及 131 项浏览器检查；真实基础地图写入仍为 0。
+**先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 本次修正分支是 `fix/automatic-map-decisions`，基于 `feature/evidence-workbench-20261104`。最新应用包括地图滑动对比、候选证据追溯、逐例评估、Rerun 联动和中英文网站。
+
+**自动处理更新：** 当前 29 个候选全部处理完成，23 个占用事件和 6 个标线差异分别保存，不再生成“等待人工复核”的任务。基础地图结构写入仍为 0；持续性未知与已经观测到物体分开表达。另修复同一车道不同占用事件被合并清除的问题。方法、输出与边界见 [自动处理说明](docs/automatic_processing.md)。
 
 **Planning 后续交付已收到：** `main` 的 `17ee2c1` 新增 44 个文件，包含三种策略各 41 帧的规划结果。当前已做基本结构核对，尚未复现或接入网站；见 [接收记录](docs/planning_intake_20261108.md)。
 
@@ -46,6 +48,8 @@ python3 -m map_update integrate-m3 \
 ```
 
 打开输出目录中的 `index.html`。新增 `event_layer.json`、`reliability.json` 和 `maintenance.json`，保留参考地图及真实逐帧观测；T004 后段局部匹配不会覆盖 LD003 前段。事件层是保存策略，不证明障碍短期消失，也不推断封路。未知覆盖率和对齐状态保持未知。
+
+2026-11-08 自动处理另输出 `automatic_decisions.json`、`recorded_event_layer.json` 和 `observed_difference_layer.json`。旧文件保留来源契约；新文件表达本次处理完成及实际保存几何，不添加人工任务。
 
 当前适配器严格对应该次“覆盖率未知”的 M3 交付。后续有效覆盖率需连同来源重新评估并扩展接入契约，不能手改 null 成 1 来绕过检查。真实长期写回仍需要覆盖/对齐、独立复访、目标修改几何与地图历史语义；准确性评价还需要独立真值。
 

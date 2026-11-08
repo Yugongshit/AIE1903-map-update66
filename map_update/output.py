@@ -45,9 +45,14 @@ def write_scene(scene, output):
 
 
 def write_maintenance(scene, output):
+    from .automatic import build_automatic_decisions
+    automatic = build_automatic_decisions(scene)
     return _write_files({"scene": scene, "reference_map": scene["reference_map"],
                          "replay": scene["replay"], "candidates": scene["candidates"],
                          "event_layer": scene["event_layer"], "reliability": scene["m3"],
                          "maintenance": scene["maintenance"], "summary": scene["summary"],
+                         "automatic_decisions": automatic,
+                         "recorded_event_layer": automatic["event_layer"],
+                         "observed_difference_layer": automatic["difference_layer"],
                          "validation": {"source": scene["raw_validation"], "m3": scene["m3"]["validation"]}},
                         "scene_viewer.html", scene, output)

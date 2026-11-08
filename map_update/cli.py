@@ -43,7 +43,7 @@ def main():
     scene.add_argument("--raw-root", required=True)
     scene.add_argument("--delivery-root", default="external/perception_delivery")
     scene.add_argument("--out", required=True)
-    m3 = commands.add_parser("integrate-m3", help="join the real M3 supplement and export reference / event / review layers")
+    m3 = commands.add_parser("integrate-m3", help="join source M3 diagnostics and automatically record event / observation layers")
     m3.add_argument("--raw-root", required=True)
     m3.add_argument("--delivery-root", default="external/perception_delivery")
     m3.add_argument("--handoff", required=True)
@@ -53,9 +53,11 @@ def main():
         if args.command == "integrate-m3":
             data = integrate_m3(args.raw_root, args.delivery_root, args.handoff)
             dest = write_maintenance(data, args.out)
-            print(f"Saved {dest}; M3 review units={len(data['m3']['review_units'])}; "
-                  f"event candidates={len(data['event_layer']['events'])}; base map updates=0")
-            print("M3 joined. Coverage/revisits/verified edit evidence remain insufficient; planning is not a prerequisite.")
+            automatic = read(dest / 'automatic_decisions.json')
+            counts = automatic['summary']
+            print(f"Saved {dest}; processed={counts['processed']}; recorded events={counts['event_records']}; "
+                  f"recorded marking differences={counts['difference_records']}; base map updates={counts['base_map_updates']}")
+            print("Processing complete. No manual review is queued. Source M3 diagnostics and unavailable structural evidence are recorded separately.")
             return
         if args.command == "inspect-scene":
             data = inspect_scene(args.raw_root, args.delivery_root)

@@ -107,6 +107,39 @@ class PipelineTests(unittest.TestCase):
         recovery["fully_observed"] = True
         self.assertEqual(run([positive, recovery])["events"][0]["status"], "resolved")
 
+    def test_distinct_obstacles_on_one_element_keep_geometry_and_clear_separately(self):
+        def footprint(y):
+            return {"type": "Polygon", "coordinates": [
+                [[3., y], [4., y], [4., y+1.], [3., y+1.], [3., y]]
+            ]}
+
+        a = record("obstacle-A", "drive", 0, "occupancy", "line-1", footprint(5.))
+        b = record("obstacle-B", "drive", .01, "occupancy", "line-1", footprint(20.))
+        a["change_id"], b["change_id"] = "A", "B"
+        observed = run([a, b, deepcopy(a)])
+        self.assertEqual(len(observed["events"]), 2)
+        self.assertEqual([e["geometry_city"] for e in observed["events"]],
+                         [a["geometry_city"], b["geometry_city"]])
+        self.assertEqual([e["record_ids"] for e in observed["events"]],
+                         [["obstacle-A"], ["obstacle-B"]])
+
+        # This observation covers A's own occupied region, not the whole lane
+        # or B. fully_observed is scoped to the identified occupancy event.
+        recovery = record("clear-A", "visit2", 2, "occupancy", "line-1", footprint(5.))
+        recovery.update(change_id="A", observation="supports_prior", support_frame_count=0)
+        recovery["reliability"]["decision"] = "No Significant Mismatch"
+        bundle = run([a, b, recovery])
+        events = {e["change_ids"][0]: e for e in bundle["events"]}
+        self.assertEqual(set(events), {"A", "B"})
+        self.assertEqual(events["A"]["status"], "resolved")
+        self.assertTrue(events["A"]["clearance_confirmed"])
+        self.assertEqual(events["B"]["status"], "temporary")
+        self.assertFalse(events["B"]["clearance_confirmed"])
+        self.assertEqual(events["B"]["geometry_city"], b["geometry_city"])
+        self.assertEqual(events["B"]["record_ids"], ["obstacle-B"])
+        self.assertEqual(bundle["planning_view"]["temporary_events"], [events["B"]])
+        self.assertEqual(bundle["current_map"], base_map())
+
     def test_contradiction_resets_accumulation(self):
         rows = visits()
         normal = record("normal", "v-normal", 13)

@@ -33,7 +33,7 @@
 | 字段 | 约定 |
 | --- | --- |
 | `record_id` | 全局唯一的输入记录 ID；相同内容重复可去重，ID 相同内容不同报错 |
-| `change_id` | 上游候选 ID；不要求跨 visit 恒定，但同 ID 不能换类型或目标 |
+| `change_id` | 上游候选 ID；结构候选可按要素重新关联，occupancy 必须使用稳定的独立事件 ID；同 ID 不能换类型或目标 |
 | `map_id`, `map_version`, `coordinate_reference` | 必须与输入 baseline 完全相符 |
 | `visit_id` | 一次实际经过/独立采集访问，不是 frame ID；同一次 clip 切片不增加 visit |
 | `timestamp_ns` | 实际该次记录的时间，十进制字符串优先；不接受浮点数 |
@@ -43,7 +43,7 @@
 | `observation` | `supports_change`, `supports_prior`, `unknown`；恢复需要明确 supports_prior |
 | `valid_frame_count`, `support_frame_count` | 同次观测的有效/支持帧数；整数；不能从加权 score 推导 |
 | `evidence_score` | 可选 [0,1] 的原始分数，仅显示；建议另保留方法/版本字段 |
-| `fully_observed` | 是否充分可见；删除的每次支持访问和恢复都必须为 true |
+| `fully_observed` | 是否充分可见；删除的每次支持访问和恢复都必须为 true；占用恢复仅声明该 change_id 对应事件的占用区域充分可见，不声明整条道路清空 |
 | `marking_type` | 属性变化时必需，跨支持访问一致，非 unknown |
 | `semantic_hint` | 可选 `temporary`，阻止基础地图自动写回；其他值不构成永久性证明 |
 | `source` | 来源文件/日志标识，保留可追溯信息，勿写入凭据 |
@@ -61,6 +61,10 @@
 ```
 
 四个允许结论与成员 3 proposal 一致：`No Significant Mismatch`、`Suspected Map Change`、`Needs Further Verification`、`Insufficient Evidence`。正向证据需要 Suspected Map Change；明确恢复需要 No Significant Mismatch。零覆盖、无效对齐、缺失 M3 均不会被高感知分数覆盖。
+
+同一车道或地图要素上可以同时存在多个占用事件。`occupancy` 只按相同 `change_id`、目标和类型累计证据；不同事件不会因为 `map_element_id` 相同而合并，也不会仅凭位置接近被视为同一障碍。上游需先完成有证据的跨访问事件身份关联，再使用稳定 ID；无法建立身份时保留独立事件。
+
+恢复记录必须指向它实际充分观测的占用事件 ID；`fully_observed=true` 和 `supports_prior` 不能广播到同一道路上的其他事件。若只确认 A 恢复，B 的几何、证据与状态保持不变。只有真正覆盖所有相关事件的观测才能分别为它们提供恢复记录。缺测和过期仍不等于恢复。
 
 ## 接入包装器
 
