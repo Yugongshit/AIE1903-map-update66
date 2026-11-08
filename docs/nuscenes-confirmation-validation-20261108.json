@@ -1,0 +1,913 @@
+{
+  "schema": "nuscenes-confirmation-validation-1.0",
+  "status": "PASS",
+  "date": "2026-11-08",
+  "source_branch": "feat/structure-state-routing",
+  "core_tests": {
+    "count": 255,
+    "status": "PASS",
+    "log_sha256": "4ffd47a32920da212d35051d001433a6aee82d796bce53eeadef543970ee5a55"
+  },
+  "browser_checks": {
+    "pipeline_checks.json": {
+      "status": "PASS",
+      "count": 75,
+      "checks": [
+        "technical evidence starts collapsed behind the map comparison",
+        "the selected-map evidence action opens the actual analysis panels",
+        "v3 presentation identifies its source hash and derived-view omissions",
+        "all event geometry, typed hypotheses, classifications, decisions and evidence are preserved",
+        "actual state layers, evaluation and method are preserved unchanged",
+        "nuScenes opens with 29 events, 23 state classes and one locally supported structural hypothesis",
+        "nuScenes status audit keeps known object annotations separate from structural evidence",
+        "every delivered candidate has a semantic map layer without being declared a verified change",
+        "the requested structural uncertainty target is honestly unmet at 5 of 6, independently from object motion",
+        "object motion uncertainty retains its own 154-instance denominator and extra insufficient-observation category",
+        "local structure detection does not turn into a fabricated executed map patch",
+        "main classifier uses structure/state semantics and makes no trained-probability claim",
+        "primary UI contains no duration forecast, posterior display or minimum revisit threshold",
+        "occupancy reliability preserves annotation provenance instead of claiming new detection",
+        "barrier is classified as a state event and its real layer record is stored",
+        "routing highlight matches the actual semantic classifier output",
+        "semantic evidence retains the source barrier category and matched input fields",
+        "numerical class confidence remains unavailable instead of invented probability",
+        "missing clip-end observation does not erase state classification or confirm clearance",
+        "lifecycle uses actual timestamps without inventing a default TTL",
+        "state geometry comes from the saved last-observed snapshot",
+        "downloaded state layer is the actual 23-feature GeoJSON with unchanged base-map flags",
+        "state filter includes all 23 occupancy events",
+        "six marking hypotheses remain visible without being accepted as verified edits",
+        "unverified marking semantics identify a structural hypothesis independently of reliability",
+        "structural hypothesis does not create a state record or a base patch",
+        "all six structural candidate diagnostics preserve their source windows and separate calculated outcomes",
+        "the audit candidate control selects the same source event on the map and in technical evidence",
+        "LD004 adopts the computed local model detection while its exact operation and edit stay unresolved",
+        "LD004 uses its exact 27–33 source window and six fixed-anchor supporting frames",
+        "same-window reference observations are retained as counterevidence to an old-line movement claim",
+        "LD004 details separate local geometric support from paint identity, alignment and structural truth",
+        "LD004 exposes its six measured residuals separately from downstream decisions",
+        "unresolved local discrepancy has no executable operation and no fabricated complete-edit geometry",
+        "empty taxonomy filter is explicit",
+        "empty search is explicit",
+        "nuScenes evaluation distinguishes 12 clip-end observations from 11 unobserved states",
+        "old duration labels are not recycled into structure/state accuracy",
+        "nuScenes repair preserves the independently evaluated Argoverse result counts",
+        "Argoverse defaults to the explicitly separate data-confirmed reference replay",
+        "reference confirmation and applied patches are reported independently of model detections",
+        "reference selector displays the chosen truth object without modifying model predictions",
+        "reference map downloads are separate from model results and preserve exact exported copies",
+        "model view retains every event and reports computed detections independently of patch eligibility",
+        "known detected false positive remains visibly evaluated rather than hidden by confirmation color",
+        "shared physical aliases retain their separate structural-write condition",
+        "primary geometry evaluation includes unpainted boundaries and actual positive truth labels",
+        "local geometry agreement is reported separately from changed-boundary identity retrieval",
+        "structural write gate retains quality conditions without duration or visit minima",
+        "task coverage retains all 34 changed lane-side references without treating them as model inputs",
+        "geometric-agreement filter matches the computed events instead of the former fixed count",
+        "geometric agreement does not adopt a structural change or active routing branch",
+        "remaining insufficient evidence stays inspectable instead of being automatically promoted",
+        "semantic routing cannot override a failed geometric decision",
+        "unpainted references use geometry-or-presence hypotheses and no blanket semantic rejection",
+        "the previously blocked 46-frame example now displays an actual local model detection",
+        "local prediction does not invent paint identity, visibility or executed full-map edits",
+        "local measurement table preserves all frozen measurements and actual positive support",
+        "full download preserves the complete original result",
+        "Argoverse context link uses its separate recorded-data route",
+        "all 105 source events render in English without changing their outcomes",
+        "interaction preserves immutable predictions and state histories",
+        "language switching preserves dataset and selected event",
+        "both languages use identical source-derived data",
+        "Chinese distinguishes unobserved clip-end state from unknown classification",
+        "Chinese audit identifies the unmet structural target using 5 of 6 rather than motion uncertainty",
+        "Chinese explains semantic routing and expiry without a temporal class",
+        "mobile event and lifecycle view has no horizontal overflow",
+        "mobile evaluation has no horizontal overflow",
+        "Chinese mobile LD004 evidence preserves the same-window warning without horizontal overflow",
+        "Chinese mobile displays the computed detection with its distinct model origin",
+        "Chinese mobile reference replay explicitly identifies truth and all 98 known changes",
+        "invalid deep link recovers to a real source event",
+        "all assets load without failed requests",
+        "all interactions finish without uncaught JavaScript errors"
+      ],
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "bb308e9c206ac1382bb8e45e90b5550166620451ebff95694f0bbc7b5485897a"
+    },
+    "composite_map_checks.json": {
+      "status": "PASS",
+      "checks": [
+        "nuscenes embedded map equals the exported reference context",
+        "nuscenes map context explicitly excludes current evaluation maps",
+        "argoverse embedded map equals the exported reference context",
+        "argoverse map context explicitly excludes current evaluation maps",
+        "nuScenes base map is the exact frozen original map file",
+        "all 157 nuScenes base features retain original node coordinates and polygon holes",
+        "Argoverse uses the frozen M2 prior rather than current ground truth",
+        "all 343 Argoverse physical boundaries are exact M2 vertices, deduplicated only by reversal",
+        "all 219 lane fills and 27 crossings use actual prior-boundary coordinates",
+        "nuscenes reference bounds equal independently measured source extents",
+        "argoverse reference bounds equal independently measured source extents",
+        "the separate reference replay contains exactly the 98 independently read confirmed truth objects",
+        "all red reference-change geometries preserve the supplied current-map coordinates and attributes",
+        "nuScenes perception guide exactly reports 14 source categories, 2278 frame records and 154 instances",
+        "nuScenes structural uncertainty denominator is the six actual source candidate windows",
+        "the displayed 5 of 6 unresolved result counts actual model decisions and does not claim the 5 percent goal is met",
+        "motion uncertainty is independently traced to the tracking source and not reused as the structure error rate",
+        "all nuScenes status-audit source hashes match the original files independently of rendered labels",
+        "Argoverse guide reports 4976 coarse vehicle boxes, without invented object classes or GT labels",
+        "the prominent map is visible before the detailed evidence panels",
+        "the yellow, red and green meaning is visible above the canvas in the first viewport",
+        "first view shows the comparison while technical analysis starts collapsed",
+        "selected map card identifies a barrier in plain language rather than only its source ID",
+        "layer options start collapsed to keep the comparison readable",
+        "model red follows the computed detection independently from structural patch execution",
+        "an explicitly synthetic detached render fixture uses red for a confirmed structure",
+        "perception details stay collapsed until requested",
+        "English perception details render all 14 actual source labels and their annotation provenance",
+        "nuScenes opens all three layers with 157 base features, 23 states and 6 structure hypotheses",
+        "all state and structural overlay geometries preserve their frozen prediction values",
+        "LD004 local support is saved separately from its unresolved structural operation",
+        "nuscenes drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
+        "argoverse drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
+        "real nuScenes pixels distinguish 23 yellow states, one red local detection and five green candidates",
+        "fit all contains actual source extents without confusing the two city coordinate systems",
+        "base geometry remains pixel-identical at before",
+        "base geometry remains pixel-identical at compare",
+        "base geometry remains pixel-identical at after",
+        "swipe 100% preserves original pixels and clips updated source geometry",
+        "swipe 50% preserves original pixels and clips updated source geometry",
+        "swipe 0% preserves original pixels and clips updated source geometry",
+        "divider positions preserve one shared metric transform for both maps",
+        "the half comparison actually hides part of the selected source geometry",
+        "mouse dragging divider to right shows all original",
+        "mouse endpoint keeps the entire divider grip reachable on screen right",
+        "mouse dragging divider to left shows all updated",
+        "mouse endpoint keeps the entire divider grip reachable on screen left",
+        "range keyboard End shows all original with no overlay pixels or hit targets",
+        "range keyboard Home restores all updated overlays",
+        "base toggle changes actual map pixels and hides its rendered features",
+        "state toggle changes actual map pixels and hides its rendered features",
+        "structure toggle changes actual map pixels and hides its rendered features",
+        "layer switches leave all predictions and histories unchanged",
+        "yellow pixels coincide with projected last-observed state source geometry",
+        "green pixels coincide with projected unconfirmed structural source geometry",
+        "zoom increases the metric scale and changes the rendered view",
+        "zoom out reverses the scale change",
+        "drag pans in metric coordinates with the expected north-up direction",
+        "an overlay hidden behind the original side cannot be selected through the swipe clip",
+        "clicking a visible map event selects the matching source event in its map card",
+        "opening evidence after a map click shows the same selected source event",
+        "LD004 renders its actual measured curve red as a local detection without asserting an executable edit",
+        "LD004 map selection opens the exact-window reference counterevidence",
+        "Argoverse starts in the explicitly labeled data-confirmed map replay",
+        "all 98 red reference overlays use the exact independently exported truth geometry",
+        "the reference updated map is a real patched copy with a separately exported rollback",
+        "data-confirmed changes produce visible red pixels on their actual city geometry",
+        "selected confirmed truth object has red source-coordinate pixels and explicit provenance",
+        "far-right divider shows only the original map and hides reference change hit targets",
+        "far-left divider restores the actual updated reference copy and red change overlays",
+        "switching to model results removes every truth overlay from the drawable map",
+        "Argoverse perception view distinguishes vehicle detections from unique objects and ground truth",
+        "model structure counts come from computed classifications rather than the 98 known answers",
+        "model-supported scope isolates detections without inventing full-map writes",
+        "computed structural detections are visibly red even while full-map write eligibility is false",
+        "a model detection can be red and still show its explicit false-positive evaluation",
+        "remaining unresolved observations stay green rather than all becoming confirmed",
+        "NONE references no longer force every observation into an unconfirmed paint-presence category",
+        "the formerly blocked 46-frame curve renders red at its measured coordinates",
+        "source switches preserve immutable predictions and distinguish reference writes from model writes",
+        "Chinese map keeps the same dataset, selected source event and exact data",
+        "Chinese selected card distinguishes the model detection from confirmed truth and a full-map write",
+        "Chinese map controls describe state and structure separately",
+        "mobile map and controls fit without horizontal document overflow",
+        "mobile fit-selected retains visible selected-source geometry",
+        "touch dragging divider to right shows all original",
+        "touch endpoint keeps the entire divider grip reachable on screen right",
+        "touch dragging divider to left shows all updated",
+        "touch endpoint keeps the entire divider grip reachable on screen left",
+        "mobile divider gestures preserve all immutable source predictions",
+        "all assets load and all map interactions have no uncaught browser errors"
+      ],
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "bb308e9c206ac1382bb8e45e90b5550166620451ebff95694f0bbc7b5485897a",
+      "source_bounds_xyxy": {
+        "nuscenes": [
+          245.75157373658558,
+          1044.6997280220949,
+          495.01611050943313,
+          1353.0075414922635
+        ],
+        "argoverse": [
+          930,
+          -542.51,
+          1290,
+          -185.52
+        ]
+      },
+      "confirmed_structure_render_fixture": {
+        "cases": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "color": "#ff5c65",
+        "pixel": [
+          255,
+          92,
+          101,
+          255
+        ],
+        "fixture_scope": "detached render test only; no source-data mutation"
+      },
+      "swipe_pixel_comparisons": {
+        "1": {
+          "checked": 812000,
+          "mismatch": 0,
+          "originalMismatch": 0,
+          "changed": 0,
+          "maxChannelDelta": 0,
+          "samples": []
+        },
+        "0.5": {
+          "checked": 810320,
+          "mismatch": 55,
+          "originalMismatch": 0,
+          "changed": 5420,
+          "maxChannelDelta": 2,
+          "samples": [
+            {
+              "x": 739,
+              "y": 230,
+              "actual": [
+                42,
+                54,
+                57,
+                255
+              ],
+              "expected": [
+                42,
+                55,
+                58,
+                255
+              ]
+            },
+            {
+              "x": 740,
+              "y": 230,
+              "actual": [
+                179,
+                154,
+                78,
+                255
+              ],
+              "expected": [
+                180,
+                154,
+                78,
+                255
+              ]
+            },
+            {
+              "x": 750,
+              "y": 232,
+              "actual": [
+                52,
+                61,
+                59,
+                255
+              ],
+              "expected": [
+                52,
+                62,
+                59,
+                255
+              ]
+            },
+            {
+              "x": 748,
+              "y": 235,
+              "actual": [
+                113,
+                106,
+                68,
+                255
+              ],
+              "expected": [
+                114,
+                106,
+                68,
+                255
+              ]
+            },
+            {
+              "x": 739,
+              "y": 236,
+              "actual": [
+                37,
+                50,
+                57,
+                255
+              ],
+              "expected": [
+                37,
+                51,
+                57,
+                255
+              ]
+            },
+            {
+              "x": 747,
+              "y": 237,
+              "actual": [
+                189,
+                160,
+                80,
+                255
+              ],
+              "expected": [
+                190,
+                161,
+                80,
+                255
+              ]
+            },
+            {
+              "x": 738,
+              "y": 238,
+              "actual": [
+                35,
+                50,
+                57,
+                255
+              ],
+              "expected": [
+                36,
+                50,
+                57,
+                255
+              ]
+            },
+            {
+              "x": 745,
+              "y": 241,
+              "actual": [
+                37,
+                50,
+                57,
+                255
+              ],
+              "expected": [
+                38,
+                51,
+                58,
+                255
+              ]
+            },
+            {
+              "x": 746,
+              "y": 241,
+              "actual": [
+                59,
+                66,
+                60,
+                255
+              ],
+              "expected": [
+                60,
+                67,
+                60,
+                255
+              ]
+            },
+            {
+              "x": 737,
+              "y": 242,
+              "actual": [
+                180,
+                155,
+                81,
+                255
+              ],
+              "expected": [
+                180,
+                155,
+                82,
+                255
+              ]
+            },
+            {
+              "x": 738,
+              "y": 242,
+              "actual": [
+                40,
+                52,
+                57,
+                255
+              ],
+              "expected": [
+                41,
+                53,
+                57,
+                255
+              ]
+            },
+            {
+              "x": 735,
+              "y": 243,
+              "actual": [
+                185,
+                157,
+                77,
+                255
+              ],
+              "expected": [
+                186,
+                157,
+                77,
+                255
+              ]
+            }
+          ]
+        },
+        "0": {
+          "checked": 812000,
+          "mismatch": 0,
+          "originalMismatch": 0,
+          "changed": 7460,
+          "maxChannelDelta": 0,
+          "samples": []
+        }
+      },
+      "yellow_state_source_coordinate_pixels": {
+        "tested": 456,
+        "hits": 456,
+        "fraction": 1
+      },
+      "green_structure_source_coordinate_pixels": {
+        "tested": 72,
+        "hits": 72,
+        "fraction": 1
+      },
+      "map_click_regression": {
+        "expected": {
+          "event_id": "S0980-OCC-scene-0980-O022",
+          "layer": "state",
+          "source_xy": [
+            385.699,
+            1136.661
+          ],
+          "screen_xy": [
+            747.398054772032,
+            370.95525171184147
+          ],
+          "confirmed": false
+        },
+        "selected": "S0980-OCC-scene-0980-O022",
+        "canvas_box": {
+          "x": 25,
+          "y": 411.265625,
+          "width": 1450,
+          "height": 560
+        },
+        "split": 0,
+        "element_at_click": "<canvas id=\"composite-map\" aria-label=\"Shared-coordinate original and updated map comparison\" width=\"1450\" height=\"560\"></canvas>"
+      },
+      "ld004_source_coordinate_pixels": {
+        "tested": 147,
+        "hits": 147,
+        "fraction": 1
+      },
+      "reference_change_source_coordinate_pixels": {
+        "tested": 204,
+        "hits": 201,
+        "fraction": 0.9852941176470589
+      },
+      "model_detected_source_coordinate_pixels": {
+        "tested": 109,
+        "hits": 109,
+        "fraction": 1
+      },
+      "count": 91
+    }
+  },
+  "browser_count": 166,
+  "result_sha256": "bb308e9c206ac1382bb8e45e90b5550166620451ebff95694f0bbc7b5485897a",
+  "asset_revision": "721a83306ca2",
+  "source_status_audit": {
+    "schema": "nuscenes-separated-status-audit-1.0",
+    "scene_id": "scene-0980",
+    "source_files": [
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/scene.json",
+        "sha256": "06e0a061c141428d83075740c3775fcb68ad18b89acbfa498f4f1e6e192493e0",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/sample.json",
+        "sha256": "ee27bd4c9d8c8591f4a166118ca6cdad19b0bb3491dd8ba0b1ef61c23e074d1d",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/sample_annotation.json",
+        "sha256": "9a6adbc07f66f71d21ba7bd94b9abd259072c420ad4fcffe324452df32e43a3b",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/category.json",
+        "sha256": "8205122ea476e44f997f5522481bf9405d3c3c375734a0a4a6fdfcc02a2bffe9",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "processed/tracking_report.json",
+        "sha256": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "processed/scene0980_unified_candidates_v1.csv",
+        "sha256": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "processed/road_perception/scene0980_discrepancy_candidates_v1.csv",
+        "sha256": "d9f89697835563e1d40d799e71274ed58ed2d1b940f5c1ddb31c98d08a83e59b",
+        "role": "audit_only"
+      },
+      {
+        "root": "delivery_root",
+        "path": "outputs/stage3/scored_candidates.csv",
+        "sha256": "1c931c3e528d2d2db189b3c2b8e07f48bd36722c700265a6e1a582200afc252d",
+        "role": "audit_only"
+      },
+      {
+        "root": "delivery_root",
+        "path": "evaluation_labels/candidate_evidence.csv",
+        "sha256": "1403f462dabb1f2bae4673d839b36eba71f0125669abe3bad854853fac229f88",
+        "role": "audit_only"
+      },
+      {
+        "root": "delivery_root",
+        "path": "outputs/stage7/evaluation_report.json",
+        "sha256": "96e86ad0fd816aaab17f6c4f46a5efcbf31e8cc9fea4daac10af5c1b64bd1f7a",
+        "role": "audit_only"
+      }
+    ],
+    "source_provenance": [
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/scene.json",
+        "sha256": "06e0a061c141428d83075740c3775fcb68ad18b89acbfa498f4f1e6e192493e0",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/sample.json",
+        "sha256": "ee27bd4c9d8c8591f4a166118ca6cdad19b0bb3491dd8ba0b1ef61c23e074d1d",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/sample_annotation.json",
+        "sha256": "9a6adbc07f66f71d21ba7bd94b9abd259072c420ad4fcffe324452df32e43a3b",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "v1.0-trainval/category.json",
+        "sha256": "8205122ea476e44f997f5522481bf9405d3c3c375734a0a4a6fdfcc02a2bffe9",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "processed/tracking_report.json",
+        "sha256": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "processed/scene0980_unified_candidates_v1.csv",
+        "sha256": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee",
+        "role": "audit_only"
+      },
+      {
+        "root": "raw_root",
+        "path": "processed/road_perception/scene0980_discrepancy_candidates_v1.csv",
+        "sha256": "d9f89697835563e1d40d799e71274ed58ed2d1b940f5c1ddb31c98d08a83e59b",
+        "role": "audit_only"
+      },
+      {
+        "root": "delivery_root",
+        "path": "outputs/stage3/scored_candidates.csv",
+        "sha256": "1c931c3e528d2d2db189b3c2b8e07f48bd36722c700265a6e1a582200afc252d",
+        "role": "audit_only"
+      },
+      {
+        "root": "delivery_root",
+        "path": "evaluation_labels/candidate_evidence.csv",
+        "sha256": "1403f462dabb1f2bae4673d839b36eba71f0125669abe3bad854853fac229f88",
+        "role": "audit_only"
+      },
+      {
+        "root": "delivery_root",
+        "path": "outputs/stage7/evaluation_report.json",
+        "sha256": "96e86ad0fd816aaab17f6c4f46a5efcbf31e8cc9fea4daac10af5c1b64bd1f7a",
+        "role": "audit_only"
+      }
+    ],
+    "prediction_inputs_modified": false,
+    "labels_used_for_model_prediction": false,
+    "annotation_categories": {
+      "total_annotations": 2278,
+      "known_category_annotations": 2278,
+      "unknown_category_annotations": 0,
+      "unique_instances": 154,
+      "category_counts": {
+        "movable_object.barrier": 890,
+        "human.pedestrian.adult": 235,
+        "movable_object.trafficcone": 561,
+        "vehicle.car": 104,
+        "vehicle.truck": 103,
+        "movable_object.debris": 107,
+        "human.pedestrian.stroller": 32,
+        "static_object.bicycle_rack": 27,
+        "human.pedestrian.construction_worker": 144,
+        "vehicle.construction": 19,
+        "human.pedestrian.personal_mobility": 18,
+        "vehicle.bus.rigid": 14,
+        "vehicle.motorcycle": 16,
+        "movable_object.pushable_pullable": 8
+      },
+      "scope": "Supplied object-category annotations; not road-structure change labels."
+    },
+    "object_motion_states": {
+      "total_instances": 154,
+      "counts": {
+        "stationary": 120,
+        "insufficient_observations": 10,
+        "moving": 21,
+        "uncertain": 3
+      },
+      "uncertain_count": 3,
+      "uncertain_fraction": 0.01948051948051948,
+      "insufficient_observations_count": 10,
+      "source_description": "nuScenes GT instance_token + 2Hz annotations; motion states are threshold heuristics",
+      "scope": "Derived motion-state heuristics over object instances; not structural-change uncertainty."
+    },
+    "source_candidates": {
+      "total_candidates": 29,
+      "structural_candidates": 6,
+      "source_status_counts": {
+        "CANDIDATE_UNVERIFIED": 6
+      },
+      "structural_evidence_level_counts": {
+        "INSUFFICIENT_EVIDENCE": 4,
+        "HIGH_EVIDENCE": 2
+      }
+    },
+    "independent_labels": {
+      "candidate_rows": 29,
+      "verified_candidate_labels": 0,
+      "blank_candidate_labels": 29,
+      "verified_structural_change_labels": null,
+      "structural_change_truth_available": false,
+      "scope": "Candidate evidence-support labels cannot substitute for independently verified prior/current map changes.",
+      "source_reason": "No independently verified prior/current change GT or held-out scenes supplied."
+    },
+    "semantic_routing": {
+      "total_candidates": 29,
+      "state_events": 23,
+      "structural_candidates": 6,
+      "unassigned": 0,
+      "unassigned_fraction": 0.0,
+      "scope": "Semantic layer identity over all delivered candidates; not truth of the proposed change."
+    },
+    "structural_quality": {
+      "total_candidates": 6,
+      "detected": 1,
+      "insufficient_evidence": 5,
+      "geometrically_consistent": 0,
+      "insufficient_fraction": 0.8333333333333334,
+      "scope": "Local geometric model decision over structural candidate windows, not a ground-truth uncertainty rate."
+    },
+    "structural_write": {
+      "total_candidates": 6,
+      "eligible": 0,
+      "executed": 0,
+      "scope": "Full structural edit eligibility/execution, separate from local detection."
+    },
+    "five_percent_claim": {
+      "structural_truth_rate_verified": false,
+      "target_fraction": 0.05,
+      "structural_model_insufficient_fraction": 0.8333333333333334,
+      "model_candidate_target_met": false,
+      "meaning": "The 5% value is the user-requested comparison target, not a verified dataset statistic. Motion uncertainty and model candidate insufficiency have different denominators."
+    },
+    "candidate_diagnostics": [
+      {
+        "candidate_id": "S0980-LD-001",
+        "frame_window": [
+          11,
+          12
+        ],
+        "source_observed_frames": 2,
+        "model_recorded_frames": 2,
+        "track_id": "T002",
+        "track_identity_verified": false,
+        "source_review_status": "CANDIDATE_UNVERIFIED",
+        "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+        "source_support_frames": 0,
+        "source_map_change_status": "UNVERIFIED",
+        "model_status": "insufficient_evidence",
+        "model_detected": false,
+        "model_status_source": "model_change_decision",
+        "reason_codes": [
+          "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+          "PHYSICAL_ALIGNMENT_UNVERIFIED",
+          "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+          "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+        ],
+        "write_eligible": false,
+        "map_patch_executed": false
+      },
+      {
+        "candidate_id": "S0980-LD-002",
+        "frame_window": [
+          16,
+          17
+        ],
+        "source_observed_frames": 2,
+        "model_recorded_frames": 2,
+        "track_id": "T003",
+        "track_identity_verified": false,
+        "source_review_status": "CANDIDATE_UNVERIFIED",
+        "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+        "source_support_frames": 2,
+        "source_map_change_status": "UNVERIFIED",
+        "model_status": "insufficient_evidence",
+        "model_detected": false,
+        "model_status_source": "model_change_decision",
+        "reason_codes": [
+          "INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS",
+          "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+          "PHYSICAL_ALIGNMENT_UNVERIFIED",
+          "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+          "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+        ],
+        "write_eligible": false,
+        "map_patch_executed": false
+      },
+      {
+        "candidate_id": "S0980-LD-003",
+        "frame_window": [
+          18,
+          25
+        ],
+        "source_observed_frames": 8,
+        "model_recorded_frames": 8,
+        "track_id": "T004",
+        "track_identity_verified": false,
+        "source_review_status": "CANDIDATE_UNVERIFIED",
+        "source_evidence_level": "HIGH_EVIDENCE",
+        "source_support_frames": 8,
+        "source_map_change_status": "UNVERIFIED",
+        "model_status": "insufficient_evidence",
+        "model_detected": false,
+        "model_status_source": "model_change_decision",
+        "reason_codes": [
+          "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+          "PHYSICAL_ALIGNMENT_UNVERIFIED",
+          "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+          "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+        ],
+        "write_eligible": false,
+        "map_patch_executed": false
+      },
+      {
+        "candidate_id": "S0980-LD-004",
+        "frame_window": [
+          27,
+          33
+        ],
+        "source_observed_frames": 7,
+        "model_recorded_frames": 7,
+        "track_id": "T005",
+        "track_identity_verified": false,
+        "source_review_status": "CANDIDATE_UNVERIFIED",
+        "source_evidence_level": "HIGH_EVIDENCE",
+        "source_support_frames": 7,
+        "source_map_change_status": "UNVERIFIED",
+        "model_status": "detected",
+        "model_detected": true,
+        "model_status_source": "model_change_decision",
+        "reason_codes": [
+          "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+          "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+          "PHYSICAL_ALIGNMENT_UNVERIFIED",
+          "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+          "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+        ],
+        "write_eligible": false,
+        "map_patch_executed": false
+      },
+      {
+        "candidate_id": "S0980-LD-005",
+        "frame_window": [
+          28,
+          28
+        ],
+        "source_observed_frames": 1,
+        "model_recorded_frames": 1,
+        "track_id": "T006",
+        "track_identity_verified": false,
+        "source_review_status": "CANDIDATE_UNVERIFIED",
+        "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+        "source_support_frames": 1,
+        "source_map_change_status": "UNVERIFIED",
+        "model_status": "insufficient_evidence",
+        "model_detected": false,
+        "model_status_source": "model_change_decision",
+        "reason_codes": [
+          "DISTINCT_PHYSICAL_REFERENCE_AMBIGUITY",
+          "PHYSICAL_ALIGNMENT_UNVERIFIED",
+          "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+          "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+        ],
+        "write_eligible": false,
+        "map_patch_executed": false
+      },
+      {
+        "candidate_id": "S0980-LD-006",
+        "frame_window": [
+          38,
+          38
+        ],
+        "source_observed_frames": 1,
+        "model_recorded_frames": 1,
+        "track_id": "T007",
+        "track_identity_verified": false,
+        "source_review_status": "CANDIDATE_UNVERIFIED",
+        "source_evidence_level": "INSUFFICIENT_EVIDENCE",
+        "source_support_frames": 1,
+        "source_map_change_status": "UNVERIFIED",
+        "model_status": "insufficient_evidence",
+        "model_detected": false,
+        "model_status_source": "model_change_decision",
+        "reason_codes": [
+          "LOCAL_REFERENCE_OVERLAP_TOO_SHORT",
+          "PHYSICAL_ALIGNMENT_UNVERIFIED",
+          "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+          "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+        ],
+        "write_eligible": false,
+        "map_patch_executed": false
+      }
+    ]
+  },
+  "nuscenes_summary": {
+    "events": 29,
+    "reliability_counts": {
+      "supported_conflict": 24,
+      "insufficient_geometry": 5
+    },
+    "layer_counts": {
+      "map_state_event": 23,
+      "base_map_structure": 6
+    },
+    "accepted_layer_counts": {
+      "map_state_event": 23,
+      "base_map_structure": 1
+    },
+    "stored_state_events": 23,
+    "base_map_updates": 0,
+    "pending_manual_reviews": 0,
+    "model_detected_local_structure": 1
+  },
+  "unchanged_outputs": {
+    "argoverse_predictions.json": true,
+    "argoverse_state_layer.geojson": true,
+    "nuscenes_state_layer.geojson": true,
+    "argoverse_reference_updated_map.json": true,
+    "argoverse_reference_rollback_map.json": true,
+    "argoverse_reference_patch_log.json": true,
+    "argoverse_reference_changes.geojson": true
+  },
+  "prediction_freeze_verified": true,
+  "executed_code_hashes_verified": true,
+  "production_thresholds_changed": false,
+  "threshold_diagnostic": "nuscenes_threshold_diagnostic_20261108.json",
+  "final_structural_uncertainty_target_met": false,
+  "source_annotations_modified": false,
+  "model_structural_map_patches": 0,
+  "live_pages_delivery_verified": false,
+  "scope": "Software and local-browser validation passes. Six structure-candidate model decisions have5/6 insufficient support; user5% final-structure target is not achieved, nor replaced by motion-state or semantic-routing rates."
+}

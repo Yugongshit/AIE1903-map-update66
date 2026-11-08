@@ -53,6 +53,46 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             expected_hash = matches[0]
         if context['provenance']['map_sha256'] != expected_hash:
             raise ValueError('Map context differs from the map used for prediction: ' + name)
+    audit = data.get('evaluation', {}).get('nuscenes', {}).get('status_audit')
+    if audit:
+        nu = data['datasets']['nuscenes']
+        if audit.get('scene_id') != nu['scene_id']:
+            raise ValueError('nuScenes status audit belongs to a different scene')
+        roots = {'raw_root': Path(raw_root or ROOT/'AIE1903 原始资料').resolve(),
+                 'delivery_root': Path(delivery_root or ROOT/'external/perception_delivery').resolve()}
+        for source in audit.get('source_provenance', []):
+            parent = roots.get(source.get('root'))
+            if parent is None:
+                raise ValueError('Unknown nuScenes audit source root')
+            path = (parent/source['path']).resolve()
+            if (not path.is_relative_to(parent) or not path.is_file()
+                    or sha256(path.read_bytes()).hexdigest() != source['sha256']):
+                raise ValueError('nuScenes status audit source identity differs')
+        events = nu['events']
+        def semantic_layer(event):
+            layer = event['map_layer']
+            return layer.get('conditional_layer_prediction', 'unresolved') if layer['predicted_layer'] == 'not_applicable' else layer['predicted_layer']
+        structural = [e for e in events if semantic_layer(e) == 'base_map_structure']
+        routing, quality, writes = audit['semantic_routing'], audit['structural_quality'], audit['structural_write']
+        expected_routing = {'total_candidates': len(events),
+                            'state_events': sum(semantic_layer(e) == 'map_state_event' for e in events),
+                            'structural_candidates': len(structural),
+                            'unassigned': sum(semantic_layer(e) not in {'map_state_event', 'base_map_structure'} for e in events)}
+        expected_quality = {'total_candidates': len(structural),
+                            'detected': sum(e.get('model_change_decision', {}).get('detected') is True for e in structural),
+                            'insufficient_evidence': sum(e['reliability']['status'] == 'insufficient_geometry' for e in structural),
+                            'geometrically_consistent': sum(e['reliability']['status'] == 'consistent_with_map' for e in structural)}
+        expected_writes = {'total_candidates': len(structural),
+                           'eligible': sum(e['decision']['write_gate']['eligible'] for e in structural),
+                           'executed': sum(e['decision']['write_gate']['map_patch_executed'] for e in structural)}
+        if (any(routing.get(k) != v for k, v in expected_routing.items())
+                or any(quality.get(k) != v for k, v in expected_quality.items())
+                or any(writes.get(k) != v for k, v in expected_writes.items())
+                or {r['candidate_id'] for r in audit['candidate_diagnostics']} != {e['event_id'] for e in structural}):
+            raise ValueError('nuScenes status audit denominator or decisions disagree with predictions')
+        fraction = expected_quality['insufficient_evidence']/len(structural) if structural else None
+        if quality.get('insufficient_fraction') != fraction:
+            raise ValueError('nuScenes status audit uncertainty fraction has the wrong denominator')
     replay = data['datasets']['argoverse'].get('reference_replay')
     if replay:
         if (replay.get('source') != 'delivered_ground_truth'
@@ -123,6 +163,8 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
                        'unconfirmed_structure': 'green'},
             'confirmation': 'Model view: model_change_decision.detected for local discrepancy, independent of write eligibility. Reference view: supplied truth confirmation, independent of model output.',
             'reference_replay_is_prediction': False,
+            'nuscenes_source': 'Annotation-backed state events and separately computed model structural discrepancies',
+            'nuscenes_uncertainty_denominators_separate': bool(audit),
             'argoverse_default_view': 'reference' if replay else 'model',
             'updated_view_includes_unconfirmed_candidates': True,
             'source_base_map_mutated': False},

@@ -69,3 +69,46 @@ class PresentationIdentityTests(unittest.TestCase):
             'summary': {'confirmed_changes': 98, 'executed_patches': 98},
         }
         self.rejected_before_publication(result, 'changes, layer and execution counts disagree')
+
+    def test_nuscenes_status_audit_cannot_borrow_another_scene_or_changed_source(self):
+        result = deepcopy(self.result)
+        result['evaluation'] = {'nuscenes': {'status_audit': {'scene_id': 'different-scene'}}}
+        self.rejected_before_publication(result, 'status audit belongs to a different scene')
+        result['evaluation']['nuscenes']['status_audit'] = {
+            'scene_id': result['datasets']['nuscenes']['scene_id'],
+            'source_provenance': [{'root': 'raw_root', 'path': 'processed/objects.csv', 'sha256': '0'*64}]}
+        self.rejected_before_publication(result, 'status audit source identity differs')
+
+    def test_nuscenes_status_audit_cannot_reuse_all_events_as_the_structure_denominator(self):
+        result = deepcopy(self.result)
+        result['evaluation'] = {'nuscenes': {'status_audit': {
+            'scene_id': result['datasets']['nuscenes']['scene_id'], 'source_provenance': [],
+            'semantic_routing': {'total_candidates': 0, 'state_events': 0, 'structural_candidates': 0, 'unassigned': 0},
+            'structural_quality': {'total_candidates': 29, 'detected': 0, 'insufficient_evidence': 0, 'geometrically_consistent': 0},
+            'structural_write': {'total_candidates': 0, 'eligible': 0, 'executed': 0},
+            'candidate_diagnostics': []}}}
+        self.rejected_before_publication(result, 'denominator or decisions disagree')
+
+    def test_geometric_agreement_remains_in_the_structural_candidate_denominator(self):
+        result = deepcopy(self.result)
+        for dataset in result['datasets'].values():
+            dataset['state_event_layer'] = {'type': 'FeatureCollection', 'features': []}
+        result['datasets']['nuscenes']['events'] = [{
+            'event_id': 'structural-1',
+            'map_layer': {'predicted_layer': 'not_applicable', 'conditional_layer_prediction': 'base_map_structure'},
+            'reliability': {'status': 'consistent_with_map'},
+            'model_change_decision': {'detected': False, 'status': 'no_geometric_discrepancy'},
+            'decision': {'write_gate': {'eligible': False, 'map_patch_executed': False}}}]
+        result['evaluation'] = {'nuscenes': {'status_audit': {
+            'scene_id': result['datasets']['nuscenes']['scene_id'], 'source_provenance': [],
+            'semantic_routing': {'total_candidates': 1, 'state_events': 0, 'structural_candidates': 1, 'unassigned': 0},
+            'structural_quality': {'total_candidates': 1, 'detected': 0, 'insufficient_evidence': 0,
+                                   'geometrically_consistent': 1, 'insufficient_fraction': 0.},
+            'structural_write': {'total_candidates': 1, 'eligible': 0, 'executed': 0},
+            'candidate_diagnostics': [{'candidate_id': 'structural-1'}]}}}
+        with tempfile.TemporaryDirectory() as directory:
+            source, output = Path(directory)/'result.json', Path(directory)/'site'
+            source.write_text(json.dumps(result))
+            with patch('scripts.build_pipeline_studio.build_map_contexts', return_value=self.contexts):
+                build(source, output)
+            self.assertTrue((output/'en/index.html').is_file())

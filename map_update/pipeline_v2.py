@@ -339,6 +339,7 @@ def run_pipeline(raw_root, delivery_root, output):
                   'shared_boundary_aliases': 'physical identity may be known; synchronized edits of all references remain unverified',
                   'minimum_duration_s': None, 'minimum_independent_visits': None},
               'structural_evidence_revision': 'geometry_detection_without_paint_veto_and_separate_reference_replay_20261108',
+              'nuscenes_confirmation_revision': 'computed_local_model_decision_passthrough_and_separate_status_denominators_20261108',
               'confirmation_contract': {
                   'model_detection': 'Computed local geometric decision; independent of map-write eligibility.',
                   'reference_confirmation': 'Delivered M8 labels and current states, read only after prediction freeze.',
@@ -363,7 +364,7 @@ def run_pipeline(raw_root, delivery_root, output):
             av._write(out/name, value)
             frozen_names.append(name)
     for name in ('pipeline_v2.py', 'nuscenes_v2.py', 'local_correspondence.py', 'reliability_v2.py', 'map_layers.py',
-                 'structure_evaluation.py', 'reference_replay.py',
+                 'structure_evaluation.py', 'reference_replay.py', 'nuscenes_status_audit.py',
                  'state_events.py', 'persistence.py', 'engine.py', 'reliability.py',
                  'scene.py', 'delivery.py', 'automatic.py', 'argoverse.py'):
         path = Path(__file__).with_name(name)
@@ -381,6 +382,13 @@ def run_pipeline(raw_root, delivery_root, output):
     av._write(out/'prediction_freeze.json', freeze)
     evaluation = {'nuscenes': evaluate_nuscenes_labels(nu['events']),
                   'argoverse': evaluate_argoverse_labels(raw, prior, argo['events'], sources)}
+    from .nuscenes_status_audit import build_nuscenes_status_audit
+    nu_audit = build_nuscenes_status_audit(raw, delivery, nu['events'])
+    evaluation['nuscenes']['status_audit'] = nu_audit
+    for source in nu_audit['source_files']:
+        prefix = 'external/perception_delivery/' if source['root'] == 'delivery_root' else ''
+        sources.append({'path': prefix + source['path'], 'sha256': source['sha256'],
+                        'role': 'nuscenes_status_audit_only_after_prediction_freeze'})
     if any(av._hash(out/name) != digest for name, digest in freeze['files_sha256'].items()):
         raise ValueError('Prediction outputs changed during evaluation')
     # Trusted reference import is an independent post-freeze replay, never a

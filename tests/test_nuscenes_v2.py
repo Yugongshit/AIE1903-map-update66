@@ -21,6 +21,7 @@ class NuScenesV2Tests(unittest.TestCase):
         result = self.result
         self.assertEqual((len(result['events']), len(result['observation_decisions'])), (29, 332))
         self.assertEqual(result['summary']['reliability_statuses'], {'supported_conflict': 24, 'insufficient_geometry': 5})
+        self.assertEqual(result['summary']['marking_model_decisions'], {'insufficient_evidence': 5, 'detected': 1})
         event = next(e for e in result['events'] if e['event_id'].endswith('O001'))
         self.assertEqual(event['semantic_kind'], 'movable_occupancy')
         self.assertEqual(event['reliability']['score'], 1.)
@@ -31,6 +32,18 @@ class NuScenesV2Tests(unittest.TestCase):
         self.assertEqual(event['geometry_city']['geometries'], [o['geometry_city'] for o in original['objects']])
         self.assertTrue(all(s['observation'] == 'supports_change' for s in event['samples']))
         self.assertFalse(event['base_map_write_eligible'])
+
+    def test_local_model_detection_is_connected_without_converting_state_events_to_structure(self):
+        structures = [e for e in self.result['events'] if e['change_type'] == 'line_discrepancy']
+        self.assertEqual(len(structures), 6)
+        self.assertTrue(all(e['model_change_decision']['source'] == 'model_prediction' for e in structures))
+        detected = [e for e in structures if e['model_change_decision']['detected']]
+        self.assertEqual([e['event_id'] for e in detected], ['S0980-LD-004'])
+        self.assertFalse(detected[0]['base_map_write_eligible'])
+        self.assertFalse(detected[0]['structural_hypothesis']['operation_resolved'])
+        occupancy = [e for e in self.result['events'] if e['change_type'] == 'occupancy']
+        self.assertEqual(len(occupancy), 23)
+        self.assertTrue(all('model_change_decision' not in e for e in occupancy))
 
     def test_missing_observations_and_zero_overlap_do_not_clear_a_lane(self):
         scene = deepcopy(self.scene)

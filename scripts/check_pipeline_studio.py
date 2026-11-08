@@ -58,6 +58,47 @@ try:
         ) and all(len(view['datasets'][name]['events']) == len(source['datasets'][name]['events']) for name in source['datasets']))
         check('actual state layers, evaluation and method are preserved unchanged', all(view['datasets'][name]['state_event_layer'] == source['datasets'][name]['state_event_layer'] for name in source['datasets']) and view['evaluation'] == source['evaluation'] and view['method'] == source['method'])
         check('nuScenes opens with 29 events, 23 state classes and one locally supported structural hypothesis', page.locator('#events [data-event]').count() == 29 and '23 / 1' in page.locator('#overview').inner_text() and source['datasets']['nuscenes']['summary']['reliability_counts'] == {'supported_conflict': 24, 'insufficient_geometry': 5})
+        audit = source['evaluation']['nuscenes']['status_audit']
+        check('nuScenes status audit keeps known object annotations separate from structural evidence',
+              page.locator('#nuscenes-status-audit').is_visible()
+              and audit['annotation_categories']['total_annotations'] == 2278
+              and audit['annotation_categories']['known_category_annotations'] == 2278
+              and audit['annotation_categories']['unknown_category_annotations'] == 0
+              and audit['annotation_categories']['unique_instances'] == 154
+              and page.locator('#nuscenes-annotation').inner_text() == '2,278 / 2,278')
+        check('every delivered candidate has a semantic map layer without being declared a verified change',
+              audit['semantic_routing']['total_candidates'] == 29
+              and audit['semantic_routing']['state_events'] == 23
+              and audit['semantic_routing']['structural_candidates'] == 6
+              and audit['semantic_routing']['unassigned'] == 0
+              and '23' in page.locator('#nuscenes-routing').inner_text()
+              and '6' in page.locator('#nuscenes-routing').inner_text()
+              and '0 unassigned / 29' in page.locator('#nuscenes-routing').locator('..').inner_text())
+        check('the requested structural uncertainty target is honestly unmet at 5 of 6, independently from object motion',
+              audit['structural_quality']['detected'] == 1
+              and audit['structural_quality']['insufficient_evidence'] == 5
+              and audit['structural_quality']['total_candidates'] == 6
+              and abs(audit['structural_quality']['insufficient_fraction'] - 5 / 6) < 1e-12
+              and audit['five_percent_claim']['model_candidate_target_met'] is False
+              and audit['five_percent_claim']['structural_truth_rate_verified'] is False
+              and '5 / 6' in page.locator('#nuscenes-structure-abstention').inner_text()
+              and '83.3%' in page.locator('#nuscenes-structure-abstention').inner_text()
+              and '5%' in page.locator('#nuscenes-uncertainty-note').inner_text())
+        page.locator('#nuscenes-candidate-audit > summary').click()
+        check('object motion uncertainty retains its own 154-instance denominator and extra insufficient-observation category',
+              audit['object_motion_states']['total_instances'] == 154
+              and audit['object_motion_states']['uncertain_count'] == 3
+              and audit['object_motion_states']['insufficient_observations_count'] == 10
+              and abs(audit['object_motion_states']['uncertain_fraction'] - 3 / 154) < 1e-12
+              and '3/154' in page.locator('#nuscenes-motion-note').inner_text()
+              and '1.95%' in page.locator('#nuscenes-motion-note').inner_text()
+              and '10' in page.locator('#nuscenes-motion-note').inner_text())
+        check('local structure detection does not turn into a fabricated executed map patch',
+              audit['structural_write']['total_candidates'] == 6
+              and audit['structural_write']['eligible'] == audit['structural_write']['executed'] == 0
+              and '0 / 6' in page.locator('#nuscenes-write').inner_text()
+              and audit['labels_used_for_model_prediction'] is False)
+        page.locator('#nuscenes-candidate-audit > summary').click()
         check('main classifier uses structure/state semantics and makes no trained-probability claim', 'Duration does not determine the map layer' in page.locator('#model-boundary').inner_text() and 'explicit semantic evidence' in page.locator('#model-boundary').inner_text() and source['method']['parameters_learned'] is False)
         check('primary UI contains no duration forecast, posterior display or minimum revisit threshold', page.locator('#trace-chart').count() == 0 and page.locator('#sensitivity').count() == 0 and 'Temporary forecast' not in page.locator('main').inner_text() and 'Long-term forecast' not in page.locator('main').inner_text() and '24 h' not in page.locator('main').inner_text() and source['method']['write_policy']['minimum_duration_s'] is None and source['method']['write_policy']['minimum_independent_visits'] is None)
         check('occupancy reliability preserves annotation provenance instead of claiming new detection', 'supplied annotation' in page.locator('#reliability-note').inner_text() and 'No new camera detector' in page.locator('#reliability-note').inner_text() and '1.00' in page.locator('#reliability-values').inner_text())
@@ -78,14 +119,29 @@ try:
         page.locator('#events [data-event]').first.click()
         check('unverified marking semantics identify a structural hypothesis independently of reliability', page.locator('#layer-status').inner_text() == 'Base-map structure' and 'Geometry evidence insufficient' in page.locator('#reliability-status').inner_text() and 'actual change is not verified' in page.locator('#layer-note').inner_text() and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False)
         check('structural hypothesis does not create a state record or a base patch', not page.locator('#lifecycle').is_visible() and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.map_patch_executed') is False)
-        page.locator('#events [data-event="S0980-LD-004"]').click()
+        if page.locator('#nuscenes-candidate-audit').get_attribute('open') is None:
+            page.locator('#nuscenes-candidate-audit > summary').click()
+        check('all six structural candidate diagnostics preserve their source windows and separate calculated outcomes',
+              page.locator('[data-nuscenes-candidate]').count() == len(audit['candidate_diagnostics']) == 6
+              and {button.get_attribute('data-nuscenes-candidate') for button in page.locator('[data-nuscenes-candidate]').all()} == {row['candidate_id'] for row in audit['candidate_diagnostics']}
+              and all(row['source_observed_frames'] == row['model_recorded_frames'] for row in audit['candidate_diagnostics'])
+              and sum(row['model_detected'] for row in audit['candidate_diagnostics']) == 1)
+        page.locator('[data-nuscenes-candidate="S0980-LD-004"]').click()
+        check('the audit candidate control selects the same source event on the map and in technical evidence',
+              page.evaluate('PIPELINE_STUDIO.state.eventId') == 'S0980-LD-004'
+              and page.locator('#selected-id').inner_text() == 'S0980-LD-004')
         ld004 = page.evaluate('PIPELINE_STUDIO.current()')
-        check('LD004 reports computed local support while its structural operation and edit remain unconfirmed',
+        check('LD004 adopts the computed local model detection while its exact operation and edit stay unresolved',
               page.locator('#reliability-status').inner_text() == 'Local conflict supported'
               and ld004['reliability']['status'] == 'supported_conflict'
               and ld004['change_type'] == 'line_discrepancy'
               and ld004['structural_hypothesis']['operation'] == 'unresolved_parallel_marking_or_insertion'
-              and ld004['structural_hypothesis']['confirmed'] is False
+              and ld004['structural_hypothesis']['confirmed'] is True
+              and ld004['structural_hypothesis']['confirmation_source'] == 'model_prediction'
+              and ld004['structural_hypothesis']['confirmation_scope'] == 'local_boundary_correspondence'
+              and ld004['structural_hypothesis']['operation_resolved'] is False
+              and ld004['model_change_decision']['detected'] is True
+              and ld004['model_change_decision']['scope'] == 'local_boundary_correspondence'
               and ld004['decision']['classification_applied'] is True
               and ld004['decision']['base_map_write_eligible'] is False
               and ld004['decision']['write_gate']['map_patch_executed'] is False)
@@ -102,8 +158,9 @@ try:
               and [int(cell.inner_text()) for cell in page.locator('#same-window-evidence tbody tr td:first-child').all()] == list(range(28, 34))
               and 'does not support a claim that the old marking disappeared or moved' in page.locator('#same-window-evidence').inner_text())
         check('LD004 details separate local geometric support from paint identity, alignment and structural truth',
-              'not a verified edit target' in page.locator('#structural-hypothesis-note').inner_text()
-              and 'parallel marking or insertion' in page.locator('#structural-hypothesis-note').inner_text()
+              'local' in page.locator('#structural-hypothesis-note').inner_text().lower()
+              and 'model' in page.locator('#structural-hypothesis-note').inner_text().lower()
+              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
               and 'Paint identity' in page.locator('#observation-dimensions').inner_text()
               and 'Physical alignment' in page.locator('#observation-dimensions').inner_text()
               and ld004['observation_evidence']['change_assessment']['map_edit_verified'] is False
@@ -133,6 +190,11 @@ try:
         page.locator('#dataset').select_option('argoverse')
         argo = source['datasets']['argoverse']
         replay = argo['reference_replay']
+        check('nuScenes repair preserves the independently evaluated Argoverse result counts',
+              argo['summary']['reliability_counts'] == {'supported_conflict': 14, 'insufficient_geometry': 40, 'consistent_with_map': 22}
+              and len(replay['changes']) == 98
+              and source['evaluation']['argoverse']['full_boundary_geometry']['metrics']['true_positives'] == 9
+              and source['evaluation']['argoverse']['full_boundary_geometry']['local_geometry_summary']['within_tolerance_detections'] == 3)
         detected = [event for event in argo['events'] if event['model_change_decision']['detected']]
         unresolved = [event for event in argo['events'] if event['reliability']['status'] == 'insufficient_geometry']
         consistent = [event for event in argo['events'] if event['reliability']['status'] == 'consistent_with_map']
@@ -259,6 +321,15 @@ try:
         check('language switching preserves dataset and selected event', page.evaluate('PIPELINE_STUDIO.state.dataset') == 'nuscenes' and page.evaluate('PIPELINE_STUDIO.state.eventId') == selected)
         check('both languages use identical source-derived data', page.evaluate('PIPELINE_STUDIO.data') == view)
         check('Chinese distinguishes unobserved clip-end state from unknown classification', '地图状态事件' in page.locator('#layer-status').inner_text() and '末帧状态未观测' in page.locator('#lifecycle').inner_text() and '并不代表没有检测到该障碍' in page.locator('#lifecycle').inner_text())
+        page.locator('#nuscenes-candidate-audit > summary').click()
+        check('Chinese audit identifies the unmet structural target using 5 of 6 rather than motion uncertainty',
+              page.locator('#nuscenes-status-audit').is_visible()
+              and '5 / 6' in page.locator('#nuscenes-structure-abstention').inner_text()
+              and '83.3%' in page.locator('#nuscenes-structure-abstention').inner_text()
+              and '5%' in page.locator('#nuscenes-uncertainty-note').inner_text()
+              and '3/154' in page.locator('#nuscenes-motion-note').inner_text())
+        page.locator('#nuscenes-status-audit').screenshot(path=str(root / 'pipeline_nuscenes_audit_zh.png'))
+        page.locator('#nuscenes-candidate-audit > summary').click()
         check('Chinese explains semantic routing and expiry without a temporal class', '持续时长不决定图层' in page.locator('#model-boundary').inner_text() and '不会虚构默认有效期或解除' in page.locator('#lifecycle').inner_text() and '最低写入访问次数 · 无最低值' in page.locator('#parameters').inner_text())
         page.screenshot(path=str(root / 'pipeline_zh.png'), full_page=True)
         page.set_viewport_size({'width': 390, 'height': 844})

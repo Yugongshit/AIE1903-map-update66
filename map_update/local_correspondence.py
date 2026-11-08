@@ -105,15 +105,26 @@ def evaluate_marking_window(candidate, observations, elements, frames, visit_id,
         'reference_semantics': {'status': 'no_unambiguous_local_reference', 'marking_type': None},
         'paint_identity': {'status': 'unverified'}, 'alignment': {'status': 'unverified'},
         'visibility': {'status': 'unverified', 'effective_coverage': None},
-        'change_assessment': {'status': 'insufficient_geometry', 'confirmed_map_change': False}}
+        'change_assessment': {'status': 'insufficient_geometry',
+                              'model_detected_local_change': False, 'map_edit_verified': False}}
+    fields['model_change_decision'] = {
+        'status': 'insufficient_evidence', 'detected': False,
+        'source': 'model_prediction', 'scope': 'local_boundary_correspondence',
+        'target_property': 'boundary_geometry',
+        'evidence_basis': 'exact_window_curve_quality_reference_correspondence_and_fixed_anchor_consensus',
+        'does_not_assess': ['paint_presence', 'marking_color_or_pattern', 'lane_use',
+                           'connectivity', 'new_unmatched_objects', 'deletion', 'exact_edit_operation'],
+        'map_edit_verified': False}
     if len(grouped) > 1:
         fields['reliability']['reason_codes'].append('REFERENCE_ASSIGNMENT_CHANGES_WITHIN_CANDIDATE_WINDOW')
     elif grouped:
         bid, rows = next(iter(grouped.items()))
         fitted = _event(lookup[bid], rows, frame_lookup, policy)
         for key in ('map_aliases', 'geometry_city', 'representative_source_id', 'fixed_anchor', 'median_residual_m',
-                    'mad_residual_m', 'distinct_frame_count', 'temporal_block_count', 'span_s', 'same_sign_conflict_fraction'):
+                    'mad_residual_m', 'distinct_frame_count', 'temporal_block_count', 'span_s', 'same_sign_conflict_fraction',
+                    'model_change_decision'):
             fields[key] = deepcopy(fitted[key])
+        fields['model_change_decision']['does_not_assess'].append('exact_edit_operation')
         fields['geometry_method'] = 'representative_observed_curve_at_fixed_reference_anchor_without_reconstruction'
         fields['reliability'] = dict(fitted['reliability'], geometry_quality=1., calibrated=False,
                                      conflict_kind='observed_local_marking_discrepancy')
@@ -157,9 +168,22 @@ def evaluate_marking_window(candidate, observations, elements, frames, visit_id,
             fields['reliability']['reason_codes'].append('REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW')
     fields['reliability']['reason_codes'] += ['PHYSICAL_ALIGNMENT_UNVERIFIED', 'GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET',
                                               'DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES']
+    model_decision = fields['model_change_decision']
+    model_decision['reason_codes'] = list(fields['reliability']['reason_codes'])
+    model_decision['claim'] = ('extra_or_differently_positioned_curve_not_verified_existing_boundary_movement'
+                               if model_decision['detected'] else 'local_curve_relation_not_detected_as_change')
     fields.update(change_type='line_discrepancy', structural_hypothesis={
         'target_property': 'paint_presence_or_boundary_geometry', 'operation': 'unresolved_parallel_marking_or_insertion',
-        'confirmed': False, 'scope': 'observed_local_segment'}, base_map_write_eligible=False,
+        'status': 'model_detected' if model_decision['detected'] else (
+            'no_geometric_discrepancy' if model_decision['status'] == 'no_geometric_discrepancy' else 'unconfirmed'),
+        'confirmed': model_decision['detected'], 'confirmation_source': 'model_prediction',
+        'confirmation_scope': 'local_boundary_correspondence',
+        'assessment': fields['reliability']['status'],
+        'operation_resolved': False, 'map_edit_verified': False,
+        'operation_alternatives': ['parallel_marking', 'new_marking', 'reference_or_projection_error'],
+        'required_evidence': ['resolve_parallel_marking_vs_new_marking_vs_reference_error',
+                              'physical_alignment_and_operation_specific_edit_evidence'],
+        'scope': 'observed_local_segment'}, base_map_write_eligible=False,
         correspondence_policy={'candidate_distance_m': policy.candidate_distance_m, 'local_direction_deg': policy.direction_deg,
             'minimum_overlap_m': policy.minimum_curve_length_m, 'ambiguity_gap_m': policy.ambiguity_gap_m,
             'reference_role': 'geometric_comparison_reference_not_verified_edit_target', 'window': [first, last]})

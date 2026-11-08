@@ -183,6 +183,36 @@ def run(directory, raw_root):
               and {row['code']: row['unique_instances'] for row in guide['nuscenes']['object_classes']} == actual_unique
               and len(actual_counts) == 14 and len(objects) == 2278
               and len({row['instance_token'] for row in objects}) == 154)
+        audit = source['evaluation']['nuscenes']['status_audit']
+        with (raw_root / 'processed/road_perception/scene0980_discrepancy_candidates_v1.csv').open(encoding='utf-8-sig') as handle:
+            structural_source = list(csv.DictReader(handle))
+        structural_source_index = {row['event_id']: row for row in structural_source}
+        structural_model = [event for event in source['datasets']['nuscenes']['events'] if event['map_layer']['predicted_layer'] == 'base_map_structure']
+        audit_rows = audit['candidate_diagnostics']
+        check('nuScenes structural uncertainty denominator is the six actual source candidate windows',
+              len(structural_source) == len(structural_source_index) == len(audit_rows) == len(structural_model) == 6
+              and {row['candidate_id'] for row in audit_rows} == set(structural_source_index)
+              and {event['event_id'] for event in structural_model} == set(structural_source_index)
+              and all(row['frame_window'] == [int(structural_source_index[row['candidate_id']]['first_frame']), int(structural_source_index[row['candidate_id']]['last_frame'])] for row in audit_rows))
+        observed_insufficient = sum(event['model_change_decision']['status'] == 'insufficient_evidence' for event in structural_model)
+        observed_detected = sum(event['model_change_decision']['detected'] for event in structural_model)
+        check('the displayed 5 of 6 unresolved result counts actual model decisions and does not claim the 5 percent goal is met',
+              observed_insufficient == audit['structural_quality']['insufficient_evidence'] == 5
+              and observed_detected == audit['structural_quality']['detected'] == 1
+              and abs(audit['structural_quality']['insufficient_fraction'] - observed_insufficient / len(structural_source)) < 1e-12
+              and audit['five_percent_claim']['model_candidate_target_met'] is False)
+        motion_source = json.loads((raw_root / 'processed/tracking_report.json').read_text())
+        check('motion uncertainty is independently traced to the tracking source and not reused as the structure error rate',
+              motion_source['motion_state_counts'] == audit['object_motion_states']['counts']
+              and motion_source['unique_instances'] == 154
+              and audit['object_motion_states']['uncertain_count'] == motion_source['motion_state_counts']['uncertain'] == 3
+              and audit['object_motion_states']['insufficient_observations_count'] == motion_source['motion_state_counts']['insufficient_observations'] == 10
+              and audit['annotation_categories']['total_annotations'] == len(objects) == 2278
+              and audit['semantic_routing']['unassigned'] == 0)
+        for item in audit['source_files']:
+            audit_root = raw_root if item['root'] == 'raw_root' else REPO / 'external/perception_delivery'
+            assert sha256((audit_root / item['path']).read_bytes()).hexdigest() == item['sha256'], item['path']
+        check('all nuScenes status-audit source hashes match the original files independently of rendered labels', True)
         detection_path = prior_paths[0].parent / 'tables/detections.jsonl'
         with detection_path.open() as handle:
             detections = [json.loads(line) for line in handle if line.strip()]
@@ -421,7 +451,11 @@ def run(directory, raw_root):
                   nu['summary']['reliability_counts'] == {'supported_conflict': 24, 'insufficient_geometry': 5}
                   and ld004['reliability']['status'] == 'supported_conflict'
                   and ld004['structural_hypothesis']['operation'] == 'unresolved_parallel_marking_or_insertion'
-                  and ld004['structural_hypothesis']['confirmed'] is False
+                  and ld004['structural_hypothesis']['confirmed'] is True
+                  and ld004['structural_hypothesis']['confirmation_source'] == 'model_prediction'
+                  and ld004['structural_hypothesis']['confirmation_scope'] == 'local_boundary_correspondence'
+                  and ld004['structural_hypothesis']['operation_resolved'] is False
+                  and ld004['model_change_decision']['detected'] is True
                   and ld004['decision']['base_map_write_eligible'] is False)
             for name in ['nuscenes', 'argoverse']:
                 page.locator('#dataset').select_option(name)
@@ -443,9 +477,12 @@ def run(directory, raw_root):
             page.locator('#map-preset-after').click()
             settle(page)
             initial = raster(page)
-            check('real nuScenes pixels use yellow states and green unconfirmed structures, with no red confirmation',
-                  initial['yellow'] > 15 and initial['green'] > 15 and initial['red'] == 0
-                  and not any(feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')))
+            check('real nuScenes pixels distinguish 23 yellow states, one red local detection and five green candidates',
+                  initial['yellow'] > 15 and initial['green'] > 15 and initial['red'] > 15
+                  and page.locator('#map-count-confirmed').inner_text() == '1'
+                  and page.locator('#map-count-unconfirmed').inner_text() == '5'
+                  and page.locator('#map-count-state').inner_text() == '23'
+                  and sum(bool(feature.get('confirmed')) for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')) == 1)
             page.locator('#map-fit-all').click()
             settle(page)
             check('fit all contains actual source extents without confusing the two city coordinate systems',
@@ -488,7 +525,7 @@ def run(directory, raw_root):
             page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', structure[0]['event_id'])
             page.locator('#map-fit-selected').click()
             settle(page)
-            green_hits = source_pixel_hits(page, [event['geometry_city'] for event in structure], 'green')
+            green_hits = source_pixel_hits(page, [event['geometry_city'] for event in structure if not event['model_change_decision']['detected']], 'green')
             report['green_structure_source_coordinate_pixels'] = green_hits
             check('green pixels coincide with projected unconfirmed structural source geometry', green_hits['hits'] > 10 and green_hits['fraction'] > .15)
             old_scale = page.evaluate('PIPELINE_STUDIO.map.state.scale')
@@ -557,13 +594,15 @@ def run(directory, raw_root):
             page.locator('#map-fit-selected').click()
             page.locator('#map-preset-after').click()
             settle(page)
-            ld_pixels = source_pixel_hits(page, [ld004['geometry_city']], 'green')
+            ld_pixels = source_pixel_hits(page, [ld004['geometry_city']], 'red')
             report['ld004_source_coordinate_pixels'] = ld_pixels
-            check('newly supported LD004 still renders its source curve as green, never confirmed red',
+            check('LD004 renders its actual measured curve red as a local detection without asserting an executable edit',
                   ld_pixels['hits'] > 10 and ld_pixels['fraction'] > .15
-                  and raster(page)['red'] == 0
-                  and page.locator('#map-count-confirmed').inner_text() == '0'
-                  and 'unconfirmed' in page.locator('#map-selected-title').inner_text().lower())
+                  and raster(page)['red'] > 15
+                  and page.locator('#map-count-confirmed').inner_text() == '1'
+                  and 'algorithm' in page.locator('#map-selected-title').inner_text().lower()
+                  and page.evaluate('PIPELINE_STUDIO.current().structural_hypothesis.operation_resolved') is False
+                  and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.map_patch_executed') is False)
             page.locator('#map-view-evidence').click()
             check('LD004 map selection opens the exact-window reference counterevidence',
                   page.locator('#same-window-evidence').is_visible()

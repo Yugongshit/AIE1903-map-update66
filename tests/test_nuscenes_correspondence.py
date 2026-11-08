@@ -53,10 +53,41 @@ class LocalCorrespondenceTests(unittest.TestCase):
         self.assertEqual(result['reliability']['status'], 'supported_conflict')
         self.assertEqual(result['temporal_block_count'], 3)
         self.assertAlmostEqual(abs(result['median_residual_m']), 1.)
+        self.assertTrue(result['model_change_decision']['detected'])
+        self.assertTrue(result['structural_hypothesis']['confirmed'])
+        self.assertEqual(result['structural_hypothesis']['confirmation_source'], 'model_prediction')
+        self.assertFalse(result['structural_hypothesis']['operation_resolved'])
         self.assertFalse(result['base_map_write_eligible'])
         result = evaluate(observations(2), refs)['event_fields']
         self.assertEqual(result['reliability']['status'], 'insufficient_geometry')
+        self.assertFalse(result['model_change_decision']['detected'])
+        self.assertEqual(result['model_change_decision']['status'], 'insufficient_evidence')
         self.assertIn('INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS', result['reliability']['reason_codes'])
+
+    def test_positive_local_decision_survives_unresolved_edit_and_reference_still_present(self):
+        rows = observations()
+        frames = [dict(frame_index=r['frame_index'], timestamp_ns=r['timestamp_ns'], observed_lines=[
+            {'candidate_ids': [], 'line_id': 9, 'track_id': 'reference-still-present',
+             'source_file': 'same-window-' + str(r['frame_index']),
+             'geometry_city': line([[2., 0.], [18., 0.]])}]) for r in rows]
+        fields = evaluate(rows, [reference('a', [[0., 0.], [20., 0.]])], frames)['event_fields']
+        self.assertTrue(fields['model_change_decision']['detected'])
+        self.assertEqual(fields['model_change_decision']['scope'], 'local_boundary_correspondence')
+        self.assertTrue(fields['structural_hypothesis']['confirmed'])
+        self.assertEqual(fields['structural_hypothesis']['operation'], 'unresolved_parallel_marking_or_insertion')
+        self.assertEqual(len(fields['same_window_reference_observations']), 3)
+        self.assertFalse(fields['base_map_write_eligible'])
+        self.assertFalse(fields['model_change_decision']['map_edit_verified'])
+
+    def test_geometric_agreement_is_explicit_and_unmatched_curves_do_not_become_new_roads(self):
+        refs = [reference('a', [[0., 0.], [20., 0.]])]
+        agreed = evaluate(observations(height=.1), refs)['event_fields']
+        self.assertEqual(agreed['model_change_decision']['status'], 'no_geometric_discrepancy')
+        self.assertFalse(agreed['model_change_decision']['detected'])
+        unmatched = evaluate(observations(height=4.), refs)['event_fields']
+        self.assertEqual(unmatched['model_change_decision']['status'], 'insufficient_evidence')
+        self.assertFalse(unmatched['structural_hypothesis']['confirmed'])
+        self.assertFalse(unmatched['observation_evidence']['change_assessment']['map_edit_verified'])
 
     def test_out_of_gate_and_changing_reference_are_explicit_failures(self):
         refs = [reference('a', [[0., 0.], [20., 0.]])]
@@ -105,7 +136,10 @@ class LocalCorrespondenceTests(unittest.TestCase):
         self.assertEqual(event['change_type'], 'line_discrepancy')
         self.assertEqual(event['geometry_method'], 'representative_observed_curve_at_fixed_reference_anchor_without_reconstruction')
         self.assertEqual(event['structural_hypothesis']['operation'], 'unresolved_parallel_marking_or_insertion')
-        self.assertFalse(event['structural_hypothesis']['confirmed'])
+        self.assertTrue(event['structural_hypothesis']['confirmed'])
+        self.assertEqual(event['structural_hypothesis']['confirmation_source'], 'model_prediction')
+        self.assertEqual(event['model_change_decision']['status'], 'detected')
+        self.assertFalse(event['structural_hypothesis']['operation_resolved'])
         self.assertEqual([r['frame_id'] for r in event['same_window_reference_observations']], [str(i) for i in range(28, 34)])
         self.assertTrue(all(abs(r['residual_m']) < .25 for r in event['same_window_reference_observations']))
         self.assertIn('REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW', event['reliability']['reason_codes'])

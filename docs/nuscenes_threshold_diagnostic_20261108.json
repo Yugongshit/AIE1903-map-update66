@@ -1,0 +1,660 @@
+{
+  "schema": "nuscenes-threshold-diagnostic-1.0",
+  "scope": "six_supplied_structural_candidate_windows_not_verified_structure_change_ground_truth",
+  "scene_id": "scene-0980",
+  "candidate_denominator": 6,
+  "ground_truth_used": false,
+  "accuracy_measured": false,
+  "production_policy_changed": false,
+  "policy_selection_performed": false,
+  "original_input_unchanged": true,
+  "source_scene_sha256": "ef879563ac2c2924885e4dacd98febaa115f923ac0fa39a94df2a5b908c06d1e",
+  "source_map_sha256": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
+  "method": "Three predeclared policy settings requested by parent, evaluated using each exact supplied candidate window. No future-window borrowing, no threshold selection or synthetic evidence.",
+  "limitations": [
+    "The supplied candidates are not independent verified structural changes.",
+    "Uncertainty fractions describe these six candidate outputs only, not official nuScenes uncertainty or accuracy.",
+    "Local discrepancy detection does not resolve a whole-map edit operation."
+  ],
+  "results": [
+    {
+      "name": "baseline",
+      "policy": {
+        "candidate_distance_m": 3.0,
+        "direction_deg": 25.0,
+        "ambiguity_gap_m": 0.25,
+        "minimum_curve_length_m": 1.5,
+        "full_quality_length_m": 3.0,
+        "minimum_quality": 0.35,
+        "anchor_spacing_m": 5.0,
+        "residual_tolerance_m": 0.5,
+        "maximum_mad_m": 0.35,
+        "temporal_block_s": 0.5,
+        "minimum_blocks": 3,
+        "minimum_span_s": 1.0,
+        "minimum_support_fraction": 0.7
+      },
+      "counts": {
+        "insufficient_evidence": 5,
+        "detected": 1
+      },
+      "detected_ids": [
+        "S0980-LD-004"
+      ],
+      "insufficient_ids": [
+        "S0980-LD-001",
+        "S0980-LD-002",
+        "S0980-LD-003",
+        "S0980-LD-005",
+        "S0980-LD-006"
+      ],
+      "uncertain_fraction_of_six_candidates": 0.8333333333333334,
+      "cases": [
+        {
+          "candidate_id": "S0980-LD-001",
+          "frame_window": [
+            11,
+            12
+          ],
+          "supplied_observation_count": 2,
+          "supplied_observation_span_s": 0.499872,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-002",
+          "frame_window": [
+            16,
+            17
+          ],
+          "supplied_observation_count": 2,
+          "supplied_observation_span_s": 0.500451,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:425d4a61-7336-4eab-ad58-7615f79d63bb",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 2,
+          "fixed_anchor_temporal_blocks": 2,
+          "fixed_anchor_span_s": 0.500451,
+          "median_residual_m": -2.2977280572482472,
+          "mad_residual_m": 0.0401923275892655,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-003",
+          "frame_window": [
+            18,
+            25
+          ],
+          "supplied_observation_count": 8,
+          "supplied_observation_span_s": 3.550011,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-004",
+          "frame_window": [
+            27,
+            33
+          ],
+          "supplied_observation_count": 7,
+          "supplied_observation_span_s": 2.999796,
+          "status": "detected",
+          "detected": true,
+          "reliability_status": "supported_conflict",
+          "reason_codes": [
+            "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 6,
+          "fixed_anchor_temporal_blocks": 6,
+          "fixed_anchor_span_s": 2.500484,
+          "median_residual_m": -2.343870715749623,
+          "mad_residual_m": 0.0858344089107046,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-005",
+          "frame_window": [
+            28,
+            28
+          ],
+          "supplied_observation_count": 1,
+          "supplied_observation_span_s": 0.0,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "DISTINCT_PHYSICAL_REFERENCE_AMBIGUITY",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-006",
+          "frame_window": [
+            38,
+            38
+          ],
+          "supplied_observation_count": 1,
+          "supplied_observation_span_s": 0.0,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "LOCAL_REFERENCE_OVERLAP_TOO_SHORT",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        }
+      ]
+    },
+    {
+      "name": "time_only_two_blocks_half_second",
+      "policy": {
+        "candidate_distance_m": 3.0,
+        "direction_deg": 25.0,
+        "ambiguity_gap_m": 0.25,
+        "minimum_curve_length_m": 1.5,
+        "full_quality_length_m": 3.0,
+        "minimum_quality": 0.35,
+        "anchor_spacing_m": 5.0,
+        "residual_tolerance_m": 0.5,
+        "maximum_mad_m": 0.35,
+        "temporal_block_s": 0.5,
+        "minimum_blocks": 2,
+        "minimum_span_s": 0.5,
+        "minimum_support_fraction": 0.7
+      },
+      "counts": {
+        "insufficient_evidence": 4,
+        "detected": 2
+      },
+      "detected_ids": [
+        "S0980-LD-002",
+        "S0980-LD-004"
+      ],
+      "insufficient_ids": [
+        "S0980-LD-001",
+        "S0980-LD-003",
+        "S0980-LD-005",
+        "S0980-LD-006"
+      ],
+      "uncertain_fraction_of_six_candidates": 0.6666666666666666,
+      "cases": [
+        {
+          "candidate_id": "S0980-LD-001",
+          "frame_window": [
+            11,
+            12
+          ],
+          "supplied_observation_count": 2,
+          "supplied_observation_span_s": 0.499872,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-002",
+          "frame_window": [
+            16,
+            17
+          ],
+          "supplied_observation_count": 2,
+          "supplied_observation_span_s": 0.500451,
+          "status": "detected",
+          "detected": true,
+          "reliability_status": "supported_conflict",
+          "reason_codes": [
+            "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:425d4a61-7336-4eab-ad58-7615f79d63bb",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 2,
+          "fixed_anchor_temporal_blocks": 2,
+          "fixed_anchor_span_s": 0.500451,
+          "median_residual_m": -2.2977280572482472,
+          "mad_residual_m": 0.0401923275892655,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-003",
+          "frame_window": [
+            18,
+            25
+          ],
+          "supplied_observation_count": 8,
+          "supplied_observation_span_s": 3.550011,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "NO_REFERENCE_WITHIN_GEOMETRIC_GATE",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-004",
+          "frame_window": [
+            27,
+            33
+          ],
+          "supplied_observation_count": 7,
+          "supplied_observation_span_s": 2.999796,
+          "status": "detected",
+          "detected": true,
+          "reliability_status": "supported_conflict",
+          "reason_codes": [
+            "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 6,
+          "fixed_anchor_temporal_blocks": 6,
+          "fixed_anchor_span_s": 2.500484,
+          "median_residual_m": -2.343870715749623,
+          "mad_residual_m": 0.0858344089107046,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-005",
+          "frame_window": [
+            28,
+            28
+          ],
+          "supplied_observation_count": 1,
+          "supplied_observation_span_s": 0.0,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "DISTINCT_PHYSICAL_REFERENCE_AMBIGUITY",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-006",
+          "frame_window": [
+            38,
+            38
+          ],
+          "supplied_observation_count": 1,
+          "supplied_observation_span_s": 0.0,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "LOCAL_REFERENCE_OVERLAP_TOO_SHORT",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        }
+      ]
+    },
+    {
+      "name": "time_and_four_meter_reference_search",
+      "policy": {
+        "candidate_distance_m": 4.0,
+        "direction_deg": 25.0,
+        "ambiguity_gap_m": 0.25,
+        "minimum_curve_length_m": 1.5,
+        "full_quality_length_m": 3.0,
+        "minimum_quality": 0.35,
+        "anchor_spacing_m": 5.0,
+        "residual_tolerance_m": 0.5,
+        "maximum_mad_m": 0.35,
+        "temporal_block_s": 0.5,
+        "minimum_blocks": 2,
+        "minimum_span_s": 0.5,
+        "minimum_support_fraction": 0.7
+      },
+      "counts": {
+        "insufficient_evidence": 4,
+        "detected": 2
+      },
+      "detected_ids": [
+        "S0980-LD-002",
+        "S0980-LD-004"
+      ],
+      "insufficient_ids": [
+        "S0980-LD-001",
+        "S0980-LD-003",
+        "S0980-LD-005",
+        "S0980-LD-006"
+      ],
+      "uncertain_fraction_of_six_candidates": 0.6666666666666666,
+      "cases": [
+        {
+          "candidate_id": "S0980-LD-001",
+          "frame_window": [
+            11,
+            12
+          ],
+          "supplied_observation_count": 2,
+          "supplied_observation_span_s": 0.499872,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:425d4a61-7336-4eab-ad58-7615f79d63bb",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 1,
+          "fixed_anchor_temporal_blocks": 1,
+          "fixed_anchor_span_s": 0.0,
+          "median_residual_m": 3.4309721313695496,
+          "mad_residual_m": 0.0,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-002",
+          "frame_window": [
+            16,
+            17
+          ],
+          "supplied_observation_count": 2,
+          "supplied_observation_span_s": 0.500451,
+          "status": "detected",
+          "detected": true,
+          "reliability_status": "supported_conflict",
+          "reason_codes": [
+            "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:425d4a61-7336-4eab-ad58-7615f79d63bb",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 2,
+          "fixed_anchor_temporal_blocks": 2,
+          "fixed_anchor_span_s": 0.500451,
+          "median_residual_m": -2.2977280572482472,
+          "mad_residual_m": 0.0401923275892655,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-003",
+          "frame_window": [
+            18,
+            25
+          ],
+          "supplied_observation_count": 8,
+          "supplied_observation_span_s": 3.550011,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "INSUFFICIENT_TEMPORALLY_SEPARATED_LOCAL_OBSERVATIONS",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:425d4a61-7336-4eab-ad58-7615f79d63bb",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 2,
+          "fixed_anchor_temporal_blocks": 2,
+          "fixed_anchor_span_s": 0.499883,
+          "median_residual_m": -2.5631339217104134,
+          "mad_residual_m": 0.06341680515290404,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-004",
+          "frame_window": [
+            27,
+            33
+          ],
+          "supplied_observation_count": 7,
+          "supplied_observation_span_s": 2.999796,
+          "status": "detected",
+          "detected": true,
+          "reliability_status": "supported_conflict",
+          "reason_codes": [
+            "REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE",
+            "REFERENCE_LINE_ALSO_OBSERVED_IN_SAME_WINDOW",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [
+            {
+              "map_element_id": "lane_divider:6b5a4771-79b4-4ddf-b305-5f4f8260b6ac",
+              "layer": "lane_divider"
+            }
+          ],
+          "fixed_anchor_frame_count": 6,
+          "fixed_anchor_temporal_blocks": 6,
+          "fixed_anchor_span_s": 2.500484,
+          "median_residual_m": -2.343870715749623,
+          "mad_residual_m": 0.0858344089107046,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-005",
+          "frame_window": [
+            28,
+            28
+          ],
+          "supplied_observation_count": 1,
+          "supplied_observation_span_s": 0.0,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "DISTINCT_PHYSICAL_REFERENCE_AMBIGUITY",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        },
+        {
+          "candidate_id": "S0980-LD-006",
+          "frame_window": [
+            38,
+            38
+          ],
+          "supplied_observation_count": 1,
+          "supplied_observation_span_s": 0.0,
+          "status": "insufficient_evidence",
+          "detected": false,
+          "reliability_status": "insufficient_geometry",
+          "reason_codes": [
+            "LOCAL_REFERENCE_OVERLAP_TOO_SHORT",
+            "PHYSICAL_ALIGNMENT_UNVERIFIED",
+            "GEOMETRIC_REFERENCE_NOT_VERIFIED_EDIT_TARGET",
+            "DIVIDER_GEOMETRY_DOES_NOT_VERIFY_PAINT_ATTRIBUTES"
+          ],
+          "reference_aliases": [],
+          "fixed_anchor_frame_count": 0,
+          "fixed_anchor_temporal_blocks": 0,
+          "fixed_anchor_span_s": null,
+          "median_residual_m": null,
+          "mad_residual_m": null,
+          "model_scope": "local_boundary_correspondence",
+          "operation_resolved": false,
+          "map_edit_verified": false
+        }
+      ]
+    }
+  ]
+}
