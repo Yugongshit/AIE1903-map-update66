@@ -393,6 +393,13 @@ def run(directory, raw_root):
                   view['datasets']['nuscenes']['state_event_layer'] == nu['state_event_layer']
                   and all(event['geometry_city'] == original['geometry_city']
                           for event, original in zip(view['datasets']['nuscenes']['events'], nu['events'])))
+            ld004 = next(event for event in structure if event['event_id'] == 'S0980-LD-004')
+            check('LD004 local support is saved separately from its unresolved structural operation',
+                  nu['summary']['reliability_counts'] == {'supported_conflict': 24, 'insufficient_geometry': 5}
+                  and ld004['reliability']['status'] == 'supported_conflict'
+                  and ld004['structural_hypothesis']['operation'] == 'unresolved_parallel_marking_or_insertion'
+                  and ld004['structural_hypothesis']['confirmed'] is False
+                  and ld004['decision']['base_map_write_eligible'] is False)
             for name in ['nuscenes', 'argoverse']:
                 page.locator('#dataset').select_option(name)
                 settle(page)
@@ -522,6 +529,23 @@ def run(directory, raw_root):
                   page.locator('#selected-id').is_visible()
                   and page.locator('#selected-id').inner_text() == candidate['event_id'])
             page.locator('#advanced-analysis > summary').click()
+            page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', ld004['event_id'])
+            page.locator('#map-fit-selected').click()
+            page.locator('#map-preset-after').click()
+            settle(page)
+            ld_pixels = source_pixel_hits(page, [ld004['geometry_city']], 'green')
+            report['ld004_source_coordinate_pixels'] = ld_pixels
+            check('newly supported LD004 still renders its source curve as green, never confirmed red',
+                  ld_pixels['hits'] > 10 and ld_pixels['fraction'] > .15
+                  and raster(page)['red'] == 0
+                  and page.locator('#map-count-confirmed').inner_text() == '0'
+                  and 'unconfirmed' in page.locator('#map-selected-title').inner_text().lower())
+            page.locator('#map-view-evidence').click()
+            check('LD004 map selection opens the exact-window reference counterevidence',
+                  page.locator('#same-window-evidence').is_visible()
+                  and page.locator('#same-window-evidence tbody tr').count() == 6
+                  and 'does not support a claim that the old marking disappeared or moved' in page.locator('#same-window-evidence').inner_text())
+            page.locator('#advanced-analysis > summary').click()
             page.locator('#map-preset-compare').click()
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_nuscenes_en.png'))
 
@@ -570,6 +594,28 @@ def run(directory, raw_root):
                   and sum(event['reliability']['status'] == 'insufficient_geometry' for event in view['datasets']['argoverse']['events']) == 70
                   and raster(page)['red'] == 0
                   and not any(feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')))
+            paint_candidates = [event for event in source['datasets']['argoverse']['events']
+                                if event.get('prior_marking_type') == 'NONE']
+            check('all 64 unpainted-reference hypotheses have explicit paint-presence semantics',
+                  len(paint_candidates) == 64
+                  and all(event['structural_hypothesis']['target_property'] == 'paint_presence'
+                          and event['structural_hypothesis']['confirmed'] is False for event in paint_candidates))
+            prior_selection = page.evaluate('PIPELINE_STUDIO.state.eventId')
+            paint = next(event for event in paint_candidates if event['observation_evidence']['geometry_measurement']['status'] == 'available')
+            page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', paint['event_id'])
+            page.locator('#map-fit-selected').click()
+            page.locator('#map-preset-after').click()
+            settle(page)
+            paint_pixels = source_pixel_hits(page, [paint['geometry_city']], 'green')
+            report['paint_presence_source_coordinate_pixels'] = paint_pixels
+            check('paint-presence map card and green source geometry do not claim a confirmed old-line displacement',
+                  page.locator('#map-selected-title').inner_text() == 'Paint-presence hypothesis'
+                  and paint_pixels['hits'] > 10 and paint_pixels['fraction'] > .15
+                  and raster(page)['red'] == 0
+                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False)
+            page.locator('.composite-panel').screenshot(path=str(root / 'composite_paint_presence_en.png'))
+            page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', prior_selection)
+            page.locator('#map-fit-all').click()
             check('cross-dataset interactions preserve data and do not turn overlays into base-map edits',
                   page.evaluate('JSON.stringify(PIPELINE_STUDIO.data)') == immutable
                   and all(dataset['summary']['base_map_updates'] == 0 for dataset in source['datasets'].values()))

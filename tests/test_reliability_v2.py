@@ -119,6 +119,82 @@ class ReliabilityV2Tests(unittest.TestCase):
             self.assertIn(reason, event['reliability']['reason_codes'])
             self.assertEqual(event['change_type'], 'line_discrepancy')
 
+    def test_none_routes_paint_presence_hypothesis_without_claiming_boundary_displacement(self):
+        rows, frames = observations([1, 1, 1, 1])
+        event = evaluate_argoverse(prior('NONE'), rows, frames)['events'][0]
+        hypothesis = event['structural_hypothesis']
+        self.assertEqual(hypothesis['target_property'], 'paint_presence')
+        self.assertEqual(hypothesis['operation'], 'marking_presence_change')
+        self.assertEqual(hypothesis['status'], 'unconfirmed')
+        self.assertFalse(hypothesis['confirmed'])
+        self.assertFalse(hypothesis['base_map_write_eligible'])
+        self.assertEqual(event['change_type'], 'line_discrepancy')
+        self.assertEqual(event['reliability']['status'], 'insufficient_geometry')
+        self.assertTrue(all(s['observation'] == 'unknown' for s in event['samples']))
+        self.assertTrue(all(s['measured_local_relation'] == 'offset_positive' for s in event['samples']))
+        evidence = event['observation_evidence']
+        self.assertEqual(evidence['geometry_measurement']['relation_counts'], {'offset_positive': 4})
+        self.assertEqual(evidence['temporal_support']['status'], 'sufficient')
+        self.assertEqual(evidence['local_consistency']['status'], 'stable')
+        self.assertEqual(evidence['reference_semantics']['status'], 'unpainted_or_logical_boundary')
+        self.assertEqual(evidence['paint_identity']['status'], 'unverified')
+
+    def test_none_geometric_agreement_is_not_proof_of_no_paint_presence_change(self):
+        rows, frames = observations([.1, .1, .1, .1])
+        event = evaluate_argoverse(prior('NONE'), rows, frames)['events'][0]
+        self.assertEqual(event['reliability']['status'], 'insufficient_geometry')
+        self.assertEqual(event['structural_hypothesis']['target_property'], 'paint_presence')
+        self.assertTrue(all(s['measured_local_relation'] == 'within_tolerance' for s in event['samples']))
+        self.assertTrue(all(s['observation'] == 'unknown' for s in event['samples']))
+
+    def test_unknown_reference_does_not_assume_geometry_or_presence_change(self):
+        rows, frames = observations([1, 1, 1, 1])
+        event = evaluate_argoverse(prior('UNKNOWN'), rows, frames)['events'][0]
+        hypothesis = event['structural_hypothesis']
+        self.assertEqual(hypothesis['target_property'], 'unspecified_marking_semantics')
+        self.assertEqual(hypothesis['operation'], 'unspecified')
+        self.assertFalse(hypothesis['confirmed'])
+        self.assertEqual(event['observation_evidence']['reference_semantics']['status'], 'unknown')
+
+    def test_supported_painted_conflict_is_not_confirmed_full_map_change(self):
+        rows, frames = observations([1, 1, 1, 1])
+        event = evaluate_argoverse(prior(), rows, frames)['events'][0]
+        self.assertEqual(event['reliability']['status'], 'supported_conflict')
+        self.assertEqual(event['change_type'], 'geometry_change')
+        hypothesis = event['structural_hypothesis']
+        self.assertEqual(hypothesis['target_property'], 'boundary_geometry')
+        self.assertEqual(hypothesis['operation'], 'geometry_change')
+        self.assertEqual(hypothesis['assessment'], 'supported_conflict')
+        self.assertFalse(hypothesis['confirmed'])
+        self.assertFalse(event['observation_evidence']['change_assessment']['confirmed_map_change'])
+        self.assertEqual(event['observation_evidence']['alignment']['status'], 'unverified')
+
+    def test_unstable_or_short_evidence_retains_all_measured_directions(self):
+        rows, frames = observations([1, -1, 1, -1])
+        event = evaluate_argoverse(prior(), rows, frames)['events'][0]
+        evidence = event['observation_evidence']
+        self.assertEqual(evidence['local_consistency']['status'], 'unstable')
+        self.assertEqual(evidence['geometry_measurement']['relation_counts'],
+                         {'offset_positive': 2, 'offset_negative': 2})
+        self.assertTrue(all(s['observation'] == 'unknown' for s in event['samples']))
+        rows, frames = observations([1] * 20, interval=.01)
+        event = evaluate_argoverse(prior(), rows, frames)['events'][0]
+        evidence = event['observation_evidence']
+        self.assertEqual(evidence['temporal_support']['status'], 'insufficient')
+        self.assertEqual(evidence['geometry_measurement']['relation_counts'], {'offset_positive': 1})
+        self.assertEqual(event['samples'][0]['observation'], 'unknown')
+
+    def test_hypothesis_and_evidence_do_not_consume_ground_truth_or_mutate_inputs(self):
+        rows, frames = observations([1, 1, 1])
+        reference = prior('NONE')
+        original = copy.deepcopy((reference, rows, frames))
+        expected = evaluate_argoverse(reference, rows, frames)
+        self.assertEqual((reference, rows, frames), original)
+        for row in rows:
+            row['gt_change_type'] = 'geometry_change'
+            row['ground_truth'] = {'permanent': True, 'paint_identity_verified': True}
+        self.assertEqual(evaluate_argoverse(reference, rows, frames), expected)
+
     def test_local_agreement_and_conflicting_offsets_differ(self):
         rows, frames = observations([.1, .12, .08, .1])
         event = evaluate_argoverse(prior(), rows, frames)['events'][0]

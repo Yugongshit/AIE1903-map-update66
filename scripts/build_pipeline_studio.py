@@ -99,7 +99,7 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         route.mkdir()
         (route / 'index.html').write_text(template.replace('__LANG__', language).replace('__RESULT__', serialized).replace('__REVISION__', revision))
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=en/index.html"><a href="en/index.html">Map-layer pipeline</a>\n')
-    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.2', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
+    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.3', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
         'map_context_sha256': {name: sha256((output/(name+'_map_context.json')).read_bytes()).hexdigest() for name in contexts},
         'perception_guide_sha256': sha256(guide_path.read_bytes()).hexdigest()}, indent=2) + '\n')
     return output

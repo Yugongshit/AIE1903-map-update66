@@ -9,6 +9,7 @@ from collections import Counter
 from copy import deepcopy
 
 from .automatic import build_automatic_decisions
+from .local_correspondence import evaluate_marking_window
 
 
 def _geometry(row, occupancy):
@@ -37,16 +38,17 @@ def _occupancy_quality(row, target):
 
 
 def evaluate_nuscenes(real_or_integrated):
-    """Return dataset-neutral events for the independent duration classifier.
+    """Return dataset-neutral events for the semantic map-layer classifier.
 
     Accept the integrated scene or dashboard ``real`` representation. Source
     annotation categories are observation inputs; external duration labels are
     neither accessed nor copied. Unknown or missing observations never clear an
-    event. A marking's conditional duration can be predicted independently of
-    its unresolved map correspondence.
+    event. Marking correspondence is computed inside its exact source window;
+    geometric support does not verify an edit operation or replacement shape.
     """
     real = real_or_integrated
     baseline = real.get('reference_map') or real['map']
+    frames = real.get('replay', real.get('frames', []))
     # Reuse the existing identity, timestamp, window and geometry validation.
     recorded = build_automatic_decisions(real)
     records = {r['candidate_id']: r for r in
@@ -60,6 +62,8 @@ def evaluate_nuscenes(real_or_integrated):
         target_id = candidate.get('map_element_id')
         target = elements.get(target_id)
         observations = records.get(cid, {}).get('observations', [])
+        local = None if occupancy else evaluate_marking_window(
+            candidate, observations, baseline['elements'], frames, real['visit_id'], real['scene_id'])
         samples, row_scores, row_reasons = [], [], set()
         categories = sorted({obj['category'] for row in observations for obj in row.get('objects', [])})
         semantic_kind = ('movable_occupancy' if categories and all(c.startswith('movable_object.') for c in categories)
@@ -72,12 +76,9 @@ def evaluate_nuscenes(real_or_integrated):
                 source_ids = [cid, 'frame:'+str(row['frame_index'])]+['instance:'+o['instance_token'] for o in row['objects']]
                 source_files = ['processed/objects.csv', 'processed/lane_impact_frames_v2.csv']
             else:
-                # A valid observed curve is not a verified correspondence to a
-                # prior-map line. In particular, nearest tokens and later track
-                # matches must not become this candidate's target or recovery.
-                score, observation, status = 0., 'unknown', 'insufficient_geometry'
-                reasons = ['VALID_OBSERVED_MARKING_GEOMETRY', 'VERIFIED_MAP_CORRESPONDENCE_UNAVAILABLE',
-                           'PHYSICAL_ALIGNMENT_UNVERIFIED', 'DURATION_CONDITIONAL_ON_A_REAL_CHANGE']
+                assessed = local['observation_decisions'][(row['frame_index'], row['line_id'])]
+                score, observation, status = assessed['score'], assessed['observation'], assessed['status']
+                reasons = assessed['reason_codes']
                 source_ids = [cid, 'frame:'+str(row['frame_index']), 'line:'+str(row['line_id'])]
                 source_files = [row['source_file']] if row.get('source_file') else []
             source_id = cid+':'+str(row['frame_index'])+(':'+str(row['line_id']) if not occupancy else '')
@@ -96,6 +97,13 @@ def evaluate_nuscenes(real_or_integrated):
                               'timestamp_ns': sample['timestamp_ns'], 'status': status, 'score': score,
                               'reason_codes': reasons, 'observation': observation, 'geometry_quality': 1.,
                               'source_ids': source_ids})
+            if not occupancy:
+                decisions[-1].update(deepcopy(assessed))
+                sample['quality_scope'] = 'observed_curve_geometry_and_computed_local_reference; not physical alignment verification'
+                sample['reason_codes'] = deepcopy(reasons)
+                if 'residual_m' in assessed:
+                    sample['residual_m'] = assessed['residual_m']
+                    sample['measured_local_relation'] = assessed['measured_local_relation']
             row_scores.append(score)
             row_reasons.update(reasons)
         supported = sum(sample['observation'] == 'supports_change' for sample in samples)
@@ -120,17 +128,19 @@ def evaluate_nuscenes(real_or_integrated):
                               'legacy_m3_decision': legacy.get('decision') if legacy else None,
                               'legacy_m3_scope': 'lane_marking' if legacy else 'outside_lane_marking_scope' if occupancy else 'unavailable',
                               'clearance_observed': False}}
+        if local is not None:
+            event.update(local['event_fields'])
         events.append(event)
     counts = Counter(e['reliability']['status'] for e in events)
     legacy_units = real.get('m3', {}).get('review_units', [])
     return {'schema': 'nuscenes-reliability-v2',
-            'policy': {'version': 'source_geometry_quality_v2', 'duration_classifier': 'separate_dataset_neutral_consumer',
-                       'score_definition': 'Fraction of supplied candidate rows passing occupancy source/target/overlap checks; marking conflict score stays zero without a verified correspondence.',
+            'policy': {'version': 'source_geometry_quality_v2', 'map_layer_classifier': 'separate_dataset_neutral_semantic_consumer',
+                       'score_definition': 'Occupancy: supplied-row source/target/overlap checks. Markings: observed geometry quality with computed exact-window local reference and fixed-anchor residual; neither score is a probability.',
                        'score_is_probability': False, 'calibrated': False, 'labels_used': False,
                        'sensor_inference_rerun': False, 'occupancy_source': 'supplied_nuscenes_annotations',
                        'missing_observation': 'unknown_not_clearance', 'manual_review_required': False,
                        'temporal_scope': 'completed_offline_recording_not_live_feed',
-                       'structural_duration_scope': 'conditional_prediction_does_not_verify_a_map_change'},
+                       'structural_hypothesis_scope': 'local_discrepancy_does_not_verify_a_map_edit'},
             'summary': {'events': len(events), 'occupancy_events': sum(e['change_type'] == 'occupancy' for e in events),
                         'marking_events': sum(e['change_type'] == 'line_discrepancy' for e in events),
                         'observation_decisions': len(decisions), 'reliability_statuses': dict(counts),
@@ -141,7 +151,9 @@ def evaluate_nuscenes(real_or_integrated):
                             'legacy_m3_statuses': dict(Counter(r['decision'] for r in legacy_units)),
                             'occupancy_uses_marking_m3_gate': False,
                             'new_detector_accuracy_measured': False,
-                            'marking_map_targets_verified': 0},
+                            'marking_map_targets_verified': 0,
+                            'marking_correspondence_method': 'clipped_local_geometry_and_fixed_prior_anchor',
+                            'supported_marking_discrepancies': sum(e['change_type'] == 'line_discrepancy' and e['reliability']['status'] == 'supported_conflict' for e in events)},
             'provenance': {'dataset_id': real['dataset_id'], 'scene_id': real['scene_id'], 'visit_id': real['visit_id'],
                            'source_files': deepcopy(real.get('source_files', [])),
                            'source_m3_handoff': deepcopy(real.get('m3', {}).get('source_handoff')),

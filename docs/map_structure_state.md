@@ -2,6 +2,8 @@
 
 展示已改成可拖动的原图/更新后对照：黄色状态、红色已确认结构、绿色未确认结构；分割线最右显示全原图，最左显示全更新后。标注类别和来源见 [Perception 与大地图说明](perception_and_composite_map.md)。原始预测与本说明的数值结果保持不变。
 
+最新修订已接入 nuScenes 精确窗口地图匹配、结构假设细分和按操作检查写入条件；LD004 现有局部差异支持，其余 5 个不足。下文原先“6 个标线全部未支持”的数值为此前基线；当前结果和限制见 [结构证据修订](structural_evidence_revision_20261108.md)。
+
 用户修正了任务定义：需要区分“地图描述的结构改变”和“附着在地图上的状态”，不是预测持续时间长短。本次代码、写图条件、评价与网页均按此定义修改；原持续时间模型不再参与主流程。
 
 [中文交互结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [英文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html) · [完整 JSON](https://yugongshit.github.io/AIE1903-map-update66/algorithms/result.json)

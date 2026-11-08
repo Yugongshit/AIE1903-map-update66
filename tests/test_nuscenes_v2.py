@@ -17,10 +17,10 @@ class NuScenesV2Tests(unittest.TestCase):
             RAW/'M3_scene0980_proposal_supplement 2/results/real_scene_handoff.json')
         cls.result = evaluate_nuscenes(cls.scene)
 
-    def test_all_candidates_reach_duration_interface_with_separate_quality(self):
+    def test_all_candidates_reach_map_layer_interface_with_separate_quality(self):
         result = self.result
         self.assertEqual((len(result['events']), len(result['observation_decisions'])), (29, 332))
-        self.assertEqual(result['summary']['reliability_statuses'], {'supported_conflict': 23, 'insufficient_geometry': 6})
+        self.assertEqual(result['summary']['reliability_statuses'], {'supported_conflict': 24, 'insufficient_geometry': 5})
         event = next(e for e in result['events'] if e['event_id'].endswith('O001'))
         self.assertEqual(event['semantic_kind'], 'movable_occupancy')
         self.assertEqual(event['reliability']['score'], 1.)

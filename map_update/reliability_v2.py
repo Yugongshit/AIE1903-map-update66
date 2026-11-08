@@ -171,6 +171,32 @@ def _quality(o, policy):
     return geo.tolist(), quality, None if quality >= policy.minimum_quality else 'LOW_LOCAL_GEOMETRIC_QUALITY'
 
 
+def _structural_hypothesis(marking, assessment):
+    """Identify the property being questioned without confirming a map edit."""
+    if marking == 'NONE':
+        target, operation = 'paint_presence', 'marking_presence_change'
+        reasons = ['PRIOR_BOUNDARY_IS_NOT_KNOWN_PAINTED',
+                   'VISIBLE_CURVE_MAY_INDICATE_PAINT_PRESENCE_NOT_OLD_PAINT_DISPLACEMENT']
+        required = ['observed_curve_is_paint_not_curb_or_projection_artifact',
+                    'paint_absence_to_presence_at_verified_local_reference']
+    elif marking in ('UNKNOWN', None, ''):
+        target, operation = 'unspecified_marking_semantics', 'unspecified'
+        reasons = ['PRIOR_MARKING_SEMANTICS_UNKNOWN', 'CHANGE_PROPERTY_CANNOT_BE_RESOLVED']
+        required = ['prior_and_observed_marking_semantics', 'verified_change_property']
+    else:
+        target, operation = 'boundary_geometry', 'geometry_change'
+        reasons = ['PRIOR_ATTRIBUTE_DESCRIBES_PAINTED_MARKING',
+                   'LOCAL_GEOMETRIC_RELATION_DOES_NOT_CONFIRM_PHYSICAL_MAP_CHANGE']
+        required = ['same_physical_painted_boundary_correspondence',
+                    'physical_alignment_and_observed_edit_geometry']
+    return {'target_property': target, 'operation': operation,
+            'status': 'unconfirmed', 'confirmed': False,
+            'assessment': assessment, 'scope': 'observed_local_segment',
+            'reference_marking_type': marking,
+            'reason_codes': reasons, 'required_evidence': required,
+            'base_map_write_eligible': False}
+
+
 def _event(boundary, rows, frame_index, policy):
     # Anchor selection uses only whether a curve crosses a predefined normal,
     # never truth labels, discrepancy magnitude, or a candidate identifier.
@@ -198,9 +224,12 @@ def _event(boundary, rows, frame_index, policy):
     samples = []
     for _, members in sorted(blocks.items()):
         residual = median(r['residual_m'] for r in members)
+        relation = ('offset_positive' if residual > policy.residual_tolerance_m else
+                    'offset_negative' if residual < -policy.residual_tolerance_m else 'within_tolerance')
         samples.append({'timestamp_ns': members[-1]['timestamp_ns'], 'frame_id': members[-1]['frame_id'],
                         'visit_id': rows[0]['visit_id'], 'observation': 'supports_change' if abs(residual) > policy.residual_tolerance_m else 'supports_prior',
                         'quality': median(r['quality'] for r in members), 'residual_m': residual,
+                        'measured_local_relation': relation,
                         'source_ids': sorted({s for r in members for s in r['source_ids']})})
     residuals = [s['residual_m'] for s in samples]
     center = median(residuals) if residuals else None
@@ -237,6 +266,34 @@ def _event(boundary, rows, frame_index, policy):
     if status == 'insufficient_geometry':
         for sample in samples:
             sample['observation'] = 'unknown'
+    hypothesis = _structural_hypothesis(marking, status)
+    # A failed change assessment does not erase the measured geometric relation.
+    # These are separate evidence dimensions, not independent probabilities.
+    observation_evidence = {
+        'scope': 'fixed_anchor_recorded_local_measurements_not_change_confirmation',
+        'geometry_measurement': {
+            'status': 'available' if samples else 'unavailable',
+            'comparison_reference': 'prior_geometric_boundary_not_verified_observed_paint_identity',
+            'measured_block_count': len(samples),
+            'relation_counts': dict(Counter(s['measured_local_relation'] for s in samples)),
+            'median_residual_m': center, 'residual_tolerance_m': policy.residual_tolerance_m},
+        'temporal_support': {
+            'status': 'sufficient' if len(samples) >= policy.minimum_blocks and span >= policy.minimum_span_s else 'insufficient',
+            'distinct_frames': len(frame_rows), 'temporal_blocks': len(samples), 'span_s': span},
+        'local_consistency': {
+            'status': 'unavailable' if mad is None else 'stable' if mad <= policy.maximum_mad_m else 'unstable',
+            'mad_residual_m': mad, 'same_sign_conflict_fraction': conflict_fraction,
+            'within_tolerance_fraction': consistent_fraction},
+        'reference_semantics': {
+            'status': 'unpainted_or_logical_boundary' if marking == 'NONE' else
+                      'unknown' if marking in ('UNKNOWN', None, '') else 'painted_prior_attribute',
+            'marking_type': marking, 'candidate_target_property': hypothesis['target_property']},
+        'paint_identity': {'status': 'unverified',
+                           'reason': 'curve_detection_quality_does_not_verify_paint_vs_curb_identity'},
+        'alignment': {'status': 'unverified'},
+        'visibility': {'status': 'unverified', 'effective_coverage': None},
+        'change_assessment': {'status': status, 'confirmed_map_change': False},
+    }
     return {'event_id': 'argo-local-'+_id([rows[0]['visit_id'], boundary['boundary_id']]),
             'change_type': 'geometry_change' if status == 'supported_conflict' else 'line_discrepancy',
             'semantic_kind': 'structural_marking', 'scene_id': rows[0]['scene_id'], 'visit_id': rows[0]['visit_id'],
@@ -244,6 +301,8 @@ def _event(boundary, rows, frame_index, policy):
             'physical_boundary_id': boundary['boundary_id'], 'physical_target_unambiguous': True,
             'map_object_identity_unambiguous': len(boundary['aliases']) == 1,
             'prior_marking_type': marking,
+            'structural_hypothesis': hypothesis,
+            'observation_evidence': observation_evidence,
             'geometry_city': {'type': 'LineString', 'coordinates': [p[:2] for p in representative['geometry']]},
             'representative_source_id': representative['observation_id'],
             'reliability': {'status': status, 'score': reliability_quality, 'score_is_probability': False,

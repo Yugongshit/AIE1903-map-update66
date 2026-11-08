@@ -25,6 +25,8 @@ def write_gate(event, map_layer, policy=None):
     The persistence module's frame helpers are used only for input validation,
     causal slicing and duplicate collapse. No duration model is executed here.
     Visit counts and span are diagnostics, never prerequisites for structure.
+    Geometry edits, attribute edits and deletion have distinct evidence contracts.
+    Eligibility is not execution; synchronized edits of aliases are not implemented.
     """
     from .geometry import validate_geometry
     from .persistence import _frames, _timestamp
@@ -54,37 +56,94 @@ def write_gate(event, map_layer, policy=None):
     operation = event.get('change_type')
     if operation not in {'geometry_change', 'marking_change', 'add', 'delete'}:
         reasons.append('NO_STRUCTURAL_EDIT_OPERATION')
+    edit_scope = {'geometry_change': 'whole_feature_geometry_replacement',
+                  'add': 'new_feature_geometry', 'marking_change': 'marking_attribute_only',
+                  'delete': 'existing_feature_removal'}.get(operation, 'unsupported_operation')
+    requirements = ['supported_conflict', 'causal_positive_observation', 'base_map_structure',
+                    'physical_alignment_verified', 'effective_visibility_verified']
     aliases = event.get('map_aliases', [])
     def valid_identity(value):
         return (type(value) is int or isinstance(value, str) and bool(value.strip()))
+    valid_aliases = (isinstance(aliases, list) and bool(aliases)
+                     and all(isinstance(alias, dict) and valid_identity(alias.get('map_element_id'))
+                             for alias in aliases))
+    physical_id = event.get('canonical_boundary_id', event.get('physical_boundary_id'))
+    shared_physical_target = bool(valid_aliases and len(aliases) > 1 and valid_identity(physical_id)
+        and event.get('physical_boundary_id', physical_id) == physical_id
+        and all(alias.get('physical_boundary_id') == physical_id for alias in aliases))
+    target_identity = {'map_reference_count': len(aliases) if isinstance(aliases, list) else None,
+                       'single_map_reference': bool(valid_aliases and len(aliases) == 1),
+                       'shared_canonical_physical_boundary': shared_physical_target,
+                       'physical_boundary_id': physical_id if shared_physical_target else None,
+                       'synchronized_alias_edit_verified': False}
     if operation == 'add':
+        requirements += ['new_element_id', 'novelty_verified', 'no_existing_edit_target']
         if not valid_identity(event.get('new_element_id')):
             reasons.append('NEW_ELEMENT_IDENTITY_UNRESOLVED')
         if event.get('novelty_verified') is not True:
             reasons.append('ADDITION_NOVELTY_UNVERIFIED')
         if aliases:
             reasons.append('ADDITION_REFERENCES_EXISTING_EDIT_TARGET')
-    elif (not isinstance(aliases, list) or len(aliases) != 1
-          or not isinstance(aliases[0], dict)
-          or not valid_identity(aliases[0].get('map_element_id'))):
-        reasons.append('EXACT_EDIT_OBJECT_UNRESOLVED')
+    else:
+        requirements.append('single_edit_target_or_verified_synchronized_alias_edit')
+        if shared_physical_target:
+            # A known physical boundary may be stored in several lane sides.
+            # This identifies the missing atomic update capability, not a new
+            # geometric ambiguity. A caller-supplied flag is not that capability.
+            reasons.append('SYNCHRONIZED_ALIAS_EDIT_UNVERIFIED')
+        elif not valid_aliases or len(aliases) != 1:
+            reasons.append('EXACT_EDIT_OBJECT_UNRESOLVED')
     for key, reason in [('physical_alignment_verified', 'PHYSICAL_ALIGNMENT_UNVERIFIED'),
-                        ('effective_visibility_verified', 'EFFECTIVE_VISIBILITY_UNVERIFIED'),
-                        ('replacement_geometry_verified', 'FULL_EDIT_GEOMETRY_UNVERIFIED')]:
+                        ('effective_visibility_verified', 'EFFECTIVE_VISIBILITY_UNVERIFIED')]:
         if event.get(key) is not True:
             reasons.append(reason)
     if operation in {'geometry_change', 'add'}:
+        requirements += ['replacement_geometry_verified', 'valid_complete_edit_geometry']
+        if event.get('replacement_geometry_verified') is not True:
+            reasons.append('FULL_EDIT_GEOMETRY_UNVERIFIED')
         try:
             validate_geometry(event.get('geometry_city'))
         except (ValueError, TypeError, KeyError, IndexError):
             reasons.append('INVALID_OR_MISSING_EDIT_GEOMETRY')
-    if operation == 'marking_change' and (not isinstance(event.get('marking_type'), str)
-                                         or event['marking_type'].strip().lower() in {'', 'unknown', 'none'}):
-        reasons.append('VERIFIED_MARKING_PROPERTY_UNAVAILABLE')
+    if operation == 'marking_change':
+        requirements += ['defined_marking_type', 'marking_property_verified']
+        if (not isinstance(event.get('marking_type'), str)
+                or event['marking_type'].strip().lower() in {'', 'unknown', 'none'}):
+            reasons.append('VERIFIED_MARKING_PROPERTY_UNAVAILABLE')
+        if event.get('marking_property_verified') is not True:
+            reasons.append('MARKING_PROPERTY_EVIDENCE_UNVERIFIED')
+    fully_observed_delete_frames = 0
+    if operation == 'delete':
+        requirements.append('fully_observed_same_target_causal_deletion_support')
+        positive_times = {int(row['timestamp_ns']) for row in positive}
+        full_times = set()
+        # _frames deliberately reserves its fully_observed output for recovery.
+        # Rejoin source deletion support to the validated, causal, nonconflicting
+        # positive timestamps; never reuse pre-recovery or future observations.
+        for row in event.get('samples', []):
+            stamp = _timestamp(row['timestamp_ns'])
+            if (stamp not in positive_times or row.get('observation') != 'supports_change'
+                    or row.get('fully_observed') is not True or row.get('quality', 0) <= 0):
+                continue
+            if row.get('event_id', event.get('event_id')) != event.get('event_id'):
+                continue
+            if not valid_aliases or not any(
+                row.get('map_element_id', alias['map_element_id']) == alias['map_element_id']
+                and ('boundary_side' not in row or row['boundary_side'] == alias.get('boundary_side'))
+                and ('physical_boundary_id' not in row or row['physical_boundary_id'] == alias.get('physical_boundary_id'))
+                for alias in aliases
+            ):
+                continue
+            full_times.add(stamp)
+        fully_observed_delete_frames = len(full_times)
+        if not full_times:
+            reasons.append('DELETION_REQUIRES_FULLY_OBSERVED_SAME_TARGET_SUPPORT')
     return {'eligible': not reasons, 'reasons': reasons, 'independent_visits': len(visits),
             'positive_observation_frames': len(positive), 'span_s': span,
             'visit_counting_gap_s': policy.min_visit_gap_s, 'visits_and_span_are_diagnostics_only': True,
-            'duration_used': False, 'policy_source': 'structural_edit_contract_v2',
+            'duration_used': False, 'policy_source': 'operation_specific_structural_edit_contract_v3',
+            'edit_scope': edit_scope, 'requirements': requirements, 'target_identity': target_identity,
+            'fully_observed_delete_frames': fully_observed_delete_frames,
             'as_of_timestamp_ns': str(cutoff) if cutoff is not None else None,
             'map_patch_executed': False}
 
@@ -261,8 +320,15 @@ def run_pipeline(raw_root, delivery_root, output):
                   'mixed_changes': 'split structural and operational claims'},
               'write_policy': {'requires': ['supported conflict', 'causal positive observation',
                   'exact target or verified novel identity', 'verified alignment',
-                  'verified visibility', 'verified complete edit geometry'],
+                  'verified visibility', 'operation-specific edit evidence'],
+                  'operation_requirements': {
+                      'geometry_change': 'verified complete replacement geometry',
+                      'add': 'verified novel identity and complete geometry',
+                      'marking_change': 'defined marking value and independently verified property evidence; no replacement geometry',
+                      'delete': 'fully observed causal support for absence on the same target; no replacement geometry'},
+                  'shared_boundary_aliases': 'physical identity may be known; synchronized edits of all references remain unverified',
                   'minimum_duration_s': None, 'minimum_independent_visits': None},
+              'structural_evidence_revision': 'local_correspondence_and_typed_hypotheses_20261108',
               'policy_selection': 'Semantic target and change operation; geometric quality defaults fixed before evaluation',
               'parameters_learned': False, 'calibrated_probabilities': False,
               'scope': 'Frozen perception inputs; structure/state routing, not a duration classifier'}
@@ -282,7 +348,7 @@ def run_pipeline(raw_root, delivery_root, output):
                             (dataset+'_state_layer.geojson', data['state_event_layer'])]:
             av._write(out/name, value)
             frozen_names.append(name)
-    for name in ('pipeline_v2.py', 'nuscenes_v2.py', 'reliability_v2.py', 'map_layers.py',
+    for name in ('pipeline_v2.py', 'nuscenes_v2.py', 'local_correspondence.py', 'reliability_v2.py', 'map_layers.py',
                  'state_events.py', 'persistence.py', 'engine.py', 'reliability.py',
                  'scene.py', 'delivery.py', 'automatic.py', 'argoverse.py'):
         path = Path(__file__).with_name(name)

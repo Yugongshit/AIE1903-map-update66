@@ -144,10 +144,120 @@ class StructuralWriteGateTests(unittest.TestCase):
                 self.assertFalse(write_gate(changed, STRUCTURE)['eligible'])
 
     def test_property_change_requires_an_actual_defined_property(self):
-        self.assertTrue(write_gate(candidate(change_type='marking_change', marking_type='solid_white'), STRUCTURE)['eligible'])
-        result = write_gate(candidate(change_type='marking_change', marking_type='unknown'), STRUCTURE)
+        event = candidate(change_type='marking_change', marking_type='solid_white', marking_property_verified=True)
+        self.assertTrue(write_gate(event, STRUCTURE)['eligible'])
+        for value in (None, '', ' ', 'unknown', ' UNKNOWN ', 'NONE', 1, True, []):
+            with self.subTest(value=value):
+                result = write_gate({**event, 'marking_type': value}, STRUCTURE)
+                self.assertFalse(result['eligible'])
+                self.assertIn('VERIFIED_MARKING_PROPERTY_UNAVAILABLE', result['reasons'])
+
+    def test_verified_property_edit_does_not_require_replacement_geometry(self):
+        event = candidate(change_type='marking_change', marking_type='solid_white',
+                          marking_property_verified=True, replacement_geometry_verified=False,
+                          geometry_city=None)
+        result = write_gate(event, STRUCTURE)
+        self.assertTrue(result['eligible'])
+        self.assertEqual(result['edit_scope'], 'marking_attribute_only')
+        self.assertIn('marking_property_verified', result['requirements'])
+        self.assertNotIn('replacement_geometry_verified', result['requirements'])
+        self.assertFalse(result['map_patch_executed'])
+
+    def test_property_string_alone_is_not_verified_property_evidence(self):
+        event = candidate(change_type='marking_change', marking_type='solid_white')
+        for value in (None, False, 1, 'true'):
+            with self.subTest(value=value):
+                result = write_gate({**event, 'marking_property_verified': value}, STRUCTURE)
+                self.assertFalse(result['eligible'])
+                self.assertIn('MARKING_PROPERTY_EVIDENCE_UNVERIFIED', result['reasons'])
+
+    def test_verified_deletion_uses_full_observation_not_replacement_geometry(self):
+        event = candidate([sample(0, fully_observed=True)], change_type='delete',
+                          replacement_geometry_verified=False, geometry_city=None)
+        result = write_gate(event, STRUCTURE)
+        self.assertTrue(result['eligible'])
+        self.assertEqual(result['fully_observed_delete_frames'], 1)
+        self.assertEqual(result['edit_scope'], 'existing_feature_removal')
+        self.assertIn('fully_observed_same_target_causal_deletion_support', result['requirements'])
+        self.assertNotIn('replacement_geometry_verified', result['requirements'])
+        self.assertFalse(result['map_patch_executed'])
+
+    def test_blind_deletion_is_blocked_despite_global_verification_flags(self):
+        for row in (sample(0), sample(0, fully_observed=False),
+                    sample(0, fully_observed=True, quality=0),
+                    sample(0, 'unknown', fully_observed=True)):
+            with self.subTest(row=row):
+                result = write_gate(candidate([row], change_type='delete'), STRUCTURE)
+                self.assertFalse(result['eligible'])
+                self.assertEqual(result['fully_observed_delete_frames'], 0)
+                self.assertIn('DELETION_REQUIRES_FULLY_OBSERVED_SAME_TARGET_SUPPORT', result['reasons'])
+
+    def test_future_or_recovered_full_observation_cannot_authorize_deletion(self):
+        rows = [sample(0), sample(2, fully_observed=True)]
+        result = write_gate(candidate(rows, change_type='delete', as_of_timestamp_ns='1000000000'), STRUCTURE)
         self.assertFalse(result['eligible'])
-        self.assertIn('VERIFIED_MARKING_PROPERTY_UNAVAILABLE', result['reasons'])
+        self.assertEqual(result['positive_observation_frames'], 1)
+        self.assertEqual(result['fully_observed_delete_frames'], 0)
+        rows = [sample(0, fully_observed=True), sample(1, 'supports_prior', fully_observed=True), sample(2)]
+        result = write_gate(candidate(rows, change_type='delete'), STRUCTURE)
+        self.assertFalse(result['eligible'])
+        self.assertEqual(result['positive_observation_frames'], 1)
+        self.assertEqual(result['fully_observed_delete_frames'], 0)
+        rows[-1]['fully_observed'] = True
+        self.assertTrue(write_gate(candidate(rows, change_type='delete'), STRUCTURE)['eligible'])
+
+    def test_simultaneous_contradiction_does_not_authorize_deletion(self):
+        rows = [sample(0, fully_observed=True), sample(0, 'supports_prior', fully_observed=True)]
+        result = write_gate(candidate(rows, change_type='delete'), STRUCTURE)
+        self.assertFalse(result['eligible'])
+        self.assertEqual(result['fully_observed_delete_frames'], 0)
+
+    def test_deletion_full_observation_must_belong_to_the_same_event_and_target(self):
+        target = {'map_element_id': 'line-1', 'boundary_side': 'left', 'physical_boundary_id': 'boundary-1'}
+        for wrong in ({'event_id': 'different-event'}, {'map_element_id': 'line-2'},
+                      {'boundary_side': 'right'}, {'physical_boundary_id': 'boundary-2'}):
+            with self.subTest(wrong=wrong):
+                row = sample(0, fully_observed=True, **wrong)
+                result = write_gate(candidate([row], event_id='event-1', change_type='delete', map_aliases=[target]), STRUCTURE)
+                self.assertFalse(result['eligible'])
+                self.assertEqual(result['fully_observed_delete_frames'], 0)
+        row = sample(0, fully_observed=True, event_id='event-1', **target)
+        self.assertTrue(write_gate(candidate([row], event_id='event-1', change_type='delete', map_aliases=[target]), STRUCTURE)['eligible'])
+
+    def test_deletion_camera_duplicates_do_not_multiply_full_observation_frames(self):
+        row = sample(0, fully_observed=True)
+        result = write_gate(candidate([row, deepcopy(row), {**row, 'frame_id': 'other-camera'}], change_type='delete'), STRUCTURE)
+        self.assertTrue(result['eligible'])
+        self.assertEqual(result['fully_observed_delete_frames'], 1)
+
+    def test_property_and_deletion_keep_alignment_visibility_and_positive_support_gates(self):
+        for operation, extra in [('marking_change', {'marking_type': 'solid_white', 'marking_property_verified': True}),
+                                 ('delete', {})]:
+            event = candidate([sample(0, fully_observed=True)], change_type=operation, **extra)
+            for field in ('physical_alignment_verified', 'effective_visibility_verified'):
+                with self.subTest(operation=operation, field=field):
+                    self.assertFalse(write_gate({**event, field: False}, STRUCTURE)['eligible'])
+            self.assertFalse(write_gate({**event, 'samples': []}, STRUCTURE)['eligible'])
+
+    def test_shared_physical_aliases_need_synchronized_edit_not_fabricated_ambiguity(self):
+        aliases = [{'map_element_id': name, 'boundary_side': 'left', 'physical_boundary_id': 'boundary-1'}
+                   for name in ('lane-A', 'lane-B')]
+        event = candidate(map_aliases=aliases, canonical_boundary_id='boundary-1', physical_boundary_id='boundary-1',
+                          physical_target_unambiguous=True, synchronized_alias_edit_verified=True)
+        result = write_gate(event, STRUCTURE)
+        self.assertFalse(result['eligible'])
+        self.assertIn('SYNCHRONIZED_ALIAS_EDIT_UNVERIFIED', result['reasons'])
+        self.assertNotIn('EXACT_EDIT_OBJECT_UNRESOLVED', result['reasons'])
+        self.assertTrue(result['target_identity']['shared_canonical_physical_boundary'])
+        self.assertFalse(result['target_identity']['synchronized_alias_edit_verified'])
+
+    def test_disagreeing_alias_identity_still_has_unresolved_edit_target(self):
+        aliases = [{'map_element_id': 'A', 'physical_boundary_id': 'boundary-1'},
+                   {'map_element_id': 'B', 'physical_boundary_id': 'boundary-2'}]
+        result = write_gate(candidate(map_aliases=aliases, canonical_boundary_id='boundary-1'), STRUCTURE)
+        self.assertFalse(result['eligible'])
+        self.assertIn('EXACT_EDIT_OBJECT_UNRESOLVED', result['reasons'])
+        self.assertFalse(result['target_identity']['shared_canonical_physical_boundary'])
 
     def test_gate_does_not_modify_inputs(self):
         event, layer = candidate(), deepcopy(STRUCTURE)
