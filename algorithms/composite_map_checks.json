@@ -15,34 +15,65 @@
     "nuScenes perception guide exactly reports 14 source categories, 2278 frame records and 154 instances",
     "Argoverse guide reports 4976 coarse vehicle boxes, without invented object classes or GT labels",
     "the prominent map is visible before the detailed evidence panels",
+    "the yellow, red and green meaning is visible above the canvas in the first viewport",
+    "first view shows the comparison while technical analysis starts collapsed",
+    "selected map card identifies a barrier in plain language rather than only its source ID",
+    "layer options start collapsed to keep the comparison readable",
+    "red confirmation needs an actual patch or both write gates, never support or class assignment alone",
+    "an explicitly synthetic detached render fixture uses red for a confirmed structure",
     "perception details stay collapsed until requested",
     "English perception details render all 14 actual source labels and their annotation provenance",
     "nuScenes opens all three layers with 157 base features, 23 states and 6 structure hypotheses",
     "all state and structural overlay geometries preserve their frozen prediction values",
     "nuscenes drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
     "argoverse drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
-    "the composite image actually contains red states and yellow structure geometry",
+    "real nuScenes pixels use yellow states and green unconfirmed structures, with no red confirmation",
     "fit all contains actual source extents without confusing the two city coordinate systems",
+    "base geometry remains pixel-identical at before",
+    "base geometry remains pixel-identical at compare",
+    "base geometry remains pixel-identical at after",
+    "swipe 100% preserves original pixels and clips updated source geometry",
+    "swipe 50% preserves original pixels and clips updated source geometry",
+    "swipe 0% preserves original pixels and clips updated source geometry",
+    "divider positions preserve one shared metric transform for both maps",
+    "the half comparison actually hides part of the selected source geometry",
+    "mouse dragging divider to right shows all original",
+    "mouse endpoint keeps the entire divider grip reachable on screen right",
+    "mouse dragging divider to left shows all updated",
+    "mouse endpoint keeps the entire divider grip reachable on screen left",
+    "range keyboard End shows all original with no overlay pixels or hit targets",
+    "range keyboard Home restores all updated overlays",
     "base toggle changes actual map pixels and hides its rendered features",
     "state toggle changes actual map pixels and hides its rendered features",
     "structure toggle changes actual map pixels and hides its rendered features",
     "layer switches leave all predictions and histories unchanged",
-    "red pixels coincide with projected last-observed state source geometry",
-    "yellow pixels coincide with projected structural source geometry",
+    "yellow pixels coincide with projected last-observed state source geometry",
+    "green pixels coincide with projected unconfirmed structural source geometry",
     "zoom increases the metric scale and changes the rendered view",
     "zoom out reverses the scale change",
     "drag pans in metric coordinates with the expected north-up direction",
-    "clicking a map event selects the matching source event in the evidence panel",
-    "Argoverse opens 589 prior features, no states and one supported structural claim",
+    "an overlay hidden behind the original side cannot be selected through the swipe clip",
+    "clicking a visible map event selects the matching source event in its map card",
+    "opening evidence after a map click shows the same selected source event",
+    "Argoverse opens 589 prior features, no states and all 71 unconfirmed structural candidates",
     "Argoverse perception view distinguishes vehicle detections from unique objects and ground truth",
     "the selected supported Argoverse claim has a visible false-positive warning",
+    "local-support scope isolates one candidate without upgrading it to confirmed structure",
+    "Argoverse supported false positive remains visibly green with no red confirmed structure",
+    "the map evidence action opens the detailed source analysis and selected evaluation",
     "Argoverse fit uses its own actual M2 prior bounds",
     "all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases",
     "cross-dataset interactions preserve data and do not turn overlays into base-map edits",
     "Chinese map keeps the same dataset, selected source event and exact data",
+    "Chinese selected card gives the marking meaning and unconfirmed status",
     "Chinese map controls describe state and structure separately",
     "mobile map and controls fit without horizontal document overflow",
     "mobile fit-selected retains visible selected-source geometry",
+    "touch dragging divider to right shows all original",
+    "touch endpoint keeps the entire divider grip reachable on screen right",
+    "touch dragging divider to left shows all updated",
+    "touch endpoint keeps the entire divider grip reachable on screen left",
+    "mobile divider gestures preserve all immutable source predictions",
     "all assets load and all map interactions have no uncaught browser errors"
   ],
   "page_errors": [],
@@ -62,15 +93,277 @@
       -185.52
     ]
   },
-  "red_source_coordinate_pixels": {
-    "tested": 489,
-    "hits": 489,
+  "confirmed_structure_render_fixture": {
+    "cases": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ],
+    "color": "#ff5c65",
+    "pixel": [
+      255,
+      92,
+      101,
+      255
+    ],
+    "fixture_scope": "detached render test only; no source-data mutation"
+  },
+  "swipe_pixel_comparisons": {
+    "1": {
+      "checked": 812000,
+      "mismatch": 0,
+      "originalMismatch": 0,
+      "changed": 0,
+      "maxChannelDelta": 0,
+      "samples": []
+    },
+    "0.5": {
+      "checked": 810320,
+      "mismatch": 55,
+      "originalMismatch": 0,
+      "changed": 5420,
+      "maxChannelDelta": 2,
+      "samples": [
+        {
+          "x": 739,
+          "y": 230,
+          "actual": [
+            42,
+            54,
+            57,
+            255
+          ],
+          "expected": [
+            42,
+            55,
+            58,
+            255
+          ]
+        },
+        {
+          "x": 740,
+          "y": 230,
+          "actual": [
+            179,
+            154,
+            78,
+            255
+          ],
+          "expected": [
+            180,
+            154,
+            78,
+            255
+          ]
+        },
+        {
+          "x": 750,
+          "y": 232,
+          "actual": [
+            52,
+            61,
+            59,
+            255
+          ],
+          "expected": [
+            52,
+            62,
+            59,
+            255
+          ]
+        },
+        {
+          "x": 748,
+          "y": 235,
+          "actual": [
+            113,
+            106,
+            68,
+            255
+          ],
+          "expected": [
+            114,
+            106,
+            68,
+            255
+          ]
+        },
+        {
+          "x": 739,
+          "y": 236,
+          "actual": [
+            37,
+            50,
+            57,
+            255
+          ],
+          "expected": [
+            37,
+            51,
+            57,
+            255
+          ]
+        },
+        {
+          "x": 747,
+          "y": 237,
+          "actual": [
+            189,
+            160,
+            80,
+            255
+          ],
+          "expected": [
+            190,
+            161,
+            80,
+            255
+          ]
+        },
+        {
+          "x": 738,
+          "y": 238,
+          "actual": [
+            35,
+            50,
+            57,
+            255
+          ],
+          "expected": [
+            36,
+            50,
+            57,
+            255
+          ]
+        },
+        {
+          "x": 745,
+          "y": 241,
+          "actual": [
+            37,
+            50,
+            57,
+            255
+          ],
+          "expected": [
+            38,
+            51,
+            58,
+            255
+          ]
+        },
+        {
+          "x": 746,
+          "y": 241,
+          "actual": [
+            59,
+            66,
+            60,
+            255
+          ],
+          "expected": [
+            60,
+            67,
+            60,
+            255
+          ]
+        },
+        {
+          "x": 737,
+          "y": 242,
+          "actual": [
+            180,
+            155,
+            81,
+            255
+          ],
+          "expected": [
+            180,
+            155,
+            82,
+            255
+          ]
+        },
+        {
+          "x": 738,
+          "y": 242,
+          "actual": [
+            40,
+            52,
+            57,
+            255
+          ],
+          "expected": [
+            41,
+            53,
+            57,
+            255
+          ]
+        },
+        {
+          "x": 735,
+          "y": 243,
+          "actual": [
+            185,
+            157,
+            77,
+            255
+          ],
+          "expected": [
+            186,
+            157,
+            77,
+            255
+          ]
+        }
+      ]
+    },
+    "0": {
+      "checked": 812000,
+      "mismatch": 0,
+      "originalMismatch": 0,
+      "changed": 7460,
+      "maxChannelDelta": 0,
+      "samples": []
+    }
+  },
+  "yellow_state_source_coordinate_pixels": {
+    "tested": 456,
+    "hits": 456,
     "fraction": 1
   },
-  "yellow_source_coordinate_pixels": {
+  "green_structure_source_coordinate_pixels": {
     "tested": 72,
-    "hits": 70,
-    "fraction": 0.9722222222222222
+    "hits": 72,
+    "fraction": 1
   },
-  "count": 43
+  "map_click_regression": {
+    "expected": {
+      "event_id": "S0980-OCC-scene-0980-O022",
+      "layer": "state",
+      "source_xy": [
+        385.699,
+        1136.661
+      ],
+      "screen_xy": [
+        747.398054772032,
+        370.95525171184147
+      ],
+      "confirmed": false
+    },
+    "selected": "S0980-OCC-scene-0980-O022",
+    "canvas_box": {
+      "x": 25,
+      "y": 189.984375,
+      "width": 1450,
+      "height": 560
+    },
+    "split": 0,
+    "element_at_click": "<canvas id=\"composite-map\" aria-label=\"Shared-coordinate original and updated map comparison\" width=\"1450\" height=\"560\"></canvas>"
+  },
+  "count": 74
 }

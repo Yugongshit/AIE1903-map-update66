@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.1",
+  "schema": "decision-evidence-studio-3.2",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -131,16 +131,34 @@
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "6881840a75df3d30086288a4c397191f3d3739bc",
+  "source_commit": "14a75beec49ef84184ff7d39df450de8a7efb15e",
   "source_branch": "feat/structure-state-routing",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
   "duration_determines_map_layer": false,
   "composite_map_colors": {
     "base": "gray",
-    "state_events": "red",
-    "structural_candidates": "yellow dashed"
+    "state_events": "yellow",
+    "confirmed_structure": "red",
+    "unconfirmed_structure": "green"
   },
-  "current_presentation_validation": "algorithms/composite_release_validation.json",
-  "previous_full_site_validation": "release_validation.json"
+  "current_presentation_validation": "algorithms/swipe_release_validation.json",
+  "previous_full_site_validation": "release_validation.json",
+  "map_comparison": {
+    "left_region": "original_reference_map",
+    "right_region": "updated_presentation",
+    "divider_leftmost": "full_updated_presentation",
+    "divider_rightmost": "full_original_reference_map",
+    "shared_coordinate_projection": true,
+    "colors": {
+      "map_state_event": "yellow",
+      "confirmed_structure": "red",
+      "unconfirmed_structure": "green"
+    },
+    "original_side_overlay_hits_disabled": true,
+    "legend_before_canvas": true,
+    "detailed_analysis_collapsed_by_default": true,
+    "confirmed_structure_requires": "Executed structural patch, or explicit eligibility after structural edit conditions; local conflict support alone does not confirm a change."
+  },
+  "previous_presentation_validation": "algorithms/composite_release_validation.json"
 }
