@@ -1,11 +1,15 @@
-# AIE1903 自动处理工作台 — 2026-11-08
+# AIE1903 双数据集工作台 — 2026-11-08
 
-[英文页面](en/index.html#decisions) · [中文页面](zh/index.html#decisions)
+nuScenes：[英文](en/index.html#decisions) · [中文](zh/index.html#decisions)
 
-29 个候选已完成自动处理：23 个占用事件、6 个标线差异，人工待办 0，基础图结构修改 0。处理完成、当前观测、持续时间与结构写图资格分别显示。原数据及 M3 诊断保留原义。
+Argoverse：[英文](argoverse/en/index.html) · [中文](argoverse/zh/index.html)
 
-方法与输出：[automatic_processing.md](automatic_processing.md)。验证：[release_validation.json](release_validation.json)：114 项核心测试，65 项决策页面、40 项双语和 35 项 Rerun 浏览器检查通过。
+nuScenes 29 个候选自动记录：23 个占用事件、6 个标线差异；当前观测流程没有运行长短期分类器。
 
-代码分支 `fix/automatic-map-decisions`，来源提交 `8178d6fe875fa4bf0fd4cd5f6eb81773d44e3ab5`。网站发布分支 `gh-pages`；`downloads/` 中带 20261106 日期的文件是保留的历史交付包。
+Argoverse 实际复跑冻结 M2 的 M3/M4：582 帧，10,278 条观测，4 条逐帧候选，1 个 uncertain 组，0 个确认变化。冻结预测后，已有 M8 地图 GT 用于自动评价：候选命中 0/1，全供给地图 98 个变化中确认检出 0。整图检出不能当作可见区域准确率，也不是长短期分类准确率。
 
-浏览器检查针对本地 HTTP 构建。当前云环境无法访问 GitHub Pages 和 GitHub Actions 公开状态接口，不能将本地通过等同于线上缓存已刷新。
+两个数据集独立，不生成当前人工待办。来源代码提交 `219aa537b930dd1eea09e4cbb525c68fe3f5d9f8`，开发分支 `feat/argoverse-rerun`；`main` 中用户的新增原始资料保持原样。
+
+验证见 [release_validation.json](release_validation.json)：121 项核心测试，177 项浏览器检查通过。本地 HTTP/Chromium 验证不等于线上 Pages 缓存刷新核验。
+
+`downloads/` 中 20261106 文件仍是历史交付包；当前 Argoverse 页面可下载完整运行结果 JSON。

@@ -1,19 +1,19 @@
 {
-  "schema": "decision-studio-validation-2.0",
-  "release_date": "2026-11-08",
-  "recorded_at_utc": "2026-11-08T09:44:54.628595+00:00",
+  "schema": "dual-dataset-validation-1.0",
+  "recorded_at_utc": "2026-11-08T11:51:37.429953+00:00",
   "status": "PASS",
+  "source_argoverse_commit": "9c6f86eba84c20b6986a020a558c0a2a6968856b",
   "core_tests": {
-    "command": "python3 -m unittest discover -s tests -q",
     "status": "PASS",
-    "count": 114,
-    "duration_seconds": 7.271
+    "count": 121,
+    "duration_seconds": 32.614,
+    "command": "python3 -m unittest discover -s tests -q"
   },
-  "browser_check_count": 140,
+  "browser_check_count": 177,
   "browser_reports": {
     "decision_studio": {
       "status": "PASS",
-      "count": 65,
+      "count": 66,
       "checks": [
         "default entry is the decision workspace with real LD003",
         "all 29 source candidates are available",
@@ -21,6 +21,7 @@
         "high-evidence badges match source labels including barrier O001",
         "high-evidence filter returns all 20 source highs including barrier O001",
         "English main workspace is English",
+        "observation completion does not pretend a duration classifier ran",
         "finite dataset completes all candidates without a human review queue",
         "high score records a difference without authorizing a structural write",
         "primary decision presents completed processing and separate persistence",
@@ -175,17 +176,158 @@
       "limits": "Cloud Chromium only; no physical Mac or real-vehicle validation",
       "page_errors": [],
       "normal_failed_requests": []
+    },
+    "argoverse": {
+      "status": "PASS",
+      "count": 33,
+      "checks": [
+        "embedded result exactly matches the executed pipeline result",
+        "overview preserves actual 582 frames, 10278 observations, four candidates and one group",
+        "M2 is identified as reused input while M3 and M4 were rerun",
+        "Argoverse M3 is distinguished from nuScenes reliability M3",
+        "uncertain change confirmation is separate from unimplemented duration classification",
+        "M3 shows actual insufficient and projection-failure counts",
+        "M2 duplicate-reference diagnostic uses actual counts and does not claim an algorithm fix",
+        "global curb-risk flags are not presented as object-specific proof",
+        "all five M4 reasons remain visible",
+        "M4 compares four support frames and 0.301 seconds against configured five frames and one second",
+        "evaluation truth, metrics and overlay are hidden by default",
+        "map draws actual prior lines, four M3 curves and one M4 representative",
+        "displayed candidate coordinates are source XY values without reconstruction",
+        "zoom changes the metric scale and map pixels",
+        "map supports panning",
+        "map and candidate fit controls use different source bounds",
+        "truth requires an explicit toggle and has a visible evaluation watermark",
+        "evaluation shows zero of 98 retrieved, undefined precision and zero of one candidate hits",
+        "full-map retrieval is not presented as visibility-conditioned accuracy",
+        "uncertain candidate is evaluated separately from confirmed predictions",
+        "disabling truth removes both the evaluation layer and metrics",
+        "download preserves the complete immutable rerun JSON",
+        "nuScenes navigation keeps the datasets on distinct routes",
+        "English main content is fully translated",
+        "inspection and evaluation do not mutate predictions or truth",
+        "Chinese route retains the exact same source data",
+        "Chinese outcome and all reason labels are translated",
+        "Chinese route defaults to hidden evaluation truth",
+        "Chinese context link returns to the Chinese nuScenes workspace",
+        "mobile default view has no horizontal overflow",
+        "mobile evaluation view has no horizontal overflow",
+        "all page assets load without failed requests",
+        "all interactions complete without uncaught JavaScript errors"
+      ],
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "e284f670cca5c32650ce8e8edb076e719c342eb8aefef10817df5262b1ef98ec"
+    },
+    "dataset_navigation": {
+      "status": "PASS",
+      "count": 3,
+      "checks": [
+        "nuScenes English opens separate Argoverse data",
+        "Argoverse language switch retains Argoverse scene",
+        "Chinese return restores nuScenes without mixing candidates or stale approval notice"
+      ]
     }
   },
-  "automatic_processing": {
-    "processed": 29,
-    "event_records": 23,
-    "difference_records": 6,
-    "no_usable_observation": 0,
-    "base_map_updates": 0,
-    "pending_manual_reviews": 0
+  "argoverse": {
+    "command": "python3 scripts/run_dataset.py --dataset argoverse --run-name rerun-20261108",
+    "result_sha256": "e284f670cca5c32650ce8e8edb076e719c342eb8aefef10817df5262b1ef98ec",
+    "summary": {
+      "frames": 582,
+      "views": 1746,
+      "observations": 10278,
+      "projected_observations": 6770,
+      "m3_candidates": 4,
+      "m4_groups": 1,
+      "confirmed_changes": 0,
+      "base_map_updates": 0,
+      "pending_manual_reviews": 0
+    },
+    "equivalence": {
+      "M3": {
+        "decisions.jsonl": true,
+        "change_candidates.jsonl": true,
+        "map_checks.jsonl": true,
+        "rules.json": true
+      },
+      "M4": {
+        "change_records.jsonl": true,
+        "frame_evidence.jsonl": true,
+        "rules.json": true
+      }
+    },
+    "evaluation": {
+      "scope": "all_supplied_supported_map_object_retrieval",
+      "inventory_objects": 288,
+      "objects": 273,
+      "excluded_unsupported_objects": 15,
+      "changed_objects": 98,
+      "confirmed_object_predictions": 0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "unretrieved_changed_objects": 98,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "f1_definition": "2TP/(2TP+FP+unretrieved_changed_objects)",
+      "visibility_conditioned_accuracy": null,
+      "candidate_diagnostics": [
+        {
+          "change_id": "m4:a3370e24c5eac30b",
+          "map_element_id": "ls-168084944",
+          "prediction_status": "uncertain",
+          "official_gt_changed": false,
+          "evaluation_role": "candidate_only_not_final_positive"
+        }
+      ],
+      "candidate_hits": 0,
+      "candidate_count": 1,
+      "gt_type_counts": {
+        "added": 27,
+        "marking_changed": 11,
+        "lane_type_changed": 35,
+        "geometry_changed": 30,
+        "connectivity_changed": 16
+      },
+      "scope_selection": "All supported supplied objects, independent of candidate locations, frames and correctness.",
+      "limitations": [
+        "Whole supplied map retrieval is not visibility-conditioned perception accuracy.",
+        "No output is not a factual unchanged prediction; no true-negative accuracy is reported.",
+        "Unsupported drivable-area state comparisons are excluded.",
+        "Constructed-train development scene, not an independent test.",
+        "Type counts overlap; candidate diagnostics are separate from confirmed positives."
+      ]
+    },
+    "m2_diagnostics": {
+      "ambiguous_matches": 1451,
+      "ambiguous_top2_same_boundary_and_attribute": 941,
+      "quality_flag_counts": {
+        "model_candidate": 10278,
+        "curb_confusion_possible": 10278,
+        "no_independent_accuracy": 10278,
+        "not_temporally_fused": 10278,
+        "ground_curve_partial_or_invalid": 4220
+      },
+      "interpretation": "Duplicate physical boundaries can create identity ambiguity. A flag on every observation is a global risk notice, not an object-specific curb diagnosis."
+    },
+    "prediction_freeze": {
+      "gt_read": false,
+      "frozen_at_utc": "2026-11-08T11:48:12.754499+00:00",
+      "files_sha256": {
+        "M3/change_candidates.csv": "4666ec56c3d911da32bf06bcc121d87d85a3c6d6dee416c258d6925672c77cfc",
+        "M3/change_candidates.jsonl": "06d468d775808fe45556aa78808cfbdfe7ba4ac1ad8f4faf40e72b1fde1d063a",
+        "M3/decisions.jsonl": "713709bf273502421daaa5575ac6c3c64c89db021e4e3e209cc8ccd2440d83b9",
+        "M3/map_checks.jsonl": "c63165b88b2f35c58d72870405d8523b4e9179f26d4bd32f1c6561064d039d83",
+        "M3/provenance.json": "99343b73060a14f8877c9d7033012ef763dfeb3aa7ca57d250f3c2effdc79c65",
+        "M3/rules.json": "46fbeda0aadb3987a852fe57b4af4246920d87b8d189b18bd54a8a701fc8348e",
+        "M3/summary.json": "9dd93b8cc487df61ea2a138db6477730c1d55a062109dc7a8307f689d0b17ee9",
+        "M4/change_records.jsonl": "9f3fe3e640e9785ed7ce13dc96aabb302fdb4e6d69441232ffb4f3212974709c",
+        "M4/frame_evidence.jsonl": "1d37f825eb8e05761622bbab5ad55ab41ca6cc6520e22df0e88b22308ebd87c6",
+        "M4/provenance.json": "142b5dc27de4cb40609de4ce6f6ca8e9fc6b5377cab72415cc16be03664f236c",
+        "M4/rules.json": "4ea98ccd5fddeb992b148f5227445e88f2c7ad3c5c3f1826fc4dc941882ba82f",
+        "M4/summary.json": "3d4036f71da146243ac2a8b19e45dd76685538c52b7d0bdf765cb600c55e2316"
+      }
+    }
   },
-  "cli_and_website_automatic_outputs_identical": true,
-  "source_map_sha256": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
-  "verification_scope": "Local build served over HTTP; Chromium / SwiftShader. Existing source geometry, labels, M3 diagnostics and evaluation metrics preserved. Live GitHub Pages delivery not verified by these tests."
+  "verification_scope": "Actual frozen-M2 M3/M4 numerical rerun; M8 exports used only after freezing predictions. Browser checks against local HTTP build in Chromium/SwiftShader; live Pages delivery not verified."
 }
