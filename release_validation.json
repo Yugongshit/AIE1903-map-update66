@@ -1,17 +1,14 @@
 {
-  "schema": "dual-dataset-validation-1.0",
-  "recorded_at_utc": "2026-11-08T11:51:37.429953+00:00",
+  "schema": "structure-state-validation-1.0",
   "status": "PASS",
-  "source_argoverse_commit": "9c6f86eba84c20b6986a020a558c0a2a6968856b",
+  "date": "2026-11-08",
+  "source_branch": "feat/structure-state-routing",
   "core_tests": {
-    "status": "PASS",
-    "count": 121,
-    "duration_seconds": 32.614,
-    "command": "python3 -m unittest discover -s tests -q"
+    "count": 200,
+    "status": "PASS"
   },
-  "browser_check_count": 177,
-  "browser_reports": {
-    "decision_studio": {
+  "browser_checks": {
+    "decision_checks.json": {
       "status": "PASS",
       "count": 66,
       "checks": [
@@ -86,7 +83,7 @@
       "failed_requests": [],
       "scope": "Cloud Chromium, two language routes; underlying source data unchanged"
     },
-    "bilingual": {
+    "bilingual_checks.json": {
       "status": "PASS",
       "checks": [
         "default entry opens the English website",
@@ -132,7 +129,7 @@
       ],
       "javascript_errors": []
     },
-    "rerun": {
+    "rerun_checks.json": {
       "status": "PASS",
       "checks": [
         "viewer is lazy: ordinary scene page does not download WASM",
@@ -177,7 +174,7 @@
       "page_errors": [],
       "normal_failed_requests": []
     },
-    "argoverse": {
+    "argoverse/argoverse_checks.json": {
       "status": "PASS",
       "count": 33,
       "checks": [
@@ -219,115 +216,257 @@
       "failed_requests": [],
       "result_sha256": "e284f670cca5c32650ce8e8edb076e719c342eb8aefef10817df5262b1ef98ec"
     },
-    "dataset_navigation": {
+    "algorithms/pipeline_checks.json": {
       "status": "PASS",
-      "count": 3,
+      "count": 47,
       "checks": [
-        "nuScenes English opens separate Argoverse data",
-        "Argoverse language switch retains Argoverse scene",
-        "Chinese return restores nuScenes without mixing candidates or stale approval notice"
-      ]
-    }
-  },
-  "argoverse": {
-    "command": "python3 scripts/run_dataset.py --dataset argoverse --run-name rerun-20261108",
-    "result_sha256": "e284f670cca5c32650ce8e8edb076e719c342eb8aefef10817df5262b1ef98ec",
-    "summary": {
-      "frames": 582,
-      "views": 1746,
-      "observations": 10278,
-      "projected_observations": 6770,
-      "m3_candidates": 4,
-      "m4_groups": 1,
-      "confirmed_changes": 0,
-      "base_map_updates": 0,
-      "pending_manual_reviews": 0
-    },
-    "equivalence": {
-      "M3": {
-        "decisions.jsonl": true,
-        "change_candidates.jsonl": true,
-        "map_checks.jsonl": true,
-        "rules.json": true
-      },
-      "M4": {
-        "change_records.jsonl": true,
-        "frame_evidence.jsonl": true,
-        "rules.json": true
-      }
-    },
-    "evaluation": {
-      "scope": "all_supplied_supported_map_object_retrieval",
-      "inventory_objects": 288,
-      "objects": 273,
-      "excluded_unsupported_objects": 15,
-      "changed_objects": 98,
-      "confirmed_object_predictions": 0,
-      "true_positives": 0,
-      "false_positives": 0,
-      "unretrieved_changed_objects": 98,
-      "precision": null,
-      "recall": 0.0,
-      "f1": 0.0,
-      "f1_definition": "2TP/(2TP+FP+unretrieved_changed_objects)",
-      "visibility_conditioned_accuracy": null,
-      "candidate_diagnostics": [
-        {
-          "change_id": "m4:a3370e24c5eac30b",
-          "map_element_id": "ls-168084944",
-          "prediction_status": "uncertain",
-          "official_gt_changed": false,
-          "evaluation_role": "candidate_only_not_final_positive"
-        }
+        "v3 presentation identifies its source hash and derived-view omissions",
+        "all geometry, semantic classifications, decisions and evidence are preserved",
+        "actual state layers, evaluation and method are preserved unchanged",
+        "nuScenes opens with 29 source events and 23 applied state classes",
+        "main classifier uses structure/state semantics and makes no trained-probability claim",
+        "primary UI contains no duration forecast, posterior display or minimum revisit threshold",
+        "occupancy reliability preserves annotation provenance instead of claiming new detection",
+        "barrier is classified as a state event and its real layer record is stored",
+        "routing highlight matches the actual semantic classifier output",
+        "semantic evidence retains the source barrier category and matched input fields",
+        "numerical class confidence remains unavailable instead of invented probability",
+        "missing clip-end observation does not erase state classification or confirm clearance",
+        "lifecycle uses actual timestamps without inventing a default TTL",
+        "state geometry comes from the saved last-observed snapshot",
+        "downloaded state layer is the actual 23-feature GeoJSON with unchanged base-map flags",
+        "state filter includes all 23 occupancy events",
+        "six marking hypotheses remain visible without being accepted as verified edits",
+        "unverified marking semantics identify a structural hypothesis independently of reliability",
+        "structural hypothesis does not create a state record or a base patch",
+        "empty taxonomy filter is explicit",
+        "empty search is explicit",
+        "nuScenes evaluation distinguishes 12 clip-end observations from 11 unobserved states",
+        "old duration labels are not recycled into structure/state accuracy",
+        "Argoverse loads 76 events with one applied structural class and no state records",
+        "71 structural hypotheses are distinguished from the single applied class",
+        "applied structural claim is still exposed as a left-boundary geometry false positive",
+        "geometry recall is undefined with no true changes in the 75-boundary scope",
+        "evaluation keeps coarse object retrieval distinct from exact boundary accuracy",
+        "structural write gate has quality conditions without duration or visit minima",
+        "truth coverage explains the 34 unpainted boundary references and 24 intersection references",
+        "five map-consistent events have a dedicated no-change filter",
+        "map-consistent events have no adopted change class or misleading active routing branch",
+        "all 70 insufficient-geometry Argoverse hypotheses remain inspectable",
+        "semantic structure identity does not override insufficient observation evidence",
+        "full download preserves the complete original result",
+        "Argoverse context link uses its separate recorded-data route",
+        "all 105 source events render in English without changing their outcomes",
+        "interaction preserves immutable predictions and state histories",
+        "language switching preserves dataset and selected event",
+        "both languages use identical source-derived data",
+        "Chinese distinguishes unobserved clip-end state from unknown classification",
+        "Chinese explains semantic routing and expiry without a temporal class",
+        "mobile event and lifecycle view has no horizontal overflow",
+        "mobile evaluation has no horizontal overflow",
+        "invalid deep link recovers to a real source event",
+        "all assets load without failed requests",
+        "all interactions finish without uncaught JavaScript errors"
       ],
-      "candidate_hits": 0,
-      "candidate_count": 1,
-      "gt_type_counts": {
-        "added": 27,
-        "marking_changed": 11,
-        "lane_type_changed": 35,
-        "geometry_changed": 30,
-        "connectivity_changed": 16
-      },
-      "scope_selection": "All supported supplied objects, independent of candidate locations, frames and correctness.",
-      "limitations": [
-        "Whole supplied map retrieval is not visibility-conditioned perception accuracy.",
-        "No output is not a factual unchanged prediction; no true-negative accuracy is reported.",
-        "Unsupported drivable-area state comparisons are excluded.",
-        "Constructed-train development scene, not an independent test.",
-        "Type counts overlap; candidate diagnostics are separate from confirmed positives."
-      ]
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4"
     },
-    "m2_diagnostics": {
-      "ambiguous_matches": 1451,
-      "ambiguous_top2_same_boundary_and_attribute": 941,
-      "quality_flag_counts": {
-        "model_candidate": 10278,
-        "curb_confusion_possible": 10278,
-        "no_independent_accuracy": 10278,
-        "not_temporally_fused": 10278,
-        "ground_curve_partial_or_invalid": 4220
+    "algorithm_navigation_checks.json": {
+      "status": "PASS",
+      "count": 11,
+      "checks": [
+        "en original baseline is labelled",
+        "en baseline opens current structure/state run",
+        "en new result links back to Argoverse baseline",
+        "en Argoverse baseline returns to current result",
+        "zh original baseline is labelled",
+        "zh baseline opens current structure/state run",
+        "zh new result links back to Argoverse baseline",
+        "zh Argoverse baseline returns to current result",
+        "full result download matches frozen run",
+        "state layer download contains all 23 actual state records",
+        "navigation has no uncaught browser errors"
+      ],
+      "page_errors": [],
+      "scope": "Local HTTP combined website navigation and download identity"
+    }
+  },
+  "browser_count": 232,
+  "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
+  "prediction_freeze_integrity": {
+    "method.json": true,
+    "nuscenes_predictions.json": true,
+    "nuscenes_state_layer.geojson": true,
+    "argoverse_predictions.json": true,
+    "argoverse_state_layer.geojson": true
+  },
+  "executed_code_integrity": {
+    "map_update/pipeline_v2.py": true,
+    "map_update/nuscenes_v2.py": true,
+    "map_update/reliability_v2.py": true,
+    "map_update/map_layers.py": true,
+    "map_update/state_events.py": true,
+    "map_update/persistence.py": true,
+    "map_update/engine.py": true,
+    "map_update/reliability.py": true,
+    "map_update/scene.py": true,
+    "map_update/delivery.py": true,
+    "map_update/automatic.py": true,
+    "map_update/argoverse.py": true
+  },
+  "actual_results": {
+    "nuscenes": {
+      "summary": {
+        "events": 29,
+        "reliability_counts": {
+          "supported_conflict": 23,
+          "insufficient_geometry": 6
+        },
+        "layer_counts": {
+          "map_state_event": 23,
+          "base_map_structure": 6
+        },
+        "accepted_layer_counts": {
+          "map_state_event": 23
+        },
+        "stored_state_events": 23,
+        "base_map_updates": 0,
+        "pending_manual_reviews": 0
       },
-      "interpretation": "Duplicate physical boundaries can create identity ambiguity. A flag on every observation is a global risk notice, not an object-specific curb diagnosis."
+      "state_lifecycle": {
+        "input_events": 29,
+        "eligible_events": 23,
+        "features": 23,
+        "observed_active": 12,
+        "unknown": 11,
+        "stale": 0,
+        "cleared": 0,
+        "unobserved": 0,
+        "excluded": 6
+      }
     },
-    "prediction_freeze": {
-      "gt_read": false,
-      "frozen_at_utc": "2026-11-08T11:48:12.754499+00:00",
-      "files_sha256": {
-        "M3/change_candidates.csv": "4666ec56c3d911da32bf06bcc121d87d85a3c6d6dee416c258d6925672c77cfc",
-        "M3/change_candidates.jsonl": "06d468d775808fe45556aa78808cfbdfe7ba4ac1ad8f4faf40e72b1fde1d063a",
-        "M3/decisions.jsonl": "713709bf273502421daaa5575ac6c3c64c89db021e4e3e209cc8ccd2440d83b9",
-        "M3/map_checks.jsonl": "c63165b88b2f35c58d72870405d8523b4e9179f26d4bd32f1c6561064d039d83",
-        "M3/provenance.json": "99343b73060a14f8877c9d7033012ef763dfeb3aa7ca57d250f3c2effdc79c65",
-        "M3/rules.json": "46fbeda0aadb3987a852fe57b4af4246920d87b8d189b18bd54a8a701fc8348e",
-        "M3/summary.json": "9dd93b8cc487df61ea2a138db6477730c1d55a062109dc7a8307f689d0b17ee9",
-        "M4/change_records.jsonl": "9f3fe3e640e9785ed7ce13dc96aabb302fdb4e6d69441232ffb4f3212974709c",
-        "M4/frame_evidence.jsonl": "1d37f825eb8e05761622bbab5ad55ab41ca6cc6520e22df0e88b22308ebd87c6",
-        "M4/provenance.json": "142b5dc27de4cb40609de4ce6f6ca8e9fc6b5377cab72415cc16be03664f236c",
-        "M4/rules.json": "4ea98ccd5fddeb992b148f5227445e88f2c7ad3c5c3f1826fc4dc941882ba82f",
-        "M4/summary.json": "3d4036f71da146243ac2a8b19e45dd76685538c52b7d0bdf765cb600c55e2316"
+    "argoverse": {
+      "summary": {
+        "events": 76,
+        "reliability_counts": {
+          "supported_conflict": 1,
+          "insufficient_geometry": 70,
+          "consistent_with_map": 5
+        },
+        "layer_counts": {
+          "base_map_structure": 71,
+          "not_applicable": 5
+        },
+        "accepted_layer_counts": {
+          "base_map_structure": 1
+        },
+        "stored_state_events": 0,
+        "base_map_updates": 0,
+        "pending_manual_reviews": 0
+      },
+      "state_lifecycle": {
+        "input_events": 76,
+        "eligible_events": 0,
+        "features": 0,
+        "observed_active": 0,
+        "unknown": 0,
+        "stale": 0,
+        "cleared": 0,
+        "unobserved": 0,
+        "excluded": 76
       }
     }
   },
-  "verification_scope": "Actual frozen-M2 M3/M4 numerical rerun; M8 exports used only after freezing predictions. Browser checks against local HTTP build in Chromium/SwiftShader; live Pages delivery not verified."
+  "evaluation": {
+    "nuscenes": {
+      "scope": "supplied_occupancy_and_marking_candidate_semantics",
+      "label_source": "Source candidate types and annotation-backed occupancy; no independent structure-versus-state labels",
+      "sample_count": 29,
+      "supported_state_events": 23,
+      "unverified_structure_hypotheses": 6,
+      "original_duration_labels_reused": false,
+      "independent_layer_accuracy": null,
+      "limitations": [
+        "Source occupancy uses annotation-backed footprints, not rerun camera detection.",
+        "Semantic routing is not proof that the candidate change is real.",
+        "Old temporary/permanent labels are not structure/state ground truth.",
+        "No scene identity or event lifetime is used to choose a map layer."
+      ]
+    },
+    "argoverse": {
+      "scope": "fixed_prior_painted_physical_boundary_geometry",
+      "physical_boundaries": 343,
+      "eligible_boundaries": 75,
+      "excluded_boundaries": {
+        "PRIOR_NOT_KNOWN_PAINTED_MARKING": 268
+      },
+      "prediction_unit": "one exact physical boundary; aliases never expand into multiple true positives",
+      "new_geometry_metrics": {
+        "true_positives": 0,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "predicted_positives": 1,
+        "truth_positives": 0,
+        "precision": 0.0,
+        "recall": null,
+        "f1": 0.0
+      },
+      "baseline_geometry_metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "predicted_positives": 0,
+        "truth_positives": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      },
+      "whole_supported_map_objects": 273,
+      "whole_map_changed_objects": 98,
+      "coarse_object_change_retrieval": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 98,
+        "predicted_positives": 0,
+        "truth_positives": 98,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "exact_object_scope_note": "Coarse any-change object diagnostic on single-reference predictions only, not boundary/type accuracy. Multi-alias output is excluded; main geometry metrics above check the actual claimed boundary.",
+      "task_support_breakdown": {
+        "changed_lane_geometry_references": 34,
+        "prior_marking_counts": {
+          "NONE": 34
+        },
+        "current_marking_counts": {
+          "NONE": 27,
+          "DASHED_WHITE": 4,
+          "SOLID_WHITE": 3
+        },
+        "intersection_references": 24,
+        "note": "Reference records can share physical geometry. NONE is unpainted or logical lane geometry, not a missing painted-line measurement; additions and semantic/topology changes require different observations."
+      },
+      "layer_on_true_geometry_hits": {
+        "predictions": 0,
+        "correct_structure": 0,
+        "accuracy": null,
+        "end_to_end_recall": null,
+        "label_source": "Supplied prior/current lane geometry; no lifetime assumption."
+      },
+      "visibility_conditioned_accuracy": null,
+      "independent_test_accuracy": null,
+      "limitations": [
+        "Constructed-train development scene; parameters not fitted to these labels.",
+        "Whole supplied geometry scope includes unobserved areas; not visibility-conditioned accuracy.",
+        "Geometry-only scope excludes additions, topology, lane-use, color and unknown paint references.",
+        "Correct layer identity does not cancel a wrong boundary, side, geometry or operation."
+      ]
+    }
+  },
+  "scope": "Frozen perception inputs; new reliability, structure/state routing and event lifecycle. Local Chromium/SwiftShader checks; live GitHub Pages delivery not verified.",
+  "independent_classification_accuracy": null,
+  "duration_used_for_layer_classification": false,
+  "parameters_trained": false
 }
