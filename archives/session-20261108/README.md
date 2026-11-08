@@ -22,7 +22,7 @@ python3 scripts/restore_session_archive.py \
 python3 scripts/restore_session_archive.py --destination restored_session
 ```
 
-脚本先验证 ZIP 及每个文件的 SHA256；内容相同的现有文件跳过，内容不同的文件拒绝覆盖。支持多个 `--group`；目录前缀也可匹配，例如 `--group outputs/team_proposal` 不会匹配名称前缀，只匹配目录层级，请使用下表精确组名。仅验证可使用 `--verify-only`。
+脚本先验证 ZIP 及每个文件的 SHA256；内容相同的现有文件跳过，内容不同的文件拒绝覆盖。支持多个 `--group`；目录层级前缀也可匹配，例如 `--group outputs/nuscenes/scene-0980` 可以恢复该场景的所有版本。单个版本使用下表中的精确组名。仅验证可使用 `--verify-only`。
 
 若手动下载 ZIP，可直接解压，内部保留相对目录。多分片组需要下载该组的所有 ZIP；每片都是可单独解压的标准 ZIP，不是需要额外工具拼接的拆分压缩格式。
 
