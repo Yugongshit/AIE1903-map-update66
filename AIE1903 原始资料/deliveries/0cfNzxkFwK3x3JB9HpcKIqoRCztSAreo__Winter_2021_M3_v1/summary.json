@@ -1,0 +1,41 @@
+{
+  "input_observations": 10278,
+  "frames": 582,
+  "views": 1746,
+  "views_with_observations": 1471,
+  "candidates": 4,
+  "candidate_types": {
+    "geometry_changed": 4
+  },
+  "decision_status": {
+    "insufficient_evidence": 10271,
+    "no_discrepancy_detected": 3,
+    "candidate": 4
+  },
+  "reasons": {
+    "MAP_BOUNDARY_NOT_KNOWN_PAINTED_MARKING": 2627,
+    "UNMATCHED_BUT_NEAR_PRIOR_BOUNDARY": 334,
+    "MAP_IDENTITY_AMBIGUOUS": 1451,
+    "CURVE_TOO_SHORT": 2631,
+    "MODEL_SCORE_TOO_LOW": 323,
+    "NO_USABLE_CITY_GEOMETRY": 3508,
+    "MAP_OVERLAP_TOO_SHORT": 363,
+    "DIRECTION_INCONSISTENT": 289,
+    "PROJECTED_FRACTION_TOO_LOW": 51,
+    "ADDITION_VS_LARGE_GEOMETRY_EDIT_UNRESOLVED": 5,
+    "GEOMETRY_WITHIN_THRESHOLD": 3,
+    "SINGLE_FRAME_DIFFERENCE_PENDING_M4": 4
+  },
+  "map_boundary_frame_checks": 20088,
+  "confirmed_changes": 0,
+  "deletion_enabled": false,
+  "gt_read": false,
+  "limitations": [
+    "Single-frame candidates only; M4 not run",
+    "No verified visibility, so no deletion conclusions",
+    "Color-only attribute evidence is heuristic; solid/dashed unknown",
+    "No topology, lane-use or crosswalk change perception",
+    "Remote parallel alternatives suppress added hypotheses conservatively",
+    "M2 curb confusion and false negatives propagate"
+  ]
+}

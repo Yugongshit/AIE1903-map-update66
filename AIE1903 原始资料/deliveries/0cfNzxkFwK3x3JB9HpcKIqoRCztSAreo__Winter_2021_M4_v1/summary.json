@@ -1,0 +1,25 @@
+{
+  "input_candidate_observations": 4,
+  "candidate_groups": 1,
+  "change_records": 1,
+  "statuses": {
+    "uncertain": 1
+  },
+  "confirmed_changes": 0,
+  "available_visibility_scores": 0,
+  "frame_evidence_rows": 4,
+  "reasons": {
+    "INSUFFICIENT_DISTINCT_SUPPORT_FRAMES": 1,
+    "SUPPORT_DURATION_TOO_SHORT": 1,
+    "VISIBILITY_DENOMINATOR_UNKNOWN": 1,
+    "VISIBILITY_SUPPORT_SCORE_UNAVAILABLE": 1,
+    "UPSTREAM_CURB_CONFUSION_RISK_UNRESOLVED": 1
+  },
+  "gt_read": false,
+  "limitations": [
+    "M4 fuses existing M3 candidates only; it does not discover missed changes",
+    "Continuity and repetition are not truth or visibility support ratios",
+    "Upstream suspected curb false positives retained as uncertain",
+    "No reliable visibility denominator, so proposal S cannot be computed for current data"
+  ]
+}

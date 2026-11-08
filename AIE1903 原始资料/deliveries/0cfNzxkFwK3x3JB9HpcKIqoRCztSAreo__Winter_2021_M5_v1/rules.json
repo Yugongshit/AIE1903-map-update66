@@ -1,0 +1,25 @@
+{
+  "version": "m5_vehicle_v1",
+  "lidar_range_m": 60.0,
+  "minimum_ego_distance_m": 2.5,
+  "point_height_above_ground_m": [
+    0.25,
+    3.5
+  ],
+  "minimum_cluster_points": 8,
+  "cluster_voxel_m": 0.3,
+  "cluster_connectivity_m": 0.8,
+  "max_cluster_voxels": 2500,
+  "measurement_sigma_base_m": 0.6,
+  "acceleration_noise_mps2": 3.0,
+  "mahalanobis_gate_squared": 9.21,
+  "maximum_prediction_s": 0.5,
+  "terminate_after_missing_s": 0.8,
+  "confirm_after_hits": 3,
+  "two_d_iou_gate": 0.2,
+  "two_d_max_gap_s": 0.4,
+  "cross_camera_overlap_fraction": 0.25,
+  "cross_camera_center_distance_m": 0.75,
+  "position_definition": "median of associated visible LiDAR returns, not amodal vehicle box center",
+  "source_detector": "YOLOP640 vehicle class only"
+}

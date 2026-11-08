@@ -1,0 +1,449 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Validate a row with $ref #/$defs/<table_name>, not as a combined table. Semantic/version upgrades follow README.",
+  "$defs": {
+    "frames": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "run_id",
+        "scene_id",
+        "clip_id",
+        "frame_id",
+        "timestamp_ns",
+        "view_ids",
+        "city_from_ego_at_lidar"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "scene_id": {
+          "type": "string"
+        },
+        "clip_id": {
+          "type": "string"
+        },
+        "frame_id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "timestamp_ns": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "view_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "city_from_ego_at_lidar": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      },
+      "additionalProperties": true
+    },
+    "views": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "run_id",
+        "view_id",
+        "scene_id",
+        "frame_id",
+        "camera",
+        "image_timestamp_ns",
+        "offset_ms",
+        "image_size_wh",
+        "masks",
+        "visibility",
+        "status"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "view_id": {
+          "type": "string"
+        },
+        "scene_id": {
+          "type": "string"
+        },
+        "frame_id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "camera": {
+          "type": "string"
+        },
+        "image_timestamp_ns": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "offset_ms": {
+          "type": "number"
+        },
+        "image_size_wh": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "city_from_ego_at_image": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "masks": {
+          "type": "object",
+          "required": [
+            "road",
+            "lane_raw",
+            "lane_vehicle_filtered"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "visibility": {
+          "enum": [
+            "visible",
+            "occluded",
+            "unknown"
+          ]
+        },
+        "status": {
+          "const": "processed"
+        }
+      },
+      "additionalProperties": true
+    },
+    "observations": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "run_id",
+        "observation_id",
+        "view_id",
+        "frame_id",
+        "scene_id",
+        "camera",
+        "image_timestamp_ns",
+        "element_type",
+        "pixel_curve_xy",
+        "geometry_city",
+        "geometry_pixel_indices",
+        "projection_status",
+        "model_score_mean",
+        "color",
+        "marking_pattern",
+        "visibility",
+        "quality_flags"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "observation_id": {
+          "type": "string"
+        },
+        "view_id": {
+          "type": "string"
+        },
+        "frame_id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "scene_id": {
+          "type": "string"
+        },
+        "camera": {
+          "type": "string"
+        },
+        "image_timestamp_ns": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "element_type": {
+          "const": "lane_boundary_candidate"
+        },
+        "pixel_curve_xy": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 3
+        },
+        "geometry_city": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "minItems": 3
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "geometry_pixel_indices": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "length_m": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "projection_status": {
+          "enum": [
+            "projected",
+            "projection_failed"
+          ]
+        },
+        "model_score_mean": {
+          "type": "number"
+        },
+        "color": {
+          "enum": [
+            "white",
+            "yellow",
+            "unknown"
+          ]
+        },
+        "marking_pattern": {
+          "enum": [
+            "solid",
+            "dashed",
+            "unknown"
+          ]
+        },
+        "visibility": {
+          "enum": [
+            "visible",
+            "occluded",
+            "unknown"
+          ]
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "matches": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "run_id",
+        "observation_id",
+        "view_id",
+        "status",
+        "candidates",
+        "best_map_element_id",
+        "visibility",
+        "change_type"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "observation_id": {
+          "type": "string"
+        },
+        "view_id": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "matched",
+            "ambiguous",
+            "unmatched",
+            "projection_failed"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": [
+              "map_element_id",
+              "boundary_side",
+              "mean_distance_m",
+              "direction_difference_deg",
+              "sample_fraction_within_3m"
+            ],
+            "properties": {
+              "map_element_id": {
+                "type": "string"
+              },
+              "boundary_side": {
+                "enum": [
+                  "left",
+                  "right"
+                ]
+              },
+              "mean_distance_m": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "direction_difference_deg": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 25
+              },
+              "sample_fraction_within_3m": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 1
+              }
+            }
+          }
+        },
+        "best_map_element_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "visibility": {
+          "enum": [
+            "visible",
+            "occluded",
+            "unknown"
+          ]
+        },
+        "change_type": {
+          "type": "null"
+        }
+      },
+      "additionalProperties": true
+    },
+    "detections": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "run_id",
+        "detection_id",
+        "view_id",
+        "frame_id",
+        "scene_id",
+        "camera",
+        "image_timestamp_ns",
+        "bbox_xyxy_px",
+        "score",
+        "class_name",
+        "track_id",
+        "geometry_city"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "detection_id": {
+          "type": "string"
+        },
+        "view_id": {
+          "type": "string"
+        },
+        "frame_id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "scene_id": {
+          "type": "string"
+        },
+        "camera": {
+          "type": "string"
+        },
+        "image_timestamp_ns": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "bbox_xyxy_px": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "class_name": {
+          "const": "vehicle"
+        },
+        "track_id": {
+          "type": "null"
+        },
+        "geometry_city": {
+          "type": "null"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
