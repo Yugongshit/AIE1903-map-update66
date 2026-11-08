@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-1.0",
+  "schema": "decision-evidence-studio-2.0",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -76,7 +76,7 @@
   },
   "source_category_policy": "English: exact original category; Chinese: translated display name; source identity and geometry unchanged",
   "shared_source_sha256": "ff50ded5064938b3fa845bdbbf86136d40acfdf32df95990df28965e1ed11377",
-  "release_date": "2026-11-06",
+  "release_date": "2026-11-08",
   "rerun_version": "0.22.1",
   "real_base_map_writes": 0,
   "rerun_recordings": {
@@ -112,7 +112,18 @@
     "missing_frame": "no source row, not observed clearance",
     "controlled_write": "existing engine outputs on a copied map; no real candidate match"
   },
+  "automatic_processing": {
+    "processed": 29,
+    "event_records": 23,
+    "difference_records": 6,
+    "no_usable_observation": 0,
+    "base_map_updates": 0,
+    "pending_manual_reviews": 0
+  },
+  "manual_review_required": false,
   "unchanged_evidence_sha256": "1b71b9ad3a9ed6eeee527ec5cccd62552bd88d6ecf0ee608875cc3e89d560056",
-  "source_commit": "0d90d1fe429b2e36ec4ef2b901aba45a1fc1b626",
-  "validation_file": "assets/runtime_validation.json"
+  "source_commit": "8178d6fe875fa4bf0fd4cd5f6eb81773d44e3ab5",
+  "source_branch": "fix/automatic-map-decisions",
+  "validation_report": "release_validation.json",
+  "browser_asset_cache": "content-hash versioned decision JS and CSS"
 }

@@ -1,19 +1,11 @@
-# AIE1903 map decisions, evidence and evaluation
+# AIE1903 自动处理工作台 — 2026-11-08
 
-English: https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions
+[英文页面](en/index.html#decisions) · [中文页面](zh/index.html#decisions)
 
-Chinese: https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions
+29 个候选已完成自动处理：23 个占用事件、6 个标线差异，人工待办 0，基础图结构修改 0。处理完成、当前观测、持续时间与结构写图资格分别显示。原数据及 M3 诊断保留原义。
 
-Release: 2026-11-06. Current dataset: nuScenes / scene-0980. Argoverse remains pending review.
+方法与输出：[automatic_processing.md](automatic_processing.md)。验证：[release_validation.json](release_validation.json)：114 项核心测试，65 项决策页面、40 项双语和 35 项 Rerun 浏览器检查通过。
 
-The default workspace lets you select all 29 source candidates, drag a map comparison divider, inspect exact-frame evidence and open the source artifacts behind verification, reliability and map decisions. English retains the original object categories; Chinese translates their display names. The evidence workspace synchronizes known candidates and frames with the existing source scene and embedded official Rerun viewer.
+代码分支 `fix/automatic-map-decisions`，来源提交 `8178d6fe875fa4bf0fd4cd5f6eb81773d44e3ab5`。网站发布分支 `gh-pages`；`downloads/` 中带 20261106 日期的文件是保留的历史交付包。
 
-The evaluation workspace separates unknown real accuracy from 126 controlled perturbation cases. Resolved F1, decision coverage and recall over all positive cases appear together. Errors and abstentions can be inspected case by case and source CSV files can be downloaded.
-
-Real base-map writes remain zero. The separate write lab displays saved maintenance-engine outputs on an isolated copy with explicitly invented offsets, coverage and revisits. Actual copy edits, versions and exact geometry rollback are inspectable. The source scene includes the original perception video; geometric projections are not camera photographs or planning recommendations. Planning and cross-vehicle sharing are not integrated.
-
-Source branch: `feature/evidence-workbench-20261104` at `0d90d1fe429b2e36ec4ef2b901aba45a1fc1b626`.
-
-Current validation: 99 core tests; 56 decision-workspace checks; 40 bilingual regression checks; 35 real Rerun/WebGL checks. See `assets/runtime_validation.json` and `version.json`. The older root `validation.json` describes an earlier release. Browser validation covers cloud Chromium and SwiftShader, not physical Mac/Safari or vehicle operation.
-
-Architecture, walkthrough, limits and rebuild commands: [decision-studio.md](https://github.com/Yugongshit/AIE1903-map-update66/blob/feature/evidence-workbench-20261104/docs/decision-studio.md).
+浏览器检查针对本地 HTTP 构建。当前云环境无法访问 GitHub Pages 和 GitHub Actions 公开状态接口，不能将本地通过等同于线上缓存已刷新。
