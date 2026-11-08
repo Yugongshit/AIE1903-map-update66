@@ -1,0 +1,111 @@
+{
+  "run_id": "m4_scene0980_static_v1",
+  "schema_version": "1.0.0",
+  "parameters": {
+    "centerline_resolution_m": 0.75,
+    "connector_resolution_m": 0.25,
+    "ego_length_m": 4.8,
+    "ego_width_m": 1.9,
+    "ego_reference": "assumed geometric center at supplied ego translation",
+    "obstacle_margin_m": 0.3,
+    "road_margin_m": 0.1,
+    "max_curvature_per_m": 0.2,
+    "response_time_s": 0.5,
+    "braking_deceleration_mps2": 3.0,
+    "stopping_extra_margin_m": 2.0,
+    "join_lookahead_m": [
+      6.0,
+      10.0,
+      14.0
+    ],
+    "max_lane_match_distance_m": 3.0,
+    "max_lane_match_heading_deg": 45.0,
+    "max_successor_gap_m": 1.0,
+    "goal_region_xy": [
+      378.0,
+      1125.0,
+      410.0,
+      1140.0
+    ],
+    "roi_xy": [
+      320.0,
+      1060.0,
+      520.0,
+      1340.0
+    ],
+    "goal_selection": "fixed map-space destination region downstream of the recorded corridor; all policies share it",
+    "fixed_candidate_penalty_per_m": 2.0,
+    "suspected_change_penalty_per_m": 3.0,
+    "uncertain_penalty_per_m": 1.0,
+    "minimum_object_age_s": 0.0,
+    "temporal_mode": "current annotation snapshot; prefix-only candidate evidence; final offline M3 available at scene end",
+    "dynamic_prediction": false,
+    "lane_change_edges": false,
+    "signal_state_available": false,
+    "observed_free_space_available": false
+  },
+  "policies": [
+    "map_only",
+    "fixed_candidate_penalty",
+    "reliability_aware"
+  ],
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "shapely": "2.2.0",
+  "map_sha256": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
+  "m3_map_hash_match": true,
+  "input_hashes": {
+    "inputs\\base_map.json": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
+    "inputs\\frame011_multi_lane_02.csv": "cfb537ebdd04cf5eb3294fb49f6e7ba748d9fa839654628ba6438c4588541d50",
+    "inputs\\frame012_multi_lane_02.csv": "3298c7f7d086450c54f498ca89d16938719409f4a89c047a11d57f24438cde95",
+    "inputs\\frame016_multi_lane_02.csv": "44ee2647abe0c11c36919beb309ed7cbda4d61018841742c34b740c8f19c86b6",
+    "inputs\\frame017_multi_lane_02.csv": "24b5ca48c710dea3ab4b3869eacd0dde7da6b06b193498caefd1efd3fed3097f",
+    "inputs\\frame018_multi_lane_02.csv": "92b1ca763fee5cca52016e715cfbac4799d342ff08024c19b6981f21f43c888c",
+    "inputs\\frame019_multi_lane_02.csv": "8022d5f6b41194e35e13faf3d8493f6d6e01cde9b3093b56c9e5b4d524cc0670",
+    "inputs\\frame020_multi_lane_02.csv": "e4a79191720b850f0f26860de1daae2298f696ac5c1cc980b5432dcc6eb2fb6a",
+    "inputs\\frame021_multi_lane_01.csv": "e5fba410647c2d51b0c6b3aec4828d3c220c71440cdcc82a7617a070784a29d7",
+    "inputs\\frame022_multi_lane_01.csv": "dcc661910bfa177ece17c64201c75b69f6cc663b04d39789aecbeeb681790a81",
+    "inputs\\frame023_multi_lane_01.csv": "f937cd750b248aed410590cef43b557a227a56ad765eda32966385056aedbbb0",
+    "inputs\\frame024_multi_lane_01.csv": "4dd10640d4f18e4fc26b85ed40b790168cf2514fd48795bc73b413c895e213e9",
+    "inputs\\frame025_multi_lane_01.csv": "bbb80a80b0a35d3782ece91dd6abab2155040f57511dfe6eed816377e6a01322",
+    "inputs\\frame027_multi_lane_02.csv": "f4a93051834769cc2aa4285b07f6865bf93f22f63a31ad34d494039b4adf214c",
+    "inputs\\frame028_multi_lane_02.csv": "4a9af469547e4beb2a2e149926fe6ccad78843a88287cd240e3eeebdc59463a7",
+    "inputs\\frame028_multi_lane_03.csv": "b92e02e3bcb3c039ddfb3eaf44c72139896829e29f984f75056807feaadbc01c",
+    "inputs\\frame029_multi_lane_02.csv": "4e0ca224e51b5e4334b458a6eb649db7c1c1d870e6effefeaf5acb3aa3b04489",
+    "inputs\\frame030_multi_lane_02.csv": "d77ea1ef1cb58a5912acaca6812bef43a4e2b3db54a48f451e5e9a6b3827ff6d",
+    "inputs\\frame031_multi_lane_02.csv": "a2f99b41e84932e9ae1bcc129477570ac6f4bfa04a26edadb01f9a1b5b415d4a",
+    "inputs\\frame032_multi_lane_02.csv": "227d7912d0d5ffe5888589cd57a55fb8153630b51d081516e22ac9b3bd092d7d",
+    "inputs\\frame033_multi_lane_02.csv": "082c06a6219f940cd851fb0a43ba9b3ccf58c0eacec0fb83f6064e66f44b6bd2",
+    "inputs\\frame038_multi_lane_02.csv": "f46228e79e3398b57630bc168c0623edfbcc107d5abb759b92a56ae47692ca42",
+    "inputs\\frames.csv": "2459d09854271492aa4f6865a7a767ce8e8ffd6e328858e689645449ff68f329",
+    "inputs\\lane_impact_events_v2.csv": "71490766beb65661bf1162bc66e6523e6fd01b80f627d95c0f9508d2684d785f",
+    "inputs\\lane_impact_frames_v2.csv": "2e83a5736bd990764c01c3a998198c01a924933d083ebf7ad179dcb0bae4f88b",
+    "inputs\\objects.csv": "6c8041f1b0e065d3341b381189f396376d80be20f7dda7f20269adbc2b387367",
+    "inputs\\real_scene_handoff.json": "f49751187d4d085f0a95efe79cf2c86b1eb7f968636c613eb3a4516546e79ef1",
+    "inputs\\scene0980_delivery_validation_v1.json": "e867c4c25ce5163fc5ff111472ce6abb66d3f4dbe1f1008e67589fea07939da4",
+    "inputs\\scene0980_discrepancy_evidence_v1.json": "96c63efa78899375a6c97e943e95d61ef9f6dee376fcffafeafca5a0a24c992d",
+    "inputs\\scene0980_unified_candidates_v1.csv": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee",
+    "inputs\\source_archives.json": "7a818e983df49d45fab4089d22b7c32f7441f719076826f0df97baba417c77b7",
+    "inputs\\tracking_report.json": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a"
+  },
+  "total_runtime_s": 14.413772799889557,
+  "used_member2": false,
+  "source_provenance": {
+    "maps.zip": {
+      "sha256": "2e2fe7d57dbcf91e5750136e3106826f61ad7cc7ec3abc53beab0db54a371ac5",
+      "bytes": 5417092
+    },
+    "processed.zip": {
+      "sha256": "1ef08a18ab9ef3c5804ac60aca091692dfa5bffc6a676825be93f29dd96d670a",
+      "bytes": 980714060
+    },
+    "M3_scene0980_proposal_supplement.zip": {
+      "sha256": "80d0f016df27716835ab7d4efe7d68caeb595bb4ad012a8fe2ce753e580747cc",
+      "bytes": 528007
+    },
+    "member2": {
+      "used": false,
+      "reason": "different Argoverse scene and truncated archive; no result files verified"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "scene_id": "scene-0980",
+  "run_id": "m4_scene0980_static_v1",
+  "map_version": "1.3",
+  "map_sha256": "17939122b940d7faff50fa7ff623ded7f739549a781c32dff1ecd1ac7bebca02",
+  "planning_records_file": "planning_results.jsonl",
+  "planning_summary_file": "planning_summary.csv",
+  "summary_file": "summary.json",
+  "routes_file": "routes_city.geojson",
+  "obstacles_file": "obstacles_city.geojson",
+  "evidence_file": "candidate_evidence_used.jsonl",
+  "reliability_review_file": "inputs/real_scene_handoff.json",
+  "join_keys": [
+    "scene_id",
+    "map_sha256",
+    "frame_index",
+    "timestamp_us",
+    "candidate_ids_used"
+  ],
+  "primary_policy": "reliability_aware",
+  "map_updates_authorized_by_this_package": false,
+  "integration_rules": [
+    "Treat routes as static candidates, not executed vehicle trajectories.",
+    "Keep unknown visibility as null; never convert it to clear or zero risk.",
+    "Planning rejection does not prove a permanent map change or lane closure.",
+    "Use map/observation evidence, not planner detours, to decide map updates.",
+    "M3 review is available only at scene end in this replay; other frames do not consume its final results.",
+    "Preserve GT annotation fallback provenance and all rejected / unevaluable records.",
+    "All GeoJSON coordinates are metric city XY, not WGS84."
+  ],
+  "record_count": 123,
+  "primary_policy_record_count": 41
+}
