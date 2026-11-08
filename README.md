@@ -1,9 +1,9 @@
-# AIE1903 structure/state results
+# AIE1903 composite map and perception labels
 
-Source: `ef0313964b3dacf873eb97363bf513e93c8c6554` on `feat/structure-state-routing`.
+Source: `6881840a75df3d30086288a4c397191f3d3739bc` on `feat/structure-state-routing`.
 
-[New English results](algorithms/en/index.html) · [新版中文结果](algorithms/zh/index.html) · [Method and actual results](https://github.com/Yugongshit/AIE1903-map-update66/blob/feat/structure-state-routing/docs/map_structure_state.md)
+[English map](algorithms/en/index.html) · [中文大地图](algorithms/zh/index.html) · [Perception labels and map guide](https://github.com/Yugongshit/AIE1903-map-update66/blob/feat/structure-state-routing/docs/perception_and_composite_map.md)
 
-The original nuScenes and Argoverse views are retained as labelled baselines. State events are stored separately from structural map patches. Duration does not determine the map layer. The supplied Argoverse structural candidate is a geometric false positive; no real base-map patch was applied.
+The composite view overlays supplied gray base geometry, red stored state events and yellow dashed structural hypotheses in the same source coordinate frame. Click a map marker to inspect the corresponding evidence. Source perception categories and their provenance are available in the expandable guide. Candidate display does not imply a base-map edit.
 
-Validation: 200 core tests and 232 local Chromium checks. Live Pages delivery was not verified from this environment. Historical downloads remain unchanged.
+This presentation update does not rerun inference or alter the saved predictions. Current validation: 208 core tests and 90 local Chromium checks, in `algorithms/composite_release_validation.json`. The previous full-site validation remains in `release_validation.json`; original baseline views and historical downloads are preserved. Live Pages delivery was not verified from this environment.

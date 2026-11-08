@@ -1,0 +1,406 @@
+{
+  "schema": "aie1903.perception_labels.v1",
+  "audit_date": "2026-11-08",
+  "scope": {
+    "en": "Delivered perception outputs; counts describe this scene or clip, not all dataset classes.",
+    "zh": "已交付的感知输出；数量对应当前场景或片段，不代表完整数据集的全部类别。"
+  },
+  "datasets": {
+    "nuscenes": {
+      "scene_id": "scene-0980",
+      "source_note": {
+        "en": "Object categories, boxes and instance identities come from nuScenes ground-truth annotations. Lane candidates use camera YOLOP and BEV geometry processing. These two sources must be reported separately.",
+        "zh": "物体类别、包围框与实例身份来自 nuScenes 官方真值标注。车道线候选来自相机 YOLOP 与 BEV 几何处理。这两种来源需要分别说明。"
+      },
+      "object_classes": [
+        {
+          "code": "movable_object.barrier",
+          "label": {
+            "en": "Barrier",
+            "zh": "路障"
+          },
+          "frame_annotations": 890,
+          "unique_instances": 61
+        },
+        {
+          "code": "human.pedestrian.adult",
+          "label": {
+            "en": "Adult pedestrian",
+            "zh": "成人行人"
+          },
+          "frame_annotations": 235,
+          "unique_instances": 21
+        },
+        {
+          "code": "movable_object.trafficcone",
+          "label": {
+            "en": "Traffic cone",
+            "zh": "交通锥桶"
+          },
+          "frame_annotations": 561,
+          "unique_instances": 42
+        },
+        {
+          "code": "vehicle.car",
+          "label": {
+            "en": "Car",
+            "zh": "汽车"
+          },
+          "frame_annotations": 104,
+          "unique_instances": 8
+        },
+        {
+          "code": "vehicle.truck",
+          "label": {
+            "en": "Truck",
+            "zh": "卡车"
+          },
+          "frame_annotations": 103,
+          "unique_instances": 4
+        },
+        {
+          "code": "movable_object.debris",
+          "label": {
+            "en": "Debris",
+            "zh": "散落杂物"
+          },
+          "frame_annotations": 107,
+          "unique_instances": 3
+        },
+        {
+          "code": "human.pedestrian.stroller",
+          "label": {
+            "en": "Stroller",
+            "zh": "婴儿车"
+          },
+          "frame_annotations": 32,
+          "unique_instances": 1
+        },
+        {
+          "code": "static_object.bicycle_rack",
+          "label": {
+            "en": "Bicycle rack",
+            "zh": "自行车架"
+          },
+          "frame_annotations": 27,
+          "unique_instances": 1
+        },
+        {
+          "code": "human.pedestrian.construction_worker",
+          "label": {
+            "en": "Construction worker",
+            "zh": "施工人员"
+          },
+          "frame_annotations": 144,
+          "unique_instances": 8
+        },
+        {
+          "code": "vehicle.construction",
+          "label": {
+            "en": "Construction vehicle",
+            "zh": "施工车辆"
+          },
+          "frame_annotations": 19,
+          "unique_instances": 1
+        },
+        {
+          "code": "human.pedestrian.personal_mobility",
+          "label": {
+            "en": "Personal mobility user",
+            "zh": "个人代步工具使用者"
+          },
+          "frame_annotations": 18,
+          "unique_instances": 1
+        },
+        {
+          "code": "vehicle.bus.rigid",
+          "label": {
+            "en": "Rigid bus",
+            "zh": "非铰接公交车"
+          },
+          "frame_annotations": 14,
+          "unique_instances": 1
+        },
+        {
+          "code": "vehicle.motorcycle",
+          "label": {
+            "en": "Motorcycle",
+            "zh": "摩托车"
+          },
+          "frame_annotations": 16,
+          "unique_instances": 1
+        },
+        {
+          "code": "movable_object.pushable_pullable",
+          "label": {
+            "en": "Pushable or pullable object",
+            "zh": "可推拉物体"
+          },
+          "frame_annotations": 8,
+          "unique_instances": 1
+        }
+      ],
+      "candidate_classes": [
+        {
+          "code": "ROAD_OCCUPANCY",
+          "label": {
+            "en": "Mapped lane occupancy candidate",
+            "zh": "地图车道占用候选"
+          },
+          "count": 23,
+          "unit": {
+            "en": "candidate events",
+            "zh": "候选事件"
+          },
+          "hypothesis": "OBSERVED_OBJECT_OVERLAPS_MAPPED_LANE",
+          "evidence_source": "NUSCENES_3D_ANNOTATIONS_WITH_LIDAR_CHECKS"
+        },
+        {
+          "code": "LANE_MARKING_GEOMETRY",
+          "label": {
+            "en": "Lane marking geometry discrepancy candidate",
+            "zh": "车道标线几何差异候选"
+          },
+          "count": 6,
+          "unit": {
+            "en": "candidate events",
+            "zh": "候选事件"
+          },
+          "hypothesis": "OBSERVED_LINE_WITHOUT_SUFFICIENT_MAP_DIVIDER_SUPPORT",
+          "evidence_source": "CAMERA_YOLOP_BEV_MULTIFRAME_MAP_COMPARISON"
+        }
+      ],
+      "notes": [
+        {
+          "en": "Frame annotations count repeated observations of an object; unique_instances counts distinct official instance_token values.",
+          "zh": "逐帧标注数会重复计算同一物体；独立实例数按官方 instance_token 去重。"
+        },
+        {
+          "en": "The 23 occupancy candidates involve 74 distinct source objects: 45 barriers, 26 traffic cones and 3 debris objects. They are a subset of the 154 objects in the scene.",
+          "zh": "23 个占用候选涉及 74 个不同原始物体：45 个路障、26 个锥桶、3 个杂物。它们是全场景 154 个物体的子集。"
+        },
+        {
+          "en": "ROAD_OCCUPANCY and LANE_MARKING_GEOMETRY are candidate event types, not object semantic classes. An overlap does not by itself confirm a lane closure or an HD-map geometry error.",
+          "zh": "ROAD_OCCUPANCY 和 LANE_MARKING_GEOMETRY 是候选事件类型，不是物体语义类别。几何重叠本身不能直接证明封路或高精地图几何错误。"
+        },
+        {
+          "en": "A barrier category identifies the object. Current road state and a proposed structural map edit are separate downstream decisions.",
+          "zh": "路障类别说明物体是什么；当前道路状态与是否提出地图结构修改，是后续两个不同的判断。"
+        },
+        {
+          "en": "nuScenes object tracks reuse official instance identities. Motion and vehicle behavior states are derived with thresholds; they are not independent detector or learned behavior-model predictions.",
+          "zh": "nuScenes 物体轨迹复用官方实例身份。运动与车辆行为状态由阈值规则派生，不是独立检测器或学习型行为模型的预测。"
+        },
+        {
+          "en": "Lane geometry candidates use learned YOLOP masks followed by geometric fitting and map comparison; their presence does not establish perception accuracy or a confirmed map defect.",
+          "zh": "车道线几何候选使用学习型 YOLOP 掩码，再进行几何拟合和地图对比；存在这些候选并不等于已验证感知准确率或已确认地图缺陷。"
+        }
+      ],
+      "source_files": [
+        {
+          "path": "AIE1903 原始资料/processed/objects.csv",
+          "sha256": "6c8041f1b0e065d3341b381189f396376d80be20f7dda7f20269adbc2b387367"
+        },
+        {
+          "path": "AIE1903 原始资料/processed/semantic_report.json",
+          "sha256": "f9a4d8fff4a6c692bdf5162b8e9d4c18d5b0ace39971ad4ddb280cfcb8af2cae"
+        },
+        {
+          "path": "AIE1903 原始资料/processed/scene0980_unified_candidates_v1.csv",
+          "sha256": "2273196c401cc2aa5a72ee1af192ef9d29a6a3b1500844b5cf45263aac3415ee"
+        },
+        {
+          "path": "AIE1903 原始资料/processed/occupancy_regions.json",
+          "sha256": "da669bc486728cd4bfa35fc4500c9e8bdf5afc600b8aed42616e1131436e2425"
+        },
+        {
+          "path": "AIE1903 原始资料/processed/tracking_report.json",
+          "sha256": "78c7d643fc63607ea18389837f9d9f98369919d156f9dcfc5c5c0de1a8f4419a"
+        },
+        {
+          "path": "AIE1903 原始资料/processed/road_perception/frame026_lane_fit_report.json",
+          "sha256": "18aed704c6c421ad853ead163de25f9ba138f1f5f7d780935de15253e93a8909"
+        },
+        {
+          "path": "AIE1903 原始资料/processed/road_perception/frame033_auto_lane_report.json",
+          "sha256": "3f3a6a47e9baaa914bc9d06fa82295a9d6d0ae4f65f7192423326024a42a7b9c"
+        },
+        {
+          "path": "AIE1903 原始资料/perception/pipeline/stage5.py",
+          "sha256": "bbe41183bdc1bb20e95d60f312f23080ba4228fe3455895f014aae172d95bbba"
+        }
+      ],
+      "statistics": {
+        "frames": 41,
+        "frame_annotations": 2278,
+        "unique_instances": 154,
+        "observed_object_classes": 14,
+        "candidate_events": 29,
+        "occupancy_candidate_events": 23,
+        "occupancy_subset_unique_instances": 74,
+        "occupancy_subset_instances_by_class": {
+          "movable_object.barrier": 45,
+          "movable_object.debris": 3,
+          "movable_object.trafficcone": 26
+        },
+        "lane_geometry_candidates": [
+          {
+            "candidate_id": "S0980-LD-001",
+            "track_id": "T002",
+            "observed_frames": 2
+          },
+          {
+            "candidate_id": "S0980-LD-002",
+            "track_id": "T003",
+            "observed_frames": 2
+          },
+          {
+            "candidate_id": "S0980-LD-003",
+            "track_id": "T004",
+            "observed_frames": 8
+          },
+          {
+            "candidate_id": "S0980-LD-004",
+            "track_id": "T005",
+            "observed_frames": 7
+          },
+          {
+            "candidate_id": "S0980-LD-005",
+            "track_id": "T006",
+            "observed_frames": 1
+          },
+          {
+            "candidate_id": "S0980-LD-006",
+            "track_id": "T007",
+            "observed_frames": 1
+          }
+        ]
+      }
+    },
+    "argoverse": {
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "source_note": {
+        "en": "M2 runs the YOLOP ONNX model on camera images. Its outputs are coarse vehicle boxes and binary road/lane masks. Curve colors are assigned by HSV rules; prior-map marking types are separate map inputs.",
+        "zh": "M2 对相机图片运行 YOLOP ONNX 模型，输出粗粒度车辆框与道路/车道线二值掩码。曲线颜色由 HSV 规则赋值；先验地图的标线类型属于另一份地图输入。"
+      },
+      "object_classes": [
+        {
+          "code": "vehicle",
+          "label": {
+            "en": "Vehicle (coarse class)",
+            "zh": "车辆（粗粒度类别）"
+          },
+          "frame_annotations": 4976,
+          "count_kind": "per_view_2d_detections",
+          "unit": {
+            "en": "per-view 2D detection boxes; not unique objects or ground-truth annotations",
+            "zh": "逐视图二维检测框；不是独立物体数或真值标注数"
+          }
+        }
+      ],
+      "candidate_classes": [
+        {
+          "code": "lane_boundary_candidate",
+          "label": {
+            "en": "Lane boundary curve observation",
+            "zh": "车道边界曲线观测"
+          },
+          "count": 10278,
+          "unit": {
+            "en": "per-view curve observations; not confirmed changes",
+            "zh": "逐视图曲线观测；不是已确认变化数"
+          }
+        }
+      ],
+      "notes": [
+        {
+          "en": "All 4,976 detector rows use the class vehicle. The current delivery does not distinguish car, truck, bus, barrier, traffic cone or construction worker with this detector.",
+          "zh": "全部 4,976 条检测记录均使用 vehicle 类别。当前交付的该检测器不细分汽车、卡车、公交车，也不提供路障、锥桶或施工人员类别。"
+        },
+        {
+          "en": "The 10,278 curves are per-view observations, not 10,278 distinct physical lines or map changes. M2 observation IDs are not temporal track identities.",
+          "zh": "10,278 条曲线是逐视图观测，不是 10,278 条独立物理线或地图变化。M2 观测 ID 不是跨帧轨迹身份。"
+        },
+        {
+          "en": "White/yellow colors use non-learned HSV thresholds after YOLOP inference. All curve marking_pattern values are unknown; no solid/dashed or crosswalk classifier is delivered here.",
+          "zh": "白色/黄色由 YOLOP 推理后的非学习型 HSV 阈值判定。所有曲线的 marking_pattern 均为 unknown；这里未交付虚实线或人行横道分类器。"
+        },
+        {
+          "en": "Curves retain pixel coordinates and, when ground projection succeeds, City coordinates. Of 10,278 observations, 6,770 have projected geometry and 3,508 fail projection.",
+          "zh": "曲线保留像素坐标；地面投影成功时另有 City 坐标。10,278 条观测中，6,770 条具有投影几何，3,508 条投影失败。"
+        },
+        {
+          "en": "Prior-map types such as DOUBLE_SOLID_YELLOW or NONE are map attributes, not YOLOP predictions. NONE does not mean the camera verified an absent line.",
+          "zh": "DOUBLE_SOLID_YELLOW、NONE 等先验地图类型属于地图属性，不是 YOLOP 预测。NONE 不代表相机已经确认没有线。"
+        },
+        {
+          "en": "Only three front cameras are processed. Visibility is unknown and no independent accuracy evaluation is provided; a missing detection cannot establish a structural deletion.",
+          "zh": "当前只处理三个前向相机。可见性未知，且没有独立准确率评估；漏检不能证明应删除地图结构。"
+        },
+        {
+          "en": "These outputs provide geometric evidence for downstream reliability and structure/state routing; they do not directly decide road-state updates or structural map edits.",
+          "zh": "这些输出为后续可靠性判断与结构/状态分流提供几何证据，并不直接决定道路状态更新或地图结构修改。"
+        }
+      ],
+      "source_files": [
+        {
+          "path": "AIE1903 原始资料/Python代码/m2_deliver.py",
+          "sha256": "0ddc2fffa854a740530e4f3fada83c1907afc449b65c60f24a3491e8b4f2ec20"
+        },
+        {
+          "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/run.json",
+          "sha256": "74fb09037a0c635aca3f16479d713d0ab58c98c48b70901d41492b15df613465"
+        },
+        {
+          "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/summary.json",
+          "sha256": "75d09beb17badfc5bbf8581e5fafb52c49c834833f2f370645b9a9fb73ba82e7"
+        },
+        {
+          "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/tables/observations.jsonl",
+          "sha256": "983e7f8e1b1d36fe8a658af3ec829db112bf9184a422c02ad3269890cb99f5f6"
+        },
+        {
+          "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/tables/detections.jsonl",
+          "sha256": "d84770a648b9d9361a45658ed2712c33b36bc29b6a91cc9bf88efaaa342bf526"
+        },
+        {
+          "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/prior_map.json",
+          "sha256": "d93d0311117e9c74039611013f005de1f5bebca665476b694eb8d5c0e560176b"
+        }
+      ],
+      "statistics": {
+        "frames": 582,
+        "views": 1746,
+        "processed_cameras": 3,
+        "vehicle_detection_boxes": 4976,
+        "curve_observations": 10278,
+        "projected_curve_observations": 6770,
+        "match_status_counts": {
+          "matched": 4448,
+          "unmatched": 871,
+          "ambiguous": 1451,
+          "projection_failed": 3508
+        },
+        "curve_colors": {
+          "unknown": 7918,
+          "white": 2073,
+          "yellow": 287
+        },
+        "curve_marking_patterns": {
+          "unknown": 10278
+        },
+        "prior_map_boundary_references": 438,
+        "prior_map_mark_types": {
+          "DASHED_WHITE": 24,
+          "DASHED_YELLOW": 2,
+          "DOUBLE_DASH_YELLOW": 2,
+          "DOUBLE_SOLID_YELLOW": 80,
+          "NONE": 295,
+          "SOLID_WHITE": 35
+        },
+        "model_sha256": "cd66a3e0087a7258ae07768cc02cb742eed93865727ae4c9baf969b8fa190696",
+        "reported_inference_gt_read": false
+      }
+    }
+  }
+}

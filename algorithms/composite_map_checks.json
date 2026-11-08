@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "checks": [
+    "nuscenes embedded map equals the exported reference context",
+    "nuscenes map context explicitly excludes current evaluation maps",
+    "argoverse embedded map equals the exported reference context",
+    "argoverse map context explicitly excludes current evaluation maps",
+    "nuScenes base map is the exact frozen original map file",
+    "all 157 nuScenes base features retain original node coordinates and polygon holes",
+    "Argoverse uses the frozen M2 prior rather than current ground truth",
+    "all 343 Argoverse physical boundaries are exact M2 vertices, deduplicated only by reversal",
+    "all 219 lane fills and 27 crossings use actual prior-boundary coordinates",
+    "nuscenes reference bounds equal independently measured source extents",
+    "argoverse reference bounds equal independently measured source extents",
+    "nuScenes perception guide exactly reports 14 source categories, 2278 frame records and 154 instances",
+    "Argoverse guide reports 4976 coarse vehicle boxes, without invented object classes or GT labels",
+    "the prominent map is visible before the detailed evidence panels",
+    "perception details stay collapsed until requested",
+    "English perception details render all 14 actual source labels and their annotation provenance",
+    "nuScenes opens all three layers with 157 base features, 23 states and 6 structure hypotheses",
+    "all state and structural overlay geometries preserve their frozen prediction values",
+    "nuscenes drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
+    "argoverse drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
+    "the composite image actually contains red states and yellow structure geometry",
+    "fit all contains actual source extents without confusing the two city coordinate systems",
+    "base toggle changes actual map pixels and hides its rendered features",
+    "state toggle changes actual map pixels and hides its rendered features",
+    "structure toggle changes actual map pixels and hides its rendered features",
+    "layer switches leave all predictions and histories unchanged",
+    "red pixels coincide with projected last-observed state source geometry",
+    "yellow pixels coincide with projected structural source geometry",
+    "zoom increases the metric scale and changes the rendered view",
+    "zoom out reverses the scale change",
+    "drag pans in metric coordinates with the expected north-up direction",
+    "clicking a map event selects the matching source event in the evidence panel",
+    "Argoverse opens 589 prior features, no states and one supported structural claim",
+    "Argoverse perception view distinguishes vehicle detections from unique objects and ground truth",
+    "the selected supported Argoverse claim has a visible false-positive warning",
+    "Argoverse fit uses its own actual M2 prior bounds",
+    "all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases",
+    "cross-dataset interactions preserve data and do not turn overlays into base-map edits",
+    "Chinese map keeps the same dataset, selected source event and exact data",
+    "Chinese map controls describe state and structure separately",
+    "mobile map and controls fit without horizontal document overflow",
+    "mobile fit-selected retains visible selected-source geometry",
+    "all assets load and all map interactions have no uncaught browser errors"
+  ],
+  "page_errors": [],
+  "failed_requests": [],
+  "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
+  "source_bounds_xyxy": {
+    "nuscenes": [
+      245.75157373658558,
+      1044.6997280220949,
+      495.01611050943313,
+      1353.0075414922635
+    ],
+    "argoverse": [
+      930,
+      -542.51,
+      1290,
+      -185.52
+    ]
+  },
+  "red_source_coordinate_pixels": {
+    "tested": 489,
+    "hits": 489,
+    "fraction": 1
+  },
+  "yellow_source_coordinate_pixels": {
+    "tested": 72,
+    "hits": 70,
+    "fraction": 0.9722222222222222
+  },
+  "count": 43
+}

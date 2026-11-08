@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.0",
+  "schema": "decision-evidence-studio-3.1",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -131,9 +131,16 @@
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "ef0313964b3dacf873eb97363bf513e93c8c6554",
+  "source_commit": "6881840a75df3d30086288a4c397191f3d3739bc",
   "source_branch": "feat/structure-state-routing",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
-  "duration_determines_map_layer": false
+  "duration_determines_map_layer": false,
+  "composite_map_colors": {
+    "base": "gray",
+    "state_events": "red",
+    "structural_candidates": "yellow dashed"
+  },
+  "current_presentation_validation": "algorithms/composite_release_validation.json",
+  "previous_full_site_validation": "release_validation.json"
 }
