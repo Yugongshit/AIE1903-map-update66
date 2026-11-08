@@ -1,6 +1,6 @@
 # 新对话从这里继续（2026-11-08）
 
-**大地图与 Perception 说明已更新：** 同一坐标系叠加灰色底图、红色状态事件和黄色虚线结构候选，可缩放、拖动、点选和开关图层。nuScenes 显示 157 个底图要素、23 个状态记录和 6 个结构假设；预测结果保持原样。页面可展开查看 nuScenes 14 类官方物体标注及 Argoverse 粗车辆/车道线输出。见 [标注来源与大地图说明](docs/perception_and_composite_map.md)。
+**地图前后对照与 Perception 说明已更新：** 使用可拖动分割线比较原图和更新后视图：拉到最右边是全原图，最左边是全更新后。黄色表示状态事件，红色表示已确认结构变更，绿色表示未确认结构候选；当前真实红色变更为 0。nuScenes 显示 157 个底图要素、23 个状态记录和 6 个结构假设；预测结果保持原样。页面可展开查看 nuScenes 14 类官方物体标注及 Argoverse 粗车辆/车道线输出。见 [标注来源与大地图说明](docs/perception_and_composite_map.md)。
 
 **最新：结构/状态分类已重写并运行。** 按用户修正的定义，区分“底图结构变更”和“地图状态事件”，不再用持续时间选择图层。nuScenes 23 个占用事件进入状态层，6 个标线结构假设未证实；Argoverse 新支持的 1 个结构候选经真值核对为几何误报。实际底图写入 0，不生成等待人工复核的队列。没有独立结构/状态分类标签，旧 23/29 长短期分数不再使用。新实现与原因见 [结构/状态算法说明](docs/map_structure_state.md)，[中文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [英文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html)。下方旧 M3、自动记录与长短期状态属于历史记录，以此条为准。
 
@@ -102,7 +102,7 @@ python3 scripts/restore_session_archive.py --destination restored_session
 
 ## 6. 验证与待办
 
-本轮大地图通过 **208 项核心测试、90 项浏览器检查**（47 结构/状态回归、43 地图/感知来源检查）。预测结果未改、未重跑推理。记录见 [composite-map-validation-20261108.json](docs/composite-map-validation-20261108.json)。
+当前滑动对照版通过 3 项构建身份测试与 123 项浏览器检查（49 项管线、74 项地图交互），验证见 [swipe-map-validation-20261108.json](docs/swipe-map-validation-20261108.json)：检查拖动方向、原图侧裁剪、鼠标／触屏／键盘、三色语义和来源不变。预测结果未改、未重跑推理。此前大地图版通过 **208 项核心测试、90 项浏览器检查**，记录保留在 [composite-map-validation-20261108.json](docs/composite-map-validation-20261108.json)；这些历史数量不是本次重新运行的结果。
 
 此前完整站点已完成 **200 项核心测试及 232 项浏览器检查**（66 决策、40 双语、35 Rerun、33 原 Argoverse、47 新结构/状态页面、11 导航/下载）。最近验证记录见 [structure-state-validation-20261108.json](docs/structure-state-validation-20261108.json)。范围为云端 Chromium / SwiftShader，未宣称验证实体 Mac、Safari 或车辆。此前归档另逐一恢复并核对 1,449 个文件，检查了已有文件保护、路径安全和损坏归档拒绝。
 

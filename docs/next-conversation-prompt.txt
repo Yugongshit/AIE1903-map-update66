@@ -1,4 +1,4 @@
-最新展示：已把实际底图、红色状态事件、黄色虚线结构候选叠加为大地图，可点选联动。先读 docs/perception_and_composite_map.md；Perception的14类nuScenes物体标签是官方GT，Argoverse仅粗vehicle及车道线。不得把新展示说成重训或提高准确率。
+最新展示：原图/更新后使用可拖动分割线对照，最右全原图、最左全更新后。黄色状态事件，红色已确认结构变更，绿色未确认结构候选；不可把局部几何支持直接标成红色。先读 docs/perception_and_composite_map.md；Perception的14类nuScenes物体标签是官方GT，Argoverse仅粗vehicle及车道线。不得把新展示说成重训或提高准确率。
 最新定义：底图结构变更 vs 地图状态事件，不是长期 vs 短期。先读 docs/map_structure_state.md；不要重新把寿命预测作为图层分类器。新版状态层会区分观测存在、明确恢复、未知和过期，旧23/29长短期评价不再适用。
 请继续我的 AIE1903 Evaluation and Evidence 项目。
 仓库：https://github.com/Yugongshit/AIE1903-map-update66

@@ -1,4 +1,4 @@
-"""Build a separate bilingual comparison of the executed structure/state pipeline."""
+"""Build a bilingual before/after map comparison from saved source evidence."""
 import argparse
 from copy import deepcopy
 from hashlib import sha256
@@ -81,6 +81,16 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         'omitted_fields': ['datasets.*.observation_decisions', 'datasets.*.events.*.samples.*.geometry_city'],
         'added_fields': ['datasets.*.map_context', 'perception_guide'],
         'map_context_source': 'Same supplied reference maps as prediction; current evaluation maps excluded',
+        'comparison_contract': {
+            'left_view': 'original_reference_map', 'right_view': 'updated_presentation',
+            'divider_leftmost': 'full_updated_presentation',
+            'divider_rightmost': 'full_original_reference_map',
+            'shared_coordinate_projection': True,
+            'colors': {'map_state_event': 'yellow', 'confirmed_structure': 'red',
+                       'unconfirmed_structure': 'green'},
+            'confirmation': 'Executed structural patch, or explicitly eligible verified structural edit. Local conflict support alone is insufficient.',
+            'updated_view_includes_unconfirmed_candidates': True,
+            'source_base_map_mutated': False},
         'event_geometry_layer_classification_and_lifecycle_preserved': True}
     serialized = json.dumps(view, ensure_ascii=False, allow_nan=False).replace('<', r'\u003c').replace('>', r'\u003e').replace('&', r'\u0026')
     revision = sha256(b''.join((output / 'assets' / ('pipeline_studio.' + suffix)).read_bytes() for suffix in ['css', 'js'])).hexdigest()[:12]
@@ -89,7 +99,7 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         route.mkdir()
         (route / 'index.html').write_text(template.replace('__LANG__', language).replace('__RESULT__', serialized).replace('__REVISION__', revision))
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=en/index.html"><a href="en/index.html">Map-layer pipeline</a>\n')
-    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.1', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
+    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.2', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
         'map_context_sha256': {name: sha256((output/(name+'_map_context.json')).read_bytes()).hexdigest() for name in contexts},
         'perception_guide_sha256': sha256(guide_path.read_bytes()).hexdigest()}, indent=2) + '\n')
     return output

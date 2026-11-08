@@ -48,6 +48,9 @@ try:
         page.wait_for_function('window.PIPELINE_STUDIO')
         view = page.evaluate('PIPELINE_STUDIO.data')
         baseline = page.evaluate('JSON.stringify(PIPELINE_STUDIO.data)')
+        check('technical evidence starts collapsed behind the map comparison', page.locator('#advanced-analysis').get_attribute('open') is None)
+        page.locator('#map-view-evidence').click()
+        check('the selected-map evidence action opens the actual analysis panels', page.locator('#advanced-analysis').get_attribute('open') is not None and page.locator('#selected-id').is_visible())
         check('v3 presentation identifies its source hash and derived-view omissions', view['schema'] == 'change-pipeline-v3' and view['presentation']['source_result_sha256'] == sha256((root / 'result.json').read_bytes()).hexdigest() and view['presentation']['event_geometry_layer_classification_and_lifecycle_preserved'] is True and all('observation_decisions' not in value for value in view['datasets'].values()))
         check('all geometry, semantic classifications, decisions and evidence are preserved', all(
             all(event[field] == original[field] for field in ['geometry_city', 'reliability', 'map_layer', 'decision']) and
@@ -118,6 +121,7 @@ try:
         selected = page.evaluate('PIPELINE_STUDIO.state.eventId')
         page.locator('#language-link').click()
         page.wait_for_url('**/zh/index.html?*')
+        page.locator('#map-view-evidence').click()
         check('language switching preserves dataset and selected event', page.evaluate('PIPELINE_STUDIO.state.dataset') == 'nuscenes' and page.evaluate('PIPELINE_STUDIO.state.eventId') == selected)
         check('both languages use identical source-derived data', page.evaluate('PIPELINE_STUDIO.data') == view)
         check('Chinese distinguishes unobserved clip-end state from unknown classification', '地图状态事件' in page.locator('#layer-status').inner_text() and '末帧状态未观测' in page.locator('#lifecycle').inner_text() and '并不代表没有检测到该障碍' in page.locator('#lifecycle').inner_text())

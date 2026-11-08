@@ -175,14 +175,15 @@ def run(directory, raw_root):
         return page.evaluate('''() => {
           const canvas=document.querySelector('#composite-map');
           const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
-          let hash=2166136261, red=0, yellow=0;
+          let hash=2166136261, red=0, yellow=0, green=0;
           for(let i=0;i<pixels.length;i+=4){
             const [r,g,b]=pixels.slice(i,i+3);
             hash=Math.imul(hash ^ r,16777619); hash=Math.imul(hash ^ g,16777619); hash=Math.imul(hash ^ b,16777619);
             if(r>110 && r>g*1.32 && r>b*1.25) red++;
             if(r>130 && g>100 && b<r*.65 && Math.abs(r-g)<115) yellow++;
+            if(g>100 && g>r*1.3 && g>b*1.15) green++;
           }
-          return {hash:hash>>>0,red,yellow,width:canvas.width,height:canvas.height};
+          return {hash:hash>>>0,red,yellow,green,width:canvas.width,height:canvas.height};
         }''')
 
     def fit_contains(page, geometries):
@@ -207,7 +208,7 @@ def run(directory, raw_root):
           const state=PIPELINE_STUDIO.map.state, ratio=canvas.width/box.width;
           const image=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
           let tested=0,hits=0;
-          function colored(r,g,b){return color==='red' ? r>110&&r>g*1.32&&r>b*1.25 : r>130&&g>100&&b<r*.65&&Math.abs(r-g)<115;}
+          function colored(r,g,b){return color==='green' ? g>100&&g>r*1.3&&g>b*1.15 : r>130&&g>100&&b<r*.65&&Math.abs(r-g)<115;}
           for(const path of paths)for(let j=1;j<path.length;j++){
             const a=path[j-1],b=path[j],steps=Math.max(1,Math.ceil(Math.hypot(a[0]-b[0],a[1]-b[1])*state.scale/3));
             for(let n=0;n<=Math.min(steps,300);n++){
@@ -224,6 +225,105 @@ def run(directory, raw_root):
           }
           return {tested,hits,fraction:tested?hits/tested:0};
         }''', {'paths': paths, 'color': color})
+
+    def swipe_pixels(page):
+        """Compare whole canvas regions, rather than trusting UI percentages."""
+        # Center the selected real barrier so the divider cuts actual overlay
+        # geometry. The whole-scene view happens to place every event to its right.
+        page.locator('#map-fit-selected').click()
+        settle(page)
+        def snapshot(name):
+            page.evaluate('''name=>{
+              const c=document.querySelector('#composite-map');
+              window.__swipeCheck ||= {};
+              window.__swipeCheck[name]=c.getContext('2d').getImageData(0,0,c.width,c.height);
+            }''', name)
+
+        view_before = page.evaluate('''() => ({center:[...PIPELINE_STUDIO.map.state.center],
+          scale:PIPELINE_STUDIO.map.state.scale,point:PIPELINE_STUDIO.map.project([400,1200])})''')
+        page.locator('#map-preset-after').click()
+        settle(page)
+        snapshot('updated')
+        page.locator('#map-layer-state').uncheck()
+        page.locator('#map-layer-structure').uncheck()
+        settle(page)
+        snapshot('base')
+        for selector in ['#map-preset-before', '#map-preset-compare', '#map-preset-after']:
+            page.locator(selector).click()
+            settle(page)
+            check('base geometry remains pixel-identical at ' + selector.removeprefix('#map-preset-'),
+                  page.evaluate('''()=>{
+                    const c=document.querySelector('#composite-map'),a=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+                    return a.every((value,i)=>value===__swipeCheck.base.data[i]);
+                  }'''))
+        page.locator('#map-layer-state').check()
+        page.locator('#map-layer-structure').check()
+        for selector, fraction in [('#map-preset-before', 1), ('#map-preset-compare', .5), ('#map-preset-after', 0)]:
+            page.locator(selector).click()
+            settle(page)
+            comparison = page.evaluate('''fraction=>{
+              const c=document.querySelector('#composite-map'),a=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+              const cut=c.width*fraction; let checked=0,mismatch=0,originalMismatch=0,changed=0,maxChannelDelta=0;const samples=[];
+              for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
+                if(fraction>.0&&fraction<1&&Math.abs(x-cut)<2)continue;
+                const expected=x<cut?__swipeCheck.base.data:__swipeCheck.updated.data;
+                const i=(y*c.width+x)*4; checked++;
+                if(a[i]!==expected[i]||a[i+1]!==expected[i+1]||a[i+2]!==expected[i+2]||a[i+3]!==expected[i+3]){
+                  mismatch++;maxChannelDelta=Math.max(maxChannelDelta,...[0,1,2,3].map(k=>Math.abs(a[i+k]-expected[i+k])));
+                  if(x<cut)originalMismatch++;
+                  if(samples.length<12)samples.push({x,y,actual:[...a.slice(i,i+4)],expected:[...expected.slice(i,i+4)]});
+                }
+                if(a[i]!==__swipeCheck.base.data[i]||a[i+1]!==__swipeCheck.base.data[i+1]||a[i+2]!==__swipeCheck.base.data[i+2])changed++;
+              }
+              return {checked,mismatch,originalMismatch,changed,maxChannelDelta,samples};
+            }''', fraction)
+            report.setdefault('swipe_pixel_comparisons', {})[str(fraction)] = comparison
+            # Chromium's clipped path rasterizer changes a few right-side
+            # antialiased edge channels by 1–2/255; original pixels stay exact.
+            pixel_match = comparison['mismatch'] == 0 if fraction in {0, 1} else (
+                comparison['originalMismatch'] == 0 and comparison['maxChannelDelta'] <= 2
+                and comparison['mismatch'] < comparison['checked'] * .001)
+            check('swipe ' + str(int(fraction*100)) + '% preserves original pixels and clips updated source geometry',
+                  pixel_match and comparison['checked'] > 10000
+                  and (comparison['changed'] == 0 if fraction == 1 else comparison['changed'] > 50)
+                  and page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == fraction)
+            page.locator('.composite-panel').screenshot(path=str(root / ('swipe_nuscenes_' + selector.removeprefix('#map-preset-') + '.png')))
+        check('divider positions preserve one shared metric transform for both maps',
+              page.evaluate('''() => ({center:[...PIPELINE_STUDIO.map.state.center],
+                scale:PIPELINE_STUDIO.map.state.scale,point:PIPELINE_STUDIO.map.project([400,1200])})''') == view_before)
+        changes = report['swipe_pixel_comparisons']
+        check('the half comparison actually hides part of the selected source geometry',
+              0 < changes['0.5']['changed'] < changes['0']['changed'])
+
+    def drag_divider(page, right, touch=False):
+        page.locator('#map-preset-compare').click()
+        page.locator('#map-divider').scroll_into_view_if_needed()
+        settle(page)
+        handle, canvas = page.locator('#map-divider').bounding_box(), page.locator('#composite-map').bounding_box()
+        x, y = handle['x'] + handle['width']/2, handle['y'] + handle['height']/2
+        destination = canvas['x'] + canvas['width'] + 7 if right else canvas['x'] - 7
+        before = page.evaluate('({center:[...PIPELINE_STUDIO.map.state.center],scale:PIPELINE_STUDIO.map.state.scale})')
+        if touch:
+            session = page.context.new_cdp_session(page)
+            session.send('Emulation.setTouchEmulationEnabled', {'enabled': True, 'maxTouchPoints': 1})
+            session.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': x, 'y': y}]})
+            for step in range(1, 6):
+                session.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': [{'x': x+(destination-x)*step/5, 'y': y}]})
+            session.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+            session.detach()
+        else:
+            page.mouse.move(x, y)
+            page.mouse.down()
+            page.mouse.move(destination, y, steps=7)
+            page.mouse.up()
+        settle(page)
+        check(('touch' if touch else 'mouse') + ' dragging divider to ' + ('right shows all original' if right else 'left shows all updated'),
+              page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == (1 if right else 0)
+              and page.evaluate('({center:[...PIPELINE_STUDIO.map.state.center],scale:PIPELINE_STUDIO.map.state.scale})') == before)
+        end_handle = page.locator('#map-divider').bounding_box()
+        check(('touch' if touch else 'mouse') + ' endpoint keeps the entire divider grip reachable on screen ' + ('right' if right else 'left'),
+              end_handle['x'] >= canvas['x'] - 1
+              and end_handle['x'] + end_handle['width'] <= canvas['x'] + canvas['width'] + 1)
 
     server = ThreadingHTTPServer(('127.0.0.1', 0), partial(Quiet, directory=str(root)))
     Thread(target=server.serve_forever, daemon=True).start()
@@ -244,6 +344,39 @@ def run(directory, raw_root):
             check('the prominent map is visible before the detailed evidence panels',
                   page.locator('#composite-map').is_visible()
                   and page.locator('#composite-map').bounding_box()['y'] < 900)
+            legend_box = page.locator('#map-legend').bounding_box()
+            check('the yellow, red and green meaning is visible above the canvas in the first viewport',
+                  legend_box['y'] + legend_box['height'] <= page.locator('#composite-map').bounding_box()['y'] + 1
+                  and legend_box['y'] + legend_box['height'] < 1150
+                  and all(word in page.locator('#map-legend').inner_text().lower() for word in ['state', 'confirmed', 'unconfirmed']))
+            check('first view shows the comparison while technical analysis starts collapsed',
+                  page.locator('#advanced-analysis').get_attribute('open') is None
+                  and page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == .5)
+            check('selected map card identifies a barrier in plain language rather than only its source ID',
+                  'barrier' in page.locator('#map-selected-title').inner_text().lower())
+            check('layer options start collapsed to keep the comparison readable', page.locator('.map-options').get_attribute('open') is None)
+            page.locator('.map-options > summary').click()
+            fixture = page.evaluate('''()=>{
+              const map=PIPELINE_STUDIO.map;
+              const base={event_id:'RENDER_TEST_FIXTURE_ONLY',map_layer:{predicted_layer:'base_map_structure'},
+                reliability:{status:'supported_conflict'},decision:{classification_applied:true,base_map_write_eligible:false,write_gate:{eligible:false,map_patch_executed:false}}};
+              const check=(decision,layer='base_map_structure')=>map.isConfirmedStructure({...base,map_layer:{predicted_layer:layer},decision});
+              const cases=[map.isConfirmedStructure(base),map.isConfirmedStructure({}),
+                check({...base.decision,base_map_write_eligible:true}),
+                check({...base.decision,write_gate:{eligible:true,map_patch_executed:false}}),
+                check({...base.decision,base_map_write_eligible:true,write_gate:{eligible:true,map_patch_executed:false}}),
+                check({...base.decision,write_gate:{map_patch_executed:true}}),
+                check({...base.decision,write_gate:{map_patch_executed:true}},'map_state_event')];
+              const canvas=document.createElement('canvas');canvas.width=canvas.height=20;
+              const ctx=canvas.getContext('2d'),style=map.style({layer:'structure',confirmed:true,supported:false,event_id:base.event_id});
+              ctx.strokeStyle=style.color;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(2,10);ctx.lineTo(18,10);ctx.stroke();
+              return {cases,color:style.color,pixel:[...ctx.getImageData(10,10,1,1).data],fixture_scope:'detached render test only; no source-data mutation'};
+            }''')
+            report['confirmed_structure_render_fixture'] = fixture
+            check('red confirmation needs an actual patch or both write gates, never support or class assignment alone',
+                  fixture['cases'] == [False, False, False, False, True, True, False])
+            check('an explicitly synthetic detached render fixture uses red for a confirmed structure',
+                  fixture['pixel'] == [255, 92, 101, 255])
             check('perception details stay collapsed until requested', page.locator('#perception-guide').get_attribute('open') is None)
             page.locator('#perception-guide > summary').click()
             check('English perception details render all 14 actual source labels and their annotation provenance',
@@ -276,13 +409,33 @@ def run(directory, raw_root):
                       and all(f['source'] in {'map_context', 'state_event_layer', 'event'} for f in rendered_sources))
             page.locator('#dataset').select_option('nuscenes')
             settle(page)
+            page.locator('#map-preset-after').click()
+            settle(page)
             initial = raster(page)
-            check('the composite image actually contains red states and yellow structure geometry',
-                  initial['red'] > 15 and initial['yellow'] > 15)
+            check('real nuScenes pixels use yellow states and green unconfirmed structures, with no red confirmation',
+                  initial['yellow'] > 15 and initial['green'] > 15 and initial['red'] == 0
+                  and not any(feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')))
             page.locator('#map-fit-all').click()
             settle(page)
             check('fit all contains actual source extents without confusing the two city coordinate systems',
                   fit_contains(page, [element['geometry_city'] for element in contexts['nuscenes']['elements']] + state_geometries + [event['geometry_city'] for event in structure]))
+            swipe_pixels(page)
+            page.locator('#map-fit-all').click()
+            settle(page)
+            drag_divider(page, right=True)
+            drag_divider(page, right=False)
+            page.locator('#map-divider-range').focus()
+            page.keyboard.press('End')
+            settle(page)
+            check('range keyboard End shows all original with no overlay pixels or hit targets',
+                  page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == 1
+                  and raster(page)['yellow'] == raster(page)['green'] == raster(page)['red'] == 0
+                  and page.evaluate('PIPELINE_STUDIO.map.state.hits.length') == 0)
+            page.keyboard.press('Home')
+            settle(page)
+            check('range keyboard Home restores all updated overlays',
+                  page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == 0
+                  and raster(page)['yellow'] > 15 and raster(page)['green'] > 15)
             for layer in ['base', 'state', 'structure']:
                 before = raster(page)
                 page.locator('#map-layer-' + layer).uncheck()
@@ -296,17 +449,17 @@ def run(directory, raw_root):
             page.locator('#map-layer-structure').uncheck()
             page.locator('#map-fit-selected').click()
             settle(page)
-            red_hits = source_pixel_hits(page, state_geometries, 'red')
-            report['red_source_coordinate_pixels'] = red_hits
-            check('red pixels coincide with projected last-observed state source geometry', red_hits['hits'] > 10 and red_hits['fraction'] > .15)
+            yellow_hits = source_pixel_hits(page, state_geometries, 'yellow')
+            report['yellow_state_source_coordinate_pixels'] = yellow_hits
+            check('yellow pixels coincide with projected last-observed state source geometry', yellow_hits['hits'] > 10 and yellow_hits['fraction'] > .15)
             page.locator('#map-layer-state').uncheck()
             page.locator('#map-layer-structure').check()
             page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', structure[0]['event_id'])
             page.locator('#map-fit-selected').click()
             settle(page)
-            yellow_hits = source_pixel_hits(page, [event['geometry_city'] for event in structure], 'yellow')
-            report['yellow_source_coordinate_pixels'] = yellow_hits
-            check('yellow pixels coincide with projected structural source geometry', yellow_hits['hits'] > 10 and yellow_hits['fraction'] > .15)
+            green_hits = source_pixel_hits(page, [event['geometry_city'] for event in structure], 'green')
+            report['green_structure_source_coordinate_pixels'] = green_hits
+            check('green pixels coincide with projected unconfirmed structural source geometry', green_hits['hits'] > 10 and green_hits['fraction'] > .15)
             old_scale = page.evaluate('PIPELINE_STUDIO.map.state.scale')
             old_raster = raster(page)
             page.locator('#map-zoom-in').click()
@@ -319,6 +472,7 @@ def run(directory, raw_root):
             canvas.scroll_into_view_if_needed()
             box = canvas.bounding_box()
             old_center = page.evaluate('PIPELINE_STUDIO.map.state.center.slice()')
+            old_split = page.evaluate('PIPELINE_STUDIO.map.state.splitFraction')
             x, y = box['x'] + box['width'] * .4, box['y'] + box['height'] * .4
             page.mouse.move(x, y)
             page.mouse.down()
@@ -328,7 +482,8 @@ def run(directory, raw_root):
             center = page.evaluate('PIPELINE_STUDIO.map.state.center')
             check('drag pans in metric coordinates with the expected north-up direction',
                   abs((center[0]-old_center[0])*old_scale + 45) < 2
-                  and abs((center[1]-old_center[1])*old_scale - 30) < 2)
+                  and abs((center[1]-old_center[1])*old_scale - 30) < 2
+                  and page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == old_split)
             page.locator('#map-layer-state').check()
             page.locator('#map-fit-all').click()
             settle(page)
@@ -343,18 +498,39 @@ def run(directory, raw_root):
             assert candidate is not None, 'Expected a separately clickable source-event marker'
             canvas.scroll_into_view_if_needed()
             box = canvas.bounding_box()
+            selected_before_click = page.evaluate('PIPELINE_STUDIO.state.eventId')
+            page.evaluate('fraction=>PIPELINE_STUDIO.map.setSplit(fraction)', min(.95, max(.5, candidate['screen_xy'][0]/box['width']+.05)))
+            settle(page)
             page.mouse.click(box['x'] + candidate['screen_xy'][0], box['y'] + candidate['screen_xy'][1])
             settle(page)
-            check('clicking a map event selects the matching source event in the evidence panel',
+            check('an overlay hidden behind the original side cannot be selected through the swipe clip',
+                  page.evaluate('PIPELINE_STUDIO.state.eventId') == selected_before_click)
+            page.locator('#map-preset-after').click()
+            canvas.scroll_into_view_if_needed()
+            box = canvas.bounding_box()
+            page.mouse.click(box['x'] + candidate['screen_xy'][0], box['y'] + candidate['screen_xy'][1])
+            settle(page)
+            report['map_click_regression'] = {'expected': candidate, 'selected': page.evaluate('PIPELINE_STUDIO.state.eventId'),
+                'canvas_box': box, 'split': page.evaluate('PIPELINE_STUDIO.map.state.splitFraction'),
+                'element_at_click': page.evaluate('''({x,y})=>document.elementFromPoint(x,y)?.outerHTML.slice(0,500)''',
+                    {'x': box['x']+candidate['screen_xy'][0], 'y': box['y']+candidate['screen_xy'][1]})}
+            check('clicking a visible map event selects the matching source event in its map card',
                   page.evaluate('PIPELINE_STUDIO.state.eventId') == candidate['event_id']
+                  and page.locator('#map-selected code').inner_text() == candidate['event_id'])
+            page.locator('#map-view-evidence').click()
+            check('opening evidence after a map click shows the same selected source event',
+                  page.locator('#selected-id').is_visible()
                   and page.locator('#selected-id').inner_text() == candidate['event_id'])
+            page.locator('#advanced-analysis > summary').click()
+            page.locator('#map-preset-compare').click()
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_nuscenes_en.png'))
 
             page.locator('#dataset').select_option('argoverse')
             settle(page)
-            check('Argoverse opens 589 prior features, no states and one supported structural claim',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn') == {'base': 589, 'state': 0, 'structure': 1}
-                  and page.locator('#map-structure-scope').input_value() == 'supported')
+            check('Argoverse opens 589 prior features, no states and all 71 unconfirmed structural candidates',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn') == {'base': 589, 'state': 0, 'structure': 71}
+                  and page.locator('#map-structure-scope').input_value() == 'all'
+                  and page.locator('#map-count-confirmed').inner_text() == '0')
             page.locator('#perception-guide > summary').click()
             check('Argoverse perception view distinguishes vehicle detections from unique objects and ground truth',
                   '4,976' in page.locator('#perception-guide-content').inner_text()
@@ -362,10 +538,27 @@ def run(directory, raw_root):
                   and 'All curve marking_pattern values are unknown' in page.locator('#perception-guide-content').inner_text())
             page.locator('#perception-guide > summary').click()
             check('the selected supported Argoverse claim has a visible false-positive warning',
-                  page.locator('#selected-evaluation').is_visible()
-                  and 'false positive' in page.locator('#selected-evaluation').inner_text().lower()
+                  page.locator('#map-note').is_visible()
                   and 'false positive' in page.locator('#map-note').inner_text().lower()
-                  and '0 applied structural edits' in page.locator('#map-status').inner_text())
+                  and '0 structural patches applied' in page.locator('#map-status').inner_text())
+            page.locator('#map-structure-scope').select_option('supported')
+            settle(page)
+            check('local-support scope isolates one candidate without upgrading it to confirmed structure',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == 1
+                  and page.locator('#map-count-confirmed').inner_text() == '0')
+            page.locator('#map-preset-after').click()
+            settle(page)
+            check('Argoverse supported false positive remains visibly green with no red confirmed structure',
+                  raster(page)['green'] > 15 and raster(page)['red'] == 0
+                  and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is True
+                  and page.evaluate('PIPELINE_STUDIO.current().reliability.status') == 'supported_conflict'
+                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False)
+            page.locator('#map-view-evidence').click()
+            check('the map evidence action opens the detailed source analysis and selected evaluation',
+                  page.locator('#advanced-analysis').get_attribute('open') is not None
+                  and page.locator('#selected-evaluation').is_visible()
+                  and 'false positive' in page.locator('#selected-evaluation').inner_text().lower())
+            page.locator('#advanced-analysis > summary').click()
             page.locator('#map-fit-all').click()
             settle(page)
             check('Argoverse fit uses its own actual M2 prior bounds',
@@ -374,10 +567,13 @@ def run(directory, raw_root):
             settle(page)
             check('all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases',
                   page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == 71
-                  and sum(event['reliability']['status'] == 'insufficient_geometry' for event in view['datasets']['argoverse']['events']) == 70)
+                  and sum(event['reliability']['status'] == 'insufficient_geometry' for event in view['datasets']['argoverse']['events']) == 70
+                  and raster(page)['red'] == 0
+                  and not any(feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')))
             check('cross-dataset interactions preserve data and do not turn overlays into base-map edits',
                   page.evaluate('JSON.stringify(PIPELINE_STUDIO.data)') == immutable
                   and all(dataset['summary']['base_map_updates'] == 0 for dataset in source['datasets'].values()))
+            page.locator('#map-preset-compare').click()
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_argoverse_en.png'))
             selected = page.evaluate('PIPELINE_STUDIO.state.eventId')
             page.locator('#language-link').click()
@@ -387,6 +583,10 @@ def run(directory, raw_root):
                   page.evaluate('PIPELINE_STUDIO.state.dataset') == 'argoverse'
                   and page.evaluate('PIPELINE_STUDIO.state.eventId') == selected
                   and page.evaluate('PIPELINE_STUDIO.data') == view)
+            check('Chinese selected card gives the marking meaning and unconfirmed status',
+                  '标线' in page.locator('#map-selected-title').inner_text()
+                  and '未确认' in page.locator('#map-selected-status').inner_text())
+            page.locator('.map-options > summary').click()
             check('Chinese map controls describe state and structure separately',
                   '状态' in page.locator('#map-layer-state').locator('..').inner_text()
                   and '结构' in page.locator('#map-layer-structure').locator('..').inner_text())
@@ -399,6 +599,10 @@ def run(directory, raw_root):
             settle(page)
             check('mobile fit-selected retains visible selected-source geometry',
                   fit_contains(page, [page.evaluate('PIPELINE_STUDIO.current().geometry_city')]))
+            drag_divider(page, right=True, touch=True)
+            drag_divider(page, right=False, touch=True)
+            page.locator('#map-preset-compare').click()
+            check('mobile divider gestures preserve all immutable source predictions', page.evaluate('PIPELINE_STUDIO.data') == view)
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_mobile_zh.png'))
             check('all assets load and all map interactions have no uncaught browser errors', not errors and not requests)
             browser.close()
