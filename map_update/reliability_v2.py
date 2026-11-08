@@ -172,25 +172,40 @@ def _quality(o, policy):
 
 
 def _structural_hypothesis(marking, assessment):
-    """Identify the property being questioned without confirming a map edit."""
+    """Describe a model decision without asserting truth or an executable edit.
+
+    Paint semantics do not determine whether a geometric residual is measurable.
+    In particular, NONE can be a valid unpainted/logical lane reference. It must
+    neither veto a geometric detection nor force that detection to mean new paint.
+    """
+    detected = assessment == 'supported_conflict'
     if marking == 'NONE':
-        target, operation = 'paint_presence', 'marking_presence_change'
-        reasons = ['PRIOR_BOUNDARY_IS_NOT_KNOWN_PAINTED',
-                   'VISIBLE_CURVE_MAY_INDICATE_PAINT_PRESENCE_NOT_OLD_PAINT_DISPLACEMENT']
-        required = ['observed_curve_is_paint_not_curb_or_projection_artifact',
-                    'paint_absence_to_presence_at_verified_local_reference']
+        target, operation = 'boundary_geometry_or_paint_presence', 'local_boundary_change'
+        alternatives = ['boundary_geometry_change', 'paint_presence_change']
+        reasons = ['UNPAINTED_OR_LOGICAL_REFERENCE_SUPPORTS_GEOMETRIC_COMPARISON',
+                   'GEOMETRY_AND_PAINT_PRESENCE_ARE_SEPARATE_PROPERTIES']
+        required = ['resolve_geometric_boundary_change_vs_paint_presence_change',
+                    'physical_alignment_and_operation_specific_edit_evidence']
     elif marking in ('UNKNOWN', None, ''):
-        target, operation = 'unspecified_marking_semantics', 'unspecified'
-        reasons = ['PRIOR_MARKING_SEMANTICS_UNKNOWN', 'CHANGE_PROPERTY_CANNOT_BE_RESOLVED']
-        required = ['prior_and_observed_marking_semantics', 'verified_change_property']
+        target, operation = 'boundary_geometry_with_unknown_marking', 'local_boundary_change'
+        alternatives = ['boundary_geometry_change', 'unresolved_marking_attribute_change']
+        reasons = ['PRIOR_MARKING_SEMANTICS_UNKNOWN',
+                   'UNKNOWN_PAINT_ATTRIBUTE_DOES_NOT_INVALIDATE_REFERENCE_GEOMETRY']
+        required = ['prior_and_observed_marking_semantics',
+                    'physical_alignment_and_operation_specific_edit_evidence']
     else:
         target, operation = 'boundary_geometry', 'geometry_change'
+        alternatives = ['boundary_geometry_change']
         reasons = ['PRIOR_ATTRIBUTE_DESCRIBES_PAINTED_MARKING',
-                   'LOCAL_GEOMETRIC_RELATION_DOES_NOT_CONFIRM_PHYSICAL_MAP_CHANGE']
+                   'LOCAL_MODEL_DETECTION_IS_NOT_VERIFIED_FULL_FEATURE_REPLACEMENT']
         required = ['same_physical_painted_boundary_correspondence',
                     'physical_alignment_and_observed_edit_geometry']
     return {'target_property': target, 'operation': operation,
-            'status': 'unconfirmed', 'confirmed': False,
+            'status': 'model_detected' if detected else (
+                'no_geometric_discrepancy' if assessment == 'consistent_with_map' else 'unconfirmed'),
+            'confirmed': detected, 'confirmation_source': 'model_prediction',
+            'confirmation_scope': 'local_boundary_correspondence',
+            'operation_alternatives': alternatives,
             'assessment': assessment, 'scope': 'observed_local_segment',
             'reference_marking_type': marking,
             'reason_codes': reasons, 'required_evidence': required,
@@ -246,8 +261,9 @@ def _event(boundary, rows, frame_index, policy):
     if mad is None or mad > policy.maximum_mad_m:
         reasons.append('UNSTABLE_OR_UNAVAILABLE_FIXED_ANCHOR_RESIDUAL')
     marking = boundary['marking_type']
-    if marking in ('NONE', 'UNKNOWN', None, ''):
-        reasons.append('PRIOR_EXPLICITLY_UNPAINTED_REQUIRES_INSERTION_VERIFICATION' if marking == 'NONE' else 'PRIOR_MARKING_SEMANTICS_UNKNOWN')
+    # A supplied reference can be geometrically valid without being painted.
+    # Keep paint identity/attributes as independent, unresolved dimensions below;
+    # do not erase a measured discrepancy merely because the prior says NONE.
     status = 'insufficient_geometry'
     if not reasons:
         if abs(center) > policy.residual_tolerance_m and conflict_fraction >= policy.minimum_support_fraction:
@@ -255,7 +271,7 @@ def _event(boundary, rows, frame_index, policy):
             reasons.append('REPEATED_SIGNED_LOCAL_OFFSET_FROM_REFERENCE')
         elif abs(center) <= policy.residual_tolerance_m and consistent_fraction >= policy.minimum_support_fraction:
             status = 'consistent_with_map'
-            reasons.append('OBSERVED_LOCAL_MARKING_WITHIN_ENGINEERING_TOLERANCE')
+            reasons.append('OBSERVED_LOCAL_GEOMETRY_WITHIN_ENGINEERING_TOLERANCE')
         else:
             reasons.append('CONFLICTING_LOCAL_OBSERVATIONS')
     if selected:
@@ -267,10 +283,25 @@ def _event(boundary, rows, frame_index, policy):
         for sample in samples:
             sample['observation'] = 'unknown'
     hypothesis = _structural_hypothesis(marking, status)
+    detected = status == 'supported_conflict'
+    model_decision = {
+        'status': 'detected' if detected else (
+            'no_geometric_discrepancy' if status == 'consistent_with_map' else 'insufficient_evidence'),
+        'detected': detected, 'source': 'model_prediction',
+        'scope': 'local_boundary_correspondence',
+        'target_property': 'boundary_geometry',
+        'evidence_basis': 'quality_filtered_correspondence_fixed_anchor_median_mad_and_temporal_blocks',
+        'reason_codes': list(reasons),
+        'thresholds_tuned_on_ground_truth': False,
+        'paint_semantics_used_to_veto_geometry': False,
+        'does_not_assess': ['paint_presence', 'marking_color_or_pattern', 'lane_use',
+                           'connectivity', 'new_unmatched_objects', 'deletion'],
+        'map_edit_verified': False,
+    }
     # A failed change assessment does not erase the measured geometric relation.
     # These are separate evidence dimensions, not independent probabilities.
     observation_evidence = {
-        'scope': 'fixed_anchor_recorded_local_measurements_not_change_confirmation',
+        'scope': 'model_local_geometry_decision_not_ground_truth_or_map_write_confirmation',
         'geometry_measurement': {
             'status': 'available' if samples else 'unavailable',
             'comparison_reference': 'prior_geometric_boundary_not_verified_observed_paint_identity',
@@ -289,10 +320,19 @@ def _event(boundary, rows, frame_index, policy):
                       'unknown' if marking in ('UNKNOWN', None, '') else 'painted_prior_attribute',
             'marking_type': marking, 'candidate_target_property': hypothesis['target_property']},
         'paint_identity': {'status': 'unverified',
-                           'reason': 'curve_detection_quality_does_not_verify_paint_vs_curb_identity'},
-        'alignment': {'status': 'unverified'},
-        'visibility': {'status': 'unverified', 'effective_coverage': None},
-        'change_assessment': {'status': status, 'confirmed_map_change': False},
+                           'reason': 'lane_boundary_candidate_prediction_not_independent_paint_identity_verification'},
+        'alignment': {'status': 'unverified',
+                      'reason': 'usable_city_projection_not_independent_physical_alignment_verification'},
+        'visibility': {'status': 'unverified', 'effective_coverage': None,
+                       'reason': 'positive_local_observation_does_not_measure_full_feature_visibility'},
+        'semantic_change_assessment': {
+            'status': 'not_assessed',
+            'properties': ['paint_presence', 'marking_color_or_pattern', 'lane_use', 'connectivity'],
+            'reason': 'supplied_curve_geometry_does_not_encode_these_current_properties'},
+        'change_assessment': {'status': status, 'model_detected_local_change': detected,
+                              'confirmation_source': 'model_prediction',
+                              'confirmation_scope': 'local_boundary_correspondence',
+                              'map_edit_verified': False},
     }
     return {'event_id': 'argo-local-'+_id([rows[0]['visit_id'], boundary['boundary_id']]),
             'change_type': 'geometry_change' if status == 'supported_conflict' else 'line_discrepancy',
@@ -301,6 +341,7 @@ def _event(boundary, rows, frame_index, policy):
             'physical_boundary_id': boundary['boundary_id'], 'physical_target_unambiguous': True,
             'map_object_identity_unambiguous': len(boundary['aliases']) == 1,
             'prior_marking_type': marking,
+            'model_change_decision': model_decision,
             'structural_hypothesis': hypothesis,
             'observation_evidence': observation_evidence,
             'geometry_city': {'type': 'LineString', 'coordinates': [p[:2] for p in representative['geometry']]},

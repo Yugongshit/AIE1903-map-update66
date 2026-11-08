@@ -53,6 +53,24 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             expected_hash = matches[0]
         if context['provenance']['map_sha256'] != expected_hash:
             raise ValueError('Map context differs from the map used for prediction: ' + name)
+    replay = data['datasets']['argoverse'].get('reference_replay')
+    if replay:
+        if (replay.get('source') != 'delivered_ground_truth'
+                or replay.get('confirmation_source') != 'reference'
+                or replay.get('scene_id') != data['datasets']['argoverse']['scene_id']):
+            raise ValueError('Reference replay provenance or scene identity differs')
+        changes, features = replay['changes'], replay['change_layer']['features']
+        change_ids = {change['change_id'] for change in changes}
+        feature_ids = {feature['properties']['change_id'] for feature in features}
+        if (len(change_ids) != len(changes) or change_ids != feature_ids
+                or len(features) != replay['summary']['confirmed_changes']
+                or len(changes) != replay['summary']['executed_patches']
+                or any(not feature['properties'].get('confirmed')
+                       or feature['properties'].get('confirmation_source') != 'reference'
+                       for feature in features)):
+            raise ValueError('Reference replay changes, layer and execution counts disagree')
+        if replay['updated_map_context']['scene_id'] != replay['scene_id']:
+            raise ValueError('Updated reference map context has a different scene')
     if output.exists():
         raise ValueError('Choose a new output directory')
     (output / 'assets').mkdir(parents=True)
@@ -64,6 +82,18 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             shutil.copy2(original, output / filename)
         else:
             (output / filename).write_text(json.dumps(dataset['state_event_layer'], ensure_ascii=False, indent=2) + '\n')
+    if replay:
+        for filename, value in [
+            ('argoverse_reference_updated_map.json', replay['updated_map']),
+            ('argoverse_reference_rollback_map.json', replay['rollback_map']),
+            ('argoverse_reference_patch_log.json', replay['patch_log']),
+            ('argoverse_reference_changes.geojson', replay['change_layer']),
+        ]:
+            original = result_path.parent / filename
+            if original.exists() and json.loads(original.read_text()) == value:
+                shutil.copy2(original, output / filename)
+            else:
+                (output / filename).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
     for suffix in ['css', 'js']:
         shutil.copy2(ROOT / 'map_update' / ('pipeline_studio.' + suffix), output / 'assets')
     template = (ROOT / 'map_update/pipeline_studio.html').read_text()
@@ -74,13 +104,16 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         dataset['map_context'] = contexts[name]
         (output/(name+'_map_context.json')).write_text(json.dumps(contexts[name], ensure_ascii=False, indent=2)+'\n')
         dataset.pop('observation_decisions', None)
+        if dataset.get('reference_replay'):
+            dataset['reference_replay'].pop('updated_map', None)
+            dataset['reference_replay'].pop('rollback_map', None)
         for event in dataset['events']:
             for sample in event.get('samples', []):
                 sample.pop('geometry_city', None)
     view['presentation'] = {'kind': 'derived_view', 'source_result_sha256': sha256(result_path.read_bytes()).hexdigest(),
-        'omitted_fields': ['datasets.*.observation_decisions', 'datasets.*.events.*.samples.*.geometry_city'],
+        'omitted_fields': ['datasets.*.observation_decisions', 'datasets.*.events.*.samples.*.geometry_city', 'datasets.*.reference_replay.updated_map', 'datasets.*.reference_replay.rollback_map'],
         'added_fields': ['datasets.*.map_context', 'perception_guide'],
-        'map_context_source': 'Same supplied reference maps as prediction; current evaluation maps excluded',
+        'map_context_source': 'Prediction contexts retain frozen priors. Explicit reference-replay view uses the separately updated supplied-truth map copy.',
         'comparison_contract': {
             'left_view': 'original_reference_map', 'right_view': 'updated_presentation',
             'divider_leftmost': 'full_updated_presentation',
@@ -88,7 +121,9 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             'shared_coordinate_projection': True,
             'colors': {'map_state_event': 'yellow', 'confirmed_structure': 'red',
                        'unconfirmed_structure': 'green'},
-            'confirmation': 'Executed structural patch, or explicitly eligible verified structural edit. Local conflict support alone is insufficient.',
+            'confirmation': 'Model view: model_change_decision.detected for local discrepancy, independent of write eligibility. Reference view: supplied truth confirmation, independent of model output.',
+            'reference_replay_is_prediction': False,
+            'argoverse_default_view': 'reference' if replay else 'model',
             'updated_view_includes_unconfirmed_candidates': True,
             'source_base_map_mutated': False},
         'event_geometry_layer_classification_and_lifecycle_preserved': True}
@@ -99,7 +134,7 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         route.mkdir()
         (route / 'index.html').write_text(template.replace('__LANG__', language).replace('__RESULT__', serialized).replace('__REVISION__', revision))
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=en/index.html"><a href="en/index.html">Map-layer pipeline</a>\n')
-    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.3', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
+    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.4', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
         'map_context_sha256': {name: sha256((output/(name+'_map_context.json')).read_bytes()).hexdigest() for name in contexts},
         'perception_guide_sha256': sha256(guide_path.read_bytes()).hexdigest()}, indent=2) + '\n')
     return output

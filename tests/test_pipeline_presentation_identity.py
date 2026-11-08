@@ -48,3 +48,24 @@ class PresentationIdentityTests(unittest.TestCase):
         result['sources'].append({'path': 'processed/objects.csv', 'sha256': '0'*64,
                                   'role': 'nuscenes_prediction_input'})
         self.rejected_before_publication(result, 'guide differs from prediction inputs')
+
+    def test_reference_replay_cannot_borrow_another_scene_or_claim_model_source(self):
+        for field, value in [('scene_id', 'different-scene'), ('source', 'model_prediction')]:
+            result = deepcopy(self.result)
+            replay = {'source': 'delivered_ground_truth', 'confirmation_source': 'reference',
+                      'scene_id': result['datasets']['argoverse']['scene_id']}
+            replay[field] = value
+            result['datasets']['argoverse']['reference_replay'] = replay
+            self.rejected_before_publication(result, 'replay provenance or scene identity')
+
+    def test_reference_confirmation_count_must_match_the_actual_change_layer(self):
+        result = deepcopy(self.result)
+        result['datasets']['argoverse']['reference_replay'] = {
+            'source': 'delivered_ground_truth', 'confirmation_source': 'reference',
+            'scene_id': result['datasets']['argoverse']['scene_id'],
+            'changes': [{'change_id': 'one'}],
+            'change_layer': {'features': [{'properties': {'change_id': 'one',
+                'confirmed': True, 'confirmation_source': 'reference'}}]},
+            'summary': {'confirmed_changes': 98, 'executed_patches': 98},
+        }
+        self.rejected_before_publication(result, 'changes, layer and execution counts disagree')

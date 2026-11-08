@@ -110,27 +110,32 @@ class ReliabilityV2Tests(unittest.TestCase):
         self.assertEqual(result['events'], [])
         self.assertIn('deletion', result['diagnostics']['visibility_unknown_blocks'])
 
-    def test_none_and_unknown_are_not_normal_painted_markings(self):
-        rows, frames = observations([0, 0, 0, 0])
-        for mark, reason in [('NONE', 'PRIOR_EXPLICITLY_UNPAINTED_REQUIRES_INSERTION_VERIFICATION'),
-                             ('UNKNOWN', 'PRIOR_MARKING_SEMANTICS_UNKNOWN')]:
+    def test_paint_attribute_does_not_veto_stable_geometric_detection(self):
+        rows, frames = observations([1, 1, 1, 1])
+        for mark in ['NONE', 'UNKNOWN', None, '', 'SOLID_WHITE']:
             event = evaluate_argoverse(prior(mark), rows, frames)['events'][0]
-            self.assertEqual(event['reliability']['status'], 'insufficient_geometry')
-            self.assertIn(reason, event['reliability']['reason_codes'])
-            self.assertEqual(event['change_type'], 'line_discrepancy')
+            self.assertEqual(event['reliability']['status'], 'supported_conflict')
+            self.assertEqual(event['model_change_decision']['status'], 'detected')
+            self.assertTrue(event['model_change_decision']['detected'])
+            self.assertFalse(event['model_change_decision']['map_edit_verified'])
+            self.assertFalse(event['base_map_write_eligible'])
+            self.assertEqual(event['change_type'], 'geometry_change')
 
-    def test_none_routes_paint_presence_hypothesis_without_claiming_boundary_displacement(self):
+    def test_none_local_detection_does_not_force_a_paint_or_replacement_operation(self):
         rows, frames = observations([1, 1, 1, 1])
         event = evaluate_argoverse(prior('NONE'), rows, frames)['events'][0]
         hypothesis = event['structural_hypothesis']
-        self.assertEqual(hypothesis['target_property'], 'paint_presence')
-        self.assertEqual(hypothesis['operation'], 'marking_presence_change')
-        self.assertEqual(hypothesis['status'], 'unconfirmed')
-        self.assertFalse(hypothesis['confirmed'])
+        self.assertEqual(hypothesis['target_property'], 'boundary_geometry_or_paint_presence')
+        self.assertEqual(hypothesis['operation'], 'local_boundary_change')
+        self.assertEqual(hypothesis['status'], 'model_detected')
+        self.assertTrue(hypothesis['confirmed'])
+        self.assertEqual(hypothesis['confirmation_source'], 'model_prediction')
+        self.assertEqual(hypothesis['confirmation_scope'], 'local_boundary_correspondence')
+        self.assertEqual(hypothesis['operation_alternatives'], ['boundary_geometry_change', 'paint_presence_change'])
         self.assertFalse(hypothesis['base_map_write_eligible'])
-        self.assertEqual(event['change_type'], 'line_discrepancy')
-        self.assertEqual(event['reliability']['status'], 'insufficient_geometry')
-        self.assertTrue(all(s['observation'] == 'unknown' for s in event['samples']))
+        self.assertEqual(event['change_type'], 'geometry_change')
+        self.assertEqual(event['reliability']['status'], 'supported_conflict')
+        self.assertTrue(all(s['observation'] == 'supports_change' for s in event['samples']))
         self.assertTrue(all(s['measured_local_relation'] == 'offset_positive' for s in event['samples']))
         evidence = event['observation_evidence']
         self.assertEqual(evidence['geometry_measurement']['relation_counts'], {'offset_positive': 4})
@@ -142,18 +147,24 @@ class ReliabilityV2Tests(unittest.TestCase):
     def test_none_geometric_agreement_is_not_proof_of_no_paint_presence_change(self):
         rows, frames = observations([.1, .1, .1, .1])
         event = evaluate_argoverse(prior('NONE'), rows, frames)['events'][0]
-        self.assertEqual(event['reliability']['status'], 'insufficient_geometry')
-        self.assertEqual(event['structural_hypothesis']['target_property'], 'paint_presence')
+        self.assertEqual(event['reliability']['status'], 'consistent_with_map')
+        self.assertEqual(event['model_change_decision']['status'], 'no_geometric_discrepancy')
+        self.assertIn('paint_presence', event['model_change_decision']['does_not_assess'])
+        self.assertEqual(event['observation_evidence']['semantic_change_assessment']['status'], 'not_assessed')
+        self.assertEqual(event['structural_hypothesis']['target_property'], 'boundary_geometry_or_paint_presence')
+        self.assertFalse(event['structural_hypothesis']['confirmed'])
         self.assertTrue(all(s['measured_local_relation'] == 'within_tolerance' for s in event['samples']))
-        self.assertTrue(all(s['observation'] == 'unknown' for s in event['samples']))
+        self.assertTrue(all(s['observation'] == 'supports_prior' for s in event['samples']))
 
-    def test_unknown_reference_does_not_assume_geometry_or_presence_change(self):
+    def test_unknown_marking_retains_geometric_prediction_and_unknown_semantics(self):
         rows, frames = observations([1, 1, 1, 1])
         event = evaluate_argoverse(prior('UNKNOWN'), rows, frames)['events'][0]
         hypothesis = event['structural_hypothesis']
-        self.assertEqual(hypothesis['target_property'], 'unspecified_marking_semantics')
-        self.assertEqual(hypothesis['operation'], 'unspecified')
-        self.assertFalse(hypothesis['confirmed'])
+        self.assertEqual(hypothesis['target_property'], 'boundary_geometry_with_unknown_marking')
+        self.assertEqual(hypothesis['operation'], 'local_boundary_change')
+        self.assertTrue(hypothesis['confirmed'])
+        self.assertIn('PRIOR_MARKING_SEMANTICS_UNKNOWN', hypothesis['reason_codes'])
+        self.assertFalse(hypothesis['base_map_write_eligible'])
         self.assertEqual(event['observation_evidence']['reference_semantics']['status'], 'unknown')
 
     def test_supported_painted_conflict_is_not_confirmed_full_map_change(self):
@@ -165,14 +176,18 @@ class ReliabilityV2Tests(unittest.TestCase):
         self.assertEqual(hypothesis['target_property'], 'boundary_geometry')
         self.assertEqual(hypothesis['operation'], 'geometry_change')
         self.assertEqual(hypothesis['assessment'], 'supported_conflict')
-        self.assertFalse(hypothesis['confirmed'])
-        self.assertFalse(event['observation_evidence']['change_assessment']['confirmed_map_change'])
+        self.assertTrue(hypothesis['confirmed'])
+        self.assertEqual(hypothesis['confirmation_scope'], 'local_boundary_correspondence')
+        self.assertTrue(event['observation_evidence']['change_assessment']['model_detected_local_change'])
+        self.assertFalse(event['observation_evidence']['change_assessment']['map_edit_verified'])
         self.assertEqual(event['observation_evidence']['alignment']['status'], 'unverified')
 
     def test_unstable_or_short_evidence_retains_all_measured_directions(self):
         rows, frames = observations([1, -1, 1, -1])
         event = evaluate_argoverse(prior(), rows, frames)['events'][0]
         evidence = event['observation_evidence']
+        self.assertFalse(event['model_change_decision']['detected'])
+        self.assertFalse(event['structural_hypothesis']['confirmed'])
         self.assertEqual(evidence['local_consistency']['status'], 'unstable')
         self.assertEqual(evidence['geometry_measurement']['relation_counts'],
                          {'offset_positive': 2, 'offset_negative': 2})
@@ -183,6 +198,16 @@ class ReliabilityV2Tests(unittest.TestCase):
         self.assertEqual(evidence['temporal_support']['status'], 'insufficient')
         self.assertEqual(evidence['geometry_measurement']['relation_counts'], {'offset_positive': 1})
         self.assertEqual(event['samples'][0]['observation'], 'unknown')
+
+    def test_none_is_not_automatically_positive_for_short_or_conflicting_evidence(self):
+        for offsets, interval in [([1] * 10, .01), ([1, -1, 1, -1], .5)]:
+            rows, frames = observations(offsets, interval=interval)
+            event = evaluate_argoverse(prior('NONE'), rows, frames)['events'][0]
+            self.assertEqual(event['reliability']['status'], 'insufficient_geometry')
+            self.assertEqual(event['model_change_decision']['status'], 'insufficient_evidence')
+            self.assertFalse(event['model_change_decision']['detected'])
+            self.assertFalse(event['structural_hypothesis']['confirmed'])
+            self.assertTrue(all(s['observation'] == 'unknown' for s in event['samples']))
 
     def test_hypothesis_and_evidence_do_not_consume_ground_truth_or_mutate_inputs(self):
         rows, frames = observations([1, 1, 1])

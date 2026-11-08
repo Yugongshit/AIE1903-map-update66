@@ -1,3 +1,5 @@
+最新入口：docs/argoverse_confirmation_repair_20261108.md。Argoverse 已分为 98 个真值地图副本更新回放与独立模型识别（14 检出，身份 9 TP / 5 FP / 22 FN，仅 3 个局部几何误差≤0.5m）。结果 outputs/pipeline-v4/confirmation-final-20261108/result.json；不得把真值回放当模型成绩。以下保留此前记录。
+
 最新算法修订：先读 docs/structural_evidence_revision_20261108.md。nuScenes S0980-LD-004 接入精确窗口几何匹配后有局部差异支持，同窗口原参考线仍有观测，不能认定旧线移位；其余5条不足。23状态不变；Argo NONE 形成未确认paint-presence假设。写入按操作核验，实际写入0。不要恢复统一unknown或将局部支持写成已确认结构修改。
 
 最新展示：原图/更新后使用可拖动分割线对照，最右全原图、最左全更新后。黄色状态事件，红色已确认结构变更，绿色未确认结构候选；不可把局部几何支持直接标成红色。先读 docs/perception_and_composite_map.md；Perception的14类nuScenes物体标签是官方GT，Argoverse仅粗vehicle及车道线。不得把新展示说成重训或提高准确率。

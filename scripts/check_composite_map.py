@@ -146,6 +146,32 @@ def run(directory, raw_root):
                   all(abs(value) < 100000 for value in extent)
                   and extent[2] > extent[0] and extent[3] > extent[1]
                   and context['bounds_xyxy'] == extent)
+        truth_paths = list((raw_root / 'deliveries').glob('*_M8_v1/gt_changed_objects.jsonl'))
+        assert len(truth_paths) == 1, 'Expected one delivered object-change truth source'
+        truth_rows = [json.loads(line) for line in truth_paths[0].read_text().splitlines() if line.strip()]
+        truth = {(row['layer'], row['element_id']): row for row in truth_rows if row['state_comparison_supported'] and row['official_changed']}
+        replay = source['datasets']['argoverse']['reference_replay']
+        check('the separate reference replay contains exactly the 98 independently read confirmed truth objects',
+              len(truth) == len(replay['changes']) == 98
+              and {(row['layer'], row['element_id']) for row in replay['changes']} == set(truth)
+              and replay['prediction_input'] is False
+              and replay['source_base_map_mutated'] is False
+              and replay['rollback_map'] == prior)
+        for change in replay['changes']:
+            original_change = truth[(change['layer'], change['element_id'])]
+            assert change['prior_state'] == original_change['prior_state']
+            assert change['current_state'] == original_change['current_state']
+            current = original_change['current_state'] or original_change['prior_state']
+            if change['layer'] == 'laneSegments':
+                left = [[point['x'], point['y']] for point in current['left_lane_boundary']]
+                right = [[point['x'], point['y']] for point in current['right_lane_boundary']]
+                polygon = left + right[::-1]
+            else:
+                polygon = current.get('points') or [[point['x'], point['y']] for point in current['edges']]
+            if polygon[0] != polygon[-1]:
+                polygon = polygon + [polygon[0]]
+            assert change['geometry_city'] == {'type': 'Polygon', 'coordinates': [polygon]}, change['element_id']
+        check('all red reference-change geometries preserve the supplied current-map coordinates and attributes', True)
         guide = view['perception_guide']['datasets']
         with (raw_root / 'processed/objects.csv').open(encoding='utf-8-sig') as handle:
             objects = list(csv.DictReader(handle))
@@ -208,7 +234,7 @@ def run(directory, raw_root):
           const state=PIPELINE_STUDIO.map.state, ratio=canvas.width/box.width;
           const image=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
           let tested=0,hits=0;
-          function colored(r,g,b){return color==='green' ? g>100&&g>r*1.3&&g>b*1.15 : r>130&&g>100&&b<r*.65&&Math.abs(r-g)<115;}
+          function colored(r,g,b){return color==='green' ? g>100&&g>r*1.3&&g>b*1.15 : color==='red' ? r>110&&r>g*1.32&&r>b*1.25 : r>130&&g>100&&b<r*.65&&Math.abs(r-g)<115;}
           for(const path of paths)for(let j=1;j<path.length;j++){
             const a=path[j-1],b=path[j],steps=Math.max(1,Math.ceil(Math.hypot(a[0]-b[0],a[1]-b[1])*state.scale/3));
             for(let n=0;n<=Math.min(steps,300);n++){
@@ -348,7 +374,7 @@ def run(directory, raw_root):
             check('the yellow, red and green meaning is visible above the canvas in the first viewport',
                   legend_box['y'] + legend_box['height'] <= page.locator('#composite-map').bounding_box()['y'] + 1
                   and legend_box['y'] + legend_box['height'] < 1150
-                  and all(word in page.locator('#map-legend').inner_text().lower() for word in ['state', 'confirmed', 'unconfirmed']))
+                  and all(word in page.locator('#map-legend').inner_text().lower() for word in ['state', 'structure', 'unconfirmed']))
             check('first view shows the comparison while technical analysis starts collapsed',
                   page.locator('#advanced-analysis').get_attribute('open') is None
                   and page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == .5)
@@ -360,21 +386,18 @@ def run(directory, raw_root):
               const map=PIPELINE_STUDIO.map;
               const base={event_id:'RENDER_TEST_FIXTURE_ONLY',map_layer:{predicted_layer:'base_map_structure'},
                 reliability:{status:'supported_conflict'},decision:{classification_applied:true,base_map_write_eligible:false,write_gate:{eligible:false,map_patch_executed:false}}};
-              const check=(decision,layer='base_map_structure')=>map.isConfirmedStructure({...base,map_layer:{predicted_layer:layer},decision});
+              const check=(detected,decision=base.decision,layer='base_map_structure')=>map.isConfirmedStructure({...base,map_layer:{predicted_layer:layer},model_change_decision:{detected},decision});
               const cases=[map.isConfirmedStructure(base),map.isConfirmedStructure({}),
-                check({...base.decision,base_map_write_eligible:true}),
-                check({...base.decision,write_gate:{eligible:true,map_patch_executed:false}}),
-                check({...base.decision,base_map_write_eligible:true,write_gate:{eligible:true,map_patch_executed:false}}),
-                check({...base.decision,write_gate:{map_patch_executed:true}}),
-                check({...base.decision,write_gate:{map_patch_executed:true}},'map_state_event')];
+                check(false,{...base.decision,base_map_write_eligible:true,write_gate:{eligible:true,map_patch_executed:true}}),
+                check(true),check(false),check(true,base.decision,'map_state_event')];
               const canvas=document.createElement('canvas');canvas.width=canvas.height=20;
               const ctx=canvas.getContext('2d'),style=map.style({layer:'structure',confirmed:true,supported:false,event_id:base.event_id});
               ctx.strokeStyle=style.color;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(2,10);ctx.lineTo(18,10);ctx.stroke();
               return {cases,color:style.color,pixel:[...ctx.getImageData(10,10,1,1).data],fixture_scope:'detached render test only; no source-data mutation'};
             }''')
             report['confirmed_structure_render_fixture'] = fixture
-            check('red confirmation needs an actual patch or both write gates, never support or class assignment alone',
-                  fixture['cases'] == [False, False, False, False, True, True, False])
+            check('model red follows the computed detection independently from structural patch execution',
+                  fixture['cases'] == [False, False, False, True, False, False])
             check('an explicitly synthetic detached render fixture uses red for a confirmed structure',
                   fixture['pixel'] == [255, 92, 101, 255])
             check('perception details stay collapsed until requested', page.locator('#perception-guide').get_attribute('open') is None)
@@ -402,6 +425,7 @@ def run(directory, raw_root):
                   and ld004['decision']['base_map_write_eligible'] is False)
             for name in ['nuscenes', 'argoverse']:
                 page.locator('#dataset').select_option(name)
+                page.evaluate("PIPELINE_STUDIO.map.setSource('model')")
                 settle(page)
                 rendered_sources = page.evaluate('PIPELINE_STUDIO.map.features(false)')
                 dataset = source['datasets'][name]
@@ -551,74 +575,122 @@ def run(directory, raw_root):
 
             page.locator('#dataset').select_option('argoverse')
             settle(page)
-            check('Argoverse opens 589 prior features, no states and all 71 unconfirmed structural candidates',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn') == {'base': 589, 'state': 0, 'structure': 71}
-                  and page.locator('#map-structure-scope').input_value() == 'all'
-                  and page.locator('#map-count-confirmed').inner_text() == '0')
+            argo = source['datasets']['argoverse']
+            replay = argo['reference_replay']
+            reference_geometries = [feature['geometry'] for feature in replay['change_layer']['features']]
+            check('Argoverse starts in the explicitly labeled data-confirmed map replay',
+                  page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'reference'
+                  and page.locator('#map-source').input_value() == 'reference'
+                  and page.locator('#reference-change-select option').count() == 98
+                  and page.locator('#map-count-confirmed').inner_text() == '98'
+                  and 'data-confirmed' in page.locator('#map-legend').inner_text().lower())
+            reference_features = page.evaluate('PIPELINE_STUDIO.map.features(false)')
+            check('all 98 red reference overlays use the exact independently exported truth geometry',
+                  Counter(frozen(feature['geometry_city']) for feature in reference_features if feature.get('reference'))
+                  == Counter(frozen(geometry) for geometry in reference_geometries)
+                  and sum(bool(feature.get('reference')) for feature in reference_features) == 98
+                  and all(feature['confirmed'] for feature in reference_features if feature.get('reference')))
+            check('the reference updated map is a real patched copy with a separately exported rollback',
+                  json.loads((root / 'argoverse_reference_updated_map.json').read_text()) == replay['updated_map']
+                  and json.loads((root / 'argoverse_reference_rollback_map.json').read_text()) == replay['rollback_map']
+                  and replay['updated_map'] != replay['rollback_map']
+                  and replay['summary']['executed_patches'] == 98)
+            page.locator('#map-fit-all').click()
+            page.locator('#map-preset-after').click()
+            settle(page)
+            check('data-confirmed changes produce visible red pixels on their actual city geometry',
+                  raster(page)['red'] > 100
+                  and fit_contains(page, reference_geometries))
+            reference_id = next(change['change_id'] for change in replay['changes'] if change['element_id'] == 'ls-168085012')
+            page.locator('#reference-change-select').select_option(reference_id)
+            page.locator('#map-fit-selected').click()
+            settle(page)
+            selected_reference = next(change for change in replay['changes'] if change['change_id'] == reference_id)
+            page.locator('#map-preset-after').click()
+            settle(page)
+            reference_pixels = source_pixel_hits(page, [selected_reference['geometry_city']], 'red')
+            report['reference_change_source_coordinate_pixels'] = reference_pixels
+            check('selected confirmed truth object has red source-coordinate pixels and explicit provenance',
+                  reference_pixels['hits'] > 10 and reference_pixels['fraction'] > .15
+                  and 'ls-168085012' in page.locator('#reference-detail').inner_text()
+                  and 'reference' in page.locator('#reference-detail').inner_text().lower())
+            page.locator('#map-preset-before').click()
+            settle(page)
+            before_reference = raster(page)
+            check('far-right divider shows only the original map and hides reference change hit targets',
+                  before_reference['red'] == 0
+                  and page.evaluate('PIPELINE_STUDIO.map.state.hits.length') == 0)
+            page.locator('#map-preset-after').click()
+            settle(page)
+            check('far-left divider restores the actual updated reference copy and red change overlays',
+                  raster(page)['red'] > 10 and raster(page)['hash'] != before_reference['hash'])
+            page.locator('.composite-panel').screenshot(path=str(root / 'composite_reference_argoverse_en.png'))
+            page.locator('#map-source').select_option('model')
+            settle(page)
+            check('switching to model results removes every truth overlay from the drawable map',
+                  page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'model'
+                  and not any(feature.get('reference') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)'))
+                  and not page.locator('#reference-detail').is_visible())
             page.locator('#perception-guide > summary').click()
             check('Argoverse perception view distinguishes vehicle detections from unique objects and ground truth',
                   '4,976' in page.locator('#perception-guide-content').inner_text()
                   and 'not unique objects or ground-truth annotations' in page.locator('#perception-guide-content').inner_text()
                   and 'All curve marking_pattern values are unknown' in page.locator('#perception-guide-content').inner_text())
             page.locator('#perception-guide > summary').click()
-            check('the selected supported Argoverse claim has a visible false-positive warning',
-                  page.locator('#map-note').is_visible()
-                  and 'false positive' in page.locator('#map-note').inner_text().lower()
-                  and '0 structural patches applied' in page.locator('#map-status').inner_text())
+            model_detected = [event for event in argo['events'] if event['model_change_decision']['detected']]
+            model_structure = [event for event in argo['events'] if event['map_layer']['predicted_layer'] == 'base_map_structure']
+            check('model structure counts come from computed classifications rather than the 98 known answers',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == len(model_structure)
+                  and page.locator('#map-count-confirmed').inner_text() == str(len(model_detected))
+                  and 0 < len(model_detected) < 98)
             page.locator('#map-structure-scope').select_option('supported')
             settle(page)
-            check('local-support scope isolates one candidate without upgrading it to confirmed structure',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == 1
-                  and page.locator('#map-count-confirmed').inner_text() == '0')
+            check('model-supported scope isolates detections without inventing full-map writes',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == len(model_detected)
+                  and all(not event['decision']['write_gate']['map_patch_executed'] for event in model_detected))
             page.locator('#map-preset-after').click()
-            settle(page)
-            check('Argoverse supported false positive remains visibly green with no red confirmed structure',
-                  raster(page)['green'] > 15 and raster(page)['red'] == 0
-                  and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is True
-                  and page.evaluate('PIPELINE_STUDIO.current().reliability.status') == 'supported_conflict'
-                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False)
-            page.locator('#map-view-evidence').click()
-            check('the map evidence action opens the detailed source analysis and selected evaluation',
-                  page.locator('#advanced-analysis').get_attribute('open') is not None
-                  and page.locator('#selected-evaluation').is_visible()
-                  and 'false positive' in page.locator('#selected-evaluation').inner_text().lower())
-            page.locator('#advanced-analysis > summary').click()
             page.locator('#map-fit-all').click()
             settle(page)
-            check('Argoverse fit uses its own actual M2 prior bounds',
-                  fit_contains(page, [element['geometry_city'] for element in contexts['argoverse']['elements']]))
+            check('computed structural detections are visibly red even while full-map write eligibility is false',
+                  raster(page)['red'] > 15
+                  and all(not event['decision']['base_map_write_eligible'] for event in model_detected)
+                  and 'algorithm' in page.locator('#map-legend').inner_text().lower())
+            false_positive = next(event for event in argo['events'] if event['event_id'] == 'argo-local-5d7fb99ef6812741')
+            page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', false_positive['event_id'])
+            page.locator('#map-view-evidence').click()
+            check('a model detection can be red and still show its explicit false-positive evaluation',
+                  page.locator('#advanced-analysis').get_attribute('open') is not None
+                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
+                  and 'false positive' in page.locator('#selected-evaluation').inner_text().lower())
+            page.locator('#advanced-analysis > summary').click()
             page.locator('#map-structure-scope').select_option('all')
-            settle(page)
-            check('all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == 71
-                  and sum(event['reliability']['status'] == 'insufficient_geometry' for event in view['datasets']['argoverse']['events']) == 70
-                  and raster(page)['red'] == 0
-                  and not any(feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')))
-            paint_candidates = [event for event in source['datasets']['argoverse']['events']
-                                if event.get('prior_marking_type') == 'NONE']
-            check('all 64 unpainted-reference hypotheses have explicit paint-presence semantics',
+            unresolved = [event for event in model_structure if not event['model_change_decision']['detected']]
+            check('remaining unresolved observations stay green rather than all becoming confirmed',
+                  len(unresolved) > 0
+                  and sum(not feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)') if feature['layer'] == 'structure') == len(unresolved))
+            paint_candidates = [event for event in argo['events'] if event.get('prior_marking_type') == 'NONE']
+            check('NONE references no longer force every observation into an unconfirmed paint-presence category',
                   len(paint_candidates) == 64
-                  and all(event['structural_hypothesis']['target_property'] == 'paint_presence'
-                          and event['structural_hypothesis']['confirmed'] is False for event in paint_candidates))
-            prior_selection = page.evaluate('PIPELINE_STUDIO.state.eventId')
-            paint = next(event for event in paint_candidates if event['observation_evidence']['geometry_measurement']['status'] == 'available')
+                  and any(event['model_change_decision']['detected'] for event in paint_candidates)
+                  and all(event['structural_hypothesis']['target_property'] == 'boundary_geometry_or_paint_presence' for event in paint_candidates))
+            paint = next(event for event in paint_candidates if any(alias['map_element_id'] == 'ls-168085012' and alias['boundary_side'] == 'right' for alias in event['map_aliases']))
             page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', paint['event_id'])
             page.locator('#map-fit-selected').click()
             page.locator('#map-preset-after').click()
             settle(page)
-            paint_pixels = source_pixel_hits(page, [paint['geometry_city']], 'green')
-            report['paint_presence_source_coordinate_pixels'] = paint_pixels
-            check('paint-presence map card and green source geometry do not claim a confirmed old-line displacement',
-                  page.locator('#map-selected-title').inner_text() == 'Paint-presence hypothesis'
+            paint_pixels = source_pixel_hits(page, [paint['geometry_city']], 'red')
+            report['model_detected_source_coordinate_pixels'] = paint_pixels
+            check('the formerly blocked 46-frame curve renders red at its measured coordinates',
+                  paint['distinct_frame_count'] == 46
                   and paint_pixels['hits'] > 10 and paint_pixels['fraction'] > .15
-                  and raster(page)['red'] == 0
-                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False)
-            page.locator('.composite-panel').screenshot(path=str(root / 'composite_paint_presence_en.png'))
-            page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', prior_selection)
+                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
+                  and 'algorithm' in page.locator('#map-selected-title').inner_text().lower())
+            page.locator('.composite-panel').screenshot(path=str(root / 'composite_model_detection_en.png'))
             page.locator('#map-fit-all').click()
-            check('cross-dataset interactions preserve data and do not turn overlays into base-map edits',
+            check('source switches preserve immutable predictions and distinguish reference writes from model writes',
                   page.evaluate('JSON.stringify(PIPELINE_STUDIO.data)') == immutable
-                  and all(dataset['summary']['base_map_updates'] == 0 for dataset in source['datasets'].values()))
+                  and all(dataset['summary']['base_map_updates'] == 0 for dataset in source['datasets'].values())
+                  and replay['summary']['executed_patches'] == 98)
             page.locator('#map-preset-compare').click()
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_argoverse_en.png'))
             selected = page.evaluate('PIPELINE_STUDIO.state.eventId')
@@ -629,9 +701,10 @@ def run(directory, raw_root):
                   page.evaluate('PIPELINE_STUDIO.state.dataset') == 'argoverse'
                   and page.evaluate('PIPELINE_STUDIO.state.eventId') == selected
                   and page.evaluate('PIPELINE_STUDIO.data') == view)
-            check('Chinese selected card gives the marking meaning and unconfirmed status',
-                  '标线' in page.locator('#map-selected-title').inner_text()
-                  and '未确认' in page.locator('#map-selected-status').inner_text())
+            check('Chinese selected card distinguishes the model detection from confirmed truth and a full-map write',
+                  '算法' in page.locator('#map-selected-title').inner_text()
+                  and page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'model'
+                  and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is True)
             page.locator('.map-options > summary').click()
             check('Chinese map controls describe state and structure separately',
                   '状态' in page.locator('#map-layer-state').locator('..').inner_text()

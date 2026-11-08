@@ -17,6 +17,7 @@ from .map_layers import classify_map_layer
 from .state_events import build_state_event_layer
 from .reliability import integrate_m3
 from .reliability_v2 import ReliabilityPolicy, canonical_boundaries, evaluate_argoverse
+from .structure_evaluation import evaluate_all_boundaries
 
 
 def write_gate(event, map_layer, policy=None):
@@ -165,6 +166,10 @@ def classify_events(data):
                              'base_map_write_eligible': gate['eligible'], 'write_gate': gate,
                              'map_action': 'unchanged', 'processing_status': 'complete',
                              'manual_review_required': False}
+        if 'model_change_decision' in event:
+            event['decision']['model_detected_local_change'] = event['model_change_decision']['detected']
+            event['decision']['confirmation_scope'] = event['model_change_decision']['scope']
+            event['decision']['write_status'] = 'not_executed'
     events = result['events']
     result['state_event_layer'] = build_state_event_layer(events)
     result['source_summary'] = result.get('summary', {})
@@ -175,6 +180,8 @@ def classify_events(data):
         'accepted_layer_counts': dict(Counter(e['map_layer']['predicted_layer'] for e in events if e['decision']['classification_applied'])),
         'stored_state_events': len(result['state_event_layer']['features']),
         'base_map_updates': 0, 'pending_manual_reviews': 0,
+        'model_detected_local_structure': sum(e.get('model_change_decision', {}).get('detected', False)
+                                              and e['map_layer']['predicted_layer'] == 'base_map_structure' for e in events),
     }
     return result
 
@@ -272,7 +279,7 @@ def evaluate_argoverse_labels(raw, prior, events, sources):
                     'prior_marking': row['prior_state'][side+'_lane_mark_type'],
                     'current_marking': row['current_state'][side+'_lane_mark_type'],
                     'intersection': row['prior_state']['is_intersection']})
-    return {'scope': 'fixed_prior_painted_physical_boundary_geometry',
+    report = {'scope': 'fixed_prior_painted_physical_boundary_geometry',
             'physical_boundaries': len(correspondence), 'eligible_boundaries': len(boundary_truth),
             'excluded_boundaries': dict(Counter(r['reason'] for r in excluded)),
             'prediction_unit': 'one exact physical boundary; aliases never expand into multiple true positives',
@@ -297,6 +304,9 @@ def evaluate_argoverse_labels(raw, prior, events, sources):
                 'Whole supplied geometry scope includes unobserved areas; not visibility-conditioned accuracy.',
                 'Geometry-only scope excludes additions, topology, lane-use, color and unknown paint references.',
                 'Correct layer identity does not cancel a wrong boundary, side, geometry or operation.']}
+    report['legacy_painted_scope_is_primary_evaluation'] = False
+    report['full_boundary_geometry'] = evaluate_all_boundaries(prior, inventory, changed_states, events)
+    return report
 
 
 def run_pipeline(raw_root, delivery_root, output):
@@ -328,7 +338,11 @@ def run_pipeline(raw_root, delivery_root, output):
                       'delete': 'fully observed causal support for absence on the same target; no replacement geometry'},
                   'shared_boundary_aliases': 'physical identity may be known; synchronized edits of all references remain unverified',
                   'minimum_duration_s': None, 'minimum_independent_visits': None},
-              'structural_evidence_revision': 'local_correspondence_and_typed_hypotheses_20261108',
+              'structural_evidence_revision': 'geometry_detection_without_paint_veto_and_separate_reference_replay_20261108',
+              'confirmation_contract': {
+                  'model_detection': 'Computed local geometric decision; independent of map-write eligibility.',
+                  'reference_confirmation': 'Delivered M8 labels and current states, read only after prediction freeze.',
+                  'execution': 'Known reference changes replay into an isolated map copy; model geometry is not promoted to a full-map patch.'},
               'policy_selection': 'Semantic target and change operation; geometric quality defaults fixed before evaluation',
               'parameters_learned': False, 'calibrated_probabilities': False,
               'scope': 'Frozen perception inputs; structure/state routing, not a duration classifier'}
@@ -349,6 +363,7 @@ def run_pipeline(raw_root, delivery_root, output):
             av._write(out/name, value)
             frozen_names.append(name)
     for name in ('pipeline_v2.py', 'nuscenes_v2.py', 'local_correspondence.py', 'reliability_v2.py', 'map_layers.py',
+                 'structure_evaluation.py', 'reference_replay.py',
                  'state_events.py', 'persistence.py', 'engine.py', 'reliability.py',
                  'scene.py', 'delivery.py', 'automatic.py', 'argoverse.py'):
         path = Path(__file__).with_name(name)
@@ -368,6 +383,23 @@ def run_pipeline(raw_root, delivery_root, output):
                   'argoverse': evaluate_argoverse_labels(raw, prior, argo['events'], sources)}
     if any(av._hash(out/name) != digest for name, digest in freeze['files_sha256'].items()):
         raise ValueError('Prediction outputs changed during evaluation')
+    # Trusted reference import is an independent post-freeze replay, never a
+    # detector input or a replacement for the frozen model prediction files.
+    from .reference_replay import build_reference_replay
+    m8 = av._package(raw, 'M8')
+    replay = build_reference_replay(prior, av._rows(m8/'gt_changed_objects.jsonl'),
+                                   av._rows(m8/'gt_object_inventory.jsonl'),
+                                   provenance={'source_files': [s for s in sources if '_M8_' in s['path']],
+                                               'prediction_freeze_sha256': av._hash(out/'prediction_freeze.json'),
+                                               'used_for_model_prediction': False})
+    argo['reference_replay'] = replay
+    for filename, value in [('argoverse_reference_updated_map.json', replay['updated_map']),
+                            ('argoverse_reference_rollback_map.json', replay['rollback_map']),
+                            ('argoverse_reference_patch_log.json', replay['patch_log']),
+                            ('argoverse_reference_changes.geojson', replay['change_layer'])]:
+        av._write(out/filename, value)
+    if any(av._hash(out/name) != digest for name, digest in freeze['files_sha256'].items()):
+        raise ValueError('Prediction outputs changed during reference replay')
     comparisons = [
         {'dataset_id': 'nuscenes', 'baseline': {'explicit_structure_state_classifier_run': False,
             'recorded_occupancy_events': 23}, 'new': nu['summary'], 'unit': 'same 29 delivered source candidates'},

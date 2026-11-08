@@ -106,7 +106,8 @@ try:
               and 'parallel marking or insertion' in page.locator('#structural-hypothesis-note').inner_text()
               and 'Paint identity' in page.locator('#observation-dimensions').inner_text()
               and 'Physical alignment' in page.locator('#observation-dimensions').inner_text()
-              and ld004['observation_evidence']['change_assessment']['confirmed_map_change'] is False
+              and ld004['observation_evidence']['change_assessment']['map_edit_verified'] is False
+              and ld004['observation_evidence']['change_assessment']['model_detected_local_change'] is True
               and 'no independent structural truth label' in page.locator('#selected-evaluation').inner_text()
               and source['prediction_freeze']['gt_read'] is False)
         page.locator('#local-measurements > summary').click()
@@ -130,55 +131,116 @@ try:
         check('old duration labels are not recycled into structure/state accuracy', source['evaluation']['nuscenes']['original_duration_labels_reused'] is False and source['evaluation']['nuscenes']['independent_layer_accuracy'] is None and 'not reused as layer ground truth' in page.locator('#evaluation').inner_text() and '23 / 29' not in page.locator('#comparison').inner_text())
         page.screenshot(path=str(root / 'pipeline_nuscenes_en.png'), full_page=True)
         page.locator('#dataset').select_option('argoverse')
-        check('Argoverse loads 76 events with one applied structural class and no state records', page.locator('#events [data-event]').count() == 76 and '0 / 1' in page.locator('#overview').inner_text() and source['datasets']['argoverse']['summary']['stored_state_events'] == 0)
-        check('71 structural hypotheses are distinguished from the single applied class', '71 / 1' in page.locator('#comparison').inner_text() and 'Structural hypotheses / applied' in page.locator('#comparison').inner_text())
-        check('applied structural claim is still exposed as a left-boundary geometry false positive', 'geometric false positive' in page.locator('#selected-evaluation').inner_text() and 'left-boundary geometry' in page.locator('#selected-evaluation').inner_text() and '2 map references' in page.locator('#selected-title').inner_text())
-        check('shared physical aliases are distinguished from unresolved physical targets without authorizing a patch',
+        argo = source['datasets']['argoverse']
+        replay = argo['reference_replay']
+        detected = [event for event in argo['events'] if event['model_change_decision']['detected']]
+        unresolved = [event for event in argo['events'] if event['reliability']['status'] == 'insufficient_geometry']
+        consistent = [event for event in argo['events'] if event['reliability']['status'] == 'consistent_with_map']
+        check('Argoverse defaults to the explicitly separate data-confirmed reference replay',
+              page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'reference'
+              and page.locator('#map-source').input_value() == 'reference'
+              and page.locator('#reference-detail').is_visible()
+              and page.locator('#reference-change-select option').count() == len(replay['changes']) == 98)
+        check('reference confirmation and applied patches are reported independently of model detections',
+              replay['summary']['confirmed_changes'] == replay['summary']['executed_patches'] == 98
+              and argo['summary']['base_map_updates'] == 0
+              and 0 < len(detected) < 98
+              and '98' in page.locator('#map-count-confirmed').inner_text()
+              and 'reference' in page.locator('#reference-detail').inner_text().lower())
+        first_reference = replay['changes'][0]
+        page.locator('#reference-change-select').select_option(first_reference['change_id'])
+        check('reference selector displays the chosen truth object without modifying model predictions',
+              page.evaluate('PIPELINE_STUDIO.state.referenceId') == first_reference['change_id']
+              and first_reference['element_id'] in page.locator('#reference-detail').inner_text()
+              and source['prediction_freeze']['gt_read'] is False)
+        check('reference map downloads are separate from model results and preserve exact exported copies',
+              all((root / filename).exists() for filename in [
+                  'argoverse_reference_updated_map.json', 'argoverse_reference_rollback_map.json',
+                  'argoverse_reference_patch_log.json', 'argoverse_reference_changes.geojson'])
+              and json.loads((root / 'argoverse_reference_changes.geojson').read_text()) == replay['change_layer'])
+        page.locator('#map-source').select_option('model')
+        check('model view retains every event and reports computed detections independently of patch eligibility',
+              page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'model'
+              and page.locator('#events [data-event]').count() == len(argo['events']) == 76
+              and '76 events' in page.locator('#map-source-status').inner_text()
+              and argo['summary']['stored_state_events'] == 0
+              and all(not e['decision']['write_gate']['map_patch_executed'] for e in argo['events']))
+        false_positive = next(event for event in argo['events'] if event['event_id'] == 'argo-local-5d7fb99ef6812741')
+        page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', false_positive['event_id'])
+        check('known detected false positive remains visibly evaluated rather than hidden by confirmation color',
+              'false positive' in page.locator('#selected-evaluation').inner_text().lower()
+              and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is True
+              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True)
+        check('shared physical aliases retain their separate structural-write condition',
               page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.target_identity.shared_canonical_physical_boundary') is True
               and page.locator('#write-reasons [data-reason="SYNCHRONIZED_ALIAS_EDIT_UNVERIFIED"]').count() == 1
               and page.locator('#write-reasons [data-reason="EXACT_EDIT_OBJECT_UNRESOLVED"]').count() == 0
-              and 'share one known physical boundary' in page.locator('#edit-target-note').inner_text()
               and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.eligible') is False)
-        check('geometry recall is undefined with no true changes in the 75-boundary scope', '75 eligible physical boundaries' in page.locator('#dataset-scope').inner_text() and 'no changed boundaries' in page.locator('.comparison-warning').inner_text() and 'recall is undefined' in page.locator('.comparison-warning').inner_text() and '0 / 1 / 0' in page.locator('#comparison').inner_text())
-        check('evaluation keeps coarse object retrieval distinct from exact boundary accuracy', '0 / 98' in page.locator('#evaluation').inner_text() and 'not boundary, side or operation accuracy' in page.locator('#evaluation').inner_text() and source['evaluation']['argoverse']['layer_on_true_geometry_hits']['accuracy'] is None)
-        check('structural write gate has quality conditions without duration or visit minima', 'Minimum write duration · No minimum' in page.locator('#parameters').inner_text() and 'Minimum write visits · No minimum' in page.locator('#parameters').inner_text() and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.duration_used') is False)
+        full_eval = source['evaluation']['argoverse']['full_boundary_geometry']
+        check('primary geometry evaluation includes unpainted boundaries and actual positive truth labels',
+              full_eval['metrics']['truth_positives'] > 0
+              and full_eval['metrics']['true_positives'] > 0
+              and full_eval['metrics']['recall'] is not None
+              and '75 eligible physical boundaries' not in page.locator('#dataset-scope').inner_text())
+        local_eval = full_eval['local_geometry_summary']
+        check('local geometry agreement is reported separately from changed-boundary identity retrieval',
+              local_eval['within_tolerance_detections'] <= local_eval['evaluable_detections'] <= local_eval['model_detections']
+              and local_eval['within_tolerance_detections'] < full_eval['metrics']['true_positives']
+              and str(local_eval['within_tolerance_detections']) + ' / ' + str(local_eval['model_detections']) in page.locator('#local-geometry-summary').inner_text()
+              and 'Boundary-identity recall' in page.locator('#comparison').inner_text()
+              and 'same' in page.locator('#local-geometry-summary').inner_text().lower())
+        check('structural write gate retains quality conditions without duration or visit minima',
+              'Minimum write duration · No minimum' in page.locator('#parameters').inner_text()
+              and 'Minimum write visits · No minimum' in page.locator('#parameters').inner_text()
+              and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.duration_used') is False)
         support = source['evaluation']['argoverse']['task_support_breakdown']
-        check('truth coverage explains the 34 unpainted boundary references and 24 intersection references', str(support['changed_lane_geometry_references']) in page.locator('#task-support').inner_text() and str(support['intersection_references']) in page.locator('#task-support').inner_text() and 'prior marking NONE' in page.locator('#task-support').inner_text() and 'Reference records can share physical geometry' in page.locator('#task-support').inner_text() and 'not prediction inputs' in page.locator('#task-support').inner_text())
+        check('task coverage retains all 34 changed lane-side references without treating them as model inputs',
+              support['changed_lane_geometry_references'] == 34
+              and support['prior_marking_counts']['NONE'] == 34
+              and '34' in page.locator('#task-support').inner_text()
+              and source['prediction_freeze']['gt_read'] is False)
         page.screenshot(path=str(root / 'pipeline_argoverse_en.png'), full_page=True)
         page.locator('#filter').select_option('not_applicable')
-        check('five map-consistent events have a dedicated no-change filter', page.locator('#events [data-event]').count() == 5)
+        check('geometric-agreement filter matches the computed events instead of the former fixed count',
+              page.locator('#events [data-event]').count() == len(consistent) and len(consistent) > 0)
         page.locator('#events [data-event]').first.click()
-        check('map-consistent events have no adopted change class or misleading active routing branch', page.locator('#layer-status').inner_text() == 'No observed change class' and page.locator('#routing-path article.active').count() == 0 and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False)
+        check('geometric agreement does not adopt a structural change or active routing branch',
+              page.locator('#routing-path article.active').count() == 0
+              and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False
+              and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is False)
         page.locator('#filter').select_option('insufficient')
-        check('all 70 insufficient-geometry Argoverse hypotheses remain inspectable', page.locator('#events [data-event]').count() == 70)
+        check('remaining insufficient evidence stays inspectable instead of being automatically promoted',
+              page.locator('#events [data-event]').count() == len(unresolved) and len(unresolved) > 0)
         page.locator('#events [data-event]').first.click()
-        check('semantic structure identity does not override insufficient observation evidence', 'Geometry evidence insufficient' in page.locator('#reliability-status').inner_text() and 'actual change is not verified' in page.locator('#layer-note').inner_text() and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False)
-        paint_events = [event for event in source['datasets']['argoverse']['events'] if event.get('prior_marking_type') == 'NONE']
-        check('all 64 unpainted references have explicit paint-presence hypotheses rather than claimed old-line displacement',
-              len(paint_events) == 64 and all(event['structural_hypothesis']['target_property'] == 'paint_presence'
-                  and event['structural_hypothesis']['operation'] == 'marking_presence_change'
-                  and event['structural_hypothesis']['confirmed'] is False for event in paint_events))
-        paint = next(event for event in paint_events if event['observation_evidence']['temporal_support']['status'] == 'sufficient'
-                     and event['observation_evidence']['local_consistency']['status'] == 'stable')
+        check('semantic routing cannot override a failed geometric decision',
+              page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False
+              and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is False)
+        paint_events = [event for event in argo['events'] if event.get('prior_marking_type') == 'NONE']
+        check('unpainted references use geometry-or-presence hypotheses and no blanket semantic rejection',
+              len(paint_events) == 64
+              and any(event['model_change_decision']['detected'] for event in paint_events)
+              and all(event['structural_hypothesis']['target_property'] == 'boundary_geometry_or_paint_presence' for event in paint_events)
+              and all('PRIOR_EXPLICITLY_UNPAINTED_REQUIRES_INSERTION_VERIFICATION' not in event['reliability']['reason_codes'] for event in paint_events))
+        paint = next(event for event in paint_events if any(alias['map_element_id'] == 'ls-168085012' and alias['boundary_side'] == 'right' for alias in event['map_aliases']))
         page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', paint['event_id'])
-        check('paint-presence details keep measured geometry and semantic uncertainty separate',
-              'Paint-presence hypothesis' in page.locator('#selected-title').inner_text()
-              and 'not displacement of an old painted line' in page.locator('#structural-hypothesis-note').inner_text()
-              and 'Sufficient local support' in page.locator('#observation-dimensions').inner_text()
-              and 'Stable at the fixed anchor' in page.locator('#observation-dimensions').inner_text()
-              and paint['reliability']['status'] == 'insufficient_geometry')
-        check('paint confirmation evidence is visibly labeled as required conditions, not achieved verification',
-              page.locator('#structural-required-evidence-box').is_visible()
-              and 'Conditions for confirming this hypothesis' in page.locator('#structural-required-evidence-box').inner_text()
-              and all(item.inner_text().startswith('Evidence ') for item in page.locator('#structural-required-evidence li').all())
-              and paint['structural_hypothesis']['confirmed'] is False)
+        check('the previously blocked 46-frame example now displays an actual local model detection',
+              paint['model_change_decision']['detected'] is True
+              and paint['distinct_frame_count'] == 46
+              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
+              and 'model' in page.locator('#structural-hypothesis-values').inner_text().lower()
+              and not paint['decision']['write_gate']['map_patch_executed'])
+        check('local prediction does not invent paint identity, visibility or executed full-map edits',
+              paint['observation_evidence']['paint_identity']['status'] == 'unverified'
+              and paint['observation_evidence']['alignment']['status'] == 'unverified'
+              and paint['decision']['base_map_write_eligible'] is False
+              and page.locator('#structural-required-evidence-box').is_visible())
         if page.locator('#local-measurements').get_attribute('open') is None:
             page.locator('#local-measurements > summary').click()
-        check('unknown change assessment does not erase the actual measured local relations',
+        check('local measurement table preserves all frozen measurements and actual positive support',
               page.locator('#local-measurement-rows tbody tr').count() == len(paint['samples'])
-              and all(sample['observation'] == 'unknown' and sample['measured_local_relation'] in {'within_tolerance', 'offset_positive', 'offset_negative'} for sample in paint['samples'])
-              and 'Unknown' in page.locator('#local-measurement-rows').inner_text())
-        page.locator('#structural-evidence').screenshot(path=str(root / 'pipeline_paint_presence_evidence_en.png'))
+              and any(sample['observation'] == 'supports_change' for sample in paint['samples'])
+              and all('measured_local_relation' in sample for sample in paint['samples']))
+        page.locator('#structural-evidence').screenshot(path=str(root / 'pipeline_model_detection_evidence_en.png'))
         check('full download preserves the complete original result', download(page, '#download') == (root / 'result.json').read_bytes())
         check('Argoverse context link uses its separate recorded-data route', page.locator('#source-link').get_attribute('href') == '../../argoverse/en/index.html')
         for name in ['nuscenes', 'argoverse']:
@@ -216,15 +278,18 @@ try:
         page.locator('#structural-evidence').screenshot(path=str(root / 'pipeline_ld004_mobile_zh.png'))
         page.locator('#dataset').select_option('argoverse')
         page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', paint['event_id'])
-        check('Chinese mobile paint-presence evidence remains a hypothesis and fits the screen',
-              '新标线存在候选' in page.locator('#selected-title').inner_text()
-              and '不是旧油漆线发生位移' in page.locator('#structural-hypothesis-note').inner_text()
+        check('Chinese mobile displays the computed detection with its distinct model origin',
+              '算法' in page.locator('#map-selected-title').inner_text()
+              and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is True
               and page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
-        check('Chinese confirmation conditions request evidence without claiming it is already verified',
-              '确认此假设所要求的证据' in page.locator('#structural-required-evidence-box').inner_text()
-              and all(item.inner_text().startswith('证明') for item in page.locator('#structural-required-evidence li').all())
-              and '已核验' not in page.locator('#structural-required-evidence').inner_text())
-        page.locator('#structural-evidence').screenshot(path=str(root / 'pipeline_paint_presence_mobile_zh.png'))
+        page.locator('#structural-evidence').screenshot(path=str(root / 'pipeline_model_detection_mobile_zh.png'))
+        page.locator('#map-source').select_option('reference')
+        check('Chinese mobile reference replay explicitly identifies truth and all 98 known changes',
+              page.locator('#reference-detail').is_visible()
+              and '真值' in page.locator('.composite-panel').inner_text()
+              and page.locator('#reference-change-select option').count() == 98
+              and page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
+        page.locator('.composite-panel').screenshot(path=str(root / 'pipeline_reference_mobile_zh.png'))
         page.goto(base + 'en/index.html?dataset=invalid&event=missing')
         page.wait_for_function('window.PIPELINE_STUDIO')
         check('invalid deep link recovers to a real source event', page.evaluate('PIPELINE_STUDIO.state.dataset==="nuscenes"&&PIPELINE_STUDIO.current().event_id===PIPELINE_STUDIO.state.eventId'))
