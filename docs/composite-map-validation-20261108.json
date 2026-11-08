@@ -1,0 +1,181 @@
+{
+  "schema": "composite-map-validation-1.0",
+  "status": "PASS",
+  "date": "2026-11-08",
+  "source_branch": "feat/structure-state-routing",
+  "core_tests": {
+    "count": 208,
+    "status": "PASS"
+  },
+  "browser_checks": {
+    "pipeline_checks.json": {
+      "status": "PASS",
+      "count": 47,
+      "checks": [
+        "v3 presentation identifies its source hash and derived-view omissions",
+        "all geometry, semantic classifications, decisions and evidence are preserved",
+        "actual state layers, evaluation and method are preserved unchanged",
+        "nuScenes opens with 29 source events and 23 applied state classes",
+        "main classifier uses structure/state semantics and makes no trained-probability claim",
+        "primary UI contains no duration forecast, posterior display or minimum revisit threshold",
+        "occupancy reliability preserves annotation provenance instead of claiming new detection",
+        "barrier is classified as a state event and its real layer record is stored",
+        "routing highlight matches the actual semantic classifier output",
+        "semantic evidence retains the source barrier category and matched input fields",
+        "numerical class confidence remains unavailable instead of invented probability",
+        "missing clip-end observation does not erase state classification or confirm clearance",
+        "lifecycle uses actual timestamps without inventing a default TTL",
+        "state geometry comes from the saved last-observed snapshot",
+        "downloaded state layer is the actual 23-feature GeoJSON with unchanged base-map flags",
+        "state filter includes all 23 occupancy events",
+        "six marking hypotheses remain visible without being accepted as verified edits",
+        "unverified marking semantics identify a structural hypothesis independently of reliability",
+        "structural hypothesis does not create a state record or a base patch",
+        "empty taxonomy filter is explicit",
+        "empty search is explicit",
+        "nuScenes evaluation distinguishes 12 clip-end observations from 11 unobserved states",
+        "old duration labels are not recycled into structure/state accuracy",
+        "Argoverse loads 76 events with one applied structural class and no state records",
+        "71 structural hypotheses are distinguished from the single applied class",
+        "applied structural claim is still exposed as a left-boundary geometry false positive",
+        "geometry recall is undefined with no true changes in the 75-boundary scope",
+        "evaluation keeps coarse object retrieval distinct from exact boundary accuracy",
+        "structural write gate has quality conditions without duration or visit minima",
+        "truth coverage explains the 34 unpainted boundary references and 24 intersection references",
+        "five map-consistent events have a dedicated no-change filter",
+        "map-consistent events have no adopted change class or misleading active routing branch",
+        "all 70 insufficient-geometry Argoverse hypotheses remain inspectable",
+        "semantic structure identity does not override insufficient observation evidence",
+        "full download preserves the complete original result",
+        "Argoverse context link uses its separate recorded-data route",
+        "all 105 source events render in English without changing their outcomes",
+        "interaction preserves immutable predictions and state histories",
+        "language switching preserves dataset and selected event",
+        "both languages use identical source-derived data",
+        "Chinese distinguishes unobserved clip-end state from unknown classification",
+        "Chinese explains semantic routing and expiry without a temporal class",
+        "mobile event and lifecycle view has no horizontal overflow",
+        "mobile evaluation has no horizontal overflow",
+        "invalid deep link recovers to a real source event",
+        "all assets load without failed requests",
+        "all interactions finish without uncaught JavaScript errors"
+      ],
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4"
+    },
+    "composite_map_checks.json": {
+      "status": "PASS",
+      "checks": [
+        "nuscenes embedded map equals the exported reference context",
+        "nuscenes map context explicitly excludes current evaluation maps",
+        "argoverse embedded map equals the exported reference context",
+        "argoverse map context explicitly excludes current evaluation maps",
+        "nuScenes base map is the exact frozen original map file",
+        "all 157 nuScenes base features retain original node coordinates and polygon holes",
+        "Argoverse uses the frozen M2 prior rather than current ground truth",
+        "all 343 Argoverse physical boundaries are exact M2 vertices, deduplicated only by reversal",
+        "all 219 lane fills and 27 crossings use actual prior-boundary coordinates",
+        "nuscenes reference bounds equal independently measured source extents",
+        "argoverse reference bounds equal independently measured source extents",
+        "nuScenes perception guide exactly reports 14 source categories, 2278 frame records and 154 instances",
+        "Argoverse guide reports 4976 coarse vehicle boxes, without invented object classes or GT labels",
+        "the prominent map is visible before the detailed evidence panels",
+        "perception details stay collapsed until requested",
+        "English perception details render all 14 actual source labels and their annotation provenance",
+        "nuScenes opens all three layers with 157 base features, 23 states and 6 structure hypotheses",
+        "all state and structural overlay geometries preserve their frozen prediction values",
+        "nuscenes drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
+        "argoverse drawable geometry is exactly the reference, state export and predicted structure; no GT geometry",
+        "the composite image actually contains red states and yellow structure geometry",
+        "fit all contains actual source extents without confusing the two city coordinate systems",
+        "base toggle changes actual map pixels and hides its rendered features",
+        "state toggle changes actual map pixels and hides its rendered features",
+        "structure toggle changes actual map pixels and hides its rendered features",
+        "layer switches leave all predictions and histories unchanged",
+        "red pixels coincide with projected last-observed state source geometry",
+        "yellow pixels coincide with projected structural source geometry",
+        "zoom increases the metric scale and changes the rendered view",
+        "zoom out reverses the scale change",
+        "drag pans in metric coordinates with the expected north-up direction",
+        "clicking a map event selects the matching source event in the evidence panel",
+        "Argoverse opens 589 prior features, no states and one supported structural claim",
+        "Argoverse perception view distinguishes vehicle detections from unique objects and ground truth",
+        "the selected supported Argoverse claim has a visible false-positive warning",
+        "Argoverse fit uses its own actual M2 prior bounds",
+        "all-hypotheses scope reveals all 71 structural claims without relabeling the 70 insufficient cases",
+        "cross-dataset interactions preserve data and do not turn overlays into base-map edits",
+        "Chinese map keeps the same dataset, selected source event and exact data",
+        "Chinese map controls describe state and structure separately",
+        "mobile map and controls fit without horizontal document overflow",
+        "mobile fit-selected retains visible selected-source geometry",
+        "all assets load and all map interactions have no uncaught browser errors"
+      ],
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
+      "source_bounds_xyxy": {
+        "nuscenes": [
+          245.75157373658558,
+          1044.6997280220949,
+          495.01611050943313,
+          1353.0075414922635
+        ],
+        "argoverse": [
+          930,
+          -542.51,
+          1290,
+          -185.52
+        ]
+      },
+      "red_source_coordinate_pixels": {
+        "tested": 489,
+        "hits": 489,
+        "fraction": 1
+      },
+      "yellow_source_coordinate_pixels": {
+        "tested": 72,
+        "hits": 70,
+        "fraction": 0.9722222222222222
+      },
+      "count": 43
+    }
+  },
+  "browser_count": 90,
+  "original_prediction_result_sha256": "5afadaf3886ad988bd67e61a38ffb98e753ca874feec980ebd4dd9cdd06581c4",
+  "inference_rerun": false,
+  "original_prediction_result_unchanged": true,
+  "map_context_sha256": {
+    "nuscenes": "eadd93fcd65e01e3db6901e1c449c9f2ff61766acfded429a1687dd1b24266c8",
+    "argoverse": "1835e5f348fb8c1fc127db63621bf0923119c595607bb3ff844c0217f0dae2ad"
+  },
+  "perception_guide_sha256": "925ae1e456e583ecede1c0554f43b23cd830032662665c71f0e58480a24e08a6",
+  "source_file_sha256": {
+    "map_update/map_context.py": "8ce7c9a9cb7018df4ad9a541aa7c65d3810c0a7a80499617d9e553981d2d2eb5",
+    "map_update/pipeline_studio.js": "299f30a243fe1130a726c23e05bbe0efb6468b5e542eb9e43094b1cb85ff7b56",
+    "map_update/pipeline_studio.html": "77eb05d57ee6d517a9bafcad816e8ae5ad976bc2fa527bae81d51debc7942053",
+    "map_update/pipeline_studio.css": "01511e518107741c3c76d820e17ba0b32c837341ec38dd83885c221bb6f2509d",
+    "scripts/build_pipeline_studio.py": "1505d3c107c46da3bde65b2e859edfcf613783c70f1167f177d2f872ad8151b2",
+    "scripts/check_composite_map.py": "47a1f40121d946aedde90f1088bea72e1ea98d7e36feb1e3c72b076415bfb9b4"
+  },
+  "layer_counts": {
+    "nuscenes": {
+      "base_elements": 157,
+      "state_records": 23,
+      "structural_hypotheses": 6,
+      "base_map_edits": 0
+    },
+    "argoverse": {
+      "base_elements": 589,
+      "physical_boundary_lines": 343,
+      "lane_fills": 219,
+      "crossings": 27,
+      "state_records": 0,
+      "structural_hypotheses": 71,
+      "supported_structure_candidates": 1,
+      "base_map_edits": 0
+    }
+  },
+  "scope": "Actual source-coordinate composite rendering and perception-label provenance, local Chromium. Pixel alignment checks are rendering checks, not model accuracy. Live Pages delivery not verified.",
+  "unchanged_site_scope": "Previous nuScenes/Rerun/Argoverse baseline assets remain unchanged; their previous validation record is retained."
+}

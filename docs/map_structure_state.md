@@ -1,5 +1,7 @@
 # 底图结构变更与地图状态事件（2026-11-08）
 
+展示已升级为灰色底图 + 红色状态事件 + 黄色结构候选的可交互大地图；标注类别和来源见 [Perception 与大地图说明](perception_and_composite_map.md)。原始预测与本说明的数值结果保持不变。
+
 用户修正了任务定义：需要区分“地图描述的结构改变”和“附着在地图上的状态”，不是预测持续时间长短。本次代码、写图条件、评价与网页均按此定义修改；原持续时间模型不再参与主流程。
 
 [中文交互结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [英文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html) · [完整 JSON](https://yugongshit.github.io/AIE1903-map-update66/algorithms/result.json)
