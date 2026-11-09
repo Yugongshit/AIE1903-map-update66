@@ -1,0 +1,130 @@
+{
+  "schema": "semantic-object-release-validation-1.0",
+  "date": "2026-11-09",
+  "status": "PASS",
+  "change_scope": "presentation_only_annotation_backed_category_shapes",
+  "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+  "source_prediction_changed": false,
+  "input_annotations_changed": false,
+  "state_lifecycle_changed": false,
+  "original_exports_byte_identical": {
+    "result.json": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+    "nuscenes_state_layer.geojson": "a169545f011329ecfed26a5574f127cb46d177e04f0e880504d6cb7ea40a8561",
+    "argoverse_state_layer.geojson": "c7e75837967fb9807e15a121f74cf441c75e711cf29796627c6c7c755e21b9ab",
+    "argoverse_reference_updated_map.json": "836b9ed739bd00d48b214c2b2a70a8dadd4f86e7c94608fe11e31db4c68454ab",
+    "argoverse_reference_changes.geojson": "8cdbc151533241976aa627e86616183c5fa3f0c359baf2a2fe266d5590868a35",
+    "argoverse_material_reference_rollback_map.json": "7346d478d508f5b721cc7a70f897b053dadd3e45f46dd82537b5333d3adef511",
+    "argoverse_material_reference_patch_log.json": "62fec503c3526a2ce52e62e7d7cdd2ef4eba816813c26b23a222544dc7f94f23",
+    "argoverse_reference_patch_log.json": "d7e519e93b8167c8e6903838e63b4ad699efdfa0e7f504ed46885e3f9ead4504",
+    "argoverse_reference_rollback_map.json": "7346d478d508f5b721cc7a70f897b053dadd3e45f46dd82537b5333d3adef511",
+    "argoverse_material_reference_updated_map.json": "b95bf38de4563bf8e32d744fc6560d4f014a6a37ed06403def37e32b0b407ab7",
+    "argoverse_material_reference_changes.geojson": "e07a315553faee79a712831c405f0506cb918c13fdb102bc975b9514a63d2a86",
+    "argoverse_material_reference_decisions.json": "95685ec2075e2632004bae348fdab281b603244e5591eb2f144e83b52cc6bd80"
+  },
+  "object_summary": {
+    "state_events": 23,
+    "matched_events": 23,
+    "objects": 49,
+    "distinct_instances": 49,
+    "distinct_instance_frames": 49,
+    "repeated_instance_records": 0,
+    "fallbacks": 0,
+    "categories": {
+      "movable_object.barrier": 35,
+      "movable_object.debris": 3,
+      "movable_object.trafficcone": 11
+    },
+    "semantic_shapes": {
+      "barrier": 35,
+      "cone": 11,
+      "other": 3
+    },
+    "annotation_height_objects": 49
+  },
+  "object_source_provenance": {
+    "source_files": [
+      {
+        "path": "processed/objects.csv",
+        "sha256": "6c8041f1b0e065d3341b381189f396376d80be20f7dda7f20269adbc2b387367"
+      },
+      {
+        "path": "processed/frames.csv",
+        "sha256": "2459d09854271492aa4f6865a7a767ce8e8ffd6e328858e689645449ff68f329"
+      }
+    ],
+    "unavailable_source_files": [],
+    "events_sha256": "b8f49552672d176fbe414340769c2cf3e3d0a5a99a03e0a8b43dd22d3949bb9b",
+    "state_layer_sha256": "808f7c3c7cfff67a0049e0fe96f5431964a7809d6fd6ed07354e73e209753c25",
+    "identity_join": "retained_state_source_ids + exact_frame + sample_instance_order",
+    "geometry_check": "source_oriented_box_matches_retained_polygon_within_1e-7_m",
+    "category_source": "supplied_nuscenes_annotation_table",
+    "sensor_inference_rerun": false,
+    "predictions_modified": false,
+    "state_lifecycle_modified": false,
+    "base_map_modified": false,
+    "temporal_scope": "each_event_last_observed_frame_not_simultaneous_current_scene",
+    "appearance_scope": "category_prototypes_not_recovered_meshes_or_textures"
+  },
+  "display_semantics": {
+    "modeled_categories": [
+      "movable_object.barrier",
+      "movable_object.trafficcone"
+    ],
+    "unsupported_debris": "retained source footprint; no invented debris mesh",
+    "dimensions_and_heading": "exact source annotation L/W/H and yaw",
+    "appearance": "generic category prototype; colors and surface details are schematic",
+    "time_scope": "each event last retained observation; not one simultaneous present scene",
+    "altitude": "source global Z retained in provenance; model ground-relative display only"
+  },
+  "unit_tests": {
+    "status": "PASS",
+    "count": 25,
+    "command": "python -m unittest tests.test_state_object_presentation tests.test_pipeline_presentation_identity -v"
+  },
+  "browser_reports": {
+    "pipeline_checks.json": {
+      "status": "PASS",
+      "checks": 78,
+      "sha256": "b0491a81111a0aa55a21d5499629d672ab5427838894b0ff5327cf14cfe3a2c3"
+    },
+    "composite_map_checks.json": {
+      "status": "PASS",
+      "checks": 96,
+      "sha256": "c2074292f6431aad69b24e1dce237db4f8556e5bec40a7ab55be4b800655b618"
+    },
+    "three_map_checks.json": {
+      "status": "PASS",
+      "checks": 62,
+      "sha256": "c8c6073471726e03964564df79965e437537171a00619244324ff4a8faa99753"
+    }
+  },
+  "source_sha256": {
+    "map_update/pipeline_map_3d.js": "aa571671242a249492b85734384e6bd6ecef37642e70e51062810aafd1e74155",
+    "map_update/pipeline_studio.js": "7fdcb074184835af8203064ad08f1bd0abade67811616af72c3bd602fe335bd4",
+    "map_update/pipeline_studio.html": "c404b7422779da20cb8a31da378df6851699389ac6417dfe5f4a2c76005b0625",
+    "map_update/pipeline_studio.css": "0af299a15063032135c332a1c5d4fc72734ef4699eb65e28ac4b5ad7be357946",
+    "map_update/state_object_presentation.py": "a50ff79934f1445f734f0a021148ae7686a4a6f02e2a33776809d7fbbb2f5d8b",
+    "scripts/build_pipeline_studio.py": "1e4fc4e5b214895cd4282944d74df543e838cc76d14839b15641baa8ed807d58",
+    "scripts/check_pipeline_3d.py": "be721b60ec4acce751eeba71e9caba325e56776954e3dfb8c808adf915ddd339",
+    "tests/test_state_object_presentation.py": "18bedf43fcacb2e6d2b75542dac13407b9662d41449049e1755ba80928aef0c5"
+  },
+  "website_version_sha256": "fa0114f1f8fc5c3116ddd59f4bc061a758fbc1bc880440434969325ec0a293bb",
+  "object_presentation_sha256": "4733724b8ed8a6430583657c2df7b46c49390a8a4fc14aec76d8b0dd4fe8919e",
+  "screenshots": {
+    "three_argoverse_comparison_en.png": "9f5ca5e9ac63861f463f472568b3ba46cdfc6c96ca147f15e13261a287dc6734",
+    "three_argoverse_first_view_en.png": "7855dc7de5a0382977a43e422a5f0bdfa0d686ecde682e938b6f30ef42de6b0b",
+    "three_argoverse_original_en.png": "bdc0c4373b09233bf09f39be87c00a0ec192438a90111b76559123ae3a4a2236",
+    "three_argoverse_updated_en.png": "f3d19364d453a13c3005b7cb7c362968b39aab89422246cc3d2c94aa297fdd08",
+    "three_nuscenes_barrier_closeup_en.png": "fd15f8615546bb02077f79f83214b9689e9f45bd18d7f558e56125c3753c4f6a",
+    "three_nuscenes_cone_closeup_en.png": "f16adcb3844210348b66379b6d6f0c2dc2625e3909508dd328be7db91db2b79e",
+    "three_nuscenes_first_view_en.png": "81b02c0f348c1af33258c8952d3a8660f8c035c5a16bf094c86529b4db21b2bf",
+    "three_nuscenes_mobile_zh.png": "c7c84966c21f04824cdbb7cfab8f3923f59ac7f95a59dbb6aa3708bf8989ad4a",
+    "three_nuscenes_original_en.png": "9861963920598f14aa3a8f24ff4b73859ec69258f0395e10b647cb97c32a77de",
+    "three_nuscenes_updated_en.png": "c6200c033ef5c3b795ca73487713611a8a1ae0b2d54c22520efeadf021110bfe"
+  },
+  "manual_visual_review": [
+    "real barrier and cone closeups",
+    "Chinese mobile controls and layout"
+  ],
+  "delivery_scope": "local HTTP tested; publish is verified separately from GitHub Pages deployment"
+}

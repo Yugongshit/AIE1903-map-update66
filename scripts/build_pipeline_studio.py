@@ -10,6 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from map_update.map_context import build_map_contexts
+from map_update.state_object_presentation import build_state_object_presentation
 
 
 def build(result_path, output_path, raw_root=None, delivery_root=None):
@@ -152,6 +153,13 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             raise ValueError('Material reference decisions disagree with original and updated replay')
     if output.exists():
         raise ValueError('Choose a new output directory')
+    nu = data['datasets']['nuscenes']
+    object_presentation = build_state_object_presentation(
+        raw_root or ROOT/'AIE1903 原始资料', nu['events'], nu['state_event_layer'])
+    # Reuse exact prediction sources; this adapter enriches the display only.
+    for source in object_presentation['provenance']['source_files']:
+        if source['path'] in prediction_sources and prediction_sources[source['path']] != source['sha256']:
+            raise ValueError('Object display source differs from prediction input: ' + source['path'])
     vendor_root = ROOT/'map_update/vendor'
     vendor_manifest = json.loads((vendor_root/'three.manifest.json').read_text())
     for name in ['three.min.js', 'three.LICENSE']:
@@ -195,6 +203,9 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         shutil.copy2(vendor_root/name, output/'assets/vendor'/name)
     template = (ROOT / 'map_update/pipeline_studio.html').read_text()
     view = deepcopy(data)
+    view['datasets']['nuscenes']['state_object_presentation'] = object_presentation
+    object_path = output/'nuscenes_state_object_presentation.json'
+    object_path.write_text(json.dumps(object_presentation, ensure_ascii=False, indent=2, allow_nan=False)+'\n')
     view['perception_guide'] = guide
     shutil.copy2(guide_path, output/'perception_guide.json')
     for name, dataset in view['datasets'].items():
@@ -210,14 +221,18 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
                 sample.pop('geometry_city', None)
     view['presentation'] = {'kind': 'derived_view', 'source_result_sha256': sha256(result_path.read_bytes()).hexdigest(),
         'omitted_fields': ['datasets.*.observation_decisions', 'datasets.*.events.*.samples.*.geometry_city', 'datasets.*.reference_replay.updated_map', 'datasets.*.reference_replay.rollback_map', 'datasets.*.material_reference_replay.updated_map', 'datasets.*.material_reference_replay.rollback_map'],
-        'added_fields': ['datasets.*.map_context', 'perception_guide'],
+        'added_fields': ['datasets.*.map_context', 'datasets.nuscenes.state_object_presentation', 'perception_guide'],
         'map_context_source': 'Prediction contexts retain frozen priors. The reference view uses the separate map copy updated only by material supplied changes. The complete reference replay remains an audit artifact.',
         'three_dimensional_view': {
             'renderer': 'Three.js', 'version': vendor_manifest['version'],
             'dependency_source': 'local pinned bundle; no runtime CDN or network dependency',
             'source_xy_geometry_preserved': True,
             'ground_elevation': 'flat display plane; no measured terrain reconstruction',
-            'vertical_extrusion': 'schematic visual aid, not measured object or building height',
+            'vertical_extrusion': 'matched object dimensions from supplied annotations, anchored to display ground; unknown shapes retain source footprints',
+            'object_appearance': 'generic category models, not recovered meshes, colors or textures',
+            'object_source': 'nuscenes_state_object_presentation.json',
+            'object_summary': object_presentation['summary'],
+            'object_temporal_scope': object_presentation['provenance']['temporal_scope'],
             'before_after_camera': 'one shared camera with screen-space clipping',
             'views': ['perspective', 'top_down', '2d_fallback'],
             'webgl_failure_action': 'retain interactive 2D map',
@@ -249,8 +264,9 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         route.mkdir()
         (route / 'index.html').write_text(template.replace('__LANG__', language).replace('__RESULT__', serialized).replace('__REVISION__', revision))
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=en/index.html"><a href="en/index.html">Map-layer pipeline</a>\n')
-    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-4.0', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
+    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-4.1', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
         'asset_sha256': asset_hashes,
+        'state_object_presentation_sha256': sha256(object_path.read_bytes()).hexdigest(),
         'three_dimensional_view': view['presentation']['three_dimensional_view'],
         'map_context_sha256': {name: sha256((output/(name+'_map_context.json')).read_bytes()).hexdigest() for name in contexts},
         'perception_guide_sha256': sha256(guide_path.read_bytes()).hexdigest()}, indent=2) + '\n')

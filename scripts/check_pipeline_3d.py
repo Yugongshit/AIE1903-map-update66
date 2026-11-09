@@ -4,12 +4,14 @@ Checks an actual Chromium WebGL canvas, source XY, shared-camera clipping,
 interaction, mobile gestures and the retained 2D fallback. No detector is run.
 """
 import argparse
+from collections import Counter
+import csv
 from functools import partial
 from hashlib import sha256
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 import json
-from math import hypot
+from math import cos, hypot, radians, sin
 from pathlib import Path
 from threading import Thread
 
@@ -42,10 +44,29 @@ def color_counts(png):
             'red': sum(r > 110 and r > g * 1.65 and r > b * 1.3 for r, g, b in pixels)}
 
 
-def run(directory):
+def close_sequence(actual, expected, tolerance=1e-7):
+    return len(actual) == len(expected) and all(abs(a-b) < tolerance for a, b in zip(actual, expected))
+
+
+def source_object_footprint(row):
+    """Reconstruct the annotation box independently of the presentation exporter."""
+    x, y = float(row['x_global_m']), float(row['y_global_m'])
+    length, width = float(row['length_m']), float(row['width_m'])
+    angle = radians(float(row['yaw_global_deg']))
+    return [(x + lx*cos(angle) - ly*sin(angle), y + lx*sin(angle) + ly*cos(angle))
+            for lx, ly in ((-length/2, -width/2), (length/2, -width/2),
+                           (length/2, width/2), (-length/2, width/2))]
+
+
+def run(directory, source_directory):
     root = directory.resolve()
     source_bytes = (root / 'result.json').read_bytes()
     source = json.loads(source_bytes)
+    with (source_directory/'objects.csv').open(encoding='utf-8-sig', newline='') as stream:
+        object_rows = list(csv.DictReader(stream))
+    with (source_directory/'frames.csv').open(encoding='utf-8-sig', newline='') as stream:
+        frames = {row['frame_index']: row for row in csv.DictReader(stream)}
+    objects = {(row['instance_token'], row['frame_index']): row for row in object_rows}
     checks, errors, failures, external = [], [], [], []
     report = {'status': 'FAIL', 'checks': checks, 'page_errors': errors,
               'failed_requests': failures, 'external_requests': external,
@@ -83,6 +104,109 @@ def run(directory):
         png = page.locator('#composite-map-3d').screenshot(path=str(root / filename))
         return color_counts(png)
 
+    def audit_semantic_models(page, initial):
+        presentation = page.evaluate('PIPELINE_STUDIO.data.datasets.nuscenes.state_object_presentation')
+        descriptors = presentation['objects']
+        state_features = {feature['id']: feature for feature in source['datasets']['nuscenes']['state_event_layer']['features']}
+        expected_keys = {(event_id, source_id.removeprefix('instance:'))
+                         for event_id, feature in state_features.items()
+                         for source_id in feature['properties']['source_ids'] if source_id.startswith('instance:')}
+        descriptor_keys = [(item['event_id'], item['instance_token']) for item in descriptors]
+        check('semantic presentation has exactly one current source descriptor per recorded instance, without frame trails',
+              len(descriptors) == 49 and len(descriptor_keys) == len(set(descriptor_keys))
+              and set(descriptor_keys) == expected_keys
+              and len({item['instance_token'] for item in descriptors}) == 49)
+        row_matches, geometry_matches, footprints_from_boxes = [], [], []
+        for item in descriptors:
+            row = objects[(item['instance_token'], item['frame_id'])]
+            frame = frames[item['frame_id']]
+            feature = state_features[item['event_id']]
+            props = feature['properties']
+            expected_xyz = [float(row[key]) for key in ('x_global_m', 'y_global_m', 'z_global_m')]
+            row_matches.append(
+                item['object_id'] == 'instance:'+row['instance_token']
+                and 'frame:'+item['frame_id'] in props['source_ids']
+                and item['annotation_token'] == row['annotation_token']
+                and item['sample_token'] == row['sample_token'] == frame['sample_token']
+                and item['timestamp_ns'] == str(int(frame['timestamp_us'])*1000) == props['last_seen_timestamp_ns']
+                and item['category'] == row['category']
+                and close_sequence(item['center_xy'], expected_xyz[:2])
+                and close_sequence(item['center_xyz'], expected_xyz)
+                and close_sequence([item[key] for key in ('length_m', 'width_m', 'height_m')],
+                                   [float(row[key]) for key in ('length_m', 'width_m', 'height_m')])
+                and abs(item['yaw_rad']-radians(float(row['yaw_global_deg']))) < 1e-7
+                and item['height_source'] == 'source_annotation')
+            footprint = item['footprint_geometry_city']
+            geometry_matches.append(footprint == feature['geometry']['geometries'][item['footprint_index']])
+            supplied_corners = geometry_points(footprint)
+            footprints_from_boxes.append(all(any(close_sequence(point, corner) for point in supplied_corners)
+                                             for corner in source_object_footprint(row)))
+        check('all object tokens, frames, timestamps, categories, XYZ centers, dimensions and yaw join exact original CSV rows',
+              all(row_matches))
+        check('every semantic object retains its exact final event footprint and independently reconstructed annotation corners',
+              all(geometry_matches) and all(footprints_from_boxes))
+        category_counts = Counter(item['category'] for item in descriptors)
+        check('real source instances contain 35 barriers, 11 cones and 3 debris objects, with no invented vehicles',
+              category_counts == {'movable_object.barrier':35, 'movable_object.trafficcone':11,
+                                  'movable_object.debris':3})
+        models = initial['objectModels']
+        keyed = {(item['event_id'], item['object_id']): item for item in descriptors}
+        check('the live WebGL renderer has one object record per source descriptor and no duplicated observations',
+              len(models) == len(keyed) == 49
+              and {(model['event_id'], model['object_id']) for model in models} == set(keyed))
+        model_matches, transforms, envelopes, mesh_types, lifecycle = [], [], [], [], []
+        origin = initial['sourceOriginXY']
+        for model in models:
+            item = keyed[(model['event_id'], model['object_id'])]
+            supported = item['semantic_shape'] in ('barrier', 'cone')
+            model_matches.append(model['category'] == item['category']
+                                 and close_sequence(model['source_center_xy'], item['center_xy'])
+                                 and close_sequence(model['source_center_xyz'], item['center_xyz'])
+                                 and close_sequence(model['source_size_lwh'], [item['length_m'], item['width_m'], item['height_m']])
+                                 and abs(model['source_yaw_rad']-item['yaw_rad']) < 1e-7
+                                 and model['source_footprint'] == item['footprint_geometry_city']
+                                 and model['height_source'] == 'source_annotation'
+                                 and model['rendered_model'] == supported
+                                 and model['shape_type'] == (item['semantic_shape'] if supported else 'footprint'))
+            lifecycle.append(model['observation_state'] == item['observation_state']
+                             == state_features[item['event_id']]['properties']['state'])
+            if not supported:
+                continue
+            transforms.append(close_sequence([model['world_position_xyz'][0], model['world_position_xyz'][2]],
+                                             [item['center_xy'][0]-origin[0], -(item['center_xy'][1]-origin[1])], 1e-5)
+                              and abs(model['world_rotation_y']-item['yaw_rad']) < 1e-7)
+            bounds = model['world_bounds_xyz']
+            corners = geometry_points(item['footprint_geometry_city'])
+            expected = [min(p[0] for p in corners)-origin[0], max(p[0] for p in corners)-origin[0],
+                        -max(p[1] for p in corners)+origin[1], -min(p[1] for p in corners)+origin[1]]
+            # Curved models may occupy less than the annotation box. They must stay inside it,
+            # and their vertical span must retain the annotation height rather than an invented 1 m.
+            envelopes.append(bounds['min'][0] >= expected[0]-1e-5 and bounds['max'][0] <= expected[1]+1e-5
+                             and bounds['min'][2] >= expected[2]-1e-5 and bounds['max'][2] <= expected[3]+1e-5
+                             and abs(bounds['max'][1]-bounds['min'][1]-item['height_m']) < 1e-5)
+            mesh_types.append(model['mesh_count'] >= 2
+                              and (model['shape_type'] != 'cone'
+                                   or any(kind in ('CylinderGeometry', 'ConeGeometry') for kind in model['primitive_types'])))
+        check('all rendered shapes retain exact source category, center, dimensions, yaw and source footprints', all(model_matches))
+        check('semantic models preserve source XY and orientation inside annotation envelopes with actual annotated heights',
+              transforms and all(transforms) and all(envelopes))
+        check('barriers and cones are real multi-part meshes and cones use curved geometry', mesh_types and all(mesh_types))
+        debris = [model for model in models if model['category'] == 'movable_object.debris']
+        check('unclassified debris stays as three source footprints instead of acquiring an invented car or obstacle model',
+              len(debris) == 3 and all(not item['rendered_model'] and item['shape_type'] == 'footprint' for item in debris))
+        unknown = [model for model in models if model['observation_state'] == 'unknown']
+        check('last-observed unknown events remain unknown with ghost appearance and are never silently cleared',
+              all(lifecycle) and unknown and all(item['lifecycle_appearance'] == 'ghost' for item in unknown)
+              and all(state_features[item['event_id']]['properties']['clearance_observed'] is False for item in unknown))
+        before = next(item for item in initial['passes'] if item['side'] == 'before')
+        after = next(item for item in initial['passes'] if item['side'] == 'after')
+        model_ids = {item['object_id'] for item in models if item['rendered_model']}
+        check('semantic meshes render only in the updated pass of the shared-camera divider',
+              not model_ids.intersection(before['visibleObjectIds']) and model_ids.issubset(set(after['visibleObjectIds'])))
+        report['semantic_objects'] = {'source_category_counts':dict(category_counts), 'source_instances':len(descriptors),
+                                      'models':models, 'unknown_objects':len(unknown)}
+        return descriptors
+
     try:
         with sync_playwright() as pw:
             browser = None
@@ -116,8 +240,14 @@ def run(directory):
                   page.locator('#map-count-state').inner_text() == '23'
                   and page.locator('#map-count-confirmed').inner_text() == '0'
                   and page.locator('#map-count-closed').inner_text() == '6')
-            check('schematic event height is explicitly disclosed in both metadata and visible controls',
-                  first['schematicHeights']['state'] > 0 and 'schematic' in page.locator('.composite-panel').inner_text().lower())
+            check('object-model provenance and schematic appearance are explicitly disclosed in visible controls',
+                  'schematic' in page.locator('.composite-panel').inner_text().lower()
+                  and 'annotation' in page.locator('.composite-panel').inner_text().lower()
+                  and all(model['height_source'] == 'source_annotation' for model in first['objectModels']))
+            descriptors = audit_semantic_models(page, first)
+            check('the downloadable object presentation equals the live map presentation exactly',
+                  json.loads((root/'nuscenes_state_object_presentation.json').read_text())
+                  == page.evaluate('PIPELINE_STUDIO.data.datasets.nuscenes.state_object_presentation'))
 
             # Source geometry is checked independently against the exported context.
             features = page.evaluate('PIPELINE_STUDIO.map.features()')
@@ -200,6 +330,46 @@ def run(directory):
             settle(page)
             check('restoring the state layer restores every supplied state feature',
                   len([f for f in debug(page)['features'] if f['layer'] == 'state']) == 23)
+
+            original_state_ids = {item['id'] for item in debug(page)['features'] if item['layer'] == 'state'}
+            check('annotation-based object models are enabled by default',
+                  page.locator('#map-object-shapes').get_attribute('aria-pressed') == 'true'
+                  and sum(model['rendered_model'] for model in debug(page)['objectModels']) == 46)
+            page.locator('#map-object-shapes').click()
+            settle(page)
+            footprint_view = debug(page)
+            check('the shape toggle removes semantic meshes while retaining every source state footprint',
+                  page.locator('#map-object-shapes').get_attribute('aria-pressed') == 'false'
+                  and not any(model['rendered_model'] for model in footprint_view['objectModels'])
+                  and {item['id'] for item in footprint_view['features'] if item['layer'] == 'state'} == original_state_ids
+                  and page.locator('#map-count-state').inner_text() == '23')
+            page.locator('#map-object-shapes').click()
+            settle(page)
+            check('restoring object models recreates only the 46 supported source shapes without duplicates',
+                  page.locator('#map-object-shapes').get_attribute('aria-pressed') == 'true'
+                  and len(debug(page)['objectModels']) == 49
+                  and sum(model['rendered_model'] for model in debug(page)['objectModels']) == 46)
+
+            # These close-ups select existing source events. There are no vehicle annotations
+            # in this state layer, so this test never fabricates a car demonstration.
+            closeups = {}
+            for shape in ('barrier', 'cone'):
+                matching = [item for item in descriptors if item['semantic_shape'] == shape]
+                item = min(matching, key=lambda obj: (obj['observation_state'] != 'observed_active',
+                           sum(other['event_id'] == obj['event_id'] for other in descriptors)))
+                page.evaluate('(eventId) => PIPELINE_STUDIO.pickEvent(eventId)', item['event_id'])
+                page.locator('#map-camera-perspective').click()
+                page.locator('#map-fit-selected').click()
+                page.locator('#map-preset-after').click()
+                pixels = snap(page, f'three_nuscenes_{shape}_closeup_en.png')
+                check(f'the source-backed {shape} close-up contains visible real WebGL geometry',
+                      pixels['colors'] > 100 and pixels['yellow'] > 15
+                      and any(model['event_id'] == item['event_id'] and model['shape_type'] == shape
+                              and model['rendered_model'] and model['visible_updated'] for model in debug(page)['objectModels']))
+                closeups[shape] = {'event_id':item['event_id'], 'object_id':item['object_id'], 'pixels':pixels}
+            report['semantic_closeups'] = closeups
+            page.locator('#map-fit-all').click()
+            settle(page)
 
             # Click a visible marker, using projected source positions rather than guessed coordinates.
             markers = [m for m in debug(page)['markers'] if m['visible_updated']]
@@ -292,6 +462,10 @@ def run(directory):
                   '示意' in mobile.locator('.composite-panel').inner_text()
                   and mobile.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'))
             mobile.locator('#map-preset-after').click()
+            # Clicking a toolbar control scrolls that control into view. Recenter the
+            # canvas before sending raw CDP touch coordinates, which do not auto-scroll.
+            mobile.locator('#composite-map-3d').scroll_into_view_if_needed()
+            settle(mobile)
             box = mobile.locator('#composite-map-3d').bounding_box()
             cdp = mobile_context.new_cdp_session(mobile)
             x, y = box['x']+box['width']*.7, box['y']+box['height']*.5
@@ -354,6 +528,9 @@ def run(directory):
                   and missing_asset.locator('#map-mode-3d').is_disabled())
             check('normal 3D interactions finish without uncaught browser errors', not errors)
             check('all normal 3D assets load locally without failed or external requests', not failures and not external)
+            check('semantic rendering and browser checks leave the complete frozen pipeline result byte-for-byte unchanged',
+                  (root/'result.json').read_bytes() == source_bytes
+                  and sha256(source_bytes).hexdigest() == 'd9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40')
             report['status']='PASS'
             browser.close()
     finally:
@@ -366,4 +543,8 @@ def run(directory):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('directory', type=Path)
-    run(parser.parse_args().directory)
+    parser.add_argument('--source-directory', type=Path,
+                        default=Path(__file__).resolve().parents[1]/'AIE1903 原始资料'/'processed',
+                        help='Original processed annotations for independent source fidelity checks')
+    arguments = parser.parse_args()
+    run(arguments.directory, arguments.source_directory)
