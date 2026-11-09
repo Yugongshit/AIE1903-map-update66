@@ -131,7 +131,7 @@
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "1d4a0b96f5c5fcd6e44b8d9977ca45d226a3c917",
+  "source_commit": "a973f1cce0974d58ef04b6e069f77531e40d02c0",
   "source_branch": "main",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
@@ -142,7 +142,7 @@
     "accepted_material_structure": "red",
     "closed_no_update": "no_change_overlay"
   },
-  "current_presentation_validation": "algorithms/three_dimensional_release_validation_20261109.json",
+  "current_presentation_validation": "algorithms/semantic_object_release_validation_20261109.json",
   "previous_full_site_validation": "release_validation.json",
   "map_comparison": {
     "left_region": "original_reference_map",
@@ -161,7 +161,7 @@
     "detailed_analysis_collapsed_by_default": true,
     "confirmed_structure_requires": "Completed final material update action in model view; delivered reference object passing materiality policy in separate reference replay. Raw local detections do not authorize red structure overlays."
   },
-  "previous_presentation_validation": "algorithms/material_structural_release_validation_20261109.json",
+  "previous_presentation_validation": "algorithms/three_dimensional_release_validation_20261109.json",
   "structural_evidence_revision": {
     "nuscenes_supported_local_marking_discrepancies": 1,
     "nuscenes_unconfirmed_structure_candidates": 6,
@@ -327,14 +327,12 @@
     "renderer": "Three.js r180 local distribution",
     "source_xy_preserved": true,
     "ground_geometry": "flat plane from supplied map XY",
-    "state_height_m": 1,
-    "state_height_is_schematic": true,
     "source_result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
-    "asset_revision": "4f7a7315b774",
+    "asset_revision": "905f3ddaab48",
     "asset_sha256": {
-      "pipeline_map_3d.js": "b9481b7d6bc24a75d21f6b77ca1e2e3e5843da57d9a17b5301e8de6593620132",
-      "pipeline_studio.css": "e904c5bba29c13c63b7904482ffb4c3fb86a80d2436e329faf13de050b0cf4bf",
-      "pipeline_studio.js": "20679c9bc33425d9bb1777c02ada079a27270d1cc453396cb874184f87215eb4",
+      "pipeline_map_3d.js": "aa571671242a249492b85734384e6bd6ecef37642e70e51062810aafd1e74155",
+      "pipeline_studio.css": "0af299a15063032135c332a1c5d4fc72734ef4699eb65e28ac4b5ad7be357946",
+      "pipeline_studio.js": "7fdcb074184835af8203064ad08f1bd0abade67811616af72c3bd602fe335bd4",
       "vendor/README.md": "dc51e7b64adfdfe4c402acafefab1f7799221a8afc59a3a6a191d3b6c56eb00a",
       "vendor/three.LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
       "vendor/three.manifest.json": "7fa375071e770eaad49cfbeb196945a42beb86f11530678091166c958f791c41",
@@ -356,8 +354,32 @@
     "model_decisions_changed": false,
     "external_cdn_required": false,
     "browser_checks": {
-      "three_dimensional": 44,
+      "three_dimensional": 62,
       "two_dimensional": 174
-    }
+    },
+    "object_dimensions": "supplied annotation L/W/H and yaw",
+    "object_appearance": "generic category prototypes; surface details and color are schematic",
+    "state_objects": {
+      "state_events": 23,
+      "matched_events": 23,
+      "objects": 49,
+      "distinct_instances": 49,
+      "distinct_instance_frames": 49,
+      "repeated_instance_records": 0,
+      "fallbacks": 0,
+      "categories": {
+        "movable_object.barrier": 35,
+        "movable_object.debris": 3,
+        "movable_object.trafficcone": 11
+      },
+      "semantic_shapes": {
+        "barrier": 35,
+        "cone": 11,
+        "other": 3
+      },
+      "annotation_height_objects": 49
+    },
+    "object_provenance": "algorithms/nuscenes_state_object_presentation.json",
+    "object_presentation_sha256": "4733724b8ed8a6430583657c2df7b46c49390a8a4fc14aec76d8b0dd4fe8919e"
   }
 }

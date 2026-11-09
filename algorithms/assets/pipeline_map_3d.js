@@ -1,6 +1,7 @@
 /* Three-dimensional presentation of immutable saved map features.
- * Source XY coordinates stay unchanged. Heights are display offsets only;
- * the one-metre state extrusion is a schematic footprint, not a sensor height.
+ * Source XY coordinates stay unchanged. Recognized state objects use source
+ * annotation dimensions and yaw; their generic appearance is not a reconstruction.
+ * Vertical placement is relative to the display ground, not measured road elevation.
  * Both swipe regions use the same camera and full-size viewport.
  */
 (() => {
@@ -166,6 +167,104 @@
       shadow.near = .1; shadow.far = span*3; shadow.updateProjectionMatrix();
       this.scene.fog = new this.T.Fog(COLORS.ground, span*2, span*6);
     }
+    _barrierGeometry() {
+      // Unit envelope: x = length, z = width, y = height above the ground.
+      // A broad foot and tapered shoulders make the generic barrier recognizable.
+      const sections = [[0,.5],[.11,.5],[.34,.22],[1,.14]], positions = [], indices = [];
+      for (const [y, halfWidth] of sections) {
+        positions.push(-.5,y,-halfWidth, .5,y,-halfWidth, .5,y,halfWidth, -.5,y,halfWidth);
+      }
+      for (let level = 1; level < sections.length; level++) {
+        const low = (level-1)*4, high = level*4;
+        for (let side = 0; side < 4; side++) {
+          const next = (side+1)%4;
+          indices.push(low+side,high+side,low+next, low+next,high+side,high+next);
+        }
+      }
+      const top = (sections.length-1)*4;
+      indices.push(0,1,2,0,2,3, top,top+2,top+1,top,top+3,top+2);
+      const geometry = new this.T.BufferGeometry();
+      geometry.setAttribute('position', new this.T.Float32BufferAttribute(positions,3));
+      geometry.setIndex(indices);
+      // Flat normals preserve the sloped profile instead of rounding its corners.
+      const flat = geometry.toNonIndexed(); geometry.dispose(); flat.computeVertexNormals();
+      return flat;
+    }
+    _objectModel(descriptor, feature, groundHeight) {
+      const dimensions = [descriptor.length_m,descriptor.width_m,descriptor.height_m];
+      const usable = finitePoint(descriptor.center_xy) && dimensions.every(value => Number.isFinite(value) && value>0)
+        && Number.isFinite(descriptor.yaw_rad);
+      // Only an annotation category with a supported generic shape can create a model.
+      const expected = {'movable_object.barrier':'barrier','movable_object.trafficcone':'cone'}[descriptor.category];
+      const supported = expected && descriptor.semantic_shape === expected;
+      const enabled = feature.render_object_shapes !== false;
+      const fresh = descriptor.observation_state === 'observed_active';
+      const record = {descriptor, feature, shapeType: supported ? expected : 'footprint', model: null,
+        fallbackReason: !usable ? 'missing_source_geometry' : !supported ? 'unsupported_annotation_category'
+          : !enabled ? 'object_shapes_disabled' : null,
+        lifecycleAppearance: fresh ? 'solid' : 'ghost', primitives: []};
+      if (!usable || !supported || !enabled) return record;
+      const model = new this.T.Group(); model.name = 'state-object:'+descriptor.object_id;
+      model.position.copy(this._world(descriptor.center_xy,groundHeight));
+      model.rotation.y = descriptor.yaw_rad;
+      model.scale.set(dimensions[0],dimensions[2],dimensions[1]);
+      const appearance = {transparent: !fresh,opacity: fresh ? 1 : .34,depthWrite:fresh,
+        roughness:.76,metalness:.04};
+      const body = this._material(0xc6cdc6,appearance);
+      const dark = this._material(0x29383c,{...appearance,roughness:.96});
+      const reflector = this._material(COLORS.state,{...appearance,opacity:fresh ? 1 : .62,
+        emissive:COLORS.state,emissiveIntensity:.12,roughness:.45});
+      const ivory = this._material(0xedeee1,{...appearance,opacity:fresh ? 1 : .54,roughness:.42});
+      // Share only materials actually used by each model so disposal remains complete.
+      const materials = new Set([body,dark,reflector,ivory]), usedMaterials = new Set();
+      const add = (parent,geometry,material,name,position=[0,0,0]) => {
+        const mesh = new this.T.Mesh(geometry,material);
+        mesh.name=name;mesh.position.set(...position);mesh.castShadow=fresh;mesh.receiveShadow=fresh;
+        parent.add(mesh);usedMaterials.add(material);
+        record.primitives.push({name,geometry_type:geometry.type});
+        return mesh;
+      };
+      if (expected === 'barrier') {
+        const bodyGroup = new this.T.Group();
+        // Some source boxes store the long barrier axis as width. Retain their yaw
+        // and exact envelope, placing the recognizable rail along that longer side.
+        if (dimensions[1]>dimensions[0]) bodyGroup.rotation.y=Math.PI/2;
+        model.add(bodyGroup);
+        const shell = add(bodyGroup,this._barrierGeometry(),body,'tapered-barrier-body');
+        add(bodyGroup,new this.T.BoxGeometry(.86,.025,.27),reflector,'yellow-top-reflector',[0,.984,0]);
+        for (const x of [-.34,0,.34]) for (const side of [-1,1]) {
+          add(bodyGroup,new this.T.BoxGeometry(.105,.10,.012),reflector,'side-reflector',[x,.79,side*.171]);
+        }
+        const edges = new this.T.LineSegments(new this.T.EdgesGeometry(shell.geometry,25),
+          new this.T.LineBasicMaterial({color:fresh ? 0x84928d : COLORS.state,transparent:true,
+            opacity:fresh ? .28 : .46,depthWrite:false,toneMapped:false}));
+        bodyGroup.add(edges);
+      } else if (expected === 'cone') {
+        // A square rubber foot, tapered body and reflective band stay inside the
+        // measured annotation box. The color is an illustration of a traffic cone.
+        add(model,new this.T.BoxGeometry(1,.105,1),dark,'cone-foot',[0,.0525,0]);
+        const coneBody = this._material(0xe6a54b,{...appearance,roughness:.74}); materials.add(coneBody);
+        const radius = y => .43-(y-.105)/.895*.414;
+        for (const [bottom,top,material,name] of [[.105,.43,coneBody,'cone-lower-body'],
+          [.43,.62,ivory,'cone-reflective-band'],[.62,1,coneBody,'cone-tip']]) {
+          add(model,new this.T.CylinderGeometry(radius(top),radius(bottom),top-bottom,24),material,name,[0,(top+bottom)/2,0]);
+        }
+        add(model,new this.T.BoxGeometry(.78,.018,.78),reflector,'yellow-foot-accent',[0,.111,0]);
+        if (!fresh) {
+          const lineGeometry = new this.T.BufferGeometry();
+          lineGeometry.setFromPoints([new this.T.Vector3(-.43,.105,0),new this.T.Vector3(-.016,1,0),
+            new this.T.Vector3(.016,1,0),new this.T.Vector3(.43,.105,0)]);
+          const line = new this.T.Line(lineGeometry,new this.T.LineBasicMaterial({color:COLORS.state,
+            transparent:true,opacity:.46,depthWrite:false,toneMapped:false})); model.add(line);
+        }
+      }
+      for (const material of materials) if (!usedMaterials.has(material)) material.dispose();
+      model.traverse(object => {object.userData.event_id=feature.event_id;object.userData.object_id=descriptor.object_id;});
+      model.updateMatrixWorld(true);
+      record.model=model;
+      record.localBounds=new this.T.Box3().setFromObject(model,true);
+      return record;
+    }
     _feature(feature) {
       const group = new this.T.Group();
       group.userData.feature = feature;
@@ -181,9 +280,9 @@
       for (const part of geometryParts(feature.geometry_city)) {
         if (part.type === 'Polygon') {
           const shape = this._shape(part.coordinates); if (!shape) continue;
-          const geometry = isState ? new this.T.ExtrudeGeometry(shape, {depth: 1, bevelEnabled: false, steps: 1}) : new this.T.ShapeGeometry(shape);
+          const geometry = new this.T.ShapeGeometry(shape);
           const material = this._material(color, {transparent: isState || isStructure,
-            opacity: isState ? (fresh ? .54 : .09) : isStructure ? .30 : 1,
+            opacity: isState ? (fresh ? .10 : .035) : isStructure ? .30 : 1,
             depthWrite: !isState && !isStructure, emissive: isState || isStructure ? color : 0,
             emissiveIntensity: isState || isStructure ? .15 : 0,
             // Physical display heights separate surfaces. Negative polygon offsets
@@ -191,20 +290,11 @@
             polygonOffset: false});
           const mesh = new this.T.Mesh(geometry, material);
           mesh.rotation.x = -Math.PI / 2; mesh.position.y = height;
-          mesh.receiveShadow = !isState; mesh.castShadow = isState && fresh;
+          mesh.receiveShadow = !isState;
           group.add(mesh);
-          if (isState) {
-            const edges = new this.T.LineSegments(new this.T.EdgesGeometry(geometry, 20), new this.T.LineBasicMaterial({color, transparent: true, opacity: fresh ? 1 : .74, toneMapped: false}));
-            edges.rotation.x = -Math.PI / 2; edges.position.y = height;
-            group.add(edges);
-          }
           for (const ring of part.coordinates) {
-            const ribbon = this._ribbon(ring, isState ? .15 : isStructure ? .24 : .09, height+.012, outline, isStructure || isState ? .98 : .48);
+            const ribbon = this._ribbon(ring, isState ? .065 : isStructure ? .24 : .09, height+.012, outline, isStructure || isState ? .98 : .48);
             if (ribbon) group.add(ribbon);
-            if (isState) {
-              const roof = this._ribbon(ring, .13, height+1.012, color, fresh ? 1 : .74);
-              if (roof) group.add(roof);
-            }
           }
         } else if (part.type === 'LineString') {
           const line = this._ribbon(part.coordinates, isStructure ? .30 : isState ? .20 : .13,
@@ -220,10 +310,22 @@
       const bounds = boundsOf([feature]), center = [(bounds[0]+bounds[2])/2, (bounds[1]+bounds[3])/2];
       const point = geometryPoints(feature.geometry_city)[0];
       const record = {feature, group, bounds, center, height, sample: point.slice(0, 2)};
+      record.objectModels=[];
+      if (isState) {
+        const seen = new Set();
+        for (const descriptor of feature.object_models || []) {
+          // The adapter joins one final footprint to one source instance. Also
+          // guard the presentation against accidental repeated-frame descriptors.
+          if (!descriptor?.object_id || seen.has(descriptor.object_id)) continue;
+          seen.add(descriptor.object_id);
+          const object = this._objectModel(descriptor,feature,height);
+          record.objectModels.push(object); if (object.model) group.add(object.model);
+        }
+      }
       if (feature.event_id) {
         group.traverse(object => { object.userData.event_id = feature.event_id; });
         // The annotation remains screen-sized; it is not a larger physical object.
-        record.markerHeight = isState ? 1.3 : .29;
+        record.markerHeight = isState ? Math.max(.6,...record.objectModels.filter(item=>item.model).map(item=>item.descriptor.height_m+.28)) : .29;
         if (isState) {
           const canvas = document.createElement('canvas'); canvas.width = canvas.height = 64;
           const ctx = canvas.getContext('2d');
@@ -239,13 +341,16 @@
       return record;
     }
 
-    setData({features = [], bounds, selectedId = null, splitFraction = .5, datasetKey = ''} = {}) {
+    setData({features = [], bounds, selectedId = null, splitFraction = .5, datasetKey = '', render_object_shapes = true} = {}) {
       if (this.disposed || this.contextLost) return;
       const valid = features.filter(feature => feature && geometryPoints(feature.geometry_city).length
-        && (feature.layer !== 'structure' || feature.confirmed === true));
+        && (feature.layer !== 'structure' || feature.confirmed === true)).map(feature=>({...feature,
+          render_object_shapes:feature.render_object_shapes ?? render_object_shapes}));
       const effectiveBounds = validBounds(bounds) ? [...bounds] : boundsOf(valid) || [-20,-20,20,20];
       const signature = datasetKey + '|' + valid.map(feature => [feature.id, feature.event_id, feature.layer,
-        feature.view, feature.observation_state, feature.confirmed, this._id(feature.geometry_city)].join(':')).join('|');
+        feature.view, feature.observation_state, feature.confirmed, this._id(feature.geometry_city),feature.render_object_shapes,
+        (feature.object_models||[]).map(object=>[object.object_id,object.annotation_token,object.category,object.semantic_shape,
+          object.center_xy,object.length_m,object.width_m,object.height_m,object.yaw_rad,object.observation_state].join(',')).join(';')].join(':')).join('|');
       const changedDataset = this.datasetKey !== datasetKey;
       const selectionChanged = this.selectedId !== selectedId;
       this.split = clamp(Number(splitFraction) || 0, 0, 1);
@@ -278,7 +383,7 @@
       const width = record.bounds[2]-record.bounds[0], height = record.bounds[3]-record.bounds[1];
       const radius = clamp(Math.min(width, height)*.20, .45, 1.2);
       const halo = new this.T.Mesh(new this.T.TorusGeometry(radius, .055, 6, 40), new this.T.MeshBasicMaterial({color: 0xeef6f8}));
-      halo.rotation.x = -Math.PI/2; halo.position.copy(this._world(record.center, (record.markerHeight || .2)+.07));
+      halo.rotation.x = -Math.PI/2; halo.position.copy(this._world(record.center,record.height+.045));
       this.groups.selection.add(halo);
       const zh = document.documentElement.lang === 'zh';
       const label = record.feature.label || (record.feature.layer === 'state' ? (zh ? '状态事件' : 'STATE EVENT') : (zh ? '结构变化' : 'STRUCTURAL CHANGE'));
@@ -360,6 +465,11 @@
       for (const record of this.records) if (record.markerSprite) {
         const unit = 2*record.markerSprite.position.distanceTo(this.camera.position)*Math.tan(this.camera.fov*Math.PI/360)/this.height;
         record.markerSprite.scale.set(11*unit,11*unit,1);
+        // Pins help at overview scale. Close up, let the actual cone/barrier shape
+        // speak for itself instead of making every object look like a map pin.
+        const objectHeight = Math.max(0,...record.objectModels.filter(object=>object.model).map(object=>object.descriptor.height_m));
+        record.markerSprite.material.opacity=clamp((16-objectHeight/unit)/10,0,1);
+        record.markerSprite.visible=record.markerSprite.material.opacity>.01;
       }
       const edge = Math.round(this.width*this.split);
       this.renderer.setScissorTest(false);
@@ -376,6 +486,7 @@
         this.renderer.render(this.scene, this.camera);
         this.passes.push({side, scissor: [x,0,width,this.height], viewport:[0,0,this.width,this.height],
           cameraMatrix: this.camera.matrixWorld.elements.slice(),
+          visibleObjectIds: after ? this.records.flatMap(record=>record.objectModels.filter(object=>object.model).map(object=>object.descriptor.object_id)) : [],
           visibleFeatureIds: this.records.filter(record => record.feature.layer === 'base'
             ? record.feature.view !== (after ? 'before' : 'after') : after).map(record => record.feature.id)});
       }
@@ -466,8 +577,32 @@
       const markers=this.records.filter(record=>record.feature.event_id).map(record=>{
         const projected=this._projectRecord(record);
         return {event_id:record.feature.event_id,layer:record.feature.layer,source_xy:[...record.center],
-          screen_xy:projected.screen,visible_updated:projected.visible,display_height_m:record.markerHeight||record.height};
+          screen_xy:projected.screen,visible_updated:projected.visible,display_height_m:record.markerHeight||record.height,
+          marker_opacity:record.markerSprite ? record.markerSprite.material.opacity : null};
       });
+      const objectModels=this.records.flatMap(record=>record.objectModels.map(object=>{
+        const source=object.descriptor,model=object.model;
+        const center=finitePoint(source.center_xy) ? source.center_xy : record.center;
+        const vector=this._world(center,record.height+(Number(source.height_m)||0)/2).project(this.camera);
+        const screen=[(vector.x+1)*this.width/2,(1-vector.y)*this.height/2];
+        const bounds=model ? new this.T.Box3().setFromObject(model,true) : null;
+        return {event_id:record.feature.event_id,object_id:source.object_id,category:source.category,
+          annotation_token:source.annotation_token,sample_token:source.sample_token,frame_id:source.frame_id,
+          instance_token:source.instance_token,shape_type:object.shapeType,rendered_model:!!model,
+          fallback_reason:object.fallbackReason,source_center_xy:[...center],
+          source_center_xyz:source.center_xyz ? [...source.center_xyz] : null,
+          source_size_lwh:[source.length_m,source.width_m,source.height_m],source_yaw_rad:source.yaw_rad,
+          height_source:source.height_source,vertical_placement:'display_ground_relative_not_source_road_elevation',
+          footprint_index:source.footprint_index,source_footprint:source.footprint_geometry_city,
+          observation_state:source.observation_state,lifecycle_appearance:object.lifecycleAppearance,
+          world_position_xyz:model ? model.position.toArray() : null,
+          world_rotation_y:model ? model.rotation.y : null,world_scale_xyz:model ? model.scale.toArray() : null,
+          world_bounds_xyz:bounds ? {min:bounds.min.toArray(),max:bounds.max.toArray()} : null,
+          mesh_count:object.primitives.length,primitive_types:[...new Set(object.primitives.map(mesh=>mesh.geometry_type))],
+          primitive_meshes:object.primitives.map(mesh=>({...mesh})),screen_xy:screen,
+          visible_updated:!!model && vector.z>=-1 && vector.z<=1 && screen[0]>=this.width*this.split
+            && screen[0]<=this.width && screen[1]>=0 && screen[1]<=this.height && this.split<1};
+      }));
       return {ready:!this.disposed&&!this.contextLost,contextLost:this.contextLost,disposed:this.disposed,
         threeRevision:this.T.REVISION,sourceOriginXY:[...this.origin],datasetKey:this.datasetKey,
         camera:{position:this.camera.position.toArray(),target:this.target.toArray(),azimuth:this.azimuth,polar:this.polar,
@@ -480,9 +615,17 @@
         resources:{geometries:this.renderer.info.memory.geometries,textures:this.renderer.info.memory.textures,
           drawCalls:this.renderer.info.render.calls,disposedGeometries:this.disposedGeometries,
           disposedMaterials:this.disposedMaterials,disposedTextures:this.disposedTextures},
-        schematicHeights:{state:1,structureDisplayOffset:.16,roadElevationMeasured:false},
+        objectModels,
+        objectModelSummary:{sourceObjects:objectModels.length,renderedModels:objectModels.filter(object=>object.rendered_model).length,
+          barriers:objectModels.filter(object=>object.rendered_model&&object.shape_type==='barrier').length,
+          cones:objectModels.filter(object=>object.rendered_model&&object.shape_type==='cone').length,
+          footprintOnly:objectModels.filter(object=>!object.rendered_model).length},
+        schematicHeights:{state:null,stateGroundDisplayOffset:.13,structureDisplayOffset:.16,roadElevationMeasured:false,
+          objectHeights:'source_annotation_when_available'},
         renderingContract:{singleCamera:true,sharedViewport:true,overlaySide:'after',sourceXYMutated:false,
-          inferredBuildings:false,heightsAreDisplayOnly:true}};
+          inferredBuildings:false,heightsAreDisplayOnly:false,roadElevationMeasured:false,
+          genericAppearanceNotReconstruction:true,unsupportedCategoriesUseFootprints:true,
+          modelDimensionsFromSourceAnnotations:true,sourceAltitudeNotUsedAsRoadElevation:true}};
     }
     dispose() {
       if (this.disposed) return;

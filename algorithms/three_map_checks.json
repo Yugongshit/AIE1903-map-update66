@@ -4,7 +4,19 @@
     "3D is the default visible canvas and uses an actual live WebGL renderer",
     "local Three.js and the local 3D module load without external services",
     "nuScenes actions and colors retain 23 states and zero accepted structural edits",
-    "schematic event height is explicitly disclosed in both metadata and visible controls",
+    "object-model provenance and schematic appearance are explicitly disclosed in visible controls",
+    "semantic presentation has exactly one current source descriptor per recorded instance, without frame trails",
+    "all object tokens, frames, timestamps, categories, XYZ centers, dimensions and yaw join exact original CSV rows",
+    "every semantic object retains its exact final event footprint and independently reconstructed annotation corners",
+    "real source instances contain 35 barriers, 11 cones and 3 debris objects, with no invented vehicles",
+    "the live WebGL renderer has one object record per source descriptor and no duplicated observations",
+    "all rendered shapes retain exact source category, center, dimensions, yaw and source footprints",
+    "semantic models preserve source XY and orientation inside annotation envelopes with actual annotated heights",
+    "barriers and cones are real multi-part meshes and cones use curved geometry",
+    "unclassified debris stays as three source footprints instead of acquiring an invented car or obstacle model",
+    "last-observed unknown events remain unknown with ghost appearance and are never silently cleared",
+    "semantic meshes render only in the updated pass of the shared-camera divider",
+    "the downloadable object presentation equals the live map presentation exactly",
     "every rendered nuScenes feature keeps its supplied XY bounds",
     "world coordinates are only a centered XY transform plus display height",
     "unaccepted structural candidates do not acquire 3D meshes or red markers",
@@ -20,6 +32,11 @@
     "perspective view restores the tilted camera",
     "state layer control removes state meshes from the renderer",
     "restoring the state layer restores every supplied state feature",
+    "annotation-based object models are enabled by default",
+    "the shape toggle removes semantic meshes while retaining every source state footprint",
+    "restoring object models recreates only the 46 supported source shapes without duplicates",
+    "the source-backed barrier close-up contains visible real WebGL geometry",
+    "the source-backed cone close-up contains visible real WebGL geometry",
     "real source events have visible projected 3D selection markers",
     "clicking an updated 3D event selects the corresponding supplied record",
     "the original-only region cannot select an updated event",
@@ -44,7 +61,8 @@
     "the explicit 2D URL retains the existing top-down renderer",
     "a missing 3D dependency falls back to 2D without blocking the recorded map",
     "normal 3D interactions finish without uncaught browser errors",
-    "all normal 3D assets load locally without failed or external requests"
+    "all normal 3D assets load locally without failed or external requests",
+    "semantic rendering and browser checks leave the complete frozen pipeline result byte-for-byte unchanged"
   ],
   "page_errors": [],
   "failed_requests": [],
@@ -53,34 +71,5946 @@
   "chromium_flags": [
     "--no-sandbox"
   ],
+  "semantic_objects": {
+    "source_category_counts": {
+      "movable_object.barrier": 35,
+      "movable_object.debris": 3,
+      "movable_object.trafficcone": 11
+    },
+    "source_instances": 49,
+    "models": [
+      {
+        "event_id": "S0980-OCC-scene-0980-O001",
+        "object_id": "instance:6fde55a71b264a539ae9ba6017f4f451",
+        "category": "movable_object.barrier",
+        "annotation_token": "6f5b134eaea443a5a0003649b7120284",
+        "sample_token": "592ad0b0a6384f74ac9132f0907be822",
+        "frame_id": "14",
+        "instance_token": "6fde55a71b264a539ae9ba6017f4f451",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          439.318,
+          1259.625
+        ],
+        "source_center_xyz": [
+          439.318,
+          1259.625,
+          0.958
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                439.93269850832075,
+                1260.57047963694
+              ],
+              [
+                439.624914243542,
+                1260.7101680271326
+              ],
+              [
+                438.7033014916792,
+                1258.67952036306
+              ],
+              [
+                439.011085756458,
+                1258.5398319728674
+              ],
+              [
+                439.93269850832075,
+                1260.57047963694
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          68.93415787699064,
+          0.13,
+          -60.77136524282082
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            68.31945936866991,
+            0.13,
+            -61.85653326995351
+          ],
+          "max": [
+            69.54885638531137,
+            1.185,
+            -59.68619721568813
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          695.4669631969256,
+          311.9507509368909
+        ],
+        "visible_updated": true
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O001",
+        "object_id": "instance:4b5727d49ff646838b96c810613ebb75",
+        "category": "movable_object.barrier",
+        "annotation_token": "47d9c7b6ed454eec9ac8e407d94e33f4",
+        "sample_token": "592ad0b0a6384f74ac9132f0907be822",
+        "frame_id": "14",
+        "instance_token": "4b5727d49ff646838b96c810613ebb75",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          440.089,
+          1261.506
+        ],
+        "source_center_xyz": [
+          440.089,
+          1261.506,
+          1.008
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                440.70369850832077,
+                1262.4514796369401
+              ],
+              [
+                440.395914243542,
+                1262.5911680271327
+              ],
+              [
+                439.4743014916792,
+                1260.56052036306
+              ],
+              [
+                439.782085756458,
+                1260.4208319728675
+              ],
+              [
+                440.70369850832077,
+                1262.4514796369401
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          69.70515787699065,
+          0.13,
+          -62.652365242820906
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            69.09045936866993,
+            0.13,
+            -63.737533269953595
+          ],
+          "max": [
+            70.31985638531138,
+            1.185,
+            -61.56719721568822
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          694.5393319703977,
+          301.19993764012895
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O002",
+        "object_id": "instance:bb2e7a74ee5d40c2afce4573c57b4cc0",
+        "category": "movable_object.barrier",
+        "annotation_token": "0d1e7114074b4bf7988b8ade55d9e0fd",
+        "sample_token": "265c0db8390c4b7a9569f37d0f5baab8",
+        "frame_id": "10",
+        "instance_token": "bb2e7a74ee5d40c2afce4573c57b4cc0",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          440.899,
+          1263.536
+        ],
+        "source_center_xyz": [
+          440.899,
+          1263.536,
+          0.908
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                441.5136985083208,
+                1264.48147963694
+              ],
+              [
+                441.205914243542,
+                1264.6211680271326
+              ],
+              [
+                440.28430149167923,
+                1262.59052036306
+              ],
+              [
+                440.592085756458,
+                1262.4508319728675
+              ],
+              [
+                441.5136985083208,
+                1264.48147963694
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          70.51515787699066,
+          0.13,
+          -64.68236524282088
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            69.90045936866993,
+            0.13,
+            -65.76753326995356
+          ],
+          "max": [
+            71.12985638531138,
+            1.185,
+            -63.59719721568819
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          693.4201293105446,
+          289.96682895675144
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O002",
+        "object_id": "instance:55afc7a622e2478791828870fe592572",
+        "category": "movable_object.barrier",
+        "annotation_token": "5cf8002f150845ac817e47efd3196d68",
+        "sample_token": "265c0db8390c4b7a9569f37d0f5baab8",
+        "frame_id": "10",
+        "instance_token": "55afc7a622e2478791828870fe592572",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          441.795,
+          1265.621
+        ],
+        "source_center_xyz": [
+          441.795,
+          1265.621,
+          0.908
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                442.4096985083208,
+                1266.5664796369401
+              ],
+              [
+                442.101914243542,
+                1266.7061680271327
+              ],
+              [
+                441.18030149167924,
+                1264.67552036306
+              ],
+              [
+                441.488085756458,
+                1264.5358319728675
+              ],
+              [
+                442.4096985083208,
+                1266.5664796369401
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          71.41115787699067,
+          0.13,
+          -66.76736524282092
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            70.79645936866994,
+            0.13,
+            -67.8525332699536
+          ],
+          "max": [
+            72.0258563853114,
+            1.185,
+            -65.68219721568823
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          692.7203803790806,
+          278.62106935790115
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O002",
+        "object_id": "instance:ebe3acf53a244ac697b6b18fb8f1af7d",
+        "category": "movable_object.barrier",
+        "annotation_token": "55780a30854b482c9613779026fe0f0b",
+        "sample_token": "265c0db8390c4b7a9569f37d0f5baab8",
+        "frame_id": "10",
+        "instance_token": "ebe3acf53a244ac697b6b18fb8f1af7d",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          442.695,
+          1267.703
+        ],
+        "source_center_xyz": [
+          442.695,
+          1267.703,
+          0.858
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.7853534999617304,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 2,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                443.2422478081793,
+                1268.6890556964202
+              ],
+              [
+                442.92546912087755,
+                1268.8069338677303
+              ],
+              [
+                442.1477521918207,
+                1266.7169443035798
+              ],
+              [
+                442.46453087912244,
+                1266.5990661322696
+              ],
+              [
+                443.2422478081793,
+                1268.6890556964202
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          72.31115787699065,
+          0.13,
+          -68.8493652428208
+        ],
+        "world_rotation_y": 2.7853534999617304,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            71.76391006881137,
+            0.13,
+            -69.95329911055107
+          ],
+          "max": [
+            72.85840568516993,
+            1.185,
+            -67.74543137509052
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          692.0757149530897,
+          267.6071149288838
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O002",
+        "object_id": "instance:68f7f51508bb49d0864fbddbc7a19e58",
+        "category": "movable_object.barrier",
+        "annotation_token": "364bbd7a769041bcb74a41118e0a112f",
+        "sample_token": "265c0db8390c4b7a9569f37d0f5baab8",
+        "frame_id": "10",
+        "instance_token": "68f7f51508bb49d0864fbddbc7a19e58",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          443.658,
+          1269.732
+        ],
+        "source_center_xyz": [
+          443.658,
+          1269.732,
+          0.958
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 3,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                444.2726985083208,
+                1270.67747963694
+              ],
+              [
+                443.964914243542,
+                1270.8171680271325
+              ],
+              [
+                443.04330149167924,
+                1268.78652036306
+              ],
+              [
+                443.351085756458,
+                1268.6468319728674
+              ],
+              [
+                444.2726985083208,
+                1270.67747963694
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          73.27415787699067,
+          0.13,
+          -70.87836524282079
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            72.65945936866994,
+            0.13,
+            -71.96353326995347
+          ],
+          "max": [
+            73.8888563853114,
+            1.185,
+            -69.79319721568811
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          692.0087354831612,
+          257.00075082898303
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O003",
+        "object_id": "instance:a27afba6f1c140368d7b62b5c002ef57",
+        "category": "movable_object.barrier",
+        "annotation_token": "35940c55d7fb46119fefe5dbec18e4e1",
+        "sample_token": "7c892d33369d4cb7a3e2b5b11325ac2b",
+        "frame_id": "23",
+        "instance_token": "a27afba6f1c140368d7b62b5c002ef57",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          435.715,
+          1252.397
+        ],
+        "source_center_xyz": [
+          435.715,
+          1252.397,
+          1.291
+        ],
+        "source_size_lwh": [
+          0.433,
+          2.042,
+          1.023
+        ],
+        "source_yaw_rad": 2.3238535391482205,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                436.6079815667067,
+                1252.9372750887483
+              ],
+              [
+                436.3118647745074,
+                1253.2531925548333
+              ],
+              [
+                434.82201843329324,
+                1251.8567249112516
+              ],
+              [
+                435.11813522549255,
+                1251.5408074451666
+              ],
+              [
+                436.6079815667067,
+                1252.9372750887483
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          65.33115787699063,
+          0.13,
+          -53.543365242820755
+        ],
+        "world_rotation_y": 2.3238535391482205,
+        "world_scale_xyz": [
+          0.433,
+          1.023,
+          2.042
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            64.43817631028391,
+            0.13,
+            -54.39955779765417
+          ],
+          "max": [
+            66.22413944369735,
+            1.153,
+            -52.68717268798734
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          694.6938633512042,
+          357.9012836499552
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O004",
+        "object_id": "instance:2c5dabf5dd9645e9a641499992198ec4",
+        "category": "movable_object.barrier",
+        "annotation_token": "508c9aae542048d5b392579adc164a35",
+        "sample_token": "c827c16d2ddd498dae73e8bbe71b102a",
+        "frame_id": "9",
+        "instance_token": "2c5dabf5dd9645e9a641499992198ec4",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          440.3,
+          1270.02
+        ],
+        "source_center_xyz": [
+          440.3,
+          1270.02,
+          0.958
+        ],
+        "source_size_lwh": [
+          0.299,
+          1.902,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                440.82916392502256,
+                1270.8241994718069
+              ],
+              [
+                440.5568932292568,
+                1270.9477699708236
+              ],
+              [
+                439.77083607497747,
+                1269.215800528193
+              ],
+              [
+                440.04310677074324,
+                1269.0922300291763
+              ],
+              [
+                440.82916392502256,
+                1270.8241994718069
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          69.91615787699067,
+          0.13,
+          -71.1663652428208
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.299,
+          1.055,
+          1.902
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            69.38699395196811,
+            0.13,
+            -72.0941352136444
+          ],
+          "max": [
+            70.44532180201323,
+            1.185,
+            -70.2385952719972
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          669.7222641137788,
+          262.6364861783782
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O005",
+        "object_id": "instance:bb73e8df79cf4ad0a0c0863b33755a42",
+        "category": "movable_object.barrier",
+        "annotation_token": "429412a659d34ffeb399787ae59c4c78",
+        "sample_token": "c827c16d2ddd498dae73e8bbe71b102a",
+        "frame_id": "9",
+        "instance_token": "bb73e8df79cf4ad0a0c0863b33755a42",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          444.625,
+          1271.78
+        ],
+        "source_center_xyz": [
+          444.625,
+          1271.78,
+          1.008
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                445.23969850832077,
+                1272.72547963694
+              ],
+              [
+                444.931914243542,
+                1272.8651680271325
+              ],
+              [
+                444.01030149167923,
+                1270.83452036306
+              ],
+              [
+                444.318085756458,
+                1270.6948319728674
+              ],
+              [
+                445.23969850832077,
+                1272.72547963694
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          74.24115787699066,
+          0.13,
+          -72.9263652428208
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            73.62645936866993,
+            0.13,
+            -74.01153326995347
+          ],
+          "max": [
+            74.85585638531138,
+            1.185,
+            -71.84119721568811
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          691.911713896209,
+          246.60364860648426
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O005",
+        "object_id": "instance:3afa7c2119f542039358aa6cc8bc28c6",
+        "category": "movable_object.barrier",
+        "annotation_token": "79664d0a44f24f6a82e2c01e04e21d27",
+        "sample_token": "c827c16d2ddd498dae73e8bbe71b102a",
+        "frame_id": "9",
+        "instance_token": "3afa7c2119f542039358aa6cc8bc28c6",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          445.537,
+          1273.781
+        ],
+        "source_center_xyz": [
+          445.537,
+          1273.781,
+          0.983
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                446.15169850832075,
+                1274.72647963694
+              ],
+              [
+                445.843914243542,
+                1274.8661680271325
+              ],
+              [
+                444.9223014916792,
+                1272.83552036306
+              ],
+              [
+                445.230085756458,
+                1272.6958319728674
+              ],
+              [
+                446.15169850832075,
+                1274.72647963694
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          75.15315787699063,
+          0.13,
+          -74.92736524282077
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            74.5384593686699,
+            0.13,
+            -76.01253326995345
+          ],
+          "max": [
+            75.76785638531136,
+            1.185,
+            -73.84219721568809
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          691.6175810445264,
+          236.78544803252095
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O006",
+        "object_id": "instance:faf29c553913483a8f4295634eca177f",
+        "category": "movable_object.barrier",
+        "annotation_token": "10ff9ed4aa6d46ed8b4551432b02521d",
+        "sample_token": "592ad0b0a6384f74ac9132f0907be822",
+        "frame_id": "14",
+        "instance_token": "faf29c553913483a8f4295634eca177f",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          438.499,
+          1257.824
+        ],
+        "source_center_xyz": [
+          438.499,
+          1257.824,
+          0.933
+        ],
+        "source_size_lwh": [
+          0.338,
+          2.23,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                439.1136985083208,
+                1258.76947963694
+              ],
+              [
+                438.805914243542,
+                1258.9091680271326
+              ],
+              [
+                437.88430149167925,
+                1256.87852036306
+              ],
+              [
+                438.192085756458,
+                1256.7388319728675
+              ],
+              [
+                439.1136985083208,
+                1258.76947963694
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          68.11515787699068,
+          0.13,
+          -58.97036524282089
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.338,
+          1.055,
+          2.23
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            67.50045936866995,
+            0.13,
+            -60.05553326995358
+          ],
+          "max": [
+            68.72985638531141,
+            1.185,
+            -57.8851972156882
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          695.8239004112733,
+          322.7171417521355
+        ],
+        "visible_updated": true
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O007",
+        "object_id": "instance:536e2da06b4e4fe38001622e3b18305c",
+        "category": "movable_object.barrier",
+        "annotation_token": "aeaa179eb45f42cda29df3dafc206136",
+        "sample_token": "317027e758554b18ab8e98a9a0cd3a7a",
+        "frame_id": "7",
+        "instance_token": "536e2da06b4e4fe38001622e3b18305c",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          441.323,
+          1272.058
+        ],
+        "source_center_xyz": [
+          441.323,
+          1272.058,
+          0.908
+        ],
+        "source_size_lwh": [
+          0.299,
+          1.902,
+          1.055
+        ],
+        "source_yaw_rad": 2.715540329881957,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                441.8521639250225,
+                1272.862199471807
+              ],
+              [
+                441.57989322925675,
+                1272.9857699708236
+              ],
+              [
+                440.79383607497743,
+                1271.253800528193
+              ],
+              [
+                441.0661067707432,
+                1271.1302300291763
+              ],
+              [
+                441.8521639250225,
+                1272.862199471807
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          70.93915787699063,
+          0.13,
+          -73.20436524282081
+        ],
+        "world_rotation_y": 2.715540329881957,
+        "world_scale_xyz": [
+          0.299,
+          1.055,
+          1.902
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            70.40999395196808,
+            0.13,
+            -74.13213521364442
+          ],
+          "max": [
+            71.4683218020132,
+            1.185,
+            -72.27659527199721
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          670.3230784574106,
+          252.01154247715147
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O008",
+        "object_id": "instance:ef0a506bc5e54530b3b21e9b7503a8c8",
+        "category": "movable_object.debris",
+        "annotation_token": "5d946745dd854e38bc4f6b8b9df0c8e9",
+        "sample_token": "a61b104ad8de4db0ae876459f79d26af",
+        "frame_id": "38",
+        "instance_token": "ef0a506bc5e54530b3b21e9b7503a8c8",
+        "shape_type": "footprint",
+        "rendered_model": false,
+        "fallback_reason": "unsupported_annotation_category",
+        "source_center_xy": [
+          418.779,
+          1210.33
+        ],
+        "source_center_xyz": [
+          418.779,
+          1210.33,
+          1.386
+        ],
+        "source_size_lwh": [
+          0.682,
+          1.142,
+          1.137
+        ],
+        "source_yaw_rad": 1.149351672413402,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                419.1605408986976,
+                1209.7852536896673
+              ],
+              [
+                419.439532861972,
+                1210.4075779495417
+              ],
+              [
+                418.3974591013024,
+                1210.8747463103325
+              ],
+              [
+                418.118467138028,
+                1210.252422050458
+              ],
+              [
+                419.1605408986976,
+                1209.7852536896673
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": null,
+        "world_rotation_y": null,
+        "world_scale_xyz": null,
+        "world_bounds_xyz": null,
+        "mesh_count": 0,
+        "primitive_types": [],
+        "primitive_meshes": [],
+        "screen_xy": [
+          730.40120193219,
+          758.6384590152566
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:e9e57a7c40c9414f8dbf4ae204609c0c",
+        "category": "movable_object.barrier",
+        "annotation_token": "e0f2c5f8a53045fdb0125bf60c3babea",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "e9e57a7c40c9414f8dbf4ae204609c0c",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          408.833,
+          1186.54
+        ],
+        "source_center_xyz": [
+          408.833,
+          1186.54,
+          0.935
+        ],
+        "source_size_lwh": [
+          0.491,
+          2.17,
+          1.108
+        ],
+        "source_yaw_rad": 1.1050203095089453,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                409.6921604956998,
+                1185.8333611299759
+              ],
+              [
+                409.9126765927841,
+                1186.2720565264945
+              ],
+              [
+                407.97383950430026,
+                1187.246638870024
+              ],
+              [
+                407.75332340721593,
+                1186.8079434735055
+              ],
+              [
+                409.6921604956998,
+                1185.8333611299759
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          38.44915787699068,
+          0.13,
+          12.313634757179216
+        ],
+        "world_rotation_y": 1.1050203095089453,
+        "world_scale_xyz": [
+          0.491,
+          1.108,
+          2.17
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            37.369481284206586,
+            0.13,
+            11.606995887155147
+          ],
+          "max": [
+            39.52883446977478,
+            1.238,
+            13.020273627203284
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          765.977632016858,
+          1220.3684151066616
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:b15f067df5d6446aa059777c588ab55a",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "2190a8f3b0e54d9fb066eb7c33350294",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "b15f067df5d6446aa059777c588ab55a",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          410.513,
+          1186.303
+        ],
+        "source_center_xyz": [
+          410.513,
+          1186.303,
+          0.702
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                410.25495863277126,
+                1186.1763670548446
+              ],
+              [
+                410.60229415906315,
+                1186.029782498443
+              ],
+              [
+                410.7710413672287,
+                1186.4296329451556
+              ],
+              [
+                410.4237058409368,
+                1186.5762175015573
+              ],
+              [
+                410.25495863277126,
+                1186.1763670548446
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          40.12915787699063,
+          0.13,
+          12.550634757179068
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            39.87111650976191,
+            0.1300000011998415,
+            12.27741725562179
+          ],
+          "max": [
+            40.38719924421935,
+            0.861999998254776,
+            12.823852258736347
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          791.0563094301517,
+          1207.421012905407
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:e4d17426b72c4412871d7a8e8a37fae4",
+        "category": "movable_object.barrier",
+        "annotation_token": "67061d21690d4021bb9ffa808e1c858c",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "e4d17426b72c4412871d7a8e8a37fae4",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          411.063,
+          1188.366
+        ],
+        "source_center_xyz": [
+          411.063,
+          1188.366,
+          0.899
+        ],
+        "source_size_lwh": [
+          0.632,
+          2.214,
+          1.005
+        ],
+        "source_yaw_rad": -0.44013713048400427,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 2,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                410.30546460663027,
+                1187.4991406528206
+              ],
+              [
+                410.877230737741,
+                1187.2298685018009
+              ],
+              [
+                411.8205353933697,
+                1189.2328593471793
+              ],
+              [
+                411.248769262259,
+                1189.502131498199
+              ],
+              [
+                410.30546460663027,
+                1187.4991406528206
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          40.679157876990644,
+          0.13,
+          10.487634757179194
+        ],
+        "world_rotation_y": -0.44013713048400427,
+        "world_scale_xyz": [
+          0.632,
+          1.005,
+          2.214
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            39.921622483620965,
+            0.13,
+            9.351503258980259
+          ],
+          "max": [
+            41.43669327036032,
+            1.1349999999999998,
+            11.62376625537813
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          782.2006160530563,
+          1158.3833569181968
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:9472ed7b363046bf98e8beb46bf73a95",
+        "category": "movable_object.barrier",
+        "annotation_token": "f5dec7d5ffd546e385dd4d66a1f39e70",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "9472ed7b363046bf98e8beb46bf73a95",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          411.791,
+          1189.86
+        ],
+        "source_center_xyz": [
+          411.791,
+          1189.86,
+          0.949
+        ],
+        "source_size_lwh": [
+          0.632,
+          2.214,
+          1.005
+        ],
+        "source_yaw_rad": -0.44013713048400427,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 3,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                411.0334646066303,
+                1188.9931406528206
+              ],
+              [
+                411.605230737741,
+                1188.7238685018008
+              ],
+              [
+                412.5485353933697,
+                1190.7268593471792
+              ],
+              [
+                411.976769262259,
+                1190.996131498199
+              ],
+              [
+                411.0334646066303,
+                1188.9931406528206
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          41.40715787699065,
+          0.13,
+          8.99363475717928
+        ],
+        "world_rotation_y": -0.44013713048400427,
+        "world_scale_xyz": [
+          0.632,
+          1.005,
+          2.214
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            40.64962248362097,
+            0.13,
+            7.857503258980345
+          ],
+          "max": [
+            42.16469327036033,
+            1.1349999999999998,
+            10.129766255378215
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          780.3210583738454,
+          1121.3224823072123
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:cd2bb067116043269e55496ca0e8def6",
+        "category": "movable_object.barrier",
+        "annotation_token": "5e7640ad3306498fa03058161039ebbd",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "cd2bb067116043269e55496ca0e8def6",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          412.274,
+          1193.793
+        ],
+        "source_center_xyz": [
+          412.274,
+          1193.793,
+          1.016
+        ],
+        "source_size_lwh": [
+          0.314,
+          2.104,
+          1.071
+        ],
+        "source_yaw_rad": 1.0610205588735617,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 4,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                413.1156292547838,
+                1193.1426053525033
+              ],
+              [
+                413.26885545749496,
+                1193.416681493024
+              ],
+              [
+                411.4323707452162,
+                1194.4433946474965
+              ],
+              [
+                411.27914454250504,
+                1194.1693185069757
+              ],
+              [
+                413.1156292547838,
+                1193.1426053525033
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          41.890157876990656,
+          0.13,
+          5.060634757179287
+        ],
+        "world_rotation_y": 1.0610205588735617,
+        "world_scale_xyz": [
+          0.314,
+          1.071,
+          2.104
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            40.89530241949568,
+            0.13,
+            4.41024010968284
+          ],
+          "max": [
+            42.885013334485635,
+            1.201,
+            5.711029404675734
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          757.7878152415866,
+          1043.489635397453
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:d53678a2d21b488ea37c24d141e4bbb9",
+        "category": "movable_object.barrier",
+        "annotation_token": "7e875331a6244d7aa030cc7ca2170041",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "d53678a2d21b488ea37c24d141e4bbb9",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          412.821,
+          1191.906
+        ],
+        "source_center_xyz": [
+          412.821,
+          1191.906,
+          0.949
+        ],
+        "source_size_lwh": [
+          0.632,
+          2.214,
+          1.005
+        ],
+        "source_yaw_rad": -0.44013713048400427,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 5,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                412.0634646066303,
+                1191.0391406528206
+              ],
+              [
+                412.63523073774104,
+                1190.7698685018008
+              ],
+              [
+                413.57853539336975,
+                1192.7728593471793
+              ],
+              [
+                413.006769262259,
+                1193.042131498199
+              ],
+              [
+                412.0634646066303,
+                1191.0391406528206
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          42.43715787699068,
+          0.13,
+          6.94763475717923
+        ],
+        "world_rotation_y": -0.44013713048400427,
+        "world_scale_xyz": [
+          0.632,
+          1.005,
+          2.214
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            41.679622483621,
+            0.13,
+            5.811503258980296
+          ],
+          "max": [
+            43.19469327036036,
+            1.1349999999999998,
+            8.083766255378166
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          778.3025023620752,
+          1072.9038977495702
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:2d90a35cd4d140a8a170b4204ab4c452",
+        "category": "movable_object.debris",
+        "annotation_token": "8976f87c1ed54ad0813b420a04a18b54",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "2d90a35cd4d140a8a170b4204ab4c452",
+        "shape_type": "footprint",
+        "rendered_model": false,
+        "fallback_reason": "unsupported_annotation_category",
+        "source_center_xy": [
+          413.569,
+          1197.361
+        ],
+        "source_center_xyz": [
+          413.569,
+          1197.361,
+          1.154
+        ],
+        "source_size_lwh": [
+          0.906,
+          1.066,
+          1.186
+        ],
+        "source_yaw_rad": 1.149351672413402,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 6,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                413.87004907793226,
+                1196.7295988179644
+              ],
+              [
+                414.2406747652147,
+                1197.5563228347478
+              ],
+              [
+                413.26795092206777,
+                1197.9924011820358
+              ],
+              [
+                412.89732523478534,
+                1197.1656771652524
+              ],
+              [
+                413.87004907793226,
+                1196.7295988179644
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": null,
+        "world_rotation_y": null,
+        "world_scale_xyz": null,
+        "world_bounds_xyz": null,
+        "mesh_count": 0,
+        "primitive_types": [],
+        "primitive_meshes": [],
+        "screen_xy": [
+          749.5904853634897,
+          972.3127257187649
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:e3f56cd227104755baf3f6b13ced2dc4",
+        "category": "movable_object.debris",
+        "annotation_token": "452c57f1e06548f48b23c55296d4b07d",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "e3f56cd227104755baf3f6b13ced2dc4",
+        "shape_type": "footprint",
+        "rendered_model": false,
+        "fallback_reason": "unsupported_annotation_category",
+        "source_center_xy": [
+          414.517,
+          1196.96
+        ],
+        "source_center_xyz": [
+          414.517,
+          1196.96,
+          1.084
+        ],
+        "source_size_lwh": [
+          0.682,
+          1.142,
+          1.186
+        ],
+        "source_yaw_rad": 1.149351672413402,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 7,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                414.8985408986976,
+                1196.4152536896675
+              ],
+              [
+                415.177532861972,
+                1197.0375779495419
+              ],
+              [
+                414.1354591013024,
+                1197.5047463103326
+              ],
+              [
+                413.856467138028,
+                1196.8824220504582
+              ],
+              [
+                414.8985408986976,
+                1196.4152536896675
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": null,
+        "world_rotation_y": null,
+        "world_scale_xyz": null,
+        "world_bounds_xyz": null,
+        "mesh_count": 0,
+        "primitive_types": [],
+        "primitive_meshes": [],
+        "screen_xy": [
+          763.7225819959963,
+          971.3923365116617
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O009",
+        "object_id": "instance:98c6b767c7b74aa996eb101be300fe23",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "2e8ff751743440d4b275e3e94214f814",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "98c6b767c7b74aa996eb101be300fe23",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          415.425,
+          1197.277
+        ],
+        "source_center_xyz": [
+          415.425,
+          1197.277,
+          0.828
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.43425537107207507,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 8,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                415.1626963985483,
+                1197.159449710058
+              ],
+              [
+                415.5047046101795,
+                1197.000832613953
+              ],
+              [
+                415.68730360145173,
+                1197.3945502899421
+              ],
+              [
+                415.34529538982054,
+                1197.553167386047
+              ],
+              [
+                415.1626963985483,
+                1197.159449710058
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          45.04115787699067,
+          0.13,
+          1.5766347571791357
+        ],
+        "world_rotation_y": -0.43425537107207507,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            44.77885427553894,
+            0.1300000011998415,
+            1.3004673711319392
+          ],
+          "max": [
+            45.303461478442394,
+            0.861999998254776,
+            1.8528021432263322
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          772.2239695262111,
+          959.6479301809296
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O010",
+        "object_id": "instance:a49e7c33c01c4a2eab5e7873244101e4",
+        "category": "movable_object.barrier",
+        "annotation_token": "29d4df66f1d547c39eab3e441a051124",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "a49e7c33c01c4a2eab5e7873244101e4",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          398.982,
+          1162.427
+        ],
+        "source_center_xyz": [
+          398.982,
+          1162.427,
+          0.57
+        ],
+        "source_size_lwh": [
+          0.407,
+          2.168,
+          1.079
+        ],
+        "source_yaw_rad": 1.1960217768097527,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                399.9162659821182,
+                1161.840812892792
+              ],
+              [
+                400.0652535160048,
+                1162.2195630937774
+              ],
+              [
+                398.04773401788185,
+                1163.0131871072078
+              ],
+              [
+                397.89874648399524,
+                1162.6344369062224
+              ],
+              [
+                399.9162659821182,
+                1161.840812892792
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          28.598157876990683,
+          0.13,
+          36.42663475717927
+        ],
+        "world_rotation_y": 1.1960217768097527,
+        "world_scale_xyz": [
+          0.407,
+          1.079,
+          2.168
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            27.514904360985884,
+            0.13,
+            35.84044764997133
+          ],
+          "max": [
+            29.681411392995482,
+            1.209,
+            37.01282186438721
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          850.1755836386269,
+          2242.0176759376945
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O011",
+        "object_id": "instance:121bda1bdfab43078c65da00e484a2af",
+        "category": "movable_object.barrier",
+        "annotation_token": "98736a0f1d754b6a81934528739fb748",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "121bda1bdfab43078c65da00e484a2af",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          405.705,
+          1190.287
+        ],
+        "source_center_xyz": [
+          405.705,
+          1190.287,
+          0.958
+        ],
+        "source_size_lwh": [
+          0.658,
+          2.295,
+          1.054
+        ],
+        "source_yaw_rad": -1.9538960973395378,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                404.76366112898637,
+                1191.0210833603337
+              ],
+              [
+                404.5177024857946,
+                1190.410781512197
+              ],
+              [
+                406.6463388710136,
+                1189.5529166396664
+              ],
+              [
+                406.8922975142054,
+                1190.163218487803
+              ],
+              [
+                404.76366112898637,
+                1191.0210833603337
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          35.32115787699064,
+          0.13,
+          8.566634757179145
+        ],
+        "world_rotation_y": -1.9538960973395378,
+        "world_scale_xyz": [
+          0.658,
+          1.054,
+          2.295
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            34.13386036278526,
+            0.13,
+            7.832551396845466
+          ],
+          "max": [
+            36.508455391196016,
+            1.1840000000000002,
+            9.300718117512824
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          694.2930710052912,
+          1172.2341527691578
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O012",
+        "object_id": "instance:a0d82a2be263435f9062d61aae449d0c",
+        "category": "movable_object.barrier",
+        "annotation_token": "1ad4431256344d05980ad7eb34b98b17",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "a0d82a2be263435f9062d61aae449d0c",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          404.495,
+          1191.576
+        ],
+        "source_center_xyz": [
+          404.495,
+          1191.576,
+          0.949
+        ],
+        "source_size_lwh": [
+          0.632,
+          2.214,
+          1.005
+        ],
+        "source_yaw_rad": -0.3877772529241759,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                403.7838706954219,
+                1190.6706823142288
+              ],
+              [
+                404.3689458564346,
+                1190.4317031185526
+              ],
+              [
+                405.2061293045781,
+                1192.4813176857713
+              ],
+              [
+                404.6210541435654,
+                1192.7202968814474
+              ],
+              [
+                403.7838706954219,
+                1190.6706823142288
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          34.11115787699066,
+          0.13,
+          7.2776347571791575
+        ],
+        "world_rotation_y": -0.3877772529241759,
+        "world_scale_xyz": [
+          0.632,
+          1.005,
+          2.214
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            33.40002857241254,
+            0.13,
+            6.133337875731869
+          ],
+          "max": [
+            34.82228718156878,
+            1.1349999999999998,
+            8.421931638626447
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          668.6839625614185,
+          1157.617572720275
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O012",
+        "object_id": "instance:fa6c224d94c443378b9141e021312362",
+        "category": "movable_object.barrier",
+        "annotation_token": "eb5d7a1dddda47d28fc0b94e92d2d234",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "fa6c224d94c443378b9141e021312362",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          408.181,
+          1196.077
+        ],
+        "source_center_xyz": [
+          408.181,
+          1196.077,
+          1.102
+        ],
+        "source_size_lwh": [
+          0.658,
+          2.295,
+          1.054
+        ],
+        "source_yaw_rad": -1.9364428048195947,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                407.2269929782925,
+                1196.7945429273102
+              ],
+              [
+                406.99172303169655,
+                1196.180041460893
+              ],
+              [
+                409.13500702170745,
+                1195.3594570726898
+              ],
+              [
+                409.3702769683034,
+                1195.973958539107
+              ],
+              [
+                407.2269929782925,
+                1196.7945429273102
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          37.79715787699064,
+          0.13,
+          2.776634757179181
+        ],
+        "world_rotation_y": -1.9364428048195947,
+        "world_scale_xyz": [
+          0.658,
+          1.054,
+          2.295
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            36.6078809086872,
+            0.13,
+            2.059091829869037
+          ],
+          "max": [
+            38.98643484529408,
+            1.1840000000000002,
+            3.4941776844893253
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          690.1901166664414,
+          1038.0587867633988
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:e30c0781b61549eebcab263ed6595ab1",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "3044021850984b7c81db643512f48fd9",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "e30c0781b61549eebcab263ed6595ab1",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          391.918,
+          1161.59
+        ],
+        "source_center_xyz": [
+          391.918,
+          1161.59,
+          0.447
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                391.6599586327713,
+                1161.4633670548444
+              ],
+              [
+                392.0072941590632,
+                1161.3167824984428
+              ],
+              [
+                392.1760413672287,
+                1161.7166329451554
+              ],
+              [
+                391.82870584093683,
+                1161.863217501557
+              ],
+              [
+                391.6599586327713,
+                1161.4633670548444
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          21.534157876990662,
+          0.13,
+          37.26363475717926
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            21.27611650976194,
+            0.1300000011998415,
+            36.990417255621985
+          ],
+          "max": [
+            21.792199244219383,
+            0.861999998254776,
+            37.53685225873654
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          695.6365793503128,
+          2499.4376290809664
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:088ce1163fc84beaba5d62aebc8ba317",
+        "category": "movable_object.barrier",
+        "annotation_token": "b81990b3465140229b3d2af849bba6fc",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "088ce1163fc84beaba5d62aebc8ba317",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          393.116,
+          1163.918
+        ],
+        "source_center_xyz": [
+          393.116,
+          1163.918,
+          0.592
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.39002872771428465,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                392.4946917800163,
+                1162.9878767039897
+              ],
+              [
+                392.9034967568052,
+                1162.8198216804033
+              ],
+              [
+                393.7373082199837,
+                1164.84812329601
+              ],
+              [
+                393.32850324319475,
+                1165.0161783195965
+              ],
+              [
+                392.4946917800163,
+                1162.9878767039897
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          22.73215787699064,
+          0.13,
+          34.93563475717929
+        ],
+        "world_rotation_y": -0.39002872771428465,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            22.11084965700696,
+            0.13,
+            33.83745643758282
+          ],
+          "max": [
+            23.353466096974323,
+            1.153,
+            36.03381307677575
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          697.3519680891201,
+          2319.3340932722517
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:7158f27660a248ef98e0a0be58e0d164",
+        "category": "movable_object.barrier",
+        "annotation_token": "1943d2b5aa9a4665bc20e87a0fd924b2",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "7158f27660a248ef98e0a0be58e0d164",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          393.905,
+          1165.823
+        ],
+        "source_center_xyz": [
+          393.905,
+          1165.823,
+          0.592
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.39002872771428465,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 2,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                393.2836917800163,
+                1164.89287670399
+              ],
+              [
+                393.6924967568052,
+                1164.7248216804035
+              ],
+              [
+                394.52630821998366,
+                1166.7531232960102
+              ],
+              [
+                394.11750324319473,
+                1166.9211783195967
+              ],
+              [
+                393.2836917800163,
+                1164.89287670399
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          23.521157876990628,
+          0.13,
+          33.03063475717909
+        ],
+        "world_rotation_y": -0.39002872771428465,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            22.899849657006946,
+            0.13,
+            31.932456437582626
+          ],
+          "max": [
+            24.14246609697431,
+            1.153,
+            34.12881307677555
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          694.2569899472028,
+          2188.9529907948768
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:b630ef70d4dd4a0db7106eb7e7daf390",
+        "category": "movable_object.barrier",
+        "annotation_token": "58779982196d4f5ba2d909a4361d6617",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "b630ef70d4dd4a0db7106eb7e7daf390",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          394.288,
+          1160.867
+        ],
+        "source_center_xyz": [
+          394.288,
+          1160.867,
+          0.587
+        ],
+        "source_size_lwh": [
+          0.407,
+          2.168,
+          1.079
+        ],
+        "source_yaw_rad": 1.1262086067299792,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 3,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                395.1790998115886,
+                1160.2170697146719
+              ],
+              [
+                395.35414469778146,
+                1160.5845044542077
+              ],
+              [
+                393.3969001884114,
+                1161.516930285328
+              ],
+              [
+                393.22185530221856,
+                1161.1494955457922
+              ],
+              [
+                395.1790998115886,
+                1160.2170697146719
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          23.904157876990666,
+          0.13,
+          37.98663475717922
+        ],
+        "world_rotation_y": 1.1262086067299792,
+        "world_scale_xyz": [
+          0.407,
+          1.079,
+          2.168
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            22.83801317920921,
+            0.13,
+            37.33670447185112
+          ],
+          "max": [
+            24.970302574772123,
+            1.209,
+            38.636565042507314
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          764.1998287229576,
+          2477.2564232796185
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:8c3bcc7999fa4233838c5850c34a78ae",
+        "category": "movable_object.barrier",
+        "annotation_token": "14617df4e15644a4ba3d9a6e0a698eb5",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "8c3bcc7999fa4233838c5850c34a78ae",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          394.766,
+          1167.818
+        ],
+        "source_center_xyz": [
+          394.766,
+          1167.818,
+          0.692
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 4,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                394.12855351846883,
+                1166.898861689851
+              ],
+              [
+                394.5343632677043,
+                1166.7236976312502
+              ],
+              [
+                395.4034464815312,
+                1168.737138310149
+              ],
+              [
+                394.99763673229575,
+                1168.9123023687498
+              ],
+              [
+                394.12855351846883,
+                1166.898861689851
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          24.382157876990675,
+          0.13,
+          31.035634757179196
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            23.744711395459515,
+            0.13,
+            29.94133238842943
+          ],
+          "max": [
+            25.019604358521836,
+            1.153,
+            32.12993712592896
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          692.0642840128085,
+          2063.9735953038416
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:3867765a6b5f42e7af6b4d7e47804212",
+        "category": "movable_object.barrier",
+        "annotation_token": "6c6997223fa345af93a397b89a344464",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "3867765a6b5f42e7af6b4d7e47804212",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          395.621,
+          1169.878
+        ],
+        "source_center_xyz": [
+          395.621,
+          1169.878,
+          0.642
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 5,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                394.9835535184688,
+                1168.958861689851
+              ],
+              [
+                395.38936326770425,
+                1168.78369763125
+              ],
+              [
+                396.25844648153117,
+                1170.797138310149
+              ],
+              [
+                395.8526367322957,
+                1170.9723023687498
+              ],
+              [
+                394.9835535184688,
+                1168.958861689851
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          25.237157876990636,
+          0.13,
+          28.97563475717925
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            24.599711395459476,
+            0.13,
+            27.881332388429485
+          ],
+          "max": [
+            25.874604358521797,
+            1.153,
+            30.069937125929016
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          689.2989647154342,
+          1947.3556621823866
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:e4472854df2041819e1f2e870e4cac71",
+        "category": "movable_object.barrier",
+        "annotation_token": "a1261a4bffac4b52afa27636240e7977",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "e4472854df2041819e1f2e870e4cac71",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          396.343,
+          1171.514
+        ],
+        "source_center_xyz": [
+          396.343,
+          1171.514,
+          0.692
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 6,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                395.70555351846883,
+                1170.5948616898509
+              ],
+              [
+                396.1113632677043,
+                1170.41969763125
+              ],
+              [
+                396.9804464815312,
+                1172.433138310149
+              ],
+              [
+                396.57463673229574,
+                1172.6083023687497
+              ],
+              [
+                395.70555351846883,
+                1170.5948616898509
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          25.959157876990673,
+          0.13,
+          27.339634757179283
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            25.321711395459513,
+            0.13,
+            26.245332388429517
+          ],
+          "max": [
+            26.596604358521834,
+            1.153,
+            28.43393712592905
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          688.1376903169908,
+          1861.2053697759675
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O013",
+        "object_id": "instance:63c4242e0c3f40c39f1db94e95b6bdd6",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "54f2a515d5694e2fae1ecfed39403341",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "63c4242e0c3f40c39f1db94e95b6bdd6",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          397.429,
+          1174.632
+        ],
+        "source_center_xyz": [
+          397.429,
+          1174.632,
+          0.528
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 7,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                397.17095863277126,
+                1174.5053670548446
+              ],
+              [
+                397.51829415906315,
+                1174.358782498443
+              ],
+              [
+                397.6870413672287,
+                1174.7586329451556
+              ],
+              [
+                397.3397058409368,
+                1174.9052175015572
+              ],
+              [
+                397.17095863277126,
+                1174.5053670548446
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          27.04515787699063,
+          0.13,
+          24.221634757179118
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            26.78711650976191,
+            0.1300000011998415,
+            23.94841725562184
+          ],
+          "max": [
+            27.30319924421935,
+            0.861999998254776,
+            24.494852258736394
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          680.7189272925015,
+          1716.2832951483517
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O014",
+        "object_id": "instance:cea2203d24894a60bbd3f8b472063e49",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "b60f292088ae4d2ca80f63fe0442b648",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "cea2203d24894a60bbd3f8b472063e49",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          397.522,
+          1155.995
+        ],
+        "source_center_xyz": [
+          397.522,
+          1155.995,
+          0.397
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                397.2639586327713,
+                1155.8683670548444
+              ],
+              [
+                397.61129415906316,
+                1155.7217824984427
+              ],
+              [
+                397.7800413672287,
+                1156.1216329451554
+              ],
+              [
+                397.4327058409368,
+                1156.268217501557
+              ],
+              [
+                397.2639586327713,
+                1155.8683670548444
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          27.138157876990647,
+          0.13,
+          42.85863475717929
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            26.880116509761926,
+            0.1300000011998415,
+            42.58541725562201
+          ],
+          "max": [
+            27.396199244219368,
+            0.861999998254776,
+            43.131852258736565
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          920.9483685377163,
+          2708.3496273580563
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O014",
+        "object_id": "instance:ccc7b9cdfcae40f49e7c59775c8ff96b",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "1255b56927e645fba639e7c68ad48706",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "ccc7b9cdfcae40f49e7c59775c8ff96b",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          399.33,
+          1160.276
+        ],
+        "source_center_xyz": [
+          399.33,
+          1160.276,
+          0.397
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 1,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                399.07195863277127,
+                1160.1493670548446
+              ],
+              [
+                399.41929415906316,
+                1160.002782498443
+              ],
+              [
+                399.5880413672287,
+                1160.4026329451556
+              ],
+              [
+                399.2407058409368,
+                1160.5492175015572
+              ],
+              [
+                399.07195863277127,
+                1160.1493670548446
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          28.94615787699064,
+          0.13,
+          38.57763475717911
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            28.68811650976192,
+            0.1300000011998415,
+            38.304417255621836
+          ],
+          "max": [
+            29.20419924421936,
+            0.861999998254776,
+            38.85085225873639
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          889.5915393127219,
+          2353.693655854038
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O014",
+        "object_id": "instance:0523b4d3ba8e4d9082de898279571a9f",
+        "category": "movable_object.barrier",
+        "annotation_token": "ca62c5d04d134cdd91481ccd903b83b3",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "0523b4d3ba8e4d9082de898279571a9f",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          400.359,
+          1163.245
+        ],
+        "source_center_xyz": [
+          400.359,
+          1163.245,
+          0.534
+        ],
+        "source_size_lwh": [
+          0.558,
+          1.947,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 2,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                399.71704721474083,
+                1162.4617759761738
+              ],
+              [
+                400.22935907011043,
+                1162.24064125966
+              ],
+              [
+                401.00095278525913,
+                1164.028224023826
+              ],
+              [
+                400.4886409298895,
+                1164.2493587403399
+              ],
+              [
+                399.71704721474083,
+                1162.4617759761738
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          29.975157876990636,
+          0.13,
+          35.60863475717929
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.558,
+          1.023,
+          1.947
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            29.333205091731514,
+            0.13,
+            34.60427601683928
+          ],
+          "max": [
+            30.617110662249758,
+            1.153,
+            36.6129934975193
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          867.5464271361842,
+          2159.925846507278
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O014",
+        "object_id": "instance:b783edf77d48409b8d2e5aa2fad43dbc",
+        "category": "movable_object.barrier",
+        "annotation_token": "959c0bb0951e4390aad2f44e668f4a8c",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "b783edf77d48409b8d2e5aa2fad43dbc",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          401.051,
+          1164.762
+        ],
+        "source_center_xyz": [
+          401.051,
+          1164.762,
+          0.534
+        ],
+        "source_size_lwh": [
+          0.563,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 3,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                400.3580071613902,
+                1163.8668377657455
+              ],
+              [
+                400.87490962478284,
+                1163.6437215553556
+              ],
+              [
+                401.74399283860976,
+                1165.6571622342544
+              ],
+              [
+                401.22709037521713,
+                1165.8802784446443
+              ],
+              [
+                400.3580071613902,
+                1163.8668377657455
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          30.667157876990643,
+          0.13,
+          34.091634757179236
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.563,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            29.97416503838088,
+            0.13,
+            32.97335631253502
+          ],
+          "max": [
+            31.360150715600405,
+            1.153,
+            35.209913201823454
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          860.4673681520023,
+          2064.9622573174147
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O014",
+        "object_id": "instance:63d50c7eb7f04efe9abd81e3f7bfeb0c",
+        "category": "movable_object.barrier",
+        "annotation_token": "b8730fbaf3fd4ba186015758954d42bb",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "63d50c7eb7f04efe9abd81e3f7bfeb0c",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          401.957,
+          1166.834
+        ],
+        "source_center_xyz": [
+          401.957,
+          1166.834,
+          0.484
+        ],
+        "source_size_lwh": [
+          0.563,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 4,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                401.2640071613902,
+                1165.9388377657456
+              ],
+              [
+                401.78090962478285,
+                1165.7157215553557
+              ],
+              [
+                402.64999283860976,
+                1167.7291622342545
+              ],
+              [
+                402.13309037521714,
+                1167.9522784446444
+              ],
+              [
+                401.2640071613902,
+                1165.9388377657456
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          31.57315787699065,
+          0.13,
+          32.01963475717912
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.563,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            30.880165038380888,
+            0.13,
+            30.901356312534904
+          ],
+          "max": [
+            32.26615071560041,
+            1.153,
+            33.13791320182334
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          850.8254763291495,
+          1946.6072449238964
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O014",
+        "object_id": "instance:5e84274a09ad475b8098fc06bf4df49c",
+        "category": "movable_object.barrier",
+        "annotation_token": "ceb1b4060b0f4b69b513aa0dbd886f25",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "5e84274a09ad475b8098fc06bf4df49c",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          402.87,
+          1168.926
+        ],
+        "source_center_xyz": [
+          402.87,
+          1168.926,
+          0.642
+        ],
+        "source_size_lwh": [
+          0.563,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.4074820202342278,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 5,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                402.17700716139024,
+                1168.0308377657454
+              ],
+              [
+                402.69390962478286,
+                1167.8077215553556
+              ],
+              [
+                403.5629928386098,
+                1169.8211622342544
+              ],
+              [
+                403.04609037521715,
+                1170.0442784446443
+              ],
+              [
+                402.17700716139024,
+                1168.0308377657454
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          32.48615787699066,
+          0.13,
+          29.92763475717925
+        ],
+        "world_rotation_y": -0.4074820202342278,
+        "world_scale_xyz": [
+          0.563,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            31.7931650383809,
+            0.13,
+            28.809356312535034
+          ],
+          "max": [
+            33.17915071560042,
+            1.153,
+            31.045913201823463
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          841.9254380288553,
+          1837.7896985776156
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O015",
+        "object_id": "instance:845daaaace0b465bb55410f05c39fc7c",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "bbd8092b079142a4bbaaccfbba71ee60",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "845daaaace0b465bb55410f05c39fc7c",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          405.634,
+          1175.105
+        ],
+        "source_center_xyz": [
+          405.634,
+          1175.105,
+          0.628
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                405.3759586327713,
+                1174.9783670548445
+              ],
+              [
+                405.7232941590632,
+                1174.8317824984429
+              ],
+              [
+                405.8920413672287,
+                1175.2316329451555
+              ],
+              [
+                405.54470584093684,
+                1175.3782175015572
+              ],
+              [
+                405.3759586327713,
+                1174.9783670548445
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          35.25015787699067,
+          0.13,
+          23.74863475717916
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            34.99211650976195,
+            0.1300000011998415,
+            23.475417255621885
+          ],
+          "max": [
+            35.50819924421939,
+            0.861999998254776,
+            24.021852258736438
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          820.5371660094933,
+          1564.347878835158
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O016",
+        "object_id": "instance:2b09439196704eafbbd0e905ddef7796",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "a0a9ae6f4963414d80495c37d6497831",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "2b09439196704eafbbd0e905ddef7796",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          407.965,
+          1180.554
+        ],
+        "source_center_xyz": [
+          407.965,
+          1180.554,
+          0.652
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                407.70695863277126,
+                1180.4273670548446
+              ],
+              [
+                408.05429415906315,
+                1180.280782498443
+              ],
+              [
+                408.2230413672287,
+                1180.6806329451556
+              ],
+              [
+                407.8757058409368,
+                1180.8272175015572
+              ],
+              [
+                407.70695863277126,
+                1180.4273670548446
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          37.58115787699063,
+          0.13,
+          18.299634757179092
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            37.32311650976191,
+            0.1300000011998415,
+            18.026417255621816
+          ],
+          "max": [
+            37.83919924421935,
+            0.861999998254776,
+            18.57285225873637
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          804.1343759433379,
+          1374.1621346563843
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O017",
+        "object_id": "instance:25ba55a291e74d7389f048f36facc693",
+        "category": "movable_object.barrier",
+        "annotation_token": "5e9764143d374be6bfe7f93c90ccc881",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "25ba55a291e74d7389f048f36facc693",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          399.928,
+          1172.275
+        ],
+        "source_center_xyz": [
+          399.928,
+          1172.275,
+          0.812
+        ],
+        "source_size_lwh": [
+          0.46,
+          2.013,
+          1.025
+        ],
+        "source_yaw_rad": -1.861288927449801,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                399.029547003202,
+                1172.783649646166
+              ],
+              [
+                398.89779186110394,
+                1172.3429223126245
+              ],
+              [
+                400.82645299679797,
+                1171.7663503538342
+              ],
+              [
+                400.95820813889605,
+                1172.2070776873757
+              ],
+              [
+                399.029547003202,
+                1172.783649646166
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          29.544157876990653,
+          0.13,
+          26.57863475717909
+        ],
+        "world_rotation_y": -1.861288927449801,
+        "world_scale_xyz": [
+          0.46,
+          1.025,
+          2.013
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            28.513949738094556,
+            0.13,
+            26.069985111013136
+          ],
+          "max": [
+            30.57436601588675,
+            1.1549999999999998,
+            27.08728440334504
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          749.9302141431492,
+          1761.2939072868812
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O018",
+        "object_id": "instance:56cf90aa4c914299a47fe66881f275cc",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "bd3dbc0271764215a74f5a02f947ae74",
+        "sample_token": "ff566499c7804d91a286770eaff5b824",
+        "frame_id": "30",
+        "instance_token": "56cf90aa4c914299a47fe66881f275cc",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          408.015,
+          1200.322
+        ],
+        "source_center_xyz": [
+          408.015,
+          1200.322,
+          0.578
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.43425537107207507,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                407.75269639854827,
+                1200.2044497100578
+              ],
+              [
+                408.09470461017946,
+                1200.0458326139528
+              ],
+              [
+                408.2773036014517,
+                1200.439550289942
+              ],
+              [
+                407.9352953898205,
+                1200.598167386047
+              ],
+              [
+                407.75269639854827,
+                1200.2044497100578
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          37.63115787699064,
+          0.13,
+          -1.4683652428207097
+        ],
+        "world_rotation_y": -0.43425537107207507,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            37.368854275538915,
+            0.1300000011998415,
+            -1.7445326288679062
+          ],
+          "max": [
+            37.89346147844237,
+            0.862,
+            -1.1921978567735132
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          663.0613387602978,
+          968.1672461413622
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O019",
+        "object_id": "instance:62f4692ad37644ef8ba384b07ebee82e",
+        "category": "movable_object.barrier",
+        "annotation_token": "5a1c43eb51d4471885a8f42edd6f67bc",
+        "sample_token": "ddc330338767421cbf8f0507a376bcb0",
+        "frame_id": "34",
+        "instance_token": "62f4692ad37644ef8ba384b07ebee82e",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          392.244,
+          1155.935
+        ],
+        "source_center_xyz": [
+          392.244,
+          1155.935,
+          0.392
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.5122017753538863,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                391.51396940190153,
+                1155.087528126815
+              ],
+              [
+                391.89924645300476,
+                1154.8709049657882
+              ],
+              [
+                392.9740305980985,
+                1156.782471873185
+              ],
+              [
+                392.5887535469953,
+                1156.9990950342117
+              ],
+              [
+                391.51396940190153,
+                1155.087528126815
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          21.860157876990684,
+          0.13,
+          42.918634757179234
+        ],
+        "world_rotation_y": -0.5122017753538863,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            21.130127278892175,
+            0.13,
+            41.854539722967445
+          ],
+          "max": [
+            22.590188475089192,
+            1.153,
+            43.98272979139102
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          784.6242740356583,
+          2931.75988129724
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O020",
+        "object_id": "instance:2251ecda45d74bed8588580cf725e628",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "adf9af0c096149768e200b047dbc9050",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "2251ecda45d74bed8588580cf725e628",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          399.187,
+          1179.336
+        ],
+        "source_center_xyz": [
+          399.187,
+          1179.336,
+          0.628
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3993487860321885,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                398.9289586327713,
+                1179.2093670548445
+              ],
+              [
+                399.2762941590632,
+                1179.0627824984429
+              ],
+              [
+                399.4450413672287,
+                1179.4626329451555
+              ],
+              [
+                399.09770584093684,
+                1179.6092175015572
+              ],
+              [
+                398.9289586327713,
+                1179.2093670548445
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          28.803157876990667,
+          0.13,
+          19.517634757179167
+        ],
+        "world_rotation_y": -0.3993487860321885,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            28.545116509761947,
+            0.1300000011998415,
+            19.24441725562189
+          ],
+          "max": [
+            29.061199244219388,
+            0.861999998254776,
+            19.790852258736443
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          673.1328854572707,
+          1529.3498207804553
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O021",
+        "object_id": "instance:ee5bc268c33f4ea5a2e8c94fab17d408",
+        "category": "movable_object.barrier",
+        "annotation_token": "8d7ec0b6fecf4f5ba0d4ef531238989f",
+        "sample_token": "a61b104ad8de4db0ae876459f79d26af",
+        "frame_id": "38",
+        "instance_token": "ee5bc268c33f4ea5a2e8c94fab17d408",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          384.29,
+          1153.907
+        ],
+        "source_center_xyz": [
+          384.29,
+          1153.907,
+          0.542
+        ],
+        "source_size_lwh": [
+          0.442,
+          2.193,
+          1.023
+        ],
+        "source_yaw_rad": -0.39002872771428465,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                383.66869178001633,
+                1152.9768767039898
+              ],
+              [
+                384.07749675680526,
+                1152.8088216804033
+              ],
+              [
+                384.9113082199837,
+                1154.83712329601
+              ],
+              [
+                384.5025032431948,
+                1155.0051783195966
+              ],
+              [
+                383.66869178001633,
+                1152.9768767039898
+              ]
+            ]
+          ]
+        },
+        "observation_state": "unknown",
+        "lifecycle_appearance": "ghost",
+        "world_position_xyz": [
+          13.906157876990676,
+          0.13,
+          44.946634757179254
+        ],
+        "world_rotation_y": -0.39002872771428465,
+        "world_scale_xyz": [
+          0.442,
+          1.023,
+          2.193
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            13.284849657006992,
+            0.13,
+            43.84845643758279
+          ],
+          "max": [
+            14.52746609697436,
+            1.153,
+            46.04481307677572
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          561.5028841842452,
+          3546.7186744488317
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O022",
+        "object_id": "instance:595a0ef7d3f747a0ab5d7bdc80720eb9",
+        "category": "movable_object.barrier",
+        "annotation_token": "ad4506c3226a47918034cecb99a98c41",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "595a0ef7d3f747a0ab5d7bdc80720eb9",
+        "shape_type": "barrier",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          385.699,
+          1136.661
+        ],
+        "source_center_xyz": [
+          385.699,
+          1136.661,
+          0.588
+        ],
+        "source_size_lwh": [
+          0.523,
+          1.992,
+          1.014
+        ],
+        "source_yaw_rad": -0.3900287277142839,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                385.078445011488,
+                1135.8392276737243
+              ],
+              [
+                385.56216673741693,
+                1135.6403752363133
+              ],
+              [
+                386.31955498851204,
+                1137.4827723262758
+              ],
+              [
+                385.8358332625831,
+                1137.6816247636868
+              ],
+              [
+                385.078445011488,
+                1135.8392276737243
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          15.315157876990668,
+          0.13,
+          62.19263475717912
+        ],
+        "world_rotation_y": -0.3900287277142839,
+        "world_scale_xyz": [
+          0.523,
+          1.014,
+          1.992
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            14.694602888478652,
+            0.13,
+            61.17200999349225
+          ],
+          "max": [
+            15.935712865502683,
+            1.1440000000000001,
+            63.21325952086599
+          ]
+        },
+        "mesh_count": 8,
+        "primitive_types": [
+          "BufferGeometry",
+          "BoxGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "tapered-barrier-body",
+            "geometry_type": "BufferGeometry"
+          },
+          {
+            "name": "yellow-top-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "side-reflector",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          1102.483881596512,
+          7705.052767470471
+        ],
+        "visible_updated": false
+      },
+      {
+        "event_id": "S0980-OCC-scene-0980-O023",
+        "object_id": "instance:58a24204f6514bcca9ec0ab792c8e687",
+        "category": "movable_object.trafficcone",
+        "annotation_token": "85d2b98cab694a2d8dd7cba5461c0e4f",
+        "sample_token": "03d74d6d17464f0397c4b3b568f5c49c",
+        "frame_id": "40",
+        "instance_token": "58a24204f6514bcca9ec0ab792c8e687",
+        "shape_type": "cone",
+        "rendered_model": true,
+        "fallback_reason": null,
+        "source_center_xy": [
+          394.333,
+          1148.512
+        ],
+        "source_center_xyz": [
+          394.333,
+          1148.512,
+          0.347
+        ],
+        "source_size_lwh": [
+          0.377,
+          0.434,
+          0.732
+        ],
+        "source_yaw_rad": -0.3469889084723585,
+        "height_source": "source_annotation",
+        "vertical_placement": "display_ground_relative_not_source_road_elevation",
+        "footprint_index": 0,
+        "source_footprint": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                394.0819397257735,
+                1148.3720357591908
+              ],
+              [
+                394.4364708837279,
+                1148.2438302287344
+              ],
+              [
+                394.58406027422654,
+                1148.651964240809
+              ],
+              [
+                394.22952911627215,
+                1148.7801697712655
+              ],
+              [
+                394.0819397257735,
+                1148.3720357591908
+              ]
+            ]
+          ]
+        },
+        "observation_state": "observed_active",
+        "lifecycle_appearance": "solid",
+        "world_position_xyz": [
+          23.949157876990682,
+          0.13,
+          50.341634757179236
+        ],
+        "world_rotation_y": -0.3469889084723585,
+        "world_scale_xyz": [
+          0.377,
+          0.732,
+          0.434
+        ],
+        "world_bounds_xyz": {
+          "min": [
+            23.6980976027642,
+            0.1300000011998415,
+            50.073464985913766
+          ],
+          "max": [
+            24.200218151217165,
+            0.861999998254776,
+            50.609804528444705
+          ]
+        },
+        "mesh_count": 5,
+        "primitive_types": [
+          "BoxGeometry",
+          "CylinderGeometry"
+        ],
+        "primitive_meshes": [
+          {
+            "name": "cone-foot",
+            "geometry_type": "BoxGeometry"
+          },
+          {
+            "name": "cone-lower-body",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-reflective-band",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "cone-tip",
+            "geometry_type": "CylinderGeometry"
+          },
+          {
+            "name": "yellow-foot-accent",
+            "geometry_type": "BoxGeometry"
+          }
+        ],
+        "screen_xy": [
+          998.9631812607255,
+          3602.261971663649
+        ],
+        "visible_updated": false
+      }
+    ],
+    "unknown_objects": 16
+  },
   "nuscenes_pixels": {
     "before": {
       "width": 1390,
       "height": 621,
-      "colors": 1874,
+      "colors": 1915,
       "yellow": 0,
       "red": 0
     },
     "after": {
       "width": 1390,
       "height": 621,
-      "colors": 3267,
-      "yellow": 1194,
+      "colors": 3319,
+      "yellow": 1126,
       "red": 0
+    }
+  },
+  "semantic_closeups": {
+    "barrier": {
+      "event_id": "S0980-OCC-scene-0980-O010",
+      "object_id": "instance:a49e7c33c01c4a2eab5e7873244101e4",
+      "pixels": {
+        "width": 1390,
+        "height": 621,
+        "colors": 5508,
+        "yellow": 2957,
+        "red": 0
+      }
+    },
+    "cone": {
+      "event_id": "S0980-OCC-scene-0980-O015",
+      "object_id": "instance:845daaaace0b465bb55410f05c39fc7c",
+      "pixels": {
+        "width": 1390,
+        "height": 621,
+        "colors": 4977,
+        "yellow": 2368,
+        "red": 0
+      }
     }
   },
   "argoverse_pixels": {
     "before": {
       "width": 1390,
       "height": 621,
-      "colors": 2159,
+      "colors": 2111,
       "yellow": 0,
       "red": 0
     },
     "after": {
       "width": 1390,
       "height": 621,
-      "colors": 4028,
+      "colors": 3980,
       "yellow": 0,
       "red": 863
     }
@@ -153,7 +6083,7 @@
       "height": 620,
       "pixelRatio": 1
     },
-    "frameCount": 73,
+    "frameCount": 96,
     "passes": [
       {
         "side": "before",
@@ -187,6 +6117,7 @@
           -34.16577273776274,
           1
         ],
+        "visibleObjectIds": [],
         "visibleFeatureIds": [
           "ls-168053844",
           "ls-168053852",
@@ -811,6 +6742,7 @@
           -34.16577273776274,
           1
         ],
+        "visibleObjectIds": [],
         "visibleFeatureIds": [
           "ls-168053844",
           "ls-168053852",
@@ -16136,14 +22068,24 @@
       "geometries": 837,
       "textures": 1,
       "drawCalls": 333,
-      "disposedGeometries": 4064,
-      "disposedMaterials": 4108,
-      "disposedTextures": 50
+      "disposedGeometries": 5777,
+      "disposedMaterials": 5202,
+      "disposedTextures": 100
+    },
+    "objectModels": [],
+    "objectModelSummary": {
+      "sourceObjects": 0,
+      "renderedModels": 0,
+      "barriers": 0,
+      "cones": 0,
+      "footprintOnly": 0
     },
     "schematicHeights": {
-      "state": 1,
+      "state": null,
+      "stateGroundDisplayOffset": 0.13,
       "structureDisplayOffset": 0.16,
-      "roadElevationMeasured": false
+      "roadElevationMeasured": false,
+      "objectHeights": "source_annotation_when_available"
     },
     "renderingContract": {
       "singleCamera": true,
@@ -16151,12 +22093,17 @@
       "overlaySide": "after",
       "sourceXYMutated": false,
       "inferredBuildings": false,
-      "heightsAreDisplayOnly": true
+      "heightsAreDisplayOnly": false,
+      "roadElevationMeasured": false,
+      "genericAppearanceNotReconstruction": true,
+      "unsupportedCategoriesUseFootprints": true,
+      "modelDimensionsFromSourceAnnotations": true,
+      "sourceAltitudeNotUsedAsRoadElevation": true
     },
     "mode": "3d",
     "unavailable": false,
     "unavailableReason": null
   },
   "context_loss_test": "actual_WEBGL_lose_context",
-  "count": 44
+  "count": 62
 }
