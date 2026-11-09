@@ -1,0 +1,52 @@
+{
+  "scene_id": "scene-0980",
+  "run_id": "m4_scene0980_static_v1",
+  "snapshot_count": 41,
+  "duration_s": 19.85016,
+  "planning_records": 123,
+  "policy_count": 3,
+  "per_policy": {
+    "map_only": {
+      "snapshots": 41,
+      "static_route_geometry_feasible": 7,
+      "static_stopping_geometry_feasible": 36,
+      "static_stopping_geometry_infeasible": 4,
+      "static_stopping_not_evaluable": 1,
+      "behaviors": {
+        "NO_VERIFIED_PLAN": 5,
+        "STOP_CANDIDATE_UNVERIFIED": 29,
+        "VERIFY_REQUIRED": 7
+      },
+      "mean_runtime_ms": 58.143909739489416
+    },
+    "fixed_candidate_penalty": {
+      "snapshots": 41,
+      "static_route_geometry_feasible": 7,
+      "static_stopping_geometry_feasible": 36,
+      "static_stopping_geometry_infeasible": 4,
+      "static_stopping_not_evaluable": 1,
+      "behaviors": {
+        "NO_VERIFIED_PLAN": 5,
+        "STOP_CANDIDATE_UNVERIFIED": 29,
+        "VERIFY_REQUIRED": 7
+      },
+      "mean_runtime_ms": 58.14228293190642
+    },
+    "reliability_aware": {
+      "snapshots": 41,
+      "static_route_geometry_feasible": 7,
+      "static_stopping_geometry_feasible": 36,
+      "static_stopping_geometry_infeasible": 4,
+      "static_stopping_not_evaluable": 1,
+      "behaviors": {
+        "NO_VERIFIED_PLAN": 5,
+        "STOP_CANDIDATE_UNVERIFIED": 29,
+        "VERIFY_REQUIRED": 7
+      },
+      "mean_runtime_ms": 57.47380000028032
+    }
+  },
+  "observed_space_verified_records": 0,
+  "execution_authorized_records": 0,
+  "important_result": "Static feasibility is conditional on frozen annotation boxes and prior map. Missing observation coverage prevents executable/safety claims. Policy differences are measured, not assumed."
+}
