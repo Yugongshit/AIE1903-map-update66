@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.5",
+  "schema": "decision-evidence-studio-3.6",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -8,7 +8,7 @@
   "real_map_updates": 0,
   "controlled_variants": 3,
   "argoverse": "independent_frozen_observation_rerun_available",
-  "planning": "not_integrated",
+  "planning": "original_Planning_M4_scene0980_handoff_44_files_preserved_in_main; not_integrated_into_live_planning",
   "issues": 11,
   "source_checks": 2166,
   "m3_checks": 251,
@@ -71,12 +71,12 @@
     "zh"
   ],
   "routes": {
-    "en": "en/index.html",
-    "zh": "zh/index.html"
+    "en": "algorithms/en/index.html",
+    "zh": "algorithms/zh/index.html"
   },
   "source_category_policy": "English: exact original category; Chinese: translated display name; source identity and geometry unchanged",
   "shared_source_sha256": "ff50ded5064938b3fa845bdbbf86136d40acfdf32df95990df28965e1ed11377",
-  "release_date": "2026-11-08",
+  "release_date": "2026-11-09",
   "rerun_version": "0.22.1",
   "real_base_map_writes": 0,
   "rerun_recordings": {
@@ -126,23 +126,23 @@
     "en": "argoverse/en/index.html",
     "zh": "argoverse/zh/index.html"
   },
-  "algorithm_result_sha256": "bb308e9c206ac1382bb8e45e90b5550166620451ebff95694f0bbc7b5485897a",
+  "algorithm_result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
   "algorithm_routes": {
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "53a4c2209fe40b3307508f3895b33628712da932",
-  "source_branch": "feat/structure-state-routing",
+  "source_commit": "94638e4d2a5d538c17babdd9ea4d635621bfb823",
+  "source_branch": "main",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
   "duration_determines_map_layer": false,
   "composite_map_colors": {
     "base": "gray",
     "state_events": "yellow",
-    "confirmed_structure": "red",
-    "unconfirmed_structure": "green"
+    "accepted_material_structure": "red",
+    "closed_no_update": "no_change_overlay"
   },
-  "current_presentation_validation": "algorithms/nuscenes_confirmation_release_validation.json",
+  "current_presentation_validation": "algorithms/material_structural_release_validation_20261109.json",
   "previous_full_site_validation": "release_validation.json",
   "map_comparison": {
     "left_region": "original_reference_map",
@@ -151,16 +151,17 @@
     "divider_rightmost": "full_original_reference_map",
     "shared_coordinate_projection": true,
     "colors": {
-      "map_state_event": "yellow",
-      "confirmed_structure": "red",
-      "unconfirmed_structure": "green"
+      "base": "gray",
+      "state_events": "yellow",
+      "accepted_material_structure": "red",
+      "closed_no_update": "no_change_overlay"
     },
     "original_side_overlay_hits_disabled": true,
     "legend_before_canvas": true,
     "detailed_analysis_collapsed_by_default": true,
-    "confirmed_structure_requires": "Source-explicit: delivered ground-truth change in reference replay, or computed local structural detection in model view. Patch execution is separate."
+    "confirmed_structure_requires": "Completed final material update action in model view; delivered reference object passing materiality policy in separate reference replay. Raw local detections do not authorize red structure overlays."
   },
-  "previous_presentation_validation": "algorithms/confirmation_release_validation.json",
+  "previous_presentation_validation": "algorithms/nuscenes_confirmation_release_validation.json",
   "structural_evidence_revision": {
     "nuscenes_supported_local_marking_discrepancies": 1,
     "nuscenes_unconfirmed_structure_candidates": 6,
@@ -169,7 +170,7 @@
     "argoverse_geometry_false_positives": 1,
     "confirmed_structural_edits": 0,
     "base_map_writes": 0,
-    "historical_revision": "superseded_by_argoverse_confirmation_repair"
+    "historical_revision": "superseded_by_material_structural_decisions_20261109"
   },
   "argoverse_confirmation_repair": {
     "reference_copy_patches": 98,
@@ -187,7 +188,8 @@
     "local_geometry_within_0_5m": 3,
     "model_map_patches": 0,
     "truth_read_after_prediction_freeze": true,
-    "rollback_verified": true
+    "rollback_verified": true,
+    "historical_revision": "superseded_by_material_structural_decisions_20261109"
   },
   "nuscenes_confirmation_repair": {
     "annotation_backed_state_events": 23,
@@ -200,6 +202,124 @@
     "semantic_layer_unassigned": 0,
     "model_structural_map_patches": 0,
     "motion_uncertainty_not_used_as_structural_rate": true,
-    "argoverse_predictions_unchanged": true
+    "argoverse_predictions_unchanged": true,
+    "historical_revision": "superseded_by_material_structural_decisions_20261109"
+  },
+  "structural_decision_method": "verified_target_operation_and_material_spatial_extent",
+  "final_decision_scope": "completed_action_on_supplied_recording_not_ground_truth_label",
+  "revisit_required": false,
+  "material_structural_decisions": {
+    "nuscenes": {
+      "events": 29,
+      "reliability_counts": {
+        "supported_conflict": 24,
+        "insufficient_geometry": 5
+      },
+      "layer_counts": {
+        "map_state_event": 23,
+        "base_map_structure": 6
+      },
+      "accepted_layer_counts": {
+        "map_state_event": 23
+      },
+      "stored_state_events": 23,
+      "base_map_updates": 0,
+      "pending_manual_reviews": 0,
+      "final_structural_changes": 0,
+      "closed_without_structural_update": 6,
+      "pending_structural_decisions": 0,
+      "revisit_requests": 0,
+      "final_decision_scope": "completed_actions_for_supplied_recording_not_ground_truth_labels",
+      "model_detected_local_structure": 1,
+      "model_detected_local_structure_is_raw_diagnostic": true
+    },
+    "argoverse_model": {
+      "events": 76,
+      "reliability_counts": {
+        "supported_conflict": 14,
+        "insufficient_geometry": 40,
+        "consistent_with_map": 22
+      },
+      "layer_counts": {
+        "base_map_structure": 54,
+        "not_applicable": 22
+      },
+      "accepted_layer_counts": {},
+      "stored_state_events": 0,
+      "base_map_updates": 0,
+      "pending_manual_reviews": 0,
+      "final_structural_changes": 0,
+      "closed_without_structural_update": 76,
+      "pending_structural_decisions": 0,
+      "revisit_requests": 0,
+      "final_decision_scope": "completed_actions_for_supplied_recording_not_ground_truth_labels",
+      "model_detected_local_structure": 14,
+      "model_detected_local_structure_is_raw_diagnostic": true
+    },
+    "argoverse_material_reference": {
+      "confirmed_changes": 93,
+      "executed_patches": 93,
+      "added": 27,
+      "replaced": 66,
+      "deleted": 0,
+      "layers": {
+        "laneSegments": 84,
+        "pedCrossings": 9
+      },
+      "change_types": {
+        "added": 27,
+        "marking_changed": 11,
+        "lane_type_changed": 35,
+        "geometry_changed": 25,
+        "connectivity_changed": 16
+      },
+      "unsupported_changed_objects": 0,
+      "unsupported_inventory_objects": 15,
+      "updated_lanes": 240,
+      "updated_crossings": 33,
+      "rollback_verified": true,
+      "source_base_map_mutated": false,
+      "detector_successes_claimed": false,
+      "reference_total_changes": 98,
+      "accepted_material_changes": 93,
+      "skipped_minor_changes": 5,
+      "closed_no_update_decisions": 5,
+      "revisit_required": false,
+      "all_reference_changes_preserved_in_full_replay": true,
+      "decision_reason_counts": {
+        "REFERENCE_CONFIRMED_OBJECT_ADDITION": 27,
+        "REFERENCE_CONFIRMED_MARKING_TYPE_CHANGE": 11,
+        "REFERENCE_CONFIRMED_LANE_USE_CHANGE": 35,
+        "GEOMETRY_BELOW_MATERIALITY_REQUIREMENT": 5,
+        "REFERENCE_CONFIRMED_CONNECTIVITY_CHANGE": 16,
+        "REFERENCE_CONFIRMED_COHERENT_GEOMETRY_CHANGE": 22
+      },
+      "materiality_thresholds_are_engineering_policy": true,
+      "calibrated_accuracy_claimed": false
+    },
+    "full_reference_replay_preserved": 98,
+    "materiality_policy": {
+      "distance_tolerance_m": 0.5,
+      "minimum_contiguous_length_m": 3.0,
+      "sample_spacing_m": 0.5,
+      "method": "bidirectional_sampled_same_target_spatial_extent",
+      "geometry_contract": "resolved target and operation; complete same-target prior/proposed geometry",
+      "discrete_changes": "verified addition, deletion, topology, lane use or regulated marking attributes are assessed by operation, not displacement",
+      "unsupported_write_operations": [
+        "topology_change",
+        "lane_use_change"
+      ],
+      "tolerance_basis": "engineering defaults: existing 0.5 m residual tolerance and 3 m full-quality curve extent; not calibrated on change labels",
+      "calibrated_probability": false
+    },
+    "no_update_is_ground_truth_negative": false,
+    "accuracy_improvement_claimed": false,
+    "source_original_files_changed": false,
+    "planning_files_preserved_from_original_main": 44
+  },
+  "entrypoint_policy": {
+    "default_and_decisions": "current algorithms view",
+    "legacy_1_and_other_hashes": "historical studio retained",
+    "query_parameters": "preserved"
   }
 }

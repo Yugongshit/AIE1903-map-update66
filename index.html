@@ -1,1 +1,9 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIE1903 Evidence Studio</title><p><a href="en/index.html">English website</a> · <a href="zh/index.html">Chinese website</a></p><script>location.replace("en/index.html"+location.search+location.hash)</script></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIE1903 Map Decisions</title>
+<script id="current-entry-routing">(() => {
+  const legacy = new URLSearchParams(location.search).get('legacy') === '1';
+  const historicHash = location.hash && location.hash !== '#decisions';
+  const destination = legacy || historicHash ? 'en/index.html' : 'algorithms/en/index.html';
+  location.replace(destination + location.search + (legacy || historicHash ? location.hash : ''));
+})();</script></head>
+<body><p><a href="algorithms/en/index.html">Current map decisions · English</a> · <a href="algorithms/zh/index.html">当前地图决策 · 中文</a></p><p><a href="en/index.html?legacy=1">Historical evidence studio</a></p></body></html>

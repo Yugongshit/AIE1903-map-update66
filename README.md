@@ -1,19 +1,15 @@
-# AIE1903 map comparison and structural evidence
+# AIE1903 map structure and state events
 
-Latest update: nuScenes local detection and status audit. [Chinese nuScenes result](algorithms/zh/index.html?dataset=nuscenes&event=S0980-LD-004) · [English](algorithms/en/index.html?dataset=nuscenes&event=S0980-LD-004). The page now shows 23 annotation-backed states, 1 computed local structural detection, and 5 insufficient structural candidates. Final structural uncertainty is 5/6 (83.3%); the requested ≤5% target is explicitly not achieved. Object-motion uncertainty is a separate source statistic. Argoverse predictions, all four reference map exports, and both datasets' state-layer exports remain unchanged. Validated with 255 core tests and 166 browser checks. [Validation](algorithms/nuscenes_confirmation_release_validation.json).
+Current source: [`main` / `94638e4`](https://github.com/Yugongshit/AIE1903-map-update66/tree/94638e4d2a5d538c17babdd9ea4d635621bfb823). Application code and the original Planning delivery are now together in main.
 
+[中文地图](algorithms/zh/index.html) · [English map](algorithms/en/index.html) · [Method and results](https://github.com/Yugongshit/AIE1903-map-update66/blob/main/docs/material_structural_decisions_20261109.md) · [Validation](algorithms/material_structural_release_validation_20261109.json)
 
-Latest update: Argoverse confirmation repair. [Chinese known-change replay](algorithms/zh/index.html?dataset=argoverse) · [English](algorithms/en/index.html?dataset=argoverse). The reference view replays 98 delivered ground-truth changes on an isolated map copy. The separate model view has 14 local detections: 9 changed-boundary identity hits, 5 false positives, and only 3 detections within the 0.5 m same-anchor geometry tolerance. Model map patches remain 0; reference-copy patches are 98. Validated with 245 core tests and 153 browser checks. [Validation](algorithms/confirmation_release_validation.json). Earlier entries below describe prior releases.
+The map uses completed actions from the supplied recordings. NuScenes retains 23 yellow state events; its six marking candidates close without structural updates, with no pending or revisit queue. Local residual diagnostics remain inspectable but do not directly become red structural changes.
 
+Argoverse's separate reference replay applies 93 material changes, including all 27 additions, and skips five minor geometry differences. The complete 98-change reference audit remains available. Reference replay is not model detection accuracy, and a completed no-update action is not a ground-truth negative.
 
-Source: `f41880667d7cf026f9fb1eee4aa7599f56bb4985` on `feat/structure-state-routing`.
+For same-target geometry, the shared engineering policy requires a displacement above 0.5 m over at least 3 m of continuous affected length. Adaptive interval checks prevent small oscillations from joining into a false long change. Verified additions, deletions and property changes have their own operation checks.
 
-[English map](algorithms/en/index.html) · [中文地图](algorithms/zh/index.html) · [Method and threshold audit](https://github.com/Yugongshit/AIE1903-map-update66/blob/feat/structure-state-routing/docs/structural_evidence_revision_20261108.md)
+Drag the divider right for the original map and left for the updated map. Yellow denotes state events; red denotes accepted material structure. Closed no-update candidates have no change overlay. All source inputs and the full reference exports are preserved; updated map copies have exact rollback artifacts.
 
-Drag the divider right for the original map and left for the updated presentation. Yellow identifies state events, red confirmed structural changes, and green unconfirmed structural candidates. All real structural candidates remain unconfirmed; no base-map patch was executed.
-
-The revised nuScenes adapter computes exact-window correspondence instead of assigning every marking unknown. LD004 has six fixed-anchor frames supporting a local discrepancy; the reference divider is also observed in the same window, so an old-line displacement or replacement is not confirmed. The other five marking candidates retain explicit reasons. All 23 state records are unchanged. Argoverse NONE references produce explicit paint-presence hypotheses; its deployed geometric thresholds and 1/70/5 reliability counts remain unchanged. The threshold audit records that raising MAD tolerance adds a false positive, not a verified improvement.
-
-Structural eligibility now depends on the edit operation: geometry requires complete geometry, attributes require verified properties, and deletion requires fully observed same-target support. Shared physical references remain blocked until synchronized edits are verified.
-
-Validation: 232 core tests and 142 local Chromium checks (63 pipeline, 79 map), in `algorithms/structural_evidence_release_validation.json`. Sensor neural-network inference was not rerun; existing observations were reprocessed. Prior validation records, baseline views and historical downloads are retained. Live GitHub Pages delivery was not verified from this environment.
+Validated with 290 core tests, 174 browser checks and 111 entrypoint routing checks. Default and old `#decisions` links open the current view; `?legacy=1` and other historical routes retain the older evidence studio. Sensor inference was not retrained. Live GitHub Pages delivery is checked separately from a successful branch push.

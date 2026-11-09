@@ -1,0 +1,159 @@
+{
+  "schema": "material-structural-release-validation-1.0",
+  "date": "2026-11-09",
+  "status": "PASS",
+  "source_branch": "main",
+  "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+  "core_tests": {
+    "command": "python -m unittest discover -s tests -v",
+    "count": 290,
+    "status": "PASS"
+  },
+  "browser_checks": {
+    "pipeline_checks.json": {
+      "status": "PASS",
+      "count": 78,
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40"
+    },
+    "composite_map_checks.json": {
+      "status": "PASS",
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+      "count": 96
+    }
+  },
+  "entrypoint_route_checks": {
+    "count": 111,
+    "status": "PASS",
+    "scope": "legacy/default/query/language routes tested in Node VM"
+  },
+  "prediction_freeze_intact": true,
+  "executed_source_hashes_verified": true,
+  "state_and_full_reference_exports_byte_identical_to_previous_release": {
+    "nuscenes_state_layer.geojson": true,
+    "argoverse_state_layer.geojson": true,
+    "argoverse_reference_updated_map.json": true,
+    "argoverse_reference_rollback_map.json": true,
+    "argoverse_reference_patch_log.json": true,
+    "argoverse_reference_changes.geojson": true
+  },
+  "nuscenes": {
+    "events": 29,
+    "reliability_counts": {
+      "supported_conflict": 24,
+      "insufficient_geometry": 5
+    },
+    "layer_counts": {
+      "map_state_event": 23,
+      "base_map_structure": 6
+    },
+    "accepted_layer_counts": {
+      "map_state_event": 23
+    },
+    "stored_state_events": 23,
+    "base_map_updates": 0,
+    "pending_manual_reviews": 0,
+    "final_structural_changes": 0,
+    "closed_without_structural_update": 6,
+    "pending_structural_decisions": 0,
+    "revisit_requests": 0,
+    "final_decision_scope": "completed_actions_for_supplied_recording_not_ground_truth_labels",
+    "model_detected_local_structure": 1,
+    "model_detected_local_structure_is_raw_diagnostic": true
+  },
+  "argoverse_model": {
+    "events": 76,
+    "reliability_counts": {
+      "supported_conflict": 14,
+      "insufficient_geometry": 40,
+      "consistent_with_map": 22
+    },
+    "layer_counts": {
+      "base_map_structure": 54,
+      "not_applicable": 22
+    },
+    "accepted_layer_counts": {},
+    "stored_state_events": 0,
+    "base_map_updates": 0,
+    "pending_manual_reviews": 0,
+    "final_structural_changes": 0,
+    "closed_without_structural_update": 76,
+    "pending_structural_decisions": 0,
+    "revisit_requests": 0,
+    "final_decision_scope": "completed_actions_for_supplied_recording_not_ground_truth_labels",
+    "model_detected_local_structure": 14,
+    "model_detected_local_structure_is_raw_diagnostic": true
+  },
+  "argoverse_material_reference": {
+    "confirmed_changes": 93,
+    "executed_patches": 93,
+    "added": 27,
+    "replaced": 66,
+    "deleted": 0,
+    "layers": {
+      "laneSegments": 84,
+      "pedCrossings": 9
+    },
+    "change_types": {
+      "added": 27,
+      "marking_changed": 11,
+      "lane_type_changed": 35,
+      "geometry_changed": 25,
+      "connectivity_changed": 16
+    },
+    "unsupported_changed_objects": 0,
+    "unsupported_inventory_objects": 15,
+    "updated_lanes": 240,
+    "updated_crossings": 33,
+    "rollback_verified": true,
+    "source_base_map_mutated": false,
+    "detector_successes_claimed": false,
+    "reference_total_changes": 98,
+    "accepted_material_changes": 93,
+    "skipped_minor_changes": 5,
+    "closed_no_update_decisions": 5,
+    "revisit_required": false,
+    "all_reference_changes_preserved_in_full_replay": true,
+    "decision_reason_counts": {
+      "REFERENCE_CONFIRMED_OBJECT_ADDITION": 27,
+      "REFERENCE_CONFIRMED_MARKING_TYPE_CHANGE": 11,
+      "REFERENCE_CONFIRMED_LANE_USE_CHANGE": 35,
+      "GEOMETRY_BELOW_MATERIALITY_REQUIREMENT": 5,
+      "REFERENCE_CONFIRMED_CONNECTIVITY_CHANGE": 16,
+      "REFERENCE_CONFIRMED_COHERENT_GEOMETRY_CHANGE": 22
+    },
+    "materiality_thresholds_are_engineering_policy": true,
+    "calibrated_accuracy_claimed": false
+  },
+  "materiality_policy": {
+    "distance_tolerance_m": 0.5,
+    "minimum_contiguous_length_m": 3.0,
+    "sample_spacing_m": 0.5,
+    "method": "bidirectional_sampled_same_target_spatial_extent",
+    "geometry_contract": "resolved target and operation; complete same-target prior/proposed geometry",
+    "discrete_changes": "verified addition, deletion, topology, lane use or regulated marking attributes are assessed by operation, not displacement",
+    "unsupported_write_operations": [
+      "topology_change",
+      "lane_use_change"
+    ],
+    "tolerance_basis": "engineering defaults: existing 0.5 m residual tolerance and 3 m full-quality curve extent; not calibrated on change labels",
+    "calibrated_probability": false
+  },
+  "accuracy_improvement_claimed": false,
+  "no_update_is_ground_truth_negative": false,
+  "screenshots_reviewed": [
+    "composite_nuscenes_en.png",
+    "composite_reference_argoverse_en.png",
+    "composite_mobile_zh.png"
+  ],
+  "live_github_pages_verified": false,
+  "source_commit": "94638e4d2a5d538c17babdd9ea4d635621bfb823",
+  "planning_files_verified_after_normal_merge": 44,
+  "legacy_recorded_data_links_verified_in_chromium": [
+    "en",
+    "zh"
+  ]
+}
