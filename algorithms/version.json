@@ -1,7 +1,32 @@
 {
-  "schema": "change-pipeline-studio-3.5",
+  "schema": "change-pipeline-studio-4.0",
   "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
-  "asset_revision": "1a75c4b5cd6f",
+  "asset_revision": "4f7a7315b774",
+  "asset_sha256": {
+    "pipeline_map_3d.js": "b9481b7d6bc24a75d21f6b77ca1e2e3e5843da57d9a17b5301e8de6593620132",
+    "pipeline_studio.css": "e904c5bba29c13c63b7904482ffb4c3fb86a80d2436e329faf13de050b0cf4bf",
+    "pipeline_studio.js": "20679c9bc33425d9bb1777c02ada079a27270d1cc453396cb874184f87215eb4",
+    "vendor/README.md": "dc51e7b64adfdfe4c402acafefab1f7799221a8afc59a3a6a191d3b6c56eb00a",
+    "vendor/three.LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+    "vendor/three.manifest.json": "7fa375071e770eaad49cfbeb196945a42beb86f11530678091166c958f791c41",
+    "vendor/three.min.js": "cf45c4257bbad198ac328ac54de45b9a53a6d86c21dbde13b26c8ed2e85f5fe7"
+  },
+  "three_dimensional_view": {
+    "renderer": "Three.js",
+    "version": "0.180.0",
+    "dependency_source": "local pinned bundle; no runtime CDN or network dependency",
+    "source_xy_geometry_preserved": true,
+    "ground_elevation": "flat display plane; no measured terrain reconstruction",
+    "vertical_extrusion": "schematic visual aid, not measured object or building height",
+    "before_after_camera": "one shared camera with screen-space clipping",
+    "views": [
+      "perspective",
+      "top_down",
+      "2d_fallback"
+    ],
+    "webgl_failure_action": "retain interactive 2D map",
+    "prediction_results_modified": false
+  },
   "map_context_sha256": {
     "nuscenes": "eadd93fcd65e01e3db6901e1c449c9f2ff61766acfded429a1687dd1b24266c8",
     "argoverse": "1835e5f348fb8c1fc127db63621bf0923119c595607bb3ff844c0217f0dae2ad"

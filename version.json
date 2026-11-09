@@ -1,5 +1,5 @@
 {
-  "schema": "decision-evidence-studio-3.6",
+  "schema": "decision-evidence-studio-4.0",
   "dataset_id": "nuscenes",
   "scene_id": "scene-0980",
   "camera_frames": 41,
@@ -131,7 +131,7 @@
     "en": "algorithms/en/index.html",
     "zh": "algorithms/zh/index.html"
   },
-  "source_commit": "94638e4d2a5d538c17babdd9ea4d635621bfb823",
+  "source_commit": "1d4a0b96f5c5fcd6e44b8d9977ca45d226a3c917",
   "source_branch": "main",
   "primary_results": "algorithms/en/index.html",
   "classification_definition": "base_map_structure_vs_map_state_event",
@@ -142,7 +142,7 @@
     "accepted_material_structure": "red",
     "closed_no_update": "no_change_overlay"
   },
-  "current_presentation_validation": "algorithms/material_structural_release_validation_20261109.json",
+  "current_presentation_validation": "algorithms/three_dimensional_release_validation_20261109.json",
   "previous_full_site_validation": "release_validation.json",
   "map_comparison": {
     "left_region": "original_reference_map",
@@ -161,7 +161,7 @@
     "detailed_analysis_collapsed_by_default": true,
     "confirmed_structure_requires": "Completed final material update action in model view; delivered reference object passing materiality policy in separate reference replay. Raw local detections do not authorize red structure overlays."
   },
-  "previous_presentation_validation": "algorithms/nuscenes_confirmation_release_validation.json",
+  "previous_presentation_validation": "algorithms/material_structural_release_validation_20261109.json",
   "structural_evidence_revision": {
     "nuscenes_supported_local_marking_discrepancies": 1,
     "nuscenes_unconfirmed_structure_candidates": 6,
@@ -321,5 +321,43 @@
     "default_and_decisions": "current algorithms view",
     "legacy_1_and_other_hashes": "historical studio retained",
     "query_parameters": "preserved"
+  },
+  "three_dimensional_view": {
+    "default_view": "3d",
+    "renderer": "Three.js r180 local distribution",
+    "source_xy_preserved": true,
+    "ground_geometry": "flat plane from supplied map XY",
+    "state_height_m": 1,
+    "state_height_is_schematic": true,
+    "source_result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+    "asset_revision": "4f7a7315b774",
+    "asset_sha256": {
+      "pipeline_map_3d.js": "b9481b7d6bc24a75d21f6b77ca1e2e3e5843da57d9a17b5301e8de6593620132",
+      "pipeline_studio.css": "e904c5bba29c13c63b7904482ffb4c3fb86a80d2436e329faf13de050b0cf4bf",
+      "pipeline_studio.js": "20679c9bc33425d9bb1777c02ada079a27270d1cc453396cb874184f87215eb4",
+      "vendor/README.md": "dc51e7b64adfdfe4c402acafefab1f7799221a8afc59a3a6a191d3b6c56eb00a",
+      "vendor/three.LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+      "vendor/three.manifest.json": "7fa375071e770eaad49cfbeb196945a42beb86f11530678091166c958f791c41",
+      "vendor/three.min.js": "cf45c4257bbad198ac328ac54de45b9a53a6d86c21dbde13b26c8ed2e85f5fe7"
+    },
+    "shared_camera_before_after": true,
+    "orbit_pan_zoom": true,
+    "touch_pinch": true,
+    "two_dimensional_fallback": true,
+    "view_query": [
+      "3d",
+      "2d"
+    ],
+    "first_view": "street scale around selected source object",
+    "camera_views": [
+      "perspective",
+      "top"
+    ],
+    "model_decisions_changed": false,
+    "external_cdn_required": false,
+    "browser_checks": {
+      "three_dimensional": 44,
+      "two_dimensional": 174
+    }
   }
 }

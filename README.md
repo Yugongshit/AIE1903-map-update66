@@ -1,15 +1,13 @@
-# AIE1903 map structure and state events
+# AIE1903 interactive 3D map comparison
 
-Current source: [`main` / `94638e4`](https://github.com/Yugongshit/AIE1903-map-update66/tree/94638e4d2a5d538c17babdd9ea4d635621bfb823). Application code and the original Planning delivery are now together in main.
+[中文三维地图](algorithms/zh/index.html?view=3d) · [English 3D map](algorithms/en/index.html?view=3d) · [2D map](algorithms/en/index.html?view=2d)
 
-[中文地图](algorithms/zh/index.html) · [English map](algorithms/en/index.html) · [Method and results](https://github.com/Yugongshit/AIE1903-map-update66/blob/main/docs/material_structural_decisions_20261109.md) · [Validation](algorithms/material_structural_release_validation_20261109.json)
+Current source: [`main` / `1d4a0b9`](https://github.com/Yugongshit/AIE1903-map-update66/tree/1d4a0b96f5c5fcd6e44b8d9977ca45d226a3c917). [3D implementation and controls](https://github.com/Yugongshit/AIE1903-map-update66/blob/main/docs/3d_map_view_20261109.md) · [Release validation](algorithms/three_dimensional_release_validation_20261109.json)
 
-The map uses completed actions from the supplied recordings. NuScenes retains 23 yellow state events; its six marking candidates close without structural updates, with no pending or revisit queue. Local residual diagnostics remain inspectable but do not directly become red structural changes.
+The default map now supports 3D orbit, pan, zoom, overhead view and mobile two-finger gestures. Before and after retain a single shared camera; drag the divider right for the original and left for the updated map. Click yellow state events or red accepted structures for the saved evidence. Use the 2D button to return to the original flat renderer. WebGL failures automatically retain the working 2D comparison.
 
-Argoverse's separate reference replay applies 93 material changes, including all 27 additions, and skips five minor geometry differences. The complete 98-change reference audit remains available. Reference replay is not model detection accuracy, and a completed no-update action is not a ground-truth negative.
+The map positions and boundaries are supplied XY geometry. Road display offsets and 1 m state extrusions are schematic, not measured elevation or building reconstruction. All inference results and exported source geometry are unchanged. NuScenes retains 23 yellow states and 6 closed no-update candidates; Argoverse reference replay retains 93 material changes and all 27 additions. The complete 98-change reference audit remains separate and available.
 
-For same-target geometry, the shared engineering policy requires a displacement above 0.5 m over at least 3 m of continuous affected length. Adaptive interval checks prevent small oscillations from joining into a false long change. Verified additions, deletions and property changes have their own operation checks.
+Three.js 0.180.0 is bundled locally with its MIT license and integrity manifest; no runtime CDN is needed. Validated with 14 presentation identity tests, 44 real WebGL browser checks and 174 retained 2D browser checks. Actual WebGL context loss, missing dependencies, mobile gestures, clipping andsource immutability are covered. Result SHA256: `d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40`.
 
-Drag the divider right for the original map and left for the updated map. Yellow denotes state events; red denotes accepted material structure. Closed no-update candidates have no change overlay. All source inputs and the full reference exports are preserved; updated map copies have exact rollback artifacts.
-
-Validated with 290 core tests, 174 browser checks and 111 entrypoint routing checks. Default and old `#decisions` links open the current view; `?legacy=1` and other historical routes retain the older evidence studio. Sensor inference was not retrained. Live GitHub Pages delivery is checked separately from a successful branch push.
+[Material-change method](https://github.com/Yugongshit/AIE1903-map-update66/blob/main/docs/material_structural_decisions_20261109.md). Historical recordings remain accessible with `?legacy=1`; older releases and downloads are retained. GitHub Pages delivery is checked separately from a successful branch push.

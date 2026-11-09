@@ -1,0 +1,69 @@
+{
+  "schema": "three-dimensional-map-release-validation-1.0",
+  "date": "2026-11-09",
+  "status": "PASS",
+  "presentation_identity_tests": {
+    "count": 14,
+    "status": "PASS"
+  },
+  "browser_checks": {
+    "three_map_checks.json": {
+      "status": "PASS",
+      "page_errors": [],
+      "failed_requests": [],
+      "external_requests": [],
+      "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+      "count": 44
+    },
+    "pipeline_checks.json": {
+      "status": "PASS",
+      "count": 78,
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40"
+    },
+    "composite_map_checks.json": {
+      "status": "PASS",
+      "page_errors": [],
+      "failed_requests": [],
+      "result_sha256": "d9e494b00aa1ade1ee472c3123df44745bbfe9d0a35e044589303ff7b31d8b40",
+      "count": 96
+    }
+  },
+  "browser_check_total": 218,
+  "original_data_and_results_byte_identical": {
+    "result.json": true,
+    "nuscenes_state_layer.geojson": true,
+    "argoverse_state_layer.geojson": true,
+    "nuscenes_map_context.json": true,
+    "argoverse_map_context.json": true,
+    "argoverse_reference_updated_map.json": true,
+    "argoverse_material_reference_updated_map.json": true,
+    "argoverse_material_reference_rollback_map.json": true,
+    "argoverse_material_reference_patch_log.json": true,
+    "argoverse_material_reference_changes.geojson": true
+  },
+  "asset_sha256": {
+    "pipeline_map_3d.js": "b9481b7d6bc24a75d21f6b77ca1e2e3e5843da57d9a17b5301e8de6593620132",
+    "pipeline_studio.css": "e904c5bba29c13c63b7904482ffb4c3fb86a80d2436e329faf13de050b0cf4bf",
+    "pipeline_studio.js": "20679c9bc33425d9bb1777c02ada079a27270d1cc453396cb874184f87215eb4",
+    "vendor/README.md": "dc51e7b64adfdfe4c402acafefab1f7799221a8afc59a3a6a191d3b6c56eb00a",
+    "vendor/three.LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+    "vendor/three.manifest.json": "7fa375071e770eaad49cfbeb196945a42beb86f11530678091166c958f791c41",
+    "vendor/three.min.js": "cf45c4257bbad198ac328ac54de45b9a53a6d86c21dbde13b26c8ed2e85f5fe7"
+  },
+  "renderer_source_and_build_sha256": "b9481b7d6bc24a75d21f6b77ca1e2e3e5843da57d9a17b5301e8de6593620132",
+  "renderer": "Three.js 0.180.0 local bundle",
+  "default_view": "3d",
+  "event_height": "1m schematic display extrusion, not a measured height",
+  "terrain": "recorded XY geometry on a flat plane",
+  "before_after_camera": "shared",
+  "inference_rerun": false,
+  "screenshots_reviewed": [
+    "three_nuscenes_first_view_en.png",
+    "three_argoverse_first_view_en.png",
+    "three_nuscenes_mobile_zh.png"
+  ],
+  "live_github_pages_verified": false,
+  "source_commit": "1d4a0b96f5c5fcd6e44b8d9977ca45d226a3c917"
+}
