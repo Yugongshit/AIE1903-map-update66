@@ -1,30 +1,28 @@
 # 道路地图结构变更与状态事件
 
-**当前更新：nuScenes 结构判断接线修复（2026-11-08）。** LD004 的实际局部差异判定已接通到网页，显示1个红色局部检出、5个绿色证据不足结构候选；23个黄色状态事件保持不变。六个结构候选的证据不足率为5/6=83.3%，用户指定的最终结构判断≤5%目标尚未达到，不以物体运动3/154的1.95%替代。新增来源与分母审计、逐候选原因、放宽条件诊断。详见[nuScenes修改与限制](docs/nuscenes_confirmation_repair_20261108.md)。Argoverse识别及98个真值回放保留。
+当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
+**2026-11-09：按实质结构变化决定是否改图。** 局部曲线距离不再直接等同于标线移动。先核对物理对象和修改操作，再检查几何变化的幅度与连续影响范围；新增车道、连通关系、车道用途和受约束的标线类型变化分别处理。只使用本次提供的材料，所有候选给出已完成的动作，不创建复访或人工待办。`no_update` 表示本次不改底图，不是独立真值标签。
 
-**当前更新：Argoverse 确认流程修复（2026-11-08）。** 已确认数据的 98 个变化在隔离地图副本上执行并可回退，网页默认显示独立的红色真值回放。算法视图单独显示 14 个局部检出、40 个证据不足、22 个几何一致。按变化边界身份评价为 9 TP / 5 FP / 22 FN；其中只有 3 个检出同时满足 0.5 米局部几何误差条件，不能称为 9 份正确地图修改。修复了 NONE 一票否决、确认结果固定为 false 和颜色依赖写入许可的问题。模型自动底图补丁仍为 0；真值副本补丁为 98。详见 [修改原理、结果与复现](docs/argoverse_confirmation_repair_20261108.md)。以下较早记录保留为历史状态。
+- [当前算法与实际结果](docs/material_structural_decisions_20261109.md)
+- [中文地图对照](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [English map comparison](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html)
+- [新对话接续](CONTINUE_HERE.md) · [历史资料归档](archives/session-20261108/README.md)
 
+nuScenes 的 6 个标线候选本次均不执行结构更新，23 个黄色状态事件保留。Argoverse 已交付参考变化中，93 项满足实质变化标准，5 项细微几何差异不用于主图更新；完整 98 项原始参考回放仍可下载。参考回放与算法预测分别保存，不把已有真值回放说成模型准确率。
 
-**最新结构证据修订：** nuScenes 标线已接入精确窗口的实际地图对应计算，LD004 有重复局部差异支持，但同窗口原参考线仍可观测，不能直接认定边界移动。其余 5 个标线候选分别保留原因；23 个状态不变。写入检查改为按几何、属性和删除操作分别核验，真实底图写入仍为 0。见 [本次方法与阈值对照](docs/structural_evidence_revision_20261108.md)。
+```bash
+python scripts/run_change_pipeline.py --out outputs/material-run
+python scripts/build_pipeline_studio.py --result outputs/material-run/result.json --out outputs/material-site
+python -m unittest discover -s tests -v
+python scripts/check_pipeline_studio.py outputs/material-site
+python scripts/check_composite_map.py outputs/material-site
+```
 
-**地图前后对照与 Perception 说明已更新：** 使用可拖动分割线比较原图和更新后视图：拉到最右边是全原图，最左边是全更新后。黄色表示状态事件，红色表示已确认结构变更，绿色表示未确认结构候选；当前真实红色变更为 0。nuScenes 显示 157 个底图要素、23 个状态记录和 6 个结构假设；展示读取最新冻结预测；底图未改写。页面可展开查看 nuScenes 14 类官方物体标注及 Argoverse 粗车辆/车道线输出。见 [标注来源与地图对照说明](docs/perception_and_composite_map.md) · [滑动对照验证](docs/swipe-map-validation-20261108.json)。
+运行目录须为新的目录；打开构建结果中的 `zh/index.html` 或 `en/index.html`。依赖和旧工具的用法见下面保留的历史说明。
 
-本仓库包括地图维护原型和 Evaluation & Evidence 工作台。用户黄子明负责最终评估与证据汇总；地图维护原型接收感知与可靠性结果，区分底图结构变更和地图状态事件，维护观测证据、事件有效性与版本历史。
+成员原始资料在 `AIE1903 原始资料/`；Planning 在其中的 `Planning_M4_scene0980_handoff/`。集成算法在 `map_update/`，运行、构建与浏览器检查在 `scripts/`。这些原型使用已交付观测，不能描述为重新训练了感知网络或已经完成实车闭环规划。
 
-## 新对话接续入口（2026-11-08）
-
-**最新：结构/状态分类已重写并运行。** 按用户修正的定义，区分“底图结构变更”和“地图状态事件”，不再用持续时间选择图层。nuScenes 23 个占用事件进入状态层，6 个标线结构假设未证实；Argoverse 新支持的 1 个结构候选经真值核对为几何误报。实际底图写入 0，不生成等待人工复核的队列。没有独立结构/状态分类标签，旧 23/29 长短期分数不再使用。新实现与原因见 [结构/状态算法说明](docs/map_structure_state.md)，[中文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/zh/index.html) · [英文结果](https://yugongshit.github.io/AIE1903-map-update66/algorithms/en/index.html)。下方旧 M3、自动记录与长短期状态属于历史记录，以此条为准。
-
-**先读 [CONTINUE_HERE.md](CONTINUE_HERE.md)。** 当前开发分支是 `feat/structure-state-routing`，包含此前 `fix/automatic-map-decisions` 的网站与自动记录修正，以及用户在 `main` 提交 `9c6f86e` 的 Argoverse 交付。
-
-**原始 Argoverse 基线复现：** 582 帧、10,278 条冻结观测 → 4 条逐帧差异候选 → 1 个 uncertain 融合组 → 0 个确认变化。已有 M8 地图真值用于自动评价：候选命中 0/1，全供给地图 98 个变化中确认检出 0。该数值是整图任务完成度，不是可见区域准确率。方法、原因和运行命令见 [复跑诊断](docs/argoverse_rerun_20261108.md) 与 [独立数据集入口](docs/datasets.md)。原始基线未执行持续性分类；最新版已按用户修正的结构/状态定义运行，见上方新入口。
-
-**自动处理更新：** 当前 29 个候选全部处理完成，23 个占用事件和 6 个标线差异分别保存，不再生成“等待人工复核”的任务。基础地图结构写入仍为 0；持续性未知与已经观测到物体分开表达。另修复同一车道不同占用事件被合并清除的问题。方法、输出与边界见 [自动处理说明](docs/automatic_processing.md)。
-
-**Planning 后续交付已收到：** `main` 的 `17ee2c1` 新增 44 个文件，包含三种策略各 41 帧的规划结果。当前已做基本结构核对，尚未复现或接入网站；见 [接收记录](docs/planning_intake_20261108.md)。
-
-[英文网站](https://yugongshit.github.io/AIE1903-map-update66/en/index.html#decisions) · [中文网站](https://yugongshit.github.io/AIE1903-map-update66/zh/index.html#decisions) · [当前实现说明](docs/decision-studio.md) · [1,449 个工作文件的归档与恢复](archives/session-20261108/README.md) · [给新对话的短指令](docs/next-conversation-prompt.txt)
+## 历史版本说明
 
 以下保留各阶段的运行说明。旧日期、旧测试数量和旧交付状态以接续说明中的当前记录为准。历史 Proposal、PPT、讲稿、生成脚本和原始附件已一并归档，旧工作区快照不会覆盖当前源代码。
 

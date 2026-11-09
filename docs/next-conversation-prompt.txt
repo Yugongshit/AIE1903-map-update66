@@ -1,18 +1,6 @@
-最新nuScenes修复见docs/nuscenes_confirmation_repair_20261108.md；结果outputs/pipeline-v5/nuscenes-confirmation-20261108/result.json。用户5%指最终结构变化判断。当前6候选=1局部检出+5证据不足，未达5%；不能拿物体运动uncertain3/154=1.95%替代。Argoverse旧结果保持。
-
-最新入口：docs/argoverse_confirmation_repair_20261108.md。Argoverse 已分为 98 个真值地图副本更新回放与独立模型识别（14 检出，身份 9 TP / 5 FP / 22 FN，仅 3 个局部几何误差≤0.5m）。结果 outputs/pipeline-v4/confirmation-final-20261108/result.json；不得把真值回放当模型成绩。以下保留此前记录。
-
-最新算法修订：先读 docs/structural_evidence_revision_20261108.md。nuScenes S0980-LD-004 接入精确窗口几何匹配后有局部差异支持，同窗口原参考线仍有观测，不能认定旧线移位；其余5条不足。23状态不变；Argo NONE 形成未确认paint-presence假设。写入按操作核验，实际写入0。不要恢复统一unknown或将局部支持写成已确认结构修改。
-
-最新展示：原图/更新后使用可拖动分割线对照，最右全原图、最左全更新后。黄色状态事件，红色已确认结构变更，绿色未确认结构候选；不可把局部几何支持直接标成红色。先读 docs/perception_and_composite_map.md；Perception的14类nuScenes物体标签是官方GT，Argoverse仅粗vehicle及车道线。不得把新展示说成重训或提高准确率。
-最新定义：底图结构变更 vs 地图状态事件，不是长期 vs 短期。先读 docs/map_structure_state.md；不要重新把寿命预测作为图层分类器。新版状态层会区分观测存在、明确恢复、未知和过期，旧23/29长短期评价不再适用。
-请继续我的 AIE1903 Evaluation and Evidence 项目。
-仓库：https://github.com/Yugongshit/AIE1903-map-update66
-继续开发使用分支：feat/structure-state-routing（包含 fix/automatic-map-decisions 及 main 的 9c6f86e Argoverse 交付）。
-先读取这个分支根目录的 CONTINUE_HERE.md，再读取 docs/decision-studio.md 和 archives/session-20261108/README.md。
-本轮代码、数据边界、已通过的检查、全部历史文件恢复方法和待办都在那里。原始资料在 AIE1903 原始资料/，在线网站与下载包在 gh-pages 分支。
-保留英文/中文两个可交互网站，使用 nuScenes scene-0980 的真实来源；Argoverse 已授权并通过独立适配器复跑。真实改图仍为 0，受控写入是隔离副本实验，不能当作真实长期变化或实车规划。
-2026-11-08 已取消当前自动处理流程的人工待办：29 个候选处理完成，23 个占用事件和 6 个标线差异分别保存。持续性未知不能覆盖已经看到路障的事实；不能因此伪造永久变化或已清除。先读 docs/automatic_processing.md；旧 M3 诊断保留原义。
-随后已接入 Argoverse M2–M8 交付，实际复跑 M3/M4，冻结预测后自动评价已有 M8 GT：4 条逐帧候选、1 个 uncertain 组、0 确认变化，候选命中 0/1，全供给 98 个变化对象确认检出 0。先读 docs/argoverse_rerun_20261108.md 和 docs/datasets.md。这段是原始基线记录；最新版已运行结构/状态分类，不能恢复用持续时间决定图层。
-我是黄子明，负责最后的 Evaluation and Evidence 汇总。先核对当前仓库和进度，接着根据我新提供的成员交付继续做，不要重做已有 demo，也不要把旧工作区草稿覆盖到最新版代码。
-Planning 后续交付已在 main 分支的 17ee2c1 中收到：AIE1903 原始资料/Planning_M4_scene0980_handoff。先读 docs/planning_intake_20261108.md；它目前尚未复现或接入网站。
+请继续 AIE1903 项目，仓库 https://github.com/Yugongshit/AIE1903-map-update66，当前统一代码入口 main，网站 gh-pages。
+先读 CONTINUE_HERE.md 和 docs/material_structural_decisions_20261109.md，再核对实际源代码。
+当前定义是底图结构变更／地图状态事件，不是长短期。小幅曲线差不直接算标线移动；必须检查物理对象、修改操作和实质影响。只使用现有材料，最终动作已完成，不安排复访。
+nuScenes：23 个状态保留，6 个结构候选本次不改底图，0 待定。旧 1 检出＋5 不足只是原始局部诊断。
+Argoverse：93 项实质参考变化在独立地图副本回放，5 项纯几何差异不更新，完整 98 项参考审计保留。真值回放和模型预测分开；不得把本次 no_update 当真负标签或准确率。
+main 已含 Planning_M4_scene0980_handoff 原始代码；当前模型改图、参考回放与规划执行要区分。不要用旧分支或旧归档覆盖现有实现。

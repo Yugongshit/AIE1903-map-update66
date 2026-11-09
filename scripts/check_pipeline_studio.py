@@ -57,7 +57,16 @@ try:
             for name in source['datasets'] for event, original in zip(view['datasets'][name]['events'], source['datasets'][name]['events'])
         ) and all(len(view['datasets'][name]['events']) == len(source['datasets'][name]['events']) for name in source['datasets']))
         check('actual state layers, evaluation and method are preserved unchanged', all(view['datasets'][name]['state_event_layer'] == source['datasets'][name]['state_event_layer'] for name in source['datasets']) and view['evaluation'] == source['evaluation'] and view['method'] == source['method'])
-        check('nuScenes opens with 29 events, 23 state classes and one locally supported structural hypothesis', page.locator('#events [data-event]').count() == 29 and '23 / 1' in page.locator('#overview').inner_text() and source['datasets']['nuscenes']['summary']['reliability_counts'] == {'supported_conflict': 24, 'insufficient_geometry': 5})
+        check('all supplied candidates have a complete action with no revisit or manual-review queue',
+              all(event['final_structural_decision']['processing_status'] == 'complete'
+                  and event['final_structural_decision']['action'] in {'update', 'no_update', 'state_event'}
+                  and not event['final_structural_decision']['revisit_required']
+                  and not event['final_structural_decision']['manual_review_required']
+                  and not event['final_structural_decision']['decision_is_ground_truth']
+                  for dataset in source['datasets'].values() for event in dataset['events'])
+              and all(dataset['summary']['pending_structural_decisions'] == 0
+                      and dataset['summary']['revisit_requests'] == 0 for dataset in source['datasets'].values()))
+        check('nuScenes keeps 29 source events while displaying 23 state events and no material structural updates', page.locator('#events [data-event]').count() == 29 and page.locator('#map-count-state').inner_text() == '23' and page.locator('#map-count-confirmed').inner_text() == '0' and source['datasets']['nuscenes']['summary']['reliability_counts'] == {'supported_conflict': 24, 'insufficient_geometry': 5})
         audit = source['evaluation']['nuscenes']['status_audit']
         check('nuScenes status audit keeps known object annotations separate from structural evidence',
               page.locator('#nuscenes-status-audit').is_visible()
@@ -74,16 +83,24 @@ try:
               and '23' in page.locator('#nuscenes-routing').inner_text()
               and '6' in page.locator('#nuscenes-routing').inner_text()
               and '0 unassigned / 29' in page.locator('#nuscenes-routing').locator('..').inner_text())
-        check('the requested structural uncertainty target is honestly unmet at 5 of 6, independently from object motion',
+        structural = [event for event in source['datasets']['nuscenes']['events'] if event['map_layer']['predicted_layer'] == 'base_map_structure']
+        check('all six nuScenes structural candidates close without an edit or another observation request',
+              len(structural) == 6
+              and all(event['final_structural_decision']['processing_status'] == 'complete'
+                      and event['final_structural_decision']['action'] == 'no_update'
+                      and not event['final_structural_decision']['material_change_supported']
+                      and not event['final_structural_decision']['revisit_required']
+                      and not event['final_structural_decision']['manual_review_required']
+                      and event['final_structural_decision']['evidence_scope'] == 'supplied_recording'
+                      and not event['final_structural_decision']['decision_is_ground_truth'] for event in structural)
+              and '6 / 6' in page.locator('#nuscenes-structure-abstention').inner_text()
+              and page.locator('#map-count-closed').inner_text() == '6')
+        check('raw local diagnostics remain separate from the completed structural decision',
               audit['structural_quality']['detected'] == 1
               and audit['structural_quality']['insufficient_evidence'] == 5
               and audit['structural_quality']['total_candidates'] == 6
-              and abs(audit['structural_quality']['insufficient_fraction'] - 5 / 6) < 1e-12
-              and audit['five_percent_claim']['model_candidate_target_met'] is False
-              and audit['five_percent_claim']['structural_truth_rate_verified'] is False
-              and '5 / 6' in page.locator('#nuscenes-structure-abstention').inner_text()
-              and '83.3%' in page.locator('#nuscenes-structure-abstention').inner_text()
-              and '5%' in page.locator('#nuscenes-uncertainty-note').inner_text())
+              and source['datasets']['nuscenes']['summary']['pending_structural_decisions'] == 0
+              and source['datasets']['nuscenes']['summary']['revisit_requests'] == 0)
         page.locator('#nuscenes-candidate-audit > summary').click()
         check('object motion uncertainty retains its own 154-instance denominator and extra insufficient-observation category',
               audit['object_motion_states']['total_instances'] == 154
@@ -117,7 +134,7 @@ try:
         page.locator('#filter').select_option('base_map_structure')
         check('six marking hypotheses remain visible without being accepted as verified edits', page.locator('#events [data-event]').count() == 6)
         page.locator('#events [data-event]').first.click()
-        check('unverified marking semantics identify a structural hypothesis independently of reliability', page.locator('#layer-status').inner_text() == 'Base-map structure' and 'Geometry evidence insufficient' in page.locator('#reliability-status').inner_text() and 'actual change is not verified' in page.locator('#layer-note').inner_text() and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False)
+        check('closed structural diagnostics expose a final no-update decision without an active map overlay', page.locator('#layer-status').inner_text() == 'Base-map structure' and page.locator('#final-decision-title').is_visible() and page.locator('#final-decision-note').inner_text().strip() and page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update' and page.evaluate('PIPELINE_STUDIO.current().decision.classification_applied') is False and page.evaluate('PIPELINE_STUDIO.map.features(false).filter(f => f.layer === "structure").length') == 0)
         check('structural hypothesis does not create a state record or a base patch', not page.locator('#lifecycle').is_visible() and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.map_patch_executed') is False)
         if page.locator('#nuscenes-candidate-audit').get_attribute('open') is None:
             page.locator('#nuscenes-candidate-audit > summary').click()
@@ -131,18 +148,18 @@ try:
               page.evaluate('PIPELINE_STUDIO.state.eventId') == 'S0980-LD-004'
               and page.locator('#selected-id').inner_text() == 'S0980-LD-004')
         ld004 = page.evaluate('PIPELINE_STUDIO.current()')
-        check('LD004 adopts the computed local model detection while its exact operation and edit stay unresolved',
+        check('LD004 preserves its raw local detection but closes without a material structural edit',
               page.locator('#reliability-status').inner_text() == 'Local conflict supported'
               and ld004['reliability']['status'] == 'supported_conflict'
               and ld004['change_type'] == 'line_discrepancy'
               and ld004['structural_hypothesis']['operation'] == 'unresolved_parallel_marking_or_insertion'
-              and ld004['structural_hypothesis']['confirmed'] is True
-              and ld004['structural_hypothesis']['confirmation_source'] == 'model_prediction'
-              and ld004['structural_hypothesis']['confirmation_scope'] == 'local_boundary_correspondence'
+              and ld004['structural_hypothesis']['confirmed'] is False
+              and ld004['final_structural_decision']['action'] == 'no_update'
+              and not ld004['final_structural_decision']['material_change_supported']
               and ld004['structural_hypothesis']['operation_resolved'] is False
               and ld004['model_change_decision']['detected'] is True
               and ld004['model_change_decision']['scope'] == 'local_boundary_correspondence'
-              and ld004['decision']['classification_applied'] is True
+              and ld004['decision']['classification_applied'] is False
               and ld004['decision']['base_map_write_eligible'] is False
               and ld004['decision']['write_gate']['map_patch_executed'] is False)
         check('LD004 uses its exact 27–33 source window and six fixed-anchor supporting frames',
@@ -158,9 +175,9 @@ try:
               and [int(cell.inner_text()) for cell in page.locator('#same-window-evidence tbody tr td:first-child').all()] == list(range(28, 34))
               and 'does not support a claim that the old marking disappeared or moved' in page.locator('#same-window-evidence').inner_text())
         check('LD004 details separate local geometric support from paint identity, alignment and structural truth',
-              'local' in page.locator('#structural-hypothesis-note').inner_text().lower()
-              and 'model' in page.locator('#structural-hypothesis-note').inner_text().lower()
-              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
+              page.locator('#final-decision-title').is_visible()
+              and page.locator('#final-decision-reasons').inner_text().strip()
+              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False
               and 'Paint identity' in page.locator('#observation-dimensions').inner_text()
               and 'Physical alignment' in page.locator('#observation-dimensions').inner_text()
               and ld004['observation_evidence']['change_assessment']['map_edit_verified'] is False
@@ -189,10 +206,12 @@ try:
         page.screenshot(path=str(root / 'pipeline_nuscenes_en.png'), full_page=True)
         page.locator('#dataset').select_option('argoverse')
         argo = source['datasets']['argoverse']
-        replay = argo['reference_replay']
+        full_replay = argo['reference_replay']
+        replay = argo['material_reference_replay']
+        material_count = len(replay['changes'])
         check('nuScenes repair preserves the independently evaluated Argoverse result counts',
               argo['summary']['reliability_counts'] == {'supported_conflict': 14, 'insufficient_geometry': 40, 'consistent_with_map': 22}
-              and len(replay['changes']) == 98
+              and len(full_replay['changes']) == 98
               and source['evaluation']['argoverse']['full_boundary_geometry']['metrics']['true_positives'] == 9
               and source['evaluation']['argoverse']['full_boundary_geometry']['local_geometry_summary']['within_tolerance_detections'] == 3)
         detected = [event for event in argo['events'] if event['model_change_decision']['detected']]
@@ -202,12 +221,13 @@ try:
               page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'reference'
               and page.locator('#map-source').input_value() == 'reference'
               and page.locator('#reference-detail').is_visible()
-              and page.locator('#reference-change-select option').count() == len(replay['changes']) == 98)
+              and page.locator('#reference-change-select option').count() == material_count
+              and 0 < material_count < len(full_replay['changes']))
         check('reference confirmation and applied patches are reported independently of model detections',
-              replay['summary']['confirmed_changes'] == replay['summary']['executed_patches'] == 98
+              replay['summary']['confirmed_changes'] == replay['summary']['executed_patches'] == material_count
               and argo['summary']['base_map_updates'] == 0
               and 0 < len(detected) < 98
-              and '98' in page.locator('#map-count-confirmed').inner_text()
+              and page.locator('#map-count-confirmed').inner_text() == str(material_count)
               and 'reference' in page.locator('#reference-detail').inner_text().lower())
         first_reference = replay['changes'][0]
         page.locator('#reference-change-select').select_option(first_reference['change_id'])
@@ -219,7 +239,12 @@ try:
               all((root / filename).exists() for filename in [
                   'argoverse_reference_updated_map.json', 'argoverse_reference_rollback_map.json',
                   'argoverse_reference_patch_log.json', 'argoverse_reference_changes.geojson'])
-              and json.loads((root / 'argoverse_reference_changes.geojson').read_text()) == replay['change_layer'])
+              and json.loads((root / 'argoverse_reference_changes.geojson').read_text()) == full_replay['change_layer'])
+        check('material replay downloads match the filtered updated map, rollback, change layer and decision audit',
+              all(json.loads((root / ('argoverse_material_reference_' + filename)).read_text()) == replay[key]
+                  for filename, key in [('updated_map.json', 'updated_map'), ('rollback_map.json', 'rollback_map'),
+                                        ('patch_log.json', 'patch_log'), ('changes.geojson', 'change_layer'),
+                                        ('decisions.json', 'materiality_decisions')]))
         page.locator('#map-source').select_option('model')
         check('model view retains every event and reports computed detections independently of patch eligibility',
               page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'model'
@@ -229,10 +254,10 @@ try:
               and all(not e['decision']['write_gate']['map_patch_executed'] for e in argo['events']))
         false_positive = next(event for event in argo['events'] if event['event_id'] == 'argo-local-5d7fb99ef6812741')
         page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', false_positive['event_id'])
-        check('known detected false positive remains visibly evaluated rather than hidden by confirmation color',
+        check('raw false-positive diagnostic remains inspectable without a red structural confirmation',
               'false positive' in page.locator('#selected-evaluation').inner_text().lower()
               and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is True
-              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True)
+              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False)
         check('shared physical aliases retain their separate structural-write condition',
               page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.target_identity.shared_canonical_physical_boundary') is True
               and page.locator('#write-reasons [data-reason="SYNCHRONIZED_ALIAS_EDIT_UNVERIFIED"]').count() == 1
@@ -251,9 +276,10 @@ try:
               and str(local_eval['within_tolerance_detections']) + ' / ' + str(local_eval['model_detections']) in page.locator('#local-geometry-summary').inner_text()
               and 'Boundary-identity recall' in page.locator('#comparison').inner_text()
               and 'same' in page.locator('#local-geometry-summary').inner_text().lower())
-        check('structural write gate retains quality conditions without duration or visit minima',
-              'Minimum write duration · No minimum' in page.locator('#parameters').inner_text()
-              and 'Minimum write visits · No minimum' in page.locator('#parameters').inner_text()
+        check('materiality settings reflect the actual policy without duration or revisit requirements',
+              str(source['datasets']['nuscenes']['events'][0]['final_structural_decision']['policy']['distance_tolerance_m']) in page.locator('#materiality-method').inner_text()
+              and format(source['datasets']['nuscenes']['events'][0]['final_structural_decision']['policy']['minimum_contiguous_length_m'], 'g') + ' m' in page.locator('#materiality-method').inner_text()
+              and 'Further observations required · No' in page.locator('#parameters').inner_text()
               and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.duration_used') is False)
         support = source['evaluation']['argoverse']['task_support_breakdown']
         check('task coverage retains all 34 changed lane-side references without treating them as model inputs',
@@ -285,11 +311,11 @@ try:
               and all('PRIOR_EXPLICITLY_UNPAINTED_REQUIRES_INSERTION_VERIFICATION' not in event['reliability']['reason_codes'] for event in paint_events))
         paint = next(event for event in paint_events if any(alias['map_element_id'] == 'ls-168085012' and alias['boundary_side'] == 'right' for alias in event['map_aliases']))
         page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', paint['event_id'])
-        check('the previously blocked 46-frame example now displays an actual local model detection',
+        check('the 46-frame example retains its raw model detection and a distinct final no-update decision',
               paint['model_change_decision']['detected'] is True
               and paint['distinct_frame_count'] == 46
-              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
-              and 'model' in page.locator('#structural-hypothesis-values').inner_text().lower()
+              and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False
+              and page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update'
               and not paint['decision']['write_gate']['map_patch_executed'])
         check('local prediction does not invent paint identity, visibility or executed full-map edits',
               paint['observation_evidence']['paint_identity']['status'] == 'unverified'
@@ -322,15 +348,15 @@ try:
         check('both languages use identical source-derived data', page.evaluate('PIPELINE_STUDIO.data') == view)
         check('Chinese distinguishes unobserved clip-end state from unknown classification', '地图状态事件' in page.locator('#layer-status').inner_text() and '末帧状态未观测' in page.locator('#lifecycle').inner_text() and '并不代表没有检测到该障碍' in page.locator('#lifecycle').inner_text())
         page.locator('#nuscenes-candidate-audit > summary').click()
-        check('Chinese audit identifies the unmet structural target using 5 of 6 rather than motion uncertainty',
+        check('Chinese audit reports all six candidates complete separately from object-motion uncertainty',
               page.locator('#nuscenes-status-audit').is_visible()
-              and '5 / 6' in page.locator('#nuscenes-structure-abstention').inner_text()
-              and '83.3%' in page.locator('#nuscenes-structure-abstention').inner_text()
-              and '5%' in page.locator('#nuscenes-uncertainty-note').inner_text()
+              and '6 / 6' in page.locator('#nuscenes-structure-abstention').inner_text()
+              and page.locator('#map-count-closed').inner_text() == '6'
+              and page.locator('#map-count-confirmed').inner_text() == '0'
               and '3/154' in page.locator('#nuscenes-motion-note').inner_text())
         page.locator('#nuscenes-status-audit').screenshot(path=str(root / 'pipeline_nuscenes_audit_zh.png'))
         page.locator('#nuscenes-candidate-audit > summary').click()
-        check('Chinese explains semantic routing and expiry without a temporal class', '持续时长不决定图层' in page.locator('#model-boundary').inner_text() and '不会虚构默认有效期或解除' in page.locator('#lifecycle').inner_text() and '最低写入访问次数 · 无最低值' in page.locator('#parameters').inner_text())
+        check('Chinese explains semantic routing and expiry without a temporal class', '持续时长不决定图层' in page.locator('#model-boundary').inner_text() and '不会虚构默认有效期或解除' in page.locator('#lifecycle').inner_text() and '需要追加观测 · 否' in page.locator('#parameters').inner_text())
         page.screenshot(path=str(root / 'pipeline_zh.png'), full_page=True)
         page.set_viewport_size({'width': 390, 'height': 844})
         page.wait_for_timeout(100)
@@ -350,15 +376,16 @@ try:
         page.locator('#dataset').select_option('argoverse')
         page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', paint['event_id'])
         check('Chinese mobile displays the computed detection with its distinct model origin',
-              '算法' in page.locator('#map-selected-title').inner_text()
+              page.locator('#final-decision-title').is_visible()
+              and page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update'
               and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is True
               and page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
         page.locator('#structural-evidence').screenshot(path=str(root / 'pipeline_model_detection_mobile_zh.png'))
         page.locator('#map-source').select_option('reference')
-        check('Chinese mobile reference replay explicitly identifies truth and all 98 known changes',
+        check('Chinese mobile reference view identifies supplied truth and the material subset',
               page.locator('#reference-detail').is_visible()
               and '真值' in page.locator('.composite-panel').inner_text()
-              and page.locator('#reference-change-select option').count() == 98
+              and page.locator('#reference-change-select option').count() == material_count
               and page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
         page.locator('.composite-panel').screenshot(path=str(root / 'pipeline_reference_mobile_zh.png'))
         page.goto(base + 'en/index.html?dataset=invalid&event=missing')

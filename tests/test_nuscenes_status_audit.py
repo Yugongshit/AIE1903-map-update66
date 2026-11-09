@@ -104,6 +104,24 @@ class NuscenesStatusAuditTests(unittest.TestCase):
         self.assertFalse(report['prediction_inputs_modified'])
         self.assertFalse(report['labels_used_for_model_prediction'])
 
+    def test_closed_action_does_not_relabel_residual_quality_or_establish_accuracy(self):
+        events = source_events()
+        for event in events:
+            if event['map_layer']['predicted_layer'] == 'base_map_structure':
+                event['final_structural_decision'] = {
+                    'processing_status': 'complete', 'action': 'no_update',
+                    'revisit_required': False, 'manual_review_required': False,
+                    'decision_is_ground_truth': False}
+        report = build_nuscenes_status_audit(RAW, DELIVERY, events)
+        self.assertEqual(report['final_decisions']['closed_without_update'], 6)
+        self.assertEqual(report['final_decisions']['pending'], 0)
+        self.assertFalse(report['final_decisions']['accuracy_available'])
+        self.assertEqual(report['structural_quality']['insufficient_evidence'], 6)
+        self.assertFalse(report['five_percent_claim']['applicable_to_current_final_action'])
+        next(e for e in events if 'final_structural_decision' in e)['final_structural_decision']['revisit_required'] = True
+        with self.assertRaises(ValueError):
+            build_nuscenes_status_audit(RAW, DELIVERY, events)
+
 
 if __name__ == '__main__':
     unittest.main()

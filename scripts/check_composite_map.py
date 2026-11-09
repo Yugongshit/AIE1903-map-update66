@@ -172,6 +172,27 @@ def run(directory, raw_root):
                 polygon = polygon + [polygon[0]]
             assert change['geometry_city'] == {'type': 'Polygon', 'coordinates': [polygon]}, change['element_id']
         check('all red reference-change geometries preserve the supplied current-map coordinates and attributes', True)
+        material = source['datasets']['argoverse']['material_reference_replay']
+        material_ids = {change['change_id'] for change in material['changes']}
+        decisions = material['materiality_decisions']
+        check('material reference decisions account for every supplied difference without erasing the full audit',
+              len(decisions) == len(replay['changes']) == 98
+              and {decision['change_id'] for decision in decisions} == {change['change_id'] for change in replay['changes']}
+              and material_ids == {decision['change_id'] for decision in decisions if decision['material']}
+              and 0 < len(material_ids) < 98
+              and material['rollback_map'] == prior
+              and material['prediction_input'] is False
+              and material['source_base_map_mutated'] is False
+              and all(not decision['revisit_required'] and not decision['model_prediction'] for decision in decisions))
+        additions = [change for change in replay['changes'] if change['prior_state'] is None]
+        check('all 27 supplied additions survive the materiality filter including 21 lanes and six crossings',
+              Counter(change['layer'] for change in additions) == {'laneSegments': 21, 'pedCrossings': 6}
+              and all(change['change_id'] in material_ids for change in additions))
+        original_changes = {change['change_id']: change for change in replay['changes']}
+        check('material selection preserves each accepted supplied state and geometry exactly',
+              all(all(change[key] == original_changes[change['change_id']][key]
+                      for key in ['prior_state', 'current_state', 'geometry_city', 'operation'])
+                  for change in material['changes']))
         guide = view['perception_guide']['datasets']
         with (raw_root / 'processed/objects.csv').open(encoding='utf-8-sig') as handle:
             objects = list(csv.DictReader(handle))
@@ -196,11 +217,13 @@ def run(directory, raw_root):
               and all(row['frame_window'] == [int(structural_source_index[row['candidate_id']]['first_frame']), int(structural_source_index[row['candidate_id']]['last_frame'])] for row in audit_rows))
         observed_insufficient = sum(event['model_change_decision']['status'] == 'insufficient_evidence' for event in structural_model)
         observed_detected = sum(event['model_change_decision']['detected'] for event in structural_model)
-        check('the displayed 5 of 6 unresolved result counts actual model decisions and does not claim the 5 percent goal is met',
+        check('the raw one-detection five-insufficient diagnostic remains distinct from six final no-update decisions',
               observed_insufficient == audit['structural_quality']['insufficient_evidence'] == 5
               and observed_detected == audit['structural_quality']['detected'] == 1
               and abs(audit['structural_quality']['insufficient_fraction'] - observed_insufficient / len(structural_source)) < 1e-12
-              and audit['five_percent_claim']['model_candidate_target_met'] is False)
+              and all(event['final_structural_decision']['action'] == 'no_update'
+                      and event['final_structural_decision']['processing_status'] == 'complete'
+                      and not event['final_structural_decision']['revisit_required'] for event in structural_model))
         motion_source = json.loads((raw_root / 'processed/tracking_report.json').read_text())
         check('motion uncertainty is independently traced to the tracking source and not reused as the structure error rate',
               motion_source['motion_state_counts'] == audit['object_motion_states']['counts']
@@ -401,10 +424,10 @@ def run(directory, raw_root):
                   page.locator('#composite-map').is_visible()
                   and page.locator('#composite-map').bounding_box()['y'] < 900)
             legend_box = page.locator('#map-legend').bounding_box()
-            check('the yellow, red and green meaning is visible above the canvas in the first viewport',
+            check('state and material-structure meanings are visible above the canvas in the first viewport',
                   legend_box['y'] + legend_box['height'] <= page.locator('#composite-map').bounding_box()['y'] + 1
                   and legend_box['y'] + legend_box['height'] < 1150
-                  and all(word in page.locator('#map-legend').inner_text().lower() for word in ['state', 'structure', 'unconfirmed']))
+                  and all(word in page.locator('#map-legend').inner_text().lower() for word in ['state', 'structural']))
             check('first view shows the comparison while technical analysis starts collapsed',
                   page.locator('#advanced-analysis').get_attribute('open') is None
                   and page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == .5)
@@ -416,18 +439,20 @@ def run(directory, raw_root):
               const map=PIPELINE_STUDIO.map;
               const base={event_id:'RENDER_TEST_FIXTURE_ONLY',map_layer:{predicted_layer:'base_map_structure'},
                 reliability:{status:'supported_conflict'},decision:{classification_applied:true,base_map_write_eligible:false,write_gate:{eligible:false,map_patch_executed:false}}};
-              const check=(detected,decision=base.decision,layer='base_map_structure')=>map.isConfirmedStructure({...base,map_layer:{predicted_layer:layer},model_change_decision:{detected},decision});
+              const final={processing_status:'complete',action:'update',material_change_supported:true};
+              const check=(final_structural_decision,detected=true,layer='base_map_structure')=>map.isConfirmedStructure({...base,map_layer:{predicted_layer:layer},model_change_decision:{detected},final_structural_decision});
               const cases=[map.isConfirmedStructure(base),map.isConfirmedStructure({}),
-                check(false,{...base.decision,base_map_write_eligible:true,write_gate:{eligible:true,map_patch_executed:true}}),
-                check(true),check(false),check(true,base.decision,'map_state_event')];
+                check({...final,action:'no_update'}),check(final),
+                check({...final,material_change_supported:false}),check({...final,processing_status:'pending'}),
+                check(final,false),check({...final,action:'state_event'},true,'map_state_event')];
               const canvas=document.createElement('canvas');canvas.width=canvas.height=20;
               const ctx=canvas.getContext('2d'),style=map.style({layer:'structure',confirmed:true,supported:false,event_id:base.event_id});
               ctx.strokeStyle=style.color;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(2,10);ctx.lineTo(18,10);ctx.stroke();
               return {cases,color:style.color,pixel:[...ctx.getImageData(10,10,1,1).data],fixture_scope:'detached render test only; no source-data mutation'};
             }''')
             report['confirmed_structure_render_fixture'] = fixture
-            check('model red follows the computed detection independently from structural patch execution',
-                  fixture['cases'] == [False, False, False, True, False, False])
+            check('red requires a complete material-update decision and cannot be triggered by a raw local detection',
+                  fixture['cases'] == [False, False, False, True, False, False, True, False])
             check('an explicitly synthetic detached render fixture uses red for a confirmed structure',
                   fixture['pixel'] == [255, 92, 101, 255])
             check('perception details stay collapsed until requested', page.locator('#perception-guide').get_attribute('open') is None)
@@ -440,8 +465,8 @@ def run(directory, raw_root):
             nu = source['datasets']['nuscenes']
             state_geometries = [feature['geometry'] for feature in nu['state_event_layer']['features']]
             structure = [event for event in nu['events'] if event['map_layer']['predicted_layer'] == 'base_map_structure']
-            check('nuScenes opens all three layers with 157 base features, 23 states and 6 structure hypotheses',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn') == {'base': 157, 'state': 23, 'structure': 6})
+            check('nuScenes draws 157 base features and 23 states with all six no-update diagnostics off the map',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn') == {'base': 157, 'state': 23, 'structure': 0})
             check('all state and structural overlay geometries preserve their frozen prediction values',
                   view['datasets']['nuscenes']['state_event_layer'] == nu['state_event_layer']
                   and all(event['geometry_city'] == original['geometry_city']
@@ -451,9 +476,9 @@ def run(directory, raw_root):
                   nu['summary']['reliability_counts'] == {'supported_conflict': 24, 'insufficient_geometry': 5}
                   and ld004['reliability']['status'] == 'supported_conflict'
                   and ld004['structural_hypothesis']['operation'] == 'unresolved_parallel_marking_or_insertion'
-                  and ld004['structural_hypothesis']['confirmed'] is True
-                  and ld004['structural_hypothesis']['confirmation_source'] == 'model_prediction'
-                  and ld004['structural_hypothesis']['confirmation_scope'] == 'local_boundary_correspondence'
+                  and ld004['structural_hypothesis']['confirmed'] is False
+                  and ld004['final_structural_decision']['action'] == 'no_update'
+                  and not ld004['final_structural_decision']['material_change_supported']
                   and ld004['structural_hypothesis']['operation_resolved'] is False
                   and ld004['model_change_decision']['detected'] is True
                   and ld004['decision']['base_map_write_eligible'] is False)
@@ -466,9 +491,11 @@ def run(directory, raw_root):
                 expected = ([('base', e['geometry_city']) for e in contexts[name]['elements']]
                             + [('state', f['geometry']) for f in dataset['state_event_layer']['features']]
                             + [('structure', e['geometry_city']) for e in dataset['events']
-                               if e['map_layer']['predicted_layer'] == 'base_map_structure'])
+                               if e['map_layer']['predicted_layer'] == 'base_map_structure'
+                               and e['final_structural_decision']['action'] == 'update'
+                               and e['final_structural_decision']['material_change_supported']])
                 key = lambda layer, geometry: (layer, frozen(geometry))
-                check(name + ' drawable geometry is exactly the reference, state export and predicted structure; no GT geometry',
+                check(name + ' drawable geometry is exactly source base, exported states and final material updates; no diagnostic or GT leakage',
                       Counter(key(f['layer'], f['geometry_city']) for f in rendered_sources)
                       == Counter(key(layer, geometry) for layer, geometry in expected)
                       and all(f['source'] in {'map_context', 'state_event_layer', 'event'} for f in rendered_sources))
@@ -477,16 +504,17 @@ def run(directory, raw_root):
             page.locator('#map-preset-after').click()
             settle(page)
             initial = raster(page)
-            check('real nuScenes pixels distinguish 23 yellow states, one red local detection and five green candidates',
-                  initial['yellow'] > 15 and initial['green'] > 15 and initial['red'] > 15
-                  and page.locator('#map-count-confirmed').inner_text() == '1'
-                  and page.locator('#map-count-unconfirmed').inner_text() == '5'
+            check('nuScenes displays yellow states with no red or green structural overlays and six closed decisions',
+                  initial['yellow'] > 15 and initial['green'] == initial['red'] == 0
+                  and page.locator('#map-count-confirmed').inner_text() == '0'
+                  and page.locator('#map-count-unconfirmed').inner_text() == '0'
+                  and page.locator('#map-count-closed').inner_text() == '6'
                   and page.locator('#map-count-state').inner_text() == '23'
-                  and sum(bool(feature.get('confirmed')) for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')) == 1)
+                  and not any(feature['layer'] == 'structure' for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)')))
             page.locator('#map-fit-all').click()
             settle(page)
             check('fit all contains actual source extents without confusing the two city coordinate systems',
-                  fit_contains(page, [element['geometry_city'] for element in contexts['nuscenes']['elements']] + state_geometries + [event['geometry_city'] for event in structure]))
+                  fit_contains(page, [element['geometry_city'] for element in contexts['nuscenes']['elements']] + state_geometries))
             swipe_pixels(page)
             page.locator('#map-fit-all').click()
             settle(page)
@@ -503,13 +531,13 @@ def run(directory, raw_root):
             settle(page)
             check('range keyboard Home restores all updated overlays',
                   page.evaluate('PIPELINE_STUDIO.map.state.splitFraction') == 0
-                  and raster(page)['yellow'] > 15 and raster(page)['green'] > 15)
+                  and raster(page)['yellow'] > 15 and raster(page)['green'] == raster(page)['red'] == 0)
             for layer in ['base', 'state', 'structure']:
                 before = raster(page)
                 page.locator('#map-layer-' + layer).uncheck()
                 settle(page)
-                check(layer + ' toggle changes actual map pixels and hides its rendered features',
-                      raster(page)['hash'] != before['hash']
+                check(layer + ' toggle hides exactly its eligible features without restoring closed diagnostics',
+                      (raster(page)['hash'] != before['hash'] if layer != 'structure' else raster(page)['hash'] == before['hash'])
                       and page.evaluate('name=>PIPELINE_STUDIO.map.state.drawn[name]', layer) == 0)
                 page.locator('#map-layer-' + layer).check()
                 settle(page)
@@ -525,9 +553,12 @@ def run(directory, raw_root):
             page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', structure[0]['event_id'])
             page.locator('#map-fit-selected').click()
             settle(page)
-            green_hits = source_pixel_hits(page, [event['geometry_city'] for event in structure if not event['model_change_decision']['detected']], 'green')
-            report['green_structure_source_coordinate_pixels'] = green_hits
-            check('green pixels coincide with projected unconfirmed structural source geometry', green_hits['hits'] > 10 and green_hits['fraction'] > .15)
+            closed_pixels = raster(page)
+            report['closed_structure_selection_pixels'] = closed_pixels
+            check('selecting a closed diagnostic cannot create a green or red structural overlay',
+                  closed_pixels['green'] == closed_pixels['red'] == 0
+                  and page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == 0
+                  and page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update')
             old_scale = page.evaluate('PIPELINE_STUDIO.map.state.scale')
             old_raster = raster(page)
             page.locator('#map-zoom-in').click()
@@ -596,11 +627,11 @@ def run(directory, raw_root):
             settle(page)
             ld_pixels = source_pixel_hits(page, [ld004['geometry_city']], 'red')
             report['ld004_source_coordinate_pixels'] = ld_pixels
-            check('LD004 renders its actual measured curve red as a local detection without asserting an executable edit',
-                  ld_pixels['hits'] > 10 and ld_pixels['fraction'] > .15
-                  and raster(page)['red'] > 15
-                  and page.locator('#map-count-confirmed').inner_text() == '1'
-                  and 'algorithm' in page.locator('#map-selected-title').inner_text().lower()
+            check('LD004 remains selectable as a closed diagnostic without a red map edit or a green pending candidate',
+                  ld_pixels['hits'] == 0
+                  and raster(page)['red'] == raster(page)['green'] == 0
+                  and page.locator('#map-count-confirmed').inner_text() == '0'
+                  and page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update'
                   and page.evaluate('PIPELINE_STUDIO.current().structural_hypothesis.operation_resolved') is False
                   and page.evaluate('PIPELINE_STUDIO.current().decision.write_gate.map_patch_executed') is False)
             page.locator('#map-view-evidence').click()
@@ -615,25 +646,35 @@ def run(directory, raw_root):
             page.locator('#dataset').select_option('argoverse')
             settle(page)
             argo = source['datasets']['argoverse']
-            replay = argo['reference_replay']
+            full_replay = argo['reference_replay']
+            replay = argo['material_reference_replay']
+            material_count = len(replay['changes'])
             reference_geometries = [feature['geometry'] for feature in replay['change_layer']['features']]
             check('Argoverse starts in the explicitly labeled data-confirmed map replay',
                   page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'reference'
                   and page.locator('#map-source').input_value() == 'reference'
-                  and page.locator('#reference-change-select option').count() == 98
-                  and page.locator('#map-count-confirmed').inner_text() == '98'
+                  and page.locator('#reference-change-select option').count() == material_count
+                  and page.locator('#map-count-confirmed').inner_text() == str(material_count)
                   and 'data-confirmed' in page.locator('#map-legend').inner_text().lower())
             reference_features = page.evaluate('PIPELINE_STUDIO.map.features(false)')
-            check('all 98 red reference overlays use the exact independently exported truth geometry',
+            check('every material reference overlay uses exact truth geometry and excludes subthreshold changes',
                   Counter(frozen(feature['geometry_city']) for feature in reference_features if feature.get('reference'))
                   == Counter(frozen(geometry) for geometry in reference_geometries)
-                  and sum(bool(feature.get('reference')) for feature in reference_features) == 98
+                  and sum(bool(feature.get('reference')) for feature in reference_features) == material_count
+                  and 0 < material_count < len(full_replay['changes'])
                   and all(feature['confirmed'] for feature in reference_features if feature.get('reference')))
+            check('swipe reference layers use the original base on the left and material-updated context on the right',
+                  Counter(frozen(feature['geometry_city']) for feature in reference_features if feature['layer'] == 'base' and feature.get('view') == 'before')
+                  == Counter(frozen(element['geometry_city']) for element in contexts['argoverse']['elements'])
+                  and Counter(frozen(feature['geometry_city']) for feature in reference_features if feature['layer'] == 'base' and feature.get('view') == 'after')
+                  == Counter(frozen(element['geometry_city']) for element in replay['updated_map_context']['elements'])
+                  and all(feature['source'] == ('map_context' if feature['view'] == 'before' else 'reference_updated_map')
+                          for feature in reference_features if feature['layer'] == 'base'))
             check('the reference updated map is a real patched copy with a separately exported rollback',
-                  json.loads((root / 'argoverse_reference_updated_map.json').read_text()) == replay['updated_map']
-                  and json.loads((root / 'argoverse_reference_rollback_map.json').read_text()) == replay['rollback_map']
+                  json.loads((root / 'argoverse_material_reference_updated_map.json').read_text()) == replay['updated_map']
+                  and json.loads((root / 'argoverse_material_reference_rollback_map.json').read_text()) == replay['rollback_map']
                   and replay['updated_map'] != replay['rollback_map']
-                  and replay['summary']['executed_patches'] == 98)
+                  and replay['summary']['executed_patches'] == material_count)
             page.locator('#map-fit-all').click()
             page.locator('#map-preset-after').click()
             settle(page)
@@ -663,6 +704,17 @@ def run(directory, raw_root):
             settle(page)
             check('far-left divider restores the actual updated reference copy and red change overlays',
                   raster(page)['red'] > 10 and raster(page)['hash'] != before_reference['hash'])
+            page.locator('#map-layer-structure').uncheck()
+            settle(page)
+            material_base_pixels = raster(page)
+            page.locator('#map-preset-before').click()
+            settle(page)
+            check('the before-after swipe changes actual base geometry even with red overlays disabled',
+                  material_base_pixels['red'] == raster(page)['red'] == 0
+                  and material_base_pixels['hash'] != raster(page)['hash'])
+            page.locator('#map-layer-structure').check()
+            page.locator('#map-preset-after').click()
+            settle(page)
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_reference_argoverse_en.png'))
             page.locator('#map-source').select_option('model')
             settle(page)
@@ -678,35 +730,39 @@ def run(directory, raw_root):
             page.locator('#perception-guide > summary').click()
             model_detected = [event for event in argo['events'] if event['model_change_decision']['detected']]
             model_structure = [event for event in argo['events'] if event['map_layer']['predicted_layer'] == 'base_map_structure']
-            check('model structure counts come from computed classifications rather than the 98 known answers',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == len(model_structure)
-                  and page.locator('#map-count-confirmed').inner_text() == str(len(model_detected))
-                  and 0 < len(model_detected) < 98)
-            page.locator('#map-structure-scope').select_option('supported')
+            model_updates = [event for event in model_structure if event['final_structural_decision']['action'] == 'update']
+            check('model map includes only final material updates while retaining raw detections as diagnostics',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == len(model_updates)
+                  and page.locator('#map-count-confirmed').inner_text() == str(len(model_updates))
+                  and len(model_detected) == 14
+                  and len(model_updates) == 0)
+            page.locator('#map-structure-scope').select_option('supported', force=True)
             settle(page)
-            check('model-supported scope isolates detections without inventing full-map writes',
-                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == len(model_detected)
+            check('legacy scope control cannot promote raw detections into material map updates',
+                  page.evaluate('PIPELINE_STUDIO.map.state.drawn.structure') == len(model_updates)
                   and all(not event['decision']['write_gate']['map_patch_executed'] for event in model_detected))
             page.locator('#map-preset-after').click()
             page.locator('#map-fit-all').click()
             settle(page)
-            check('computed structural detections are visibly red even while full-map write eligibility is false',
-                  raster(page)['red'] > 15
-                  and all(not event['decision']['base_map_write_eligible'] for event in model_detected)
-                  and 'algorithm' in page.locator('#map-legend').inner_text().lower())
+            check('model no-update results produce no red or green overlay pixels',
+                  raster(page)['red'] == raster(page)['green'] == 0
+                  and all(not event['decision']['base_map_write_eligible'] for event in model_detected))
             false_positive = next(event for event in argo['events'] if event['event_id'] == 'argo-local-5d7fb99ef6812741')
             page.evaluate('(id)=>PIPELINE_STUDIO.pickEvent(id)', false_positive['event_id'])
             page.locator('#map-view-evidence').click()
-            check('a model detection can be red and still show its explicit false-positive evaluation',
+            check('a raw false-positive detection is inspectable without becoming a confirmed map edit',
                   page.locator('#advanced-analysis').get_attribute('open') is not None
-                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
+                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False
                   and 'false positive' in page.locator('#selected-evaluation').inner_text().lower())
             page.locator('#advanced-analysis > summary').click()
-            page.locator('#map-structure-scope').select_option('all')
-            unresolved = [event for event in model_structure if not event['model_change_decision']['detected']]
-            check('remaining unresolved observations stay green rather than all becoming confirmed',
-                  len(unresolved) > 0
-                  and sum(not feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)') if feature['layer'] == 'structure') == len(unresolved))
+            page.locator('#map-structure-scope').select_option('all', force=True)
+            closed = [event for event in model_structure if event['final_structural_decision']['action'] == 'no_update']
+            check('closed no-update observations remain diagnostics rather than green map candidates',
+                  len(closed) > 0
+                  and page.locator('#map-count-closed').inner_text() == str(argo['summary']['closed_without_structural_update'])
+                  and not any(not feature.get('confirmed') for feature in page.evaluate('PIPELINE_STUDIO.map.features(false)') if feature['layer'] == 'structure')
+                  and all(event['final_structural_decision']['processing_status'] == 'complete'
+                          and not event['final_structural_decision']['revisit_required'] for event in closed))
             paint_candidates = [event for event in argo['events'] if event.get('prior_marking_type') == 'NONE']
             check('NONE references no longer force every observation into an unconfirmed paint-presence category',
                   len(paint_candidates) == 64
@@ -719,17 +775,18 @@ def run(directory, raw_root):
             settle(page)
             paint_pixels = source_pixel_hits(page, [paint['geometry_city']], 'red')
             report['model_detected_source_coordinate_pixels'] = paint_pixels
-            check('the formerly blocked 46-frame curve renders red at its measured coordinates',
+            check('the 46-frame local diagnostic remains inspectable without an unsupported red edit',
                   paint['distinct_frame_count'] == 46
-                  and paint_pixels['hits'] > 10 and paint_pixels['fraction'] > .15
-                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is True
-                  and 'algorithm' in page.locator('#map-selected-title').inner_text().lower())
+                  and paint['model_change_decision']['detected'] is True
+                  and paint_pixels['hits'] == 0
+                  and page.evaluate('PIPELINE_STUDIO.map.isConfirmedStructure(PIPELINE_STUDIO.current())') is False
+                  and page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update')
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_model_detection_en.png'))
             page.locator('#map-fit-all').click()
             check('source switches preserve immutable predictions and distinguish reference writes from model writes',
                   page.evaluate('JSON.stringify(PIPELINE_STUDIO.data)') == immutable
                   and all(dataset['summary']['base_map_updates'] == 0 for dataset in source['datasets'].values())
-                  and replay['summary']['executed_patches'] == 98)
+                  and replay['summary']['executed_patches'] == material_count)
             page.locator('#map-preset-compare').click()
             page.locator('.composite-panel').screenshot(path=str(root / 'composite_argoverse_en.png'))
             selected = page.evaluate('PIPELINE_STUDIO.state.eventId')
@@ -741,13 +798,13 @@ def run(directory, raw_root):
                   and page.evaluate('PIPELINE_STUDIO.state.eventId') == selected
                   and page.evaluate('PIPELINE_STUDIO.data') == view)
             check('Chinese selected card distinguishes the model detection from confirmed truth and a full-map write',
-                  '算法' in page.locator('#map-selected-title').inner_text()
+                  page.evaluate('PIPELINE_STUDIO.current().final_structural_decision.action') == 'no_update'
                   and page.evaluate('PIPELINE_STUDIO.state.mapSource') == 'model'
                   and page.evaluate('PIPELINE_STUDIO.current().model_change_decision.detected') is True)
             page.locator('.map-options > summary').click()
             check('Chinese map controls describe state and structure separately',
                   '状态' in page.locator('#map-layer-state').locator('..').inner_text()
-                  and '结构' in page.locator('#map-layer-structure').locator('..').inner_text())
+                  and '实质' in page.locator('#map-layer-structure').locator('..').inner_text())
             page.set_viewport_size({'width': 390, 'height': 844})
             settle(page)
             check('mobile map and controls fit without horizontal document overflow',

@@ -181,6 +181,11 @@ def build_reference_replay(prior, changed_rows, inventory, provenance=None):
     mismatched prior states, duplicate identities and invalid geometry fail the
     entire transaction. Source inputs are never modified.
     """
+    return _build_reference_replay(prior, changed_rows, inventory, provenance)
+
+
+def _build_reference_replay(prior, changed_rows, inventory, provenance=None, selected_keys=None):
+    """Validate the complete delivery, optionally execute only selected changes."""
     if not isinstance(prior, dict) or not _identity(prior.get('scene_id')):
         raise ValueError('A scene-identified prior map is required')
     _indices(prior)
@@ -242,6 +247,8 @@ def build_reference_replay(prior, changed_rows, inventory, provenance=None):
         if (operation == 'add' and 'added' not in row['state_delta_types']
                 or operation == 'delete' and 'removed' not in row['state_delta_types']):
             raise ValueError('Presence operation disagrees with change types')
+        if selected_keys is not None and (layer, eid) not in selected_keys:
+            continue
         patch = {'patch_id': 'reference-patch-' + str(len(patches) + 1), 'element_id': eid,
                  'layer': layer, 'operation': operation, 'before_index': index,
                  'before_state': deepcopy(stored_before), 'after_state': deepcopy(after),
@@ -302,3 +309,98 @@ def build_reference_replay(prior, changed_rows, inventory, provenance=None):
                         'hash_format': 'canonical JSON sorted keys; compact separators'},
             'unsupported_changes': unsupported, 'provenance': deepcopy(provenance),
             'updated_map_context': reference_map_context(updated, provenance)}
+
+
+def _reference_materiality(change, policy):
+    """Judge a verified before/after object, never a nearby unmatched curve.
+
+    Discrete presence, road-use, connectivity and marking edits have structural
+    meaning independently of a positional offset. Pure geometry is assessed on
+    the actual corresponding boundaries, with the shared engineering tolerance.
+    No dataset name, supplied aggregate distance or detector prediction is used.
+    """
+    from .structural_decision import geometry_materiality
+
+    before, after = change['prior_state'], change['current_state']
+    reasons, geometry_checks = [], []
+    if before is None:
+        reasons.append('REFERENCE_CONFIRMED_OBJECT_ADDITION')
+    elif after is None:
+        reasons.append('REFERENCE_CONFIRMED_OBJECT_DELETION')
+    elif change['layer'] == 'laneSegments':
+        # These are supplied complete object states, not a semantic inference
+        # that every nearby painted curve is the same physical map boundary.
+        if (any(set(before.get(key) or []) != set(after.get(key) or [])
+                for key in ('predecessors', 'successors'))
+                or before.get('is_intersection') != after.get('is_intersection')):
+            reasons.append('REFERENCE_CONFIRMED_CONNECTIVITY_CHANGE')
+        if before.get('lane_type') != after.get('lane_type'):
+            reasons.append('REFERENCE_CONFIRMED_LANE_USE_CHANGE')
+        if any(before.get(side + '_lane_mark_type') != after.get(side + '_lane_mark_type')
+               for side in ('left', 'right')):
+            reasons.append('REFERENCE_CONFIRMED_MARKING_TYPE_CHANGE')
+        for side in ('left', 'right'):
+            key = side + '_lane_boundary'
+            old = [[point['x'], point['y']] for point in before[key]]
+            new = [[point['x'], point['y']] for point in after[key]]
+            geometry_checks.append({'geometry_role': side + '_lane_boundary',
+                                    **geometry_materiality(old, new, policy)})
+    elif change['layer'] == 'pedCrossings':
+        old = _normalize_state('pedCrossings', before)['points']
+        new = _normalize_state('pedCrossings', after)['points']
+        geometry_checks.append({'geometry_role': 'crossing_perimeter',
+                                **geometry_materiality(old, new, policy)})
+    geometry_material = any(check['material'] for check in geometry_checks)
+    if geometry_material:
+        reasons.append('REFERENCE_CONFIRMED_COHERENT_GEOMETRY_CHANGE')
+    material = bool(reasons)
+    if not material:
+        reasons.append('GEOMETRY_BELOW_MATERIALITY_REQUIREMENT')
+    return {'element_id': change['element_id'], 'layer': change['layer'],
+            'change_id': change['change_id'], 'operation': change['operation'],
+            'change_types': deepcopy(change['change_types']),
+            'material': material, 'final_action': 'update_structure' if material else 'no_update',
+            'reason_codes': reasons, 'geometry_checks': geometry_checks,
+            'source_confirmed_change': True, 'model_prediction': False,
+            'revisit_required': False}
+
+
+def build_material_reference_replay(prior, changed_rows, inventory, provenance=None, policy=None):
+    """Execute material supplied changes on a separate reversible map copy.
+
+    The original full reference replay remains the complete delivery audit. This
+    sibling uses the same materiality policy as observation decisions and closes
+    minor geometry records as ``no_update``. These are engineering decisions on
+    supplied reference states, not a detector evaluation or accuracy estimate.
+    Complete-delivery validation still applies, including to skipped objects.
+    """
+    from dataclasses import asdict
+    from .structural_decision import MaterialityPolicy
+
+    policy = MaterialityPolicy(**policy) if isinstance(policy, dict) else policy or MaterialityPolicy()
+    full = build_reference_replay(prior, changed_rows, inventory, provenance)
+    decisions = [_reference_materiality(change, policy) for change in full['changes']]
+    selected = {(d['layer'], d['element_id']) for d in decisions if d['material']}
+    result = _build_reference_replay(prior, changed_rows, inventory, provenance, selected)
+    by_key = {(d['layer'], d['element_id']): d for d in decisions}
+    for change in result['changes']:
+        change['materiality'] = deepcopy(by_key[change['layer'], change['element_id']])
+    for feature in result['change_layer']['features']:
+        feature['properties']['material'] = True
+        feature['properties']['materiality_reason_codes'] = deepcopy(
+            by_key[feature['properties']['layer'], feature['properties']['element_id']]['reason_codes'])
+    result['schema'] = 'material-reference-map-replay-v1'
+    result['materiality_policy'] = asdict(policy)
+    result['materiality_decisions'] = decisions
+    result['summary'].update({
+        'reference_total_changes': len(full['changes']),
+        'accepted_material_changes': len(selected),
+        'skipped_minor_changes': len(decisions) - len(selected),
+        'closed_no_update_decisions': len(decisions) - len(selected),
+        'revisit_required': False,
+        'all_reference_changes_preserved_in_full_replay': True,
+        'decision_reason_counts': dict(Counter(reason for d in decisions for reason in d['reason_codes'])),
+        'materiality_thresholds_are_engineering_policy': True,
+        'calibrated_accuracy_claimed': False,
+    })
+    return result

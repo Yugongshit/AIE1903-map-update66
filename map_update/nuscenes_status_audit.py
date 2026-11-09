@@ -133,6 +133,7 @@ def build_nuscenes_status_audit(raw_root, delivery_root, events):
                             'source_support_frames': int(score['support_frames']),
                             'source_map_change_status': score['map_change_status'],
                             'model_status': status, 'model_detected': detected, 'model_status_source': status_source,
+                            'final_structural_decision': event.get('final_structural_decision'),
                             'reason_codes': list(event['reliability'].get('reason_codes', [])),
                             'write_eligible': event.get('decision', {}).get('base_map_write_eligible') is True,
                             'map_patch_executed': event.get('decision', {}).get('write_gate', {}).get('map_patch_executed') is True})
@@ -153,6 +154,23 @@ def build_nuscenes_status_audit(raw_root, delivery_root, events):
     label_count = sum(bool(r['truth']) and r['truth'] != 'uncertain' and bool(r['annotator'])
                       and bool(r['evidence_reference']) for r in labels)
     blank_count = sum(not r['truth'] for r in labels)
+    final_records = [r['final_structural_decision'] for r in diagnostics]
+    final_available = all(isinstance(r, dict) for r in final_records)
+    final_summary = {'available': final_available,
+                     'scope': 'Final action on the supplied recording, separate from diagnostic residual quality and independent truth.'}
+    if final_available:
+        for decision in final_records:
+            if (decision.get('processing_status') != 'complete'
+                    or decision.get('action') not in ('update', 'no_update')
+                    or decision.get('revisit_required') is not False
+                    or decision.get('manual_review_required') is not False
+                    or decision.get('decision_is_ground_truth') is not False):
+                raise ValueError('Invalid closed structural decision')
+        final_summary.update(total_candidates=len(final_records),
+                             structural_updates=sum(r['action'] == 'update' for r in final_records),
+                             closed_without_update=sum(r['action'] == 'no_update' for r in final_records),
+                             pending=0, revisit_requests=0, manual_review_requests=0,
+                             accuracy_available=False)
     return {
         'schema': 'nuscenes-separated-status-audit-1.0', 'scene_id': scene_id,
         'source_files': sources, 'source_provenance': sources,
@@ -194,10 +212,13 @@ def build_nuscenes_status_audit(raw_root, delivery_root, events):
             'total_candidates': structural_total, 'eligible': sum(r['write_eligible'] for r in diagnostics),
             'executed': sum(r['map_patch_executed'] for r in diagnostics),
             'scope': 'Full structural edit eligibility/execution, separate from local detection.'},
+        'final_decisions': final_summary,
         'five_percent_claim': {
+            'historical_diagnostic_only': True,
+            'applicable_to_current_final_action': False,
             'structural_truth_rate_verified': False, 'target_fraction': .05,
             'structural_model_insufficient_fraction': insufficient_fraction,
             'model_candidate_target_met': insufficient_fraction <= .05 if insufficient_fraction is not None else None,
-            'meaning': 'The 5% value is the user-requested comparison target, not a verified dataset statistic. Motion uncertainty and model candidate insufficiency have different denominators.'},
+            'meaning': 'Historical comparison target for diagnostic insufficiency, not a dataset statistic or the current final-action contract. Closed no-update decisions do not establish classification accuracy.'},
         'candidate_diagnostics': diagnostics,
     }

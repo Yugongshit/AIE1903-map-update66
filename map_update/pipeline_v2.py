@@ -18,6 +18,7 @@ from .state_events import build_state_event_layer
 from .reliability import integrate_m3
 from .reliability_v2 import ReliabilityPolicy, canonical_boundaries, evaluate_argoverse
 from .structure_evaluation import evaluate_all_boundaries
+from .structural_decision import MaterialityPolicy, final_structural_decision
 
 
 def write_gate(event, map_layer, policy=None):
@@ -139,7 +140,7 @@ def write_gate(event, map_layer, policy=None):
         fully_observed_delete_frames = len(full_times)
         if not full_times:
             reasons.append('DELETION_REQUIRES_FULLY_OBSERVED_SAME_TARGET_SUPPORT')
-    return {'eligible': not reasons, 'reasons': reasons, 'independent_visits': len(visits),
+    return {'eligible': not reasons, 'reasons': reasons, 'operation': operation, 'independent_visits': len(visits),
             'positive_observation_frames': len(positive), 'span_s': span,
             'visit_counting_gap_s': policy.min_visit_gap_s, 'visits_and_span_are_diagnostics_only': True,
             'duration_used': False, 'policy_source': 'operation_specific_structural_edit_contract_v3',
@@ -149,7 +150,7 @@ def write_gate(event, map_layer, policy=None):
             'map_patch_executed': False}
 
 
-def classify_events(data):
+def classify_events(data, materiality_policy=None):
     result = deepcopy(data)
     for event in result['events']:
         layer = classify_map_layer(event)
@@ -158,14 +159,22 @@ def classify_events(data):
             layer['conditional_layer_prediction'] = layer['predicted_layer']
             layer['predicted_layer'] = 'not_applicable'
         gate = write_gate(event, layer)
-        applied = status == 'supported_conflict' and layer['predicted_layer'] in {'map_state_event', 'base_map_structure'}
-        action = ('state_event' if layer['predicted_layer'] == 'map_state_event' else 'structural_change_candidate') if applied else (
-            'no_discrepancy_in_observed_segment' if status == 'consistent_with_map' else 'record_only')
+        final = final_structural_decision(event, layer, gate, materiality_policy)
+        event['final_structural_decision'] = final
+        if 'structural_hypothesis' in event:
+            event['raw_structural_hypothesis'] = deepcopy(event['structural_hypothesis'])
+            event['structural_hypothesis']['confirmed'] = final['action'] == 'update'
+            event['structural_hypothesis']['confirmation_scope'] = 'closed_material_structural_edit_decision'
+        applied = final['action'] in {'state_event', 'update'}
+        action = final['action']
         event['map_layer'] = layer
         event['decision'] = {'action': action, 'classification_applied': applied,
-                             'base_map_write_eligible': gate['eligible'], 'write_gate': gate,
+                             'base_map_write_eligible': final['action'] == 'update', 'write_gate': gate,
                              'map_action': 'unchanged', 'processing_status': 'complete',
-                             'manual_review_required': False}
+                             'manual_review_required': False, 'revisit_required': False,
+                             'reason_codes': final['reason_codes'],
+                             'decision_is_ground_truth': False}
+        event['base_map_write_eligible'] = final['action'] == 'update'
         if 'model_change_decision' in event:
             event['decision']['model_detected_local_change'] = event['model_change_decision']['detected']
             event['decision']['confirmation_scope'] = event['model_change_decision']['scope']
@@ -180,8 +189,14 @@ def classify_events(data):
         'accepted_layer_counts': dict(Counter(e['map_layer']['predicted_layer'] for e in events if e['decision']['classification_applied'])),
         'stored_state_events': len(result['state_event_layer']['features']),
         'base_map_updates': 0, 'pending_manual_reviews': 0,
+        'final_structural_changes': sum(e['final_structural_decision']['action'] == 'update' for e in events),
+        'closed_without_structural_update': sum(e['final_structural_decision']['action'] == 'no_update'
+                                               and e['final_structural_decision']['structural_scope'] for e in events),
+        'pending_structural_decisions': 0, 'revisit_requests': 0,
+        'final_decision_scope': 'completed_actions_for_supplied_recording_not_ground_truth_labels',
         'model_detected_local_structure': sum(e.get('model_change_decision', {}).get('detected', False)
                                               and e['map_layer']['predicted_layer'] == 'base_map_structure' for e in events),
+        'model_detected_local_structure_is_raw_diagnostic': True,
     }
     return result
 
@@ -321,6 +336,7 @@ def run_pipeline(raw_root, delivery_root, output):
     scene_id, tables = av._identity(m2)
     prior = av._read(m2/'prior_map.json')
     reliability_policy = ReliabilityPolicy()
+    materiality_policy = MaterialityPolicy()
     out.mkdir(parents=True)
     method = {'reliability': asdict(reliability_policy),
               'layer_routing': {'algorithm': 'semantic_ontology_and_change_operation',
@@ -338,24 +354,40 @@ def run_pipeline(raw_root, delivery_root, output):
                       'delete': 'fully observed causal support for absence on the same target; no replacement geometry'},
                   'shared_boundary_aliases': 'physical identity may be known; synchronized edits of all references remain unverified',
                   'minimum_duration_s': None, 'minimum_independent_visits': None},
-              'structural_evidence_revision': 'geometry_detection_without_paint_veto_and_separate_reference_replay_20261108',
-              'nuscenes_confirmation_revision': 'computed_local_model_decision_passthrough_and_separate_status_denominators_20261108',
+              'structural_materiality': {**asdict(materiality_policy),
+                  'method': 'bidirectional_sampled_same_target_spatial_extent',
+                  'geometry_contract': 'resolved target and operation; complete same-target prior/proposed geometry',
+                  'discrete_changes': 'verified addition, deletion, topology, lane use or regulated marking attributes are assessed by operation, not displacement',
+                  'unsupported_write_operations': ['topology_change', 'lane_use_change'],
+                  'tolerance_basis': 'engineering defaults: existing 0.5 m residual tolerance and 3 m full-quality curve extent; not calibrated on change labels',
+                  'calibrated_probability': False},
+              'structural_evidence_revision': 'closed_supplied_record_material_structural_actions_20261109',
+              'nuscenes_confirmation_revision': 'raw_local_geometry_diagnostic_separate_from_completed_map_action_20261109',
               'confirmation_contract': {
-                  'model_detection': 'Computed local geometric decision; independent of map-write eligibility.',
+                  'model_detection': 'Local curve discrepancy retained as diagnostic; never sufficient by itself to confirm structural change.',
+                  'final_action': 'Closed update/no_update decision from the supplied recording; no revisit or manual-review queue; no_update is not a ground-truth negative.',
                   'reference_confirmation': 'Delivered M8 labels and current states, read only after prediction freeze.',
-                  'execution': 'Known reference changes replay into an isolated map copy; model geometry is not promoted to a full-map patch.'},
+                  'execution': 'Full reference replay and materially filtered reference replay each update an isolated map copy; neither is model-detection accuracy.'},
               'policy_selection': 'Semantic target and change operation; geometric quality defaults fixed before evaluation',
               'parameters_learned': False, 'calibrated_probabilities': False,
               'scope': 'Frozen perception inputs; structure/state routing, not a duration classifier'}
     av._write(out/'method.json', method)
     nu_scene = integrate_m3(raw, delivery, raw/'M3_scene0980_proposal_supplement 2/results/real_scene_handoff.json')
     nu_input = evaluate_nuscenes(nu_scene)
+    nu_prior = {row['element_id']: row for row in (nu_scene.get('reference_map') or nu_scene['map'])['elements']}
     for event in nu_input['events']:
         event['coordinate_reference'] = nu_scene['coordinate_reference']
+        aliases = event.get('map_aliases', [])
+        if len(aliases) == 1 and aliases[0]['map_element_id'] in nu_prior:
+            event['prior_geometry_city'] = deepcopy(nu_prior[aliases[0]['map_element_id']]['geometry_city'])
+            event['prior_geometry_role'] = 'selected_map_reference_not_verification_of_observed_object_identity'
     argo_input = evaluate_argoverse(prior, tables['observations'], tables['frames'], reliability_policy)
+    argo_prior = {row['physical_boundary_id']: row['coordinates'] for row in canonical_boundaries(prior)}
     for event in argo_input['events']:
         event['coordinate_reference'] = {'frame': 'Argoverse supplied city XY', 'scene_id': scene_id, 'units': 'm'}
-    nu, argo = classify_events(nu_input), classify_events(argo_input)
+        event['prior_geometry_city'] = {'type': 'LineString', 'coordinates': deepcopy(argo_prior[event['physical_boundary_id']])}
+        event['prior_geometry_role'] = 'selected_map_reference_not_verification_of_observed_object_identity'
+    nu, argo = classify_events(nu_input, materiality_policy), classify_events(argo_input, materiality_policy)
     nu['scene_id'], argo['scene_id'] = nu_scene['scene_id'], scene_id
     frozen_names = ['method.json']
     for dataset, data in [('nuscenes', nu), ('argoverse', argo)]:
@@ -364,7 +396,7 @@ def run_pipeline(raw_root, delivery_root, output):
             av._write(out/name, value)
             frozen_names.append(name)
     for name in ('pipeline_v2.py', 'nuscenes_v2.py', 'local_correspondence.py', 'reliability_v2.py', 'map_layers.py',
-                 'structure_evaluation.py', 'reference_replay.py', 'nuscenes_status_audit.py',
+                 'structure_evaluation.py', 'structural_decision.py', 'reference_replay.py', 'nuscenes_status_audit.py',
                  'state_events.py', 'persistence.py', 'engine.py', 'reliability.py',
                  'scene.py', 'delivery.py', 'automatic.py', 'argoverse.py'):
         path = Path(__file__).with_name(name)
@@ -393,7 +425,7 @@ def run_pipeline(raw_root, delivery_root, output):
         raise ValueError('Prediction outputs changed during evaluation')
     # Trusted reference import is an independent post-freeze replay, never a
     # detector input or a replacement for the frozen model prediction files.
-    from .reference_replay import build_reference_replay
+    from .reference_replay import build_reference_replay, build_material_reference_replay
     m8 = av._package(raw, 'M8')
     replay = build_reference_replay(prior, av._rows(m8/'gt_changed_objects.jsonl'),
                                    av._rows(m8/'gt_object_inventory.jsonl'),
@@ -406,6 +438,16 @@ def run_pipeline(raw_root, delivery_root, output):
                             ('argoverse_reference_patch_log.json', replay['patch_log']),
                             ('argoverse_reference_changes.geojson', replay['change_layer'])]:
         av._write(out/filename, value)
+    material_replay = build_material_reference_replay(prior, av._rows(m8/'gt_changed_objects.jsonl'),
+                                   av._rows(m8/'gt_object_inventory.jsonl'),
+                                   provenance=deepcopy(replay['provenance']), policy=materiality_policy)
+    argo['material_reference_replay'] = material_replay
+    for filename, value in [('argoverse_material_reference_updated_map.json', material_replay['updated_map']),
+                            ('argoverse_material_reference_rollback_map.json', material_replay['rollback_map']),
+                            ('argoverse_material_reference_patch_log.json', material_replay['patch_log']),
+                            ('argoverse_material_reference_changes.geojson', material_replay['change_layer']),
+                            ('argoverse_material_reference_decisions.json', material_replay['materiality_decisions'])]:
+        av._write(out/filename, value)
     if any(av._hash(out/name) != digest for name, digest in freeze['files_sha256'].items()):
         raise ValueError('Prediction outputs changed during reference replay')
     comparisons = [
@@ -415,14 +457,16 @@ def run_pipeline(raw_root, delivery_root, output):
             'confirmed_changes': 0, 'explicit_structure_state_classifier_run': False}, 'new': argo['summary'],
          'unit': 'old M3 candidate groups versus new physical-boundary windows; use fixed-scope metrics for accuracy comparison'},
     ]
-    result = {'schema': 'change-pipeline-v3', 'run_id': 'robust_geometry_structure_state_v3',
+    result = {'schema': 'change-pipeline-v3', 'run_id': 'closed_material_structure_state_v4',
               'generated_at_utc': datetime.now(timezone.utc).isoformat(), 'method': method,
               'datasets': {'nuscenes': nu, 'argoverse': argo}, 'evaluation': evaluation,
               'comparison': comparisons, 'sources': sources, 'prediction_freeze': freeze,
               'limitations': ['Map layer is classified by target semantics, not observed lifetime.',
                   'Routing is an explicit semantic classifier, not a trained or calibrated ML model.',
                   'Reliability describes observed-segment conflict, not correctness of the full map.',
-                  'A structural candidate needs a verified full edit before base-map mutation.',
+                  'Local discrepancies without a supported material edit close with no_update for this recording; they are not asserted to be unchanged truth.',
+                  'Materiality tolerances are engineering defaults, not calibrated accuracy or learned change probabilities.',
+                  'Topology and lane-use claims can be assessed but do not yet have an implemented observation-driven write contract.',
                   'Missing observations and TTL expiry are not observed recovery.']}
     av._write(out/'result.json', result)
     return out
