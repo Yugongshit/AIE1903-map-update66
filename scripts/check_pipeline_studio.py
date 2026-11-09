@@ -44,7 +44,7 @@ try:
         page = context.new_page()
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('response', lambda response: failures.append([response.url, response.status]) if response.status >= 400 else None)
-        page.goto(base + 'en/index.html')
+        page.goto(base + 'en/index.html?view=2d')
         page.wait_for_function('window.PIPELINE_STUDIO')
         view = page.evaluate('PIPELINE_STUDIO.data')
         baseline = page.evaluate('JSON.stringify(PIPELINE_STUDIO.data)')
@@ -388,7 +388,7 @@ try:
               and page.locator('#reference-change-select option').count() == material_count
               and page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
         page.locator('.composite-panel').screenshot(path=str(root / 'pipeline_reference_mobile_zh.png'))
-        page.goto(base + 'en/index.html?dataset=invalid&event=missing')
+        page.goto(base + 'en/index.html?view=2d&dataset=invalid&event=missing')
         page.wait_for_function('window.PIPELINE_STUDIO')
         check('invalid deep link recovers to a real source event', page.evaluate('PIPELINE_STUDIO.state.dataset==="nuscenes"&&PIPELINE_STUDIO.current().event_id===PIPELINE_STUDIO.state.eventId'))
         check('all assets load without failed requests', not failures)

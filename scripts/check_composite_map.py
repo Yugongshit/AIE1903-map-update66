@@ -414,7 +414,7 @@ def run(directory, raw_root):
             page = context.new_page()
             page.on('pageerror', lambda error: errors.append(str(error)))
             page.on('response', lambda response: requests.append([response.url, response.status]) if response.status >= 400 else None)
-            page.goto(base + 'en/index.html')
+            page.goto(base + 'en/index.html?view=2d')
             page.wait_for_function('window.PIPELINE_STUDIO && PIPELINE_STUDIO.map')
             settle(page)
             view = page.evaluate('PIPELINE_STUDIO.data')

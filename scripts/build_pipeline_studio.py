@@ -152,6 +152,16 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             raise ValueError('Material reference decisions disagree with original and updated replay')
     if output.exists():
         raise ValueError('Choose a new output directory')
+    vendor_root = ROOT/'map_update/vendor'
+    vendor_manifest = json.loads((vendor_root/'three.manifest.json').read_text())
+    for name in ['three.min.js', 'three.LICENSE']:
+        entry = vendor_manifest['files'][name]
+        content = (vendor_root/name).read_bytes()
+        if sha256(content).hexdigest() != entry['sha256'] or len(content) != entry['bytes']:
+            raise ValueError('Local Three.js distribution differs from its pinned manifest: ' + name)
+    presentation_assets = ['pipeline_studio.css', 'pipeline_studio.js', 'pipeline_map_3d.js']
+    if any(not (ROOT/'map_update'/name).is_file() for name in presentation_assets):
+        raise ValueError('The 3D presentation renderer and 2D fallback assets must both be available')
     (output / 'assets').mkdir(parents=True)
     shutil.copy2(result_path, output / 'result.json')
     for name, dataset in data['datasets'].items():
@@ -178,8 +188,11 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
                 shutil.copy2(original, output / filename)
             else:
                 (output / filename).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
-    for suffix in ['css', 'js']:
-        shutil.copy2(ROOT / 'map_update' / ('pipeline_studio.' + suffix), output / 'assets')
+    for name in presentation_assets:
+        shutil.copy2(ROOT/'map_update'/name, output/'assets'/name)
+    (output/'assets/vendor').mkdir()
+    for name in ['three.min.js', 'three.LICENSE', 'three.manifest.json', 'README.md']:
+        shutil.copy2(vendor_root/name, output/'assets/vendor'/name)
     template = (ROOT / 'map_update/pipeline_studio.html').read_text()
     view = deepcopy(data)
     view['perception_guide'] = guide
@@ -199,6 +212,16 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
         'omitted_fields': ['datasets.*.observation_decisions', 'datasets.*.events.*.samples.*.geometry_city', 'datasets.*.reference_replay.updated_map', 'datasets.*.reference_replay.rollback_map', 'datasets.*.material_reference_replay.updated_map', 'datasets.*.material_reference_replay.rollback_map'],
         'added_fields': ['datasets.*.map_context', 'perception_guide'],
         'map_context_source': 'Prediction contexts retain frozen priors. The reference view uses the separate map copy updated only by material supplied changes. The complete reference replay remains an audit artifact.',
+        'three_dimensional_view': {
+            'renderer': 'Three.js', 'version': vendor_manifest['version'],
+            'dependency_source': 'local pinned bundle; no runtime CDN or network dependency',
+            'source_xy_geometry_preserved': True,
+            'ground_elevation': 'flat display plane; no measured terrain reconstruction',
+            'vertical_extrusion': 'schematic visual aid, not measured object or building height',
+            'before_after_camera': 'one shared camera with screen-space clipping',
+            'views': ['perspective', 'top_down', '2d_fallback'],
+            'webgl_failure_action': 'retain interactive 2D map',
+            'prediction_results_modified': False},
         'comparison_contract': {
             'left_view': 'original_reference_map', 'right_view': 'updated_presentation',
             'divider_leftmost': 'full_updated_presentation',
@@ -218,13 +241,17 @@ def build(result_path, output_path, raw_root=None, delivery_root=None):
             'source_base_map_mutated': False},
         'event_geometry_layer_classification_and_lifecycle_preserved': True}
     serialized = json.dumps(view, ensure_ascii=False, allow_nan=False).replace('<', r'\u003c').replace('>', r'\u003e').replace('&', r'\u0026')
-    revision = sha256(b''.join((output / 'assets' / ('pipeline_studio.' + suffix)).read_bytes() for suffix in ['css', 'js'])).hexdigest()[:12]
+    asset_hashes = {path.relative_to(output/'assets').as_posix(): sha256(path.read_bytes()).hexdigest()
+                    for path in sorted((output/'assets').rglob('*')) if path.is_file()}
+    revision = sha256(json.dumps(asset_hashes, sort_keys=True).encode()).hexdigest()[:12]
     for language in ['en', 'zh']:
         route = output / language
         route.mkdir()
         (route / 'index.html').write_text(template.replace('__LANG__', language).replace('__RESULT__', serialized).replace('__REVISION__', revision))
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=en/index.html"><a href="en/index.html">Map-layer pipeline</a>\n')
-    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-3.5', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
+    (output / 'version.json').write_text(json.dumps({'schema': 'change-pipeline-studio-4.0', 'result_sha256': sha256(result_path.read_bytes()).hexdigest(), 'asset_revision': revision,
+        'asset_sha256': asset_hashes,
+        'three_dimensional_view': view['presentation']['three_dimensional_view'],
         'map_context_sha256': {name: sha256((output/(name+'_map_context.json')).read_bytes()).hexdigest() for name in contexts},
         'perception_guide_sha256': sha256(guide_path.read_bytes()).hexdigest()}, indent=2) + '\n')
     return output

@@ -1,0 +1,37 @@
+{
+  "library": "three",
+  "version": "0.180.0",
+  "revision": "180",
+  "license": "MIT",
+  "source_url": "https://registry.npmjs.org/three/-/three-0.180.0.tgz",
+  "source_integrity": "sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==",
+  "upstream_repository": "https://github.com/mrdoob/three.js/tree/r180",
+  "build_tool": {
+    "name": "esbuild",
+    "version": "0.25.11",
+    "source_url": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.11.tgz",
+    "source_integrity": "sha512-KohQwyzrKTQmhXDW1PjCv3Tyspn9n5GcY2RTDqeORIdIJY8yKIF7sTSopFmn/wpMPW4rdPXI0UE5LJLuq3bx0Q=="
+  },
+  "build_input": "three/build/three.module.js",
+  "build_arguments": [
+    "--bundle",
+    "--format=iife",
+    "--global-name=THREE",
+    "--platform=browser",
+    "--target=es2018",
+    "--minify",
+    "--legal-comments=eof"
+  ],
+  "global": "THREE",
+  "runtime_network_dependencies": [],
+  "files": {
+    "three.min.js": {
+      "sha256": "cf45c4257bbad198ac328ac54de45b9a53a6d86c21dbde13b26c8ed2e85f5fe7",
+      "bytes": 701618
+    },
+    "three.LICENSE": {
+      "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+      "bytes": 1081
+    }
+  }
+}
