@@ -1,5 +1,7 @@
 # AIE1903 interactive 3D map comparison
 
+[Download the portable 3D share package · ZIP, 9.8 MB](downloads/AIE1903_3D_Map_Share_20261109.zip) — includes both datasets, Chinese instructions and local launchers. Validated after extraction with 19 packaging checks.
+
 [中文三维地图](algorithms/zh/index.html?view=3d) · [English 3D map](algorithms/en/index.html?view=3d) · [2D map](algorithms/en/index.html?view=2d)
 
 Current source: [`main` / `1d4a0b9`](https://github.com/Yugongshit/AIE1903-map-update66/tree/1d4a0b96f5c5fcd6e44b8d9977ca45d226a3c917). [3D implementation and controls](https://github.com/Yugongshit/AIE1903-map-update66/blob/main/docs/3d_map_view_20261109.md) · [Release validation](algorithms/three_dimensional_release_validation_20261109.json)
