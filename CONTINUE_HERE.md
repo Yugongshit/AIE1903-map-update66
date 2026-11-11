@@ -1,4 +1,18 @@
-# 从这里继续（2026-11-09）
+# 从这里继续（2026-11-11）
+
+**当前入口是统一场景平台：** `python scripts/run_simulation_platform.py`，浏览器打开 `http://127.0.0.1:8091/`。先读[操作与 Planning 契约](docs/simulation_platform.md)。已有 `aie1903-sim` 环境无需重新安装。
+
+- 左侧选场景，同一场景同时显示结构与状态层。网页源几何审阅与真实 MetaDrive 引擎画面明确区分；支持自由相机、看车后、时间轴双向定位、原图/更新图切换和变化定位。默认仍为轨迹回放。
+- Argoverse 已有真实适配与原图/更新图数据库：93 项已交付参考更新落实为 170 个仿真要素修改；不是模型检出。该资料无可用三维状态轨迹。
+- nuScenes scene-0980 有 23 个真实算法状态事件，全程关联 74 个实例；最终算法结构修改为 0。两层联调场景在同一 nuScenes 上应用一项受控道路修改，单独标 DEMO，禁止伪装为算法结果或拼接两数据集坐标。
+- Planning 导出当前道路版本、车道拓扑/通行属性、当前自车/参与者和附着状态；不导出未来轨迹或预定路线。当前输入接口不代表已完成新规划器闭环。
+- 验证页区分写入完整性与检测精度。Argoverse 局部边界检出 Precision 64.3%、Recall 29.0%，3/14 个检出的局部偏移误差不超过 0.5 米。nuScenes 缺少独立变化真值，不报告检测准确率。
+- Linux 验证：488 项 Python 测试中 487 通过、1 跳过；21 项浏览器验收通过，实际启动 MetaDrive 检查后视、状态聚焦、30→5→30 帧重建和道路版本切换。另实测鼠标旋转及跨页面场景身份保护。macOS 本机图形后端分支尚需用户机器验证。
+- 代码：`simulation_platform.py` 本机 API 与引擎进程管理，`simulation_platform_data.py` 场景与 Planning 快照，`simulation_session.py` 原生引擎会话，`simulation_validation.py` 来源/几何/拓扑校验。场景和小型评估材料已随仓库提交，不依赖云端 outputs。
+
+## 此前阶段记录
+
+下面保留历史描述；入口、数据数量与能力以以上当前记录为准。
 
 **2026-11-10 仿真接入调整：地图更新在前，Planning 在后。** 新增
 `map_update/simulation_bridge.py` 导出更新后的 ScenarioNet 地图，

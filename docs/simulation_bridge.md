@@ -6,6 +6,10 @@ ScenarioNet 负责场景转换与管理，`converted/` 是转换后的场景数�
 当前接入保留地图模块的两类输出：**结构修改写入道路底图；状态事件作为带来源、时间和状态的附着层**。
 Planning 可以同时读取更新后的道路、当前附着状态和已加载的物理障碍。
 
+## 统一场景平台
+
+推荐先运行 `python scripts/run_simulation_platform.py`，在浏览器中选择场景、同时查看结构与状态、切换原图/更新图、旋转真实 MetaDrive 相机、拖动回放并导出当前 Planning 输入。完整操作见[场景与地图更新平台](simulation_platform.md)。下文保留独立仿真窗口与规划控制器接口。
+
 ## 已有环境：同步后直接打开
 
 在 Mac 的项目根目录执行，例如 `~/Desktop/AIE1903-map-update66`：

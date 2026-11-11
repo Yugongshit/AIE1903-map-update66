@@ -1,0 +1,1828 @@
+{
+  "schema": "simulation-frozen-detection-metrics-1.0",
+  "datasets": {
+    "argoverse": {
+      "dataset": "argoverse",
+      "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+      "available": true,
+      "label": "冻结模型的局部边界变化检出",
+      "scope": "all_prior_physical_boundaries_including_unpainted",
+      "scope_description": "同一交付场景内340条可评估物理边界；包括未涂漆边界。衡量找到变更对象，不证明整条道路修改正确。",
+      "prediction_source": "frozen_model_local_boundary_decisions",
+      "metrics": {
+        "true_positives": 9,
+        "false_positives": 5,
+        "false_negatives": 22,
+        "predicted_positives": 14,
+        "truth_positives": 31,
+        "precision": 0.6428571428571429,
+        "recall": 0.2903225806451613,
+        "f1": 0.4
+      },
+      "samples": [
+        {
+          "id": "boundary-0091f5862b9eb39b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-033eae7130c0ced3",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-03a249254b25b030",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-03acf3352236018e",
+          "truth": false,
+          "predicted": true
+        },
+        {
+          "id": "boundary-0450a2550c2acfbf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-053348e169463f79",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-05f7723549c4ad81",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-080c88f01201ed6a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-08e9fc80f2b6ee76",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-090273c2d3a16931",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-09533c9cd6d19623",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-0a7bd92d14700b54",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-0ad71d1918d11c4f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-0bfd44d346f590fd",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-0c138aed8b4daadf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-0e2ca4ce3a41e880",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-0e5bfe30d9cf08c7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1085523ed633723f",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-11887583edf9e0e1",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-12037b54efecac1e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-13fa9f52ab7c2603",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-14ba4ad4cafdaf9d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1561bc7480623838",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-15df364344a770f5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1613e72a9443ec8a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1817eb0561317543",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-198a5535e17cf25e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1c088e2c8fab2f56",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1cee0df88fb1eea4",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1e155da7812ba639",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1ed4099019045804",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-1f5cd11c38e3c9d0",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2054d5f8303e7a59",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-20dcf76192a4d54b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2115f2c56ef4f1c3",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-21408a82a4373422",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2179271ce307b067",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2226ab583a4a5bdc",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-222d56c73e81b222",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-23635179e6b08789",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-238aa504ca4a8795",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-24408bba4523415a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-250ccc415d0d47c9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2544193ece898ac2",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-25b48985fb2c13cd",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-26424a385085e21f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-268d10d33a55b339",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-271b1662a91d882d",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-28241abfa89d1f86",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-283814b945395fae",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2ab18198aaabf7fa",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2b379a83b72622bb",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2b940c9a7c37e897",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2c88ce5507c37b82",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2cb4b56062973dfb",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2d9f6d10bc83eb49",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2df11c438ae9ef3e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2e4ca29699b03836",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-2fbd968e9d2d0423",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-30e78046e79613c6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-311f06534fd80567",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-334eb1c26aeffb23",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-33688540f2925d99",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-36c6e0d2cd33c48a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3720827cb6d7b934",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-375bdeccbb014fbc",
+          "truth": null,
+          "predicted": false
+        },
+        {
+          "id": "boundary-37b92c6cb69f347c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-380b4a1ed571ef22",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-381e7c30430b0944",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-38283bf499f3ab52",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-38e08b2b96bc7c6b",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3a248b87f878bd0a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3a492b4440bf6b2e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3ade716e40011ac3",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3b650edaa077c295",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3bc429490f58d628",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3cd7095956195615",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3f3a865ffb3b574e",
+          "truth": null,
+          "predicted": false
+        },
+        {
+          "id": "boundary-3fe03cfcd7d24b93",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-402acb2c0468cd13",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-42b76de565701232",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4486888da864e0e2",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-44a2cc7d899ca3f6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-475eddc773d470ad",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-47a9800d9e381b5d",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-487e553b494e1ad7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-48b1fc6cd47ca62d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-49194d81b3853526",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4a5aca53bd22326d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4ad90bf1475861b6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4baed60710a703f9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4d05480c6fe0da7f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4d095b5786fdb9e5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4db7077185f7e456",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4e0ea3c81e69b86a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-4f8ad42f671a755b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-50552cbf6e7f301e",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-50ad8bdd12cd1aa1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-50b24a3fa9500b50",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-514304fe472cde12",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-51efe31259e9fdeb",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5202536d46060aee",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-52ccc65a59846099",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-53cda79cbf2ab0c9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-54921fa41e2479bf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-55cddbc319d8ecf3",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-56f4d0b595744537",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-56fbfef9448ced78",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-580a890027b6faa4",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-583ca61db625d029",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-58ba480975120e42",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-59fd3f84791f4d2f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5ab62249e1979b8a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5b34db8dcaa48dcb",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5b4115ccbfbbebe6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5cd46952deb9e46a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5d01452cde3f312d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5d477de0347d1220",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5d4b726c662b2f8c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5f881ded1a3716ee",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-5ff6a1b6d747d291",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-6091029943c5480d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-614e09de042b872f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-618b5e3695c8df03",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-625ff4a6a742a0ed",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-626a8f04b5efad35",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-63a96b1560773d35",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6449bdd4533abd7e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-64c0e02cb49e5fad",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-64d1805146efe072",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-65aab1702cff914f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-65c6299a7624046c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6623cfba905a84dc",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6670531d4055fcb7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-66be5e4105914061",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6798de4fce251685",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6a0d2ee6edcf2e26",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6a441e846f3a3544",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6a9604980f31f16e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6b7764ce40af4940",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6b869242687f6937",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6df58ea03ec6e43f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6e4a75f551769e02",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-6e61bc15d6ba8866",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-706efe34852a9bc4",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-70fc92e3d2f887a5",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-717fceea437c273b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-71b990a041d92df4",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-74462e50474bb2b1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-74b0aaee4085d494",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-7575d3c5b4f0a372",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-77612e98f6fc74cf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-77b1dbad083fb4af",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-77c5424a6b4505af",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-7828c16fcd8f47db",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-79bd51ca32eff124",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-7b4906a0e661e00b",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-7bf6bf85505b7053",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-7dc5e076cfd3c704",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-7e86e6391d789c84",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-802de971a149b862",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8057c108c1a608f7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8082a12e2e874233",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-80dae403501a191b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-81a6060ede1c795a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8226ca4cc0791ef6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8332231632b625e2",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-83d7be72efad31e8",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-83ed839a059dcbb5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-84cc8ed2120b8485",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-852be9822da9168b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-85920f9c82022dc5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-85f6103a4def29d2",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-86583d097cebbca9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-86612db1059c9825",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-869ac421211285d5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8741d22b92a1219a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-87a9a1cef77f6baf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-880495c85f0a6520",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8835b8dce65edf6b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8852a0fa587a39f9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-88cb5b5cbae23557",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8978db10b799fa67",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-89d7098b92fa3c97",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8aa2a49a07c0c637",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8aa4ce0d5c149ccd",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8aab57b88e2493ba",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8b3d999b5f1d04c6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8bf27dab8bc3bdb5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8bfa62d7c0f85ef6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8da18b45a233a485",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8dc6ad2e08ded86f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-8e816bc970ba8cfa",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-90176c3dff2a5a5e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-91625ff7656d52ec",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-93561ad2d29ca971",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-935ac0892af548f5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-94d53c7e7fbb79a8",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-94e30e7062af98a2",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9636081aab83d0d6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-96a0ef07450acd8c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9708086c6f1e7a7c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-977e3eae193399cc",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-984b695b9a057b24",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9899ee1e98e753c9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-994e25c90dca7c5b",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9cad43277daff9fc",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9d0699a152e667fe",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9d7dc7efbaddf1de",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9d7fedd5624d6e87",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9e5d767edbce0327",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-9ffa8f40be96fcbe",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a0fbb5b2749c66a8",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a1807b038d735c95",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a18e1e24bf1da10e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a35f4b2c88980926",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a384c3fc86970fa5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a3a789c9da408431",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a4c925acb27c35e3",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a52f66a302052f6c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a711bbfdf7e8d2b6",
+          "truth": false,
+          "predicted": true
+        },
+        {
+          "id": "boundary-a71757680b694738",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a77e8b45c11e7143",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-a7e86b5d4eaf8250",
+          "truth": false,
+          "predicted": true
+        },
+        {
+          "id": "boundary-a9ad5a8541cd58b1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-aa334fe4caebac58",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-abab6a92ba4267c8",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ac60df44a76d0430",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-acd93615ab4d8699",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-ad061e02daf8b4e7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ae7ffb3eaf80b3e5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-af4cc2158b8050db",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b0f7f14e31c1f421",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-b1e91c875427ab04",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b2804d20e77738be",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b29ac18f8c704496",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b316d127404e546e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b3f45d3434a14260",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b40c6fa47bf49082",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b4b420f4ae023b2f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b6465048b9af6f9a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b650287a16698cef",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b6bc7e7bf461a75c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b6db9132fb1686a1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b865996d1d1f36f6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-b8ebce8b14730e93",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bb37293819633a8d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bb8454c79edadbfe",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bbd411fc42592bec",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bc124a38d0f67303",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bcb8fa4fbb7818a7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bdea7aa79faecd15",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-be4470c8a2397b8d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bec829f20d32bcf1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-bf09712a0c673a83",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c01b4faea254624c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c021fdcc1cf52a1e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c0a175a0008d4f0d",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c1d4f407d0d20a4d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c272b6773e6f10c9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c2f3117aceb8605c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c38e920203e92cc0",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c4a5343175f27fe4",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c549b2e71e0b2a45",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c6a86c6b0efef500",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c6c29f0fdb33cd5f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c7400332547b4760",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c89804134f2b5d7a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c8a66a37f3a11576",
+          "truth": false,
+          "predicted": true
+        },
+        {
+          "id": "boundary-c8faa163efba39ab",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c98343c02988940c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-c9bfae99a1922f6c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-cd729cfdab56fe46",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-cf60e7a536418cf0",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-cf9a5cfc121361a9",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d24a4323d726ca4a",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d26e3ee833f6d3de",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d27db6d71063b4c4",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d293e09a735d83fd",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d422b06c87fe35d2",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d528cebd7aa5a237",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d5dee519514b01d6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d5edb1ec178f33a9",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-d6acdfb620744177",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-d73b8f6a97795a7d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d7adc2fc9ec5db52",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d93b43d305a0d1d1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d96936db6184c413",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d9d032566f410968",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-d9fb684a9e27ac82",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-da1bfe3991373baf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-dcaeccbf638cf575",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-dcc4f5a9896b0c1a",
+          "truth": false,
+          "predicted": true
+        },
+        {
+          "id": "boundary-dcebaecb424611a8",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-de9f1392c2c411e1",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-df033eb3f5454025",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-df3793ae9559e74e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e0379672ad643271",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e12b5a5edaca0f8c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e1b518d88e5460be",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e23c04ad968a7adf",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e25a63bbe01cb6be",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e299346fb3a29414",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e4f123012fd6eae0",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e5304911bd54b591",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e601bd5fcf3b9cf3",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e757ecc3433c431e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e79bab3758a02039",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e819491980be6ee4",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e86a183521dc65fa",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-e961ea988b9f8de8",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ea10e569d5dc562b",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ea34a70d64331aad",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ea5826a816bfd1fc",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ea5b46720a1d489f",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ea762d13a87e781c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-eb198c8ecf26935b",
+          "truth": null,
+          "predicted": false
+        },
+        {
+          "id": "boundary-edc540fd6af5ff43",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ee388703bb810475",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-ef125622932f1b8d",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-ef22d34274b09f31",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-efa40cca2ca234f0",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-efff76bd595add53",
+          "truth": true,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f077d7da4efd9582",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f1bfeb008a77c1b0",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f3cb8c99c0cebdb7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f59d66705ac279e9",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f5a0b5ef906933bb",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f621057a66a5a0f5",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f64ec118a9a73c86",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f730febaf5bf645d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f7367f82cb0494d7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f7c2a55e376950c6",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f86a3678dfdd46b0",
+          "truth": true,
+          "predicted": true
+        },
+        {
+          "id": "boundary-f9895a7f00d7ed9c",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f9cb7e1e008af70d",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-f9eaa0de3b7abf33",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-fb1a2f4790fbb83e",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-fb885edf6fdef9b7",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-fbeac83db3c0e1ca",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-fcdaf3ae6d673d45",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-fda631e51189d760",
+          "truth": false,
+          "predicted": false
+        },
+        {
+          "id": "boundary-fe740c057df5c48c",
+          "truth": false,
+          "predicted": false
+        }
+      ],
+      "eligible_units": 340,
+      "excluded_units": 3,
+      "total_units": 343,
+      "final_model_structural_updates": 0,
+      "reference_updates_available": 93,
+      "final_structure_metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 93,
+        "predicted_positives": 0,
+        "truth_positives": 93,
+        "precision": null,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "final_structure_scope": "93项material参考对象变化的最终写入覆盖：模型实际写入0项；参考重放不计模型预测。",
+      "geometry_accuracy": {
+        "passed": 3,
+        "total": 14,
+        "tolerance_m": 0.5,
+        "scope": "同一锚点的局部偏移误差；所有边界别名均须满足阈值，非完整补丁精度。"
+      },
+      "independent_test_accuracy": null,
+      "limitations": [
+        "仅一个已交付场景，未提供独立留出测试场景。",
+        "93项参考更新是对照输入，不作为模型检出。",
+        "局部边界命中率与最终地图写入质量必须分开解释。"
+      ]
+    },
+    "nuscenes": {
+      "dataset": "nuscenes",
+      "scene_id": "scene-0980",
+      "available": false,
+      "label": "尚无独立变化真值",
+      "scope": "supplied_occupancy_and_marking_candidates",
+      "metrics": null,
+      "independent_test_accuracy": null,
+      "final_model_structural_updates": 0,
+      "reason": "nuScenes没有独立核验的原图/新图变化标签；对象标注及实例对齐不能替代变化正确率。",
+      "limitations": [
+        "23个状态事件来自已有对象标注足迹，未提供独立状态变化真值。",
+        "71个实例绑定成功只证明身份接入，不等于检测精度。"
+      ]
+    }
+  },
+  "provenance": {
+    "pipeline_result_sha256": "e6f4031bcc712f2294dd484eea4a00a6dafd5cf64d229eb5d0a0c03b717e084e",
+    "pipeline_run_id": "closed_material_structure_state_v4",
+    "prediction_freeze": {
+      "gt_read": false,
+      "created_at_utc": "2026-11-10T15:32:00.108376+00:00",
+      "files_sha256": {
+        "method.json": "2bb4f27e5a2c75f20a75229d5b9bad400beea4ba47aad8c8184720c114c25112",
+        "nuscenes_predictions.json": "7d0a0a7278863d0333a8f3dba44b58e49e11bccd5b8badb63efa5b9833e68851",
+        "nuscenes_state_layer.geojson": "a169545f011329ecfed26a5574f127cb46d177e04f0e880504d6cb7ea40a8561",
+        "argoverse_predictions.json": "73c7ac3df74338cb01c36ad5b68f74638d87a83dd515284142cc5c4bb97353cd",
+        "argoverse_state_layer.geojson": "c7e75837967fb9807e15a121f74cf441c75e711cf29796627c6c7c755e21b9ab"
+      }
+    },
+    "source_files": [
+      {
+        "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/file_manifest.json",
+        "sha256": "b9b2f658d4566f2521d0b5cbe1e4aedca96fdcf1ac686157774835b2e7f64df7",
+        "role": "evaluation_only_after_prediction_freeze_manifest"
+      },
+      {
+        "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/gt_object_inventory.jsonl",
+        "sha256": "7281fbdf565218c48ab8722da63c296e6eea102fd11ce13df5161ecef9bb65fe",
+        "role": "evaluation_only_after_prediction_freeze"
+      },
+      {
+        "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/gt_changed_objects.jsonl",
+        "sha256": "c915e1bb89fce7537c64979ce59e06072134132c72e4c50e7b8055fb49b15a0a",
+        "role": "evaluation_only_after_prediction_freeze"
+      },
+      {
+        "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/prior_map_reference.json",
+        "sha256": "d93d0311117e9c74039611013f005de1f5bebca665476b694eb8d5c0e560176b",
+        "role": "evaluation_only_after_prediction_freeze"
+      },
+      {
+        "path": "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/provenance.json",
+        "sha256": "8380a787dbd952cf568f3f641e4ccddbc503e2500626beb06b3dd4af56411281",
+        "role": "evaluation_only_after_prediction_freeze"
+      }
+    ],
+    "method": "recompute_all_prior_boundary_labels_from_independent_M8_inventory_after_prediction_freeze",
+    "reference_replay_counted_as_model_prediction": false
+  }
+}

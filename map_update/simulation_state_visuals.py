@@ -80,6 +80,10 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
         track_ids = sorted(set(row.get("matched_track_ids", [])))
         live = {bindings[key]["object_id"]: bindings[key] for key in track_ids if key in bindings}
         center = _center(paths)
+        height = row.get('height_m')
+        if height is not None and (isinstance(height, bool) or not isinstance(height, (int, float))
+                                   or not isfinite(height) or height <= 0):
+            raise ValueError('State annotation height must come from a positive finite source dimension')
         item = {"instance_id": identifier, "event_ids": associated, "status": state,
                 "category": row.get("category", row.get("type", "unknown")),
                 "historical": bool(row.get("historical", state != "observed_active")),
@@ -89,6 +93,7 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
                 "bound_object_ids": sorted(live), "matched_track_ids": track_ids,
                 "missing_model": bool(row.get("missing_model")),
                 "footprint_only": not bool(live),
+                "source_height_m": height,
                 "geometry_role": "source_observation_footprint_not_current_extent"}
         if identifier in objects:
             previous = objects[identifier]
@@ -326,6 +331,17 @@ class StateOverlay:
                     lines.moveTo(segment[0][0], segment[0][1], .22)
                     for point in segment[1:]:
                         lines.drawTo(point[0], point[1], .22)
+                    if row.get('source_height_m') is not None:
+                        # Wireframe annotation uses measured box height. It is
+                        # neither a reconstructed mesh nor a collision object.
+                        top = .22 + row['source_height_m']
+                        lines.moveTo(segment[0][0], segment[0][1], top)
+                        for point in segment[1:]:
+                            lines.drawTo(point[0], point[1], top)
+                if row.get('source_height_m') is not None:
+                    for point in path[:-1]:
+                        lines.moveTo(point[0], point[1], .22)
+                        lines.drawTo(point[0], point[1], .22 + row['source_height_m'])
             anchor = row["anchor_runtime_m"]
             if row["bound_object_ids"]:
                 # A small identity mark tracks the existing simulator instance;

@@ -40,6 +40,13 @@ def environment():
 
 
 class SimulationStateVisualsTests(unittest.TestCase):
+    def test_vertical_annotations_use_only_observed_dimensions(self):
+        model = prepare_state_annotations(snapshot([source_object(height_m=1.35)]))
+        self.assertEqual(model['objects'][0]['source_height_m'], 1.35)
+        self.assertIsNone(prepare_state_annotations(snapshot())['objects'][0]['source_height_m'])
+        with self.assertRaisesRegex(ValueError, 'source dimension'):
+            prepare_state_annotations(snapshot([source_object(height_m=float('nan'))]))
+
     def test_one_instance_in_multiple_events_has_one_footprint(self):
         data = snapshot([source_object(), source_object(events=("event-2",))],
                         [event(), event("event-2")])
