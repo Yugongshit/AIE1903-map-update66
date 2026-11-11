@@ -2,6 +2,19 @@
 
 当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
+**地图更新 → 仿真 → Planning 接口：** 可将地图模块结果导出为新的 ScenarioNet 数据库，再用 MetaDrive 手动驾驶或接收规划器控制动作。默认只绘制有来源的地图几何，路障/锥桶首次出现后持续保留；更新区域用青色、旧位置用橙色虚线标注。支持新的城市坐标目标；原 M4 交付仍作为离线基线保存。[接入说明与启动命令](docs/simulation_bridge.md)。
+
+**已有仿真环境，直接启动：** `git pull --ff-only` 后，激活 `conda activate aie1903-sim`。
+执行 `python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"` 对齐新增绘制依赖，然后运行：
+
+```bash
+python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode manual --render 3D --no-traffic --steps 6000
+```
+
+地图已随仓库提交，无需另下压缩包。`highlighted` 带 DEMO 更新标记；改成
+`demo/simulation/persistent` 可查看真实算法输出。Mac 本地窗口不要加 `--offscreen`。
+首次安装见[环境说明](docs/simulation_bridge.md#安装)。
+
 **新增三维地图：** 默认以街道尺度显示可旋转、缩放的三维视图，保留黄色状态、红色结构变化和共享相机的滑动对照；支持俯视、手机手势及一键切回二维。道路采用原始 XY 几何；35 个路障和 11 个锥桶按标注尺寸与朝向显示通用造型，3 个杂物保留真实轮廓。可直接点击“看路障／看锥桶”放大查看。[使用与实现说明](docs/3d_map_view_20261109.md)。
 
 **2026-11-09：按实质结构变化决定是否改图。** 局部曲线距离不再直接等同于标线移动。先核对物理对象和修改操作，再检查几何变化的幅度与连续影响范围；新增车道、连通关系、车道用途和受约束的标线类型变化分别处理。只使用本次提供的材料，所有候选给出已完成的动作，不创建复访或人工待办。`no_update` 表示本次不改底图，不是独立真值标签。

@@ -1,0 +1,34 @@
+{
+  "schema": "simulation-map-patch-1.0",
+  "dataset": "nuscenes",
+  "scene_id": "scene-0980",
+  "map": "singapore-onenorth",
+  "coordinate": "nuScenes_global",
+  "units": "m",
+  "base_scenario_sha256": "ce5b15805f4177769a10dc30b296eabe59e6c551612a2ff0620e303ecbd5e616",
+  "provenance": {
+    "source": "controlled_demo",
+    "synthetic": true,
+    "description": "Translate one nearby marking +1m in city X to test export/load; not a detected change."
+  },
+  "operations": [
+    {
+      "operation": "replace",
+      "feature_id": "2846e935-4d16-485d-9df2-d33038f1128a",
+      "before_sha256": "997946fce54e8ae7d2a280cde0bea03a9043209db527dc9bf6940aec3495a757",
+      "feature": {
+        "type": "ROAD_LINE_BROKEN_SINGLE_WHITE",
+        "polyline": [
+          [
+            442.3109416497856,
+            1256.794576617967
+          ],
+          [
+            438.31191219711036,
+            1247.003806885182
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,5 +1,20 @@
 # 从这里继续（2026-11-09）
 
+**2026-11-10 仿真接入调整：地图更新在前，Planning 在后。** 新增
+`map_update/simulation_bridge.py` 导出更新后的 ScenarioNet 地图，
+`scripts/run_updated_simulation.py` 提供独立自车控制、新目标和实际轨迹记录，
+`map_update/simulation_planner.py` 提供读取更新车道图的低速规划示例。
+用户最新修正：撤销整片平地背景，按源地图几何显示、未知周边留空；
+真实楼宇数据未提供，不编造建筑。默认路障/锥桶首次出现后持久保留，更新区域
+标青色、原位置橙色虚线、删除红色虚线；受控实验标 DEMO。
+原 M4 离线交付保存，不等同于新闭环规划。
+首版针对已有 nuScenes scene-0980 转换数据；Argoverse 仍需要自己的场景适配。
+真实结果仍为 23 状态事件、0 结构修改，受控改图示例必须保留 synthetic 标记。
+安装、命令和限制见 [仿真接入说明](docs/simulation_bridge.md)。
+代码和两份完整导出数据库已纳入 Git；本地使用 `demo/simulation/highlighted`
+或 `demo/simulation/persistent`，不依赖云端 `outputs` 或手动下载压缩包。
+已有本地环境只需激活 `aie1903-sim`，对齐 NumPy 2.2.6 / Shapely 2.1+ 后运行新入口。
+
 **最新展示：三维地图。** 先读 [三维视图说明](docs/3d_map_view_20261109.md)。默认 3D，`?view=2d` 可固定二维。真实 XY 几何保持；最新展示精确关联 49 个源实例，35 路障和 11 锥桶按标注 L/W/H/yaw 显示通用造型，3 杂物保留轮廓，不能声称重建了真实表面；分类算法和冻结结果没有改动。最新构建在 `outputs/pipeline-v8/semantic-objects-20261109/`，保留中英双语与原图／更新后滑动对照。
 
 当前代码以 **main** 为统一入口，已合并应用开发历史与原 main 的 Planning 44 个文件；网站在 `gh-pages`。不要用旧 `work`、旧演示分支覆盖当前源代码。

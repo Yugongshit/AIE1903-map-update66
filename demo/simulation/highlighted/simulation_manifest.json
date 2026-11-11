@@ -1,0 +1,463 @@
+{
+  "schema": "simulation-map-export-1.0",
+  "dataset": "nuscenes",
+  "scene_id": "scene-0980",
+  "map": "singapore-onenorth",
+  "coordinate": "nuScenes_global",
+  "units": "m",
+  "scenario_file": "sd_nuscenes_scene0980_v1.0-trainval_scene-0980.pkl",
+  "exported_scenario_sha256": "8b4de9ca6aeb9993e1058e1c5bdaa7812a6743523ad9fefceafef7d7d020029c",
+  "provenance": {
+    "pipeline_result_sha256": "e6f4031bcc712f2294dd484eea4a00a6dafd5cf64d229eb5d0a0c03b717e084e",
+    "source_scenario_sha256": "ce5b15805f4177769a10dc30b296eabe59e6c551612a2ff0620e303ecbd5e616",
+    "patch_sha256": "4f5ad35ea83a98057f8321e58a8af1a7ff667c95cd803736afa519d8104cc42a",
+    "map_patch_log_sha256": "4ef3bd4aad0506a4bd7a9c457c83a2f70840fe91f4f3f98a0b20f1bc229e2de8",
+    "patch_provenance": {
+      "source": "controlled_demo",
+      "synthetic": true,
+      "description": "Translate one nearby marking +1m in city X to test export/load; not a detected change."
+    },
+    "source_map_features_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+    "map_features_sha256": "4dcc95b08490a8f6ea7c3571d79999b99fb3a486aa8e38cff91f238f313ab0c9",
+    "tracks_sha256": "bec299f2f02590d3c59ae57165a1f8e12fd35a113a7b3ce7487ace4d3c8f6981",
+    "source_tracks_sha256": "da51fe672fac2361f5acb8c7d55d5ef6e1dd06b68b0d9ba850d478a2af8ef10b",
+    "exported_tracks_sha256": "bec299f2f02590d3c59ae57165a1f8e12fd35a113a7b3ce7487ace4d3c8f6981",
+    "tracks_unchanged": false,
+    "dynamic_tracks_sha256": "97edf58c44faa6fd79774fbab4a40c347f74c55ad69237e25f9ab8ab94780c57",
+    "dynamic_tracks_unchanged": true,
+    "obstacle_mode": "persistent",
+    "obstacle_manifest_sha256": "4cc67d9d5b11ecb9774603b78b852ebd217b4f4d2612a12e4d97bf48151d5ab3",
+    "persisted_obstacle_ids": [
+      "e30c0781b61549eebcab263ed6595ab1",
+      "fa6c224d94c443378b9141e021312362",
+      "89c21476d7b84141a5966c576082d105",
+      "607ba26281fc4ee08b51337efa95c587",
+      "8022e81cfed247339b3e40839b5f973c",
+      "bb73e8df79cf4ad0a0c0863b33755a42",
+      "5cdf608f8bc547e7998eebbb2c7ff0c1",
+      "ebe3acf53a244ac697b6b18fb8f1af7d",
+      "68f7f51508bb49d0864fbddbc7a19e58",
+      "121bda1bdfab43078c65da00e484a2af",
+      "4e3f67aca99f4aecb5b660f5a67a5860",
+      "5e84274a09ad475b8098fc06bf4df49c",
+      "7e5be2b0f0094d3da4ef159abd6ac4cc",
+      "50da4853b8ea434aa7a4f0c248b2931c",
+      "7158f27660a248ef98e0a0be58e0d164",
+      "9732a8afda93435189aba86f5b916ac0",
+      "ee5bc268c33f4ea5a2e8c94fab17d408",
+      "2b09439196704eafbbd0e905ddef7796",
+      "3ccf5d290b834e8fba91f2b172c74a35",
+      "376748834207441cb957250590b12653",
+      "98c6b767c7b74aa996eb101be300fe23",
+      "a0d82a2be263435f9062d61aae449d0c",
+      "33032963690f459682e50bf706ea5000",
+      "95573519ad26498d83992d4145fd0733",
+      "37268b0856b6497db6e983707a529ad4",
+      "05de81de538846069343c7cf81bf0709",
+      "628bcb0f3cdb4a56bfa776ac80418288",
+      "2e6e7372159b43ebb3fb2028d2e86680",
+      "7bee5bf7890f476c9f2ea6bbf03e9ac1",
+      "2251ecda45d74bed8588580cf725e628",
+      "595a0ef7d3f747a0ab5d7bdc80720eb9",
+      "58a24204f6514bcca9ec0ab792c8e687",
+      "62f4692ad37644ef8ba384b07ebee82e",
+      "bb2e7a74ee5d40c2afce4573c57b4cc0",
+      "a27afba6f1c140368d7b62b5c002ef57",
+      "3867765a6b5f42e7af6b4d7e47804212",
+      "e4472854df2041819e1f2e870e4cac71",
+      "a5ee60a2ec014fc4ac7b20b9ef871afc",
+      "e9e57a7c40c9414f8dbf4ae204609c0c",
+      "d53678a2d21b488ea37c24d141e4bbb9",
+      "d5906e25bf794906a83020fd8779c2fa",
+      "40391290fb0c430bbf9e095d301fda30",
+      "845daaaace0b465bb55410f05c39fc7c",
+      "faf29c553913483a8f4295634eca177f",
+      "51ff1ac2c7bc492ab7fe2e2a23959e56",
+      "207f1925fd014e7f99878454e94f3b5d",
+      "088ce1163fc84beaba5d62aebc8ba317",
+      "18ec3f0789af4741ab546517885bf46f",
+      "2c5dabf5dd9645e9a641499992198ec4",
+      "e868f0981aaa4b5cb55640c3b59dc496",
+      "0c5f20dbf3b842d2ac86bd725ce36e8c",
+      "755de3c85255445dbb4931eb899b3d7b",
+      "b630ef70d4dd4a0db7106eb7e7daf390",
+      "56cf90aa4c914299a47fe66881f275cc",
+      "25ba55a291e74d7389f048f36facc693",
+      "1fd65b97bea64ca49319dafae4382c40",
+      "d1f2a382751d48d7a4a6d8b6a825c8e9",
+      "b15f067df5d6446aa059777c588ab55a",
+      "ffa7144679ed412c8ecb6ad5c7fe5357",
+      "b783edf77d48409b8d2e5aa2fad43dbc",
+      "20b4fd57ea34494c9821f1404ae085e9",
+      "3afa7c2119f542039358aa6cc8bc28c6",
+      "461dcc7d5df4462db6bd169bf96d51e8",
+      "ac62070349ab4bbea2eb084b029e3f4b",
+      "4b5727d49ff646838b96c810613ebb75",
+      "8c3bcc7999fa4233838c5850c34a78ae",
+      "792216a8ef8d49c38261c6f03804761b",
+      "dc94097d1ef943d09fda514fd91dcb78",
+      "97396a82641f4614ad6374232d47685e",
+      "69715bd6f9854a9eb07eb4f8184d872c",
+      "6fde55a71b264a539ae9ba6017f4f451",
+      "3116f831445f4804824880b3bba84955",
+      "12726cb962664c86a25e6123b67a4775",
+      "f0496a73c82d464bb90ebc3c41d0f9f7",
+      "8833a25fc835476d969b18ae41eae9a4",
+      "0523b4d3ba8e4d9082de898279571a9f",
+      "a4770ca8530c43a8a92dcdb0b0459255",
+      "c04b64dc1f6741b6a802dbfd8d5caefa",
+      "aa7d3336d6644fae9e0fa1f236ae49df",
+      "54fe2c2fc3924ea3afe5a162b1ee3885",
+      "ccc7b9cdfcae40f49e7c59775c8ff96b",
+      "00f8a26a33294663b9376f9c143a4944",
+      "bc27ab31199e420294801eaed29f44fa",
+      "1c3b1979192f45dea60635cbb37caa14",
+      "0f14176a33bc4eeaa22d6954168353fd",
+      "d4110b841e7847138a7d77267871a86e",
+      "9472ed7b363046bf98e8beb46bf73a95",
+      "63d50c7eb7f04efe9abd81e3f7bfeb0c",
+      "a49e7c33c01c4a2eab5e7873244101e4",
+      "cd2bb067116043269e55496ca0e8def6",
+      "3811fd716d9e4ee29e42777059b7f177",
+      "0e51ce2e7a844f6a89f8ab6668b11988",
+      "cb9eda2a24d84116bb3d847843c19ea5",
+      "63c4242e0c3f40c39f1db94e95b6bdd6",
+      "536e2da06b4e4fe38001622e3b18305c",
+      "5298f6ab18ce4593b80ea75748c4fc6f",
+      "cea2203d24894a60bbd3f8b472063e49",
+      "846a40740d004538b41f15d8a0c8ff99",
+      "55afc7a622e2478791828870fe592572",
+      "e4d17426b72c4412871d7a8e8a37fae4",
+      "6d36c8e8e39a485480cbe43781c415e2",
+      "70b3dfd0082b4c56be5ed9442b45b9c0",
+      "91a3231a455744c4966e418972983462"
+    ],
+    "state_event_observations_unchanged": true,
+    "obstacle_persistence_is_simulation_policy": true,
+    "observed_permanence_claimed": false,
+    "coordinate_transform": "none; MetaDrive centralizes once when loading",
+    "workflow": [
+      "map_update",
+      "simulation_map_export",
+      "planning",
+      "vehicle_control"
+    ],
+    "synthetic": true
+  },
+  "summary": {
+    "map_features": 702,
+    "structural_operations": 1,
+    "lane_operations": 0,
+    "state_events": 23,
+    "matched_state_tracks": 46,
+    "unmatched_state_instances": 3,
+    "persisted_obstacles": 103,
+    "new_obstacles_spawned": 0
+  },
+  "topology": {
+    "introduced_issues": [],
+    "preserved_source_issues": [
+      [
+        "09bc3f89-71af-42eb-aacb-ea6beb442d11",
+        "entry_lanes",
+        "a4d847f6-a86f-4261-aa71-1703ebacb9d7",
+        "missing_lane"
+      ],
+      [
+        "0b5bf641-4b16-4c38-963c-74257c3f6271",
+        "entry_lanes",
+        "8254b145-240d-4e46-b504-dc69267ee727",
+        "missing_lane"
+      ],
+      [
+        "0fa80da3-c1f6-4b58-a9e9-a34a32b76891",
+        "exit_lanes",
+        "af49a79a-4f23-4ccd-ad97-782c65da6262",
+        "missing_lane"
+      ],
+      [
+        "1a1a568a-4f8b-4a79-8086-e557c71f5343",
+        "exit_lanes",
+        "265bcf42-f44d-4f06-b30d-e41451859ab8",
+        "missing_lane"
+      ],
+      [
+        "1a1a568a-4f8b-4a79-8086-e557c71f5343",
+        "exit_lanes",
+        "e86ebeca-69a2-4848-8f40-a1605a3609ae",
+        "missing_lane"
+      ],
+      [
+        "1c229225-fcf4-470b-a247-be14d91295cf",
+        "exit_lanes",
+        "4eec9725-3932-4374-a7de-60c8ff1595e8",
+        "missing_lane"
+      ],
+      [
+        "2c9a9c48-7cd0-42ae-9cbf-1ccb4d872113",
+        "exit_lanes",
+        "2353f001-a87a-4156-ac45-10119a9199c5",
+        "missing_lane"
+      ],
+      [
+        "323f2d0c-2d68-4f63-8b87-56eb13ef2808",
+        "entry_lanes",
+        "6c2bb111-5128-4aac-8b20-130534ff2f31",
+        "missing_lane"
+      ],
+      [
+        "340892d1-a6f7-48da-8df2-d7b6382c6d3d",
+        "entry_lanes",
+        "c7c6061c-803a-4c24-ac77-c88aba659c8c",
+        "missing_lane"
+      ],
+      [
+        "350cfb66-3838-4516-b4eb-0b358ea34334",
+        "entry_lanes",
+        "527e83b0-ed2a-4e27-bc8f-3be9c09e2a63",
+        "missing_lane"
+      ],
+      [
+        "350cfb66-3838-4516-b4eb-0b358ea34334",
+        "entry_lanes",
+        "fe980175-368f-47d0-97b1-b5ed89f8ccd2",
+        "missing_lane"
+      ],
+      [
+        "3eabe5bf-f07e-4eff-b3dd-eec9f9a18560",
+        "exit_lanes",
+        "13e729cd-e226-4a84-a3b1-da9a7ba2b633",
+        "missing_lane"
+      ],
+      [
+        "42245e79-88fd-4fcf-a7c5-fcd728e20c74",
+        "exit_lanes",
+        "13fad3a5-4d9e-4569-a24d-2f05bf534582",
+        "missing_lane"
+      ],
+      [
+        "46fe6640-b041-4357-be05-e6dbff3df28b",
+        "exit_lanes",
+        "5ffb291b-d90d-44cc-9dd3-5a0b7380cf24",
+        "missing_lane"
+      ],
+      [
+        "4e6383d9-0afb-438e-bccb-ee3a8ee328f7",
+        "entry_lanes",
+        "3f934472-578c-4ed9-9984-013588f9ac00",
+        "missing_lane"
+      ],
+      [
+        "4e6383d9-0afb-438e-bccb-ee3a8ee328f7",
+        "entry_lanes",
+        "b98db0b1-822e-4b13-b48c-dc856126d129",
+        "missing_lane"
+      ],
+      [
+        "4f5f28f4-19c3-4070-850c-3eb923427946",
+        "exit_lanes",
+        "4f69c827-3c24-4afe-b4e6-29ebccc67001",
+        "missing_lane"
+      ],
+      [
+        "74ee76d4-03d6-413a-809f-1daf175c3c46",
+        "exit_lanes",
+        "89745c96-237d-4346-b5ee-f7c10b801fde",
+        "missing_lane"
+      ],
+      [
+        "7e55826a-6581-498a-b40d-c95c2b9301ab",
+        "exit_lanes",
+        "89745c96-237d-4346-b5ee-f7c10b801fde",
+        "missing_lane"
+      ],
+      [
+        "810cfecf-24e7-407e-a566-e6cf2e3b0799",
+        "entry_lanes",
+        "ce1d134b-0d81-4f4f-a249-10d97de8a7d9",
+        "missing_lane"
+      ],
+      [
+        "84f70b7f-8026-4d28-ab2c-214f8eeb320f",
+        "exit_lanes",
+        "8b0a8730-16a0-42fd-bce2-3bfabf7ba5b1",
+        "missing_lane"
+      ],
+      [
+        "8f231cdb-7dec-4013-9f83-8a6ae674467e",
+        "exit_lanes",
+        "dffa2160-736e-4998-ae58-939fb331cf71",
+        "missing_lane"
+      ],
+      [
+        "90a27e84-c8f6-4e84-816e-adbdc64fbc63",
+        "exit_lanes",
+        "f8a5b497-2b13-4ae2-9089-4abbdde990d3",
+        "missing_lane"
+      ],
+      [
+        "92ca7f98-71b6-4b44-8dc2-bbb7c9512cf7",
+        "exit_lanes",
+        "e8b58454-b4c8-4d47-aed3-28af9bef06b5",
+        "missing_lane"
+      ],
+      [
+        "92f44dc6-d417-4ac0-bf56-fc35e275b86a",
+        "exit_lanes",
+        "2353f001-a87a-4156-ac45-10119a9199c5",
+        "missing_lane"
+      ],
+      [
+        "951303ee-583c-4cc1-b56e-09c3ca736087",
+        "entry_lanes",
+        "fbfed65a-9f81-4a27-bfdb-30e102e5380c",
+        "missing_lane"
+      ],
+      [
+        "9bdcf3c5-3181-4099-a2b6-e6fcf428c755",
+        "entry_lanes",
+        "a0d89376-efe7-458b-8cf2-ad03ac1a8663",
+        "missing_lane"
+      ],
+      [
+        "9bdcf3c5-3181-4099-a2b6-e6fcf428c755",
+        "entry_lanes",
+        "a12d7a4c-0748-43b2-af78-bf1e1d094a70",
+        "missing_lane"
+      ],
+      [
+        "9da7e021-87b7-4baa-b3ea-61b62c122050",
+        "entry_lanes",
+        "c9cc74b1-0297-457d-9ad2-21594ba78480",
+        "missing_lane"
+      ],
+      [
+        "a101b0c4-85e8-4075-a22a-7aa43a87c95f",
+        "entry_lanes",
+        "6738af02-e5d0-47b0-9ec0-f50da6587a13",
+        "missing_lane"
+      ],
+      [
+        "a101b0c4-85e8-4075-a22a-7aa43a87c95f",
+        "exit_lanes",
+        "0f41ec1b-3ff8-46ef-a1c0-01364290f479",
+        "missing_lane"
+      ],
+      [
+        "aa2c92b7-f73b-4f83-b447-11d5b26d3e39",
+        "exit_lanes",
+        "e914c6f5-6674-4d44-8109-a7b6f0470fd9",
+        "missing_lane"
+      ],
+      [
+        "aa8beea9-dff6-4e95-980e-697045208788",
+        "entry_lanes",
+        "50e0930a-84b4-412c-9bb4-44a5fc42f399",
+        "missing_lane"
+      ],
+      [
+        "ae8dc3db-cc43-491d-b13b-5bc9a5a0fcf9",
+        "exit_lanes",
+        "4960d80a-9865-4076-857d-9d3da26fe886",
+        "missing_lane"
+      ],
+      [
+        "ae8dc3db-cc43-491d-b13b-5bc9a5a0fcf9",
+        "exit_lanes",
+        "55c8414b-e49c-4f3c-8442-c425be936a76",
+        "missing_lane"
+      ],
+      [
+        "afc678c8-16d8-4fb8-8590-807be0cfca24",
+        "entry_lanes",
+        "d1998cbc-2bd5-450a-81a6-afa8dba1af9c",
+        "missing_lane"
+      ],
+      [
+        "b0a65cfb-fac5-4004-b99b-58e2f8876d58",
+        "entry_lanes",
+        "13fad3a5-4d9e-4569-a24d-2f05bf534582",
+        "missing_lane"
+      ],
+      [
+        "c21c7588-04d7-4351-a5dd-1307d62e5935",
+        "exit_lanes",
+        "f8a5b497-2b13-4ae2-9089-4abbdde990d3",
+        "missing_lane"
+      ],
+      [
+        "c4173049-a5b7-44ec-8713-8de06877fc7b",
+        "exit_lanes",
+        "5f47e230-4bcf-4942-ba56-2f3ad9ff9817",
+        "missing_lane"
+      ],
+      [
+        "c8de7a88-c75e-4170-bc15-caabd41b4c05",
+        "exit_lanes",
+        "1931e3c5-b516-46cc-b258-79921d382ce2",
+        "missing_lane"
+      ],
+      [
+        "c8de7a88-c75e-4170-bc15-caabd41b4c05",
+        "exit_lanes",
+        "1dedb582-31a1-4cfb-a28b-21b6af99017a",
+        "missing_lane"
+      ],
+      [
+        "c8de7a88-c75e-4170-bc15-caabd41b4c05",
+        "exit_lanes",
+        "cbdb7cdd-aa68-4a33-bbf4-4b5e8892ea3a",
+        "missing_lane"
+      ],
+      [
+        "cbcc1a66-d6f7-4825-a5e1-f55bca97aa3e",
+        "entry_lanes",
+        "669633c2-4f4c-476c-946b-d3367d287b6a",
+        "missing_lane"
+      ],
+      [
+        "ce7ae474-8fc0-4064-9c96-63626ff14ea5",
+        "entry_lanes",
+        "821ff9fb-5e61-4c97-a7aa-816700ff82b5",
+        "missing_lane"
+      ],
+      [
+        "d27ea74b-6cb5-4300-baef-3f7622cd4598",
+        "entry_lanes",
+        "37102b94-7aee-4f4c-ba0c-7b8b2799d06e",
+        "missing_lane"
+      ],
+      [
+        "ded3ac2c-099b-40e7-9699-be5677902ca2",
+        "entry_lanes",
+        "821ff9fb-5e61-4c97-a7aa-816700ff82b5",
+        "missing_lane"
+      ],
+      [
+        "fd37e911-9f5a-414d-9e66-382097487294",
+        "entry_lanes",
+        "7cd63426-9c6c-497f-a1ee-7ed9f6b12424",
+        "missing_lane"
+      ],
+      [
+        "fd37e911-9f5a-414d-9e66-382097487294",
+        "entry_lanes",
+        "96d889bf-089b-4a8e-b6ff-928d4a5c0287",
+        "missing_lane"
+      ]
+    ],
+    "modified_lane_issues": []
+  },
+  "files": {
+    "planning_map": "planning_map.json",
+    "states": "state_event_layer.json",
+    "patch_log": "map_patch_log.json",
+    "obstacles": "obstacle_manifest.json"
+  },
+  "limitations": [
+    "Only explicit road-line and complete lane-feature edits are supported.",
+    "Argoverse maps require their own matching converted scenario and adapter.",
+    "Persistent barriers/cones are a chosen simulation policy, not a finding of observed permanence or road closure.",
+    "A supplied map patch is not independent detection accuracy."
+  ]
+}
