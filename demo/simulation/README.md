@@ -13,10 +13,11 @@
 ```bash
 conda activate aie1903-sim
 python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode manual --render 3D --no-traffic --steps 6000
+python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
 ```
 
-Mac 本机不加 `--offscreen`。点击窗口后使用 W/A/S/D；Esc 退出。
+车辆按原始轨迹自动行驶，背景交通保留；默认模式也是 `replay`，不需要键盘开车。
+Mac 本机不加 `--offscreen`；Esc 退出。需要手动驾驶时才显式使用 `--mode manual`。
 首次安装、导出自己的地图及控制器接入见 [仿真说明](../../docs/simulation_bridge.md)。
 
 每份目录保留完整导出结果，包括场景、索引、前后地图、规划地图、更新日志、

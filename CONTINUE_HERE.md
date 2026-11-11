@@ -14,6 +14,8 @@
 代码和两份完整导出数据库已纳入 Git；本地使用 `demo/simulation/highlighted`
 或 `demo/simulation/persistent`，不依赖云端 `outputs` 或手动下载压缩包。
 已有本地环境只需激活 `aie1903-sim`，对齐 NumPy 2.2.6 / Shapely 2.1+ 后运行新入口。
+查看可视化默认 `replay`，按原始轨迹自动行驶并保留背景交通；不要把展示命令
+改成 `manual` 或附带 `--no-traffic`。手动驾驶和新路线规划仅作为显式选项保留。
 
 **最新展示：三维地图。** 先读 [三维视图说明](docs/3d_map_view_20261109.md)。默认 3D，`?view=2d` 可固定二维。真实 XY 几何保持；最新展示精确关联 49 个源实例，35 路障和 11 锥桶按标注 L/W/H/yaw 显示通用造型，3 杂物保留轮廓，不能声称重建了真实表面；分类算法和冻结结果没有改动。最新构建在 `outputs/pipeline-v8/semantic-objects-20261109/`，保留中英双语与原图／更新后滑动对照。
 

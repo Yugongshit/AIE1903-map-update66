@@ -77,6 +77,16 @@ class RuntimeContractTests(unittest.TestCase):
             environment_config(".", mode="manual", render="none", steps=5,
                                num_scenarios=1, input_policy=external, replay_policy=replay)
 
+    def test_replay_uses_recorded_ego_and_retains_traffic_without_manual_input(self):
+        external, replay = object(), object()
+        config = environment_config(".", mode="replay", render="3D", steps=600,
+                                    num_scenarios=1, input_policy=external, replay_policy=replay)
+        self.assertIs(config["agent_policy"], replay)
+        self.assertFalse(config["manual_control"])
+        self.assertFalse(config["no_traffic"])
+        self.assertFalse(config["no_light"])
+        self.assertEqual(episode_step_limit(600, 201, mode="replay", no_traffic=False), 200)
+
     def test_rendering_adapter_does_not_replace_source_geometry_and_restores_on_error(self):
         class OriginalTerrain:
             pass

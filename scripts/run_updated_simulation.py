@@ -12,7 +12,8 @@ from map_update.simulation_runtime import run
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--database-path", type=Path, required=True)
-    parser.add_argument("--mode", choices=("manual", "replay", "controller"), default="manual")
+    parser.add_argument("--mode", choices=("manual", "replay", "controller"), default="replay",
+                        help="Ego control mode (default: replay the recorded trajectory)")
     parser.add_argument("--render", choices=("none", "2D", "3D"), default="3D")
     parser.add_argument("--steps", type=int, default=600)
     parser.add_argument("--scenario-index", type=int, default=0)

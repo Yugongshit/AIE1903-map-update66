@@ -1,4 +1,4 @@
-"""Run a ScenarioNet database with independent ego control on the loaded map.
+"""Replay a ScenarioNet database, or independently control ego on the loaded map.
 
 MetaDrive is optional and imported only by ``run``. A controller is a callable
 ``controller(state) -> [steering, throttle_or_brake]``. Both actions must lie in
@@ -223,7 +223,7 @@ def controller_state(env, *, goal=None, goal_radius=2.0, source_map_features=Non
     }
 
 
-def run(database_path, *, mode="manual", render="3D", steps=600,
+def run(database_path, *, mode="replay", render="3D", steps=600,
         scenario_index=0, controller=None, action=None, goal=None,
         goal_radius=2.0, no_traffic=False, snapshot=None, offscreen=False,
         environment_geometry=None, show_updates=True) -> dict:
@@ -362,7 +362,10 @@ The original database files are never written by this runner.
             elif render == "3D":
                 env.render(text={"mode": mode, "step": env.episode_step,
                                  "environment": "source geometry; missing surroundings left unspecified"})
-            if terminated or truncated:
+            # ScenarioEnv's training success threshold can end an episode
+            # before the recorded trajectory ends. Playback follows the full
+            # recording, bounded by limit above, as ScenarioNet's viewer does.
+            if mode != "replay" and (terminated or truncated):
                 ended = "terminated" if terminated else "truncated"
                 break
         else:

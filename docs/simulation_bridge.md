@@ -11,7 +11,7 @@ ScenarioNet 是场景转换与管理工具，`converted/` 是转换后的场景�
 git pull --ff-only
 conda activate aie1903-sim
 python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode manual --render 3D --no-traffic --steps 6000
+python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
 ```
 
 无需重新创建已有环境或另下压缩包。两份完整数据库随 Git 提交：
@@ -21,10 +21,19 @@ python scripts/run_updated_simulation.py --database-path demo/simulation/highlig
 可以核对使用的环境。新绘制需要 Shapely 2.1+；示例 pickle 使用 NumPy 2.2.6 导出，
 依赖版本与验证环境保持一致。若提示模型资源缺失，运行 `python -m metadrive.pull_asset`。
 
-Mac 本机使用图形窗口，不加 Linux 离屏截图用的 `--offscreen`。点击窗口后
-W 加速、S 制动、A/D 转向、Esc 退出；Q 为跟车视角，B 为俯视相机。
-俯视相机模式的 WASD 移动相机，按 Q 返回驾驶。`--no-traffic` 关闭移动交通，
-保留已经出现的路障/锥桶。当前云终端的 `.venv-sim` 和 `/workspace` 路径不适用于本机。
+查看可视化默认 `replay`：自车沿原始轨迹自动行驶，背景交通保留，不需要键盘开车。
+Mac 本机使用图形窗口，不加 Linux 离屏截图用的 `--offscreen`。Esc 退出；
+Q 为跟车视角，B 为俯视相机。当前云终端的 `.venv-sim` 和 `/workspace` 路径不适用于本机。
+
+如果 `git pull` 报 GitHub 443 端口连接超时，代码并未更新，后续的新入口自然不存在。
+“与 origin/main 一致”只是在比较本机缓存的远程引用。此时无需重装已经满足的依赖。
+可以先用本机原有入口自动回放，再处理本机访问 GitHub 的网络连接：
+
+```bash
+python -m scenarionet.sim --database_path "AIE1903 原始资料/simulation/converted/scene-0980" --render 3D --scenario_index 0
+```
+
+原有入口使用旧场景；新的持久障碍和更新标记在同步成功后用上面的新入口查看。
 
 ## 处理流程
 
@@ -108,17 +117,19 @@ python scripts/export_simulation_map.py --database-path "AIE1903 原始资料/si
 Argoverse 的参考变化不能套用到 nuScenes scene-0980；需要其自身转换后的
 场景和坐标/身份适配。本次桥接以仓库已有的 nuScenes 场景为验证对象。
 
-## 在更新后的环境里驾驶
+## 在更新后的环境里回放或驾驶
 
 ```bash
-python scripts/run_updated_simulation.py --database-path outputs/sim-updated --mode manual --render 3D
+python scripts/run_updated_simulation.py --database-path outputs/sim-updated --mode replay --render 3D
 ```
 
-W/A/S/D 控制车辆。二维视图使用 `--render 2D`。此模式不使用
+默认回放沿原始轨迹自动行驶，可直接查看地图修改和持久障碍。回放结果不能当作
+新规划成果。二维视图使用 `--render 2D`。
+
+需要自行驾驶时才将模式换成 `--mode manual`：W 加速、S 制动、A/D 转向。
+俯视相机模式的 WASD 移动相机，按 Q 返回驾驶。手动驾驶模式不使用
 `ReplayEgoCarPolicy`，也不再因为偏离记录轨迹就按旧终点结束。
 它仍使用 MetaDrive 的内部导航组件维持引擎兼容，但旧路线不作为新规划目标。
-
-仅作原始轨迹对照时用 `--mode replay`。回放结果不能当作新规划成果。
 
 ## 自己指定目标并接规划器
 
@@ -174,7 +185,7 @@ python scripts/run_updated_simulation.py --database-path outputs/sim-updated --m
 ```bash
 python scripts/build_simulation_demo_patch.py --scenario "AIE1903 原始资料/simulation/converted/scene-0980/scene-0980_0/sd_nuscenes_scene0980_v1.0-trainval_scene-0980.pkl" --out outputs/sim-demo-patch.json
 python scripts/export_simulation_map.py --database-path "AIE1903 原始资料/simulation/converted/scene-0980" --pipeline-result outputs/sim-source/result.json --patch outputs/sim-demo-patch.json --out outputs/sim-demo
-python scripts/run_updated_simulation.py --database-path outputs/sim-demo --mode manual --render 3D
+python scripts/run_updated_simulation.py --database-path outputs/sim-demo --mode replay --render 3D
 ```
 
 ScenarioNet 的场景文件为 pickle；只加载可信来源的本地数据库。导出器保留
@@ -194,7 +205,9 @@ python scripts/run_updated_simulation.py --database-path outputs/sim-demo --mode
 
 ## 最新实际验证
 
-- `.venv-sim/bin/python -m unittest discover -s tests -v`：378 项，377 通过，
+- 自动回放修正：78 项仿真相关测试通过；CLI 省略 `--mode` 时使用回放，
+  保留背景交通并完整播放记录的 200 个步进，不再被训练用到达信号提前截断。
+- 此前完整基线 `.venv-sim/bin/python -m unittest discover -s tests -v`：378 项，377 通过，
   1 项因原有历史场景 fixture 缺失跳过。普通 Python 的仿真测试也通过；
   没有安装可选 Shapely 时明确跳过 8 项几何测试。
 - 真实 pipeline 输出可导出为 702 个地图要素、23 个状态事件；46 个实例
@@ -219,11 +232,11 @@ python scripts/run_updated_simulation.py --database-path outputs/sim-demo --mode
 可运行的两份数据库已完整复制到 Git 跟踪的 `demo/simulation/`，从仓库根目录打开：
 
 ```bash
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode manual --render 3D --no-traffic --steps 6000
+python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
 ```
 
 当前云会话未提供远程桌面能力，且 `DISPLAY` 未设置；请使用上面的离屏截图
-命令查看三维画面。手动模式需要实际图形窗口，本地使用已激活仿真环境的 `python`。
+命令查看三维画面。本地图形窗口使用已激活仿真环境的 `python`，默认自动回放。
 
 要查看真实算法结果，将数据库路径换为 `demo/simulation/persistent`。
 这里使用新的运行入口；直接执行上游 `scenarionet.sim` 不会加载这些显示和持久化适配。

@@ -2,16 +2,17 @@
 
 当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
-**地图更新 → 仿真 → Planning 接口：** 可将地图模块结果导出为新的 ScenarioNet 数据库，再用 MetaDrive 手动驾驶或接收规划器控制动作。默认只绘制有来源的地图几何，路障/锥桶首次出现后持续保留；更新区域用青色、旧位置用橙色虚线标注。支持新的城市坐标目标；原 M4 交付仍作为离线基线保存。[接入说明与启动命令](docs/simulation_bridge.md)。
+**地图更新 → 仿真 → Planning 接口：** 可将地图模块结果导出为新的 ScenarioNet 数据库。查看可视化时默认按原始轨迹自动回放；规划实验可显式接入控制器。默认只绘制有来源的地图几何，路障/锥桶首次出现后持续保留；更新区域用青色、旧位置用橙色虚线标注。支持新的城市坐标目标；原 M4 交付仍作为离线基线保存。[接入说明与启动命令](docs/simulation_bridge.md)。
 
 **已有仿真环境，直接启动：** `git pull --ff-only` 后，激活 `conda activate aie1903-sim`。
 执行 `python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"` 对齐新增绘制依赖，然后运行：
 
 ```bash
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode manual --render 3D --no-traffic --steps 6000
+python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
 ```
 
-地图已随仓库提交，无需另下压缩包。`highlighted` 带 DEMO 更新标记；改成
+车辆按记录轨迹自动行驶，背景交通保留。地图已随仓库提交，无需另下压缩包。
+`highlighted` 带 DEMO 更新标记；改成
 `demo/simulation/persistent` 可查看真实算法输出。Mac 本地窗口不要加 `--offscreen`。
 首次安装见[环境说明](docs/simulation_bridge.md#安装)。
 
