@@ -19,6 +19,24 @@ python scripts/run_simulation_platform.py
 
 这是本地 Python 服务，真实 MetaDrive 由本机环境运行。GitHub Pages 上的静态网页不会自动启动本机引擎。
 
+## 更新后重启与画面错误
+
+更新本平台代码后，先在原运行终端按 `Ctrl+C` 停止服务，再执行上面的 `git pull --ff-only` 与启动命令；浏览器刷新页面（Mac 可用 `Command+Shift+R`），然后重新选择场景并启动 MetaDrive。只刷新网页不会更新仍在运行的 Python 服务，无需重装依赖。
+
+真实引擎的新画面成功下载、解码并匹配状态快照后，画面与时间轴才一起更新。图片读取失败会自动重试；持续失败时暂停回放、保留上一张有效画面及其时间，Planning 导出也保持该时刻。视图中会常驻显示错误原因，可点击 **重试这帧画面** 或 **重新生成当前帧**；图像过期或引擎已被别的页面切换时，可重新启动所选场景。
+
+先前版本在连续播放时会拒绝稍晚到达的旧帧请求，也可能在引擎重启后误删新生成的第一张图。本次修复为每张已生成图片分配独立标识，并缓存其实际字节；测试专门覆盖连续播放、图片延迟、失败恢复及重启，不再只检查单张截图。
+
+本次图片传输修复在 Linux 真实 MetaDrive 上另行通过 34 项相关 Python 测试、27 项专项浏览器检查，以及原有 21 项平台操作回归。专项检查人为延迟 PNG 900 毫秒、注入短暂/持续 HTTP 错误并测试恢复；749 次展示采样中，已显示图像、时间轴和状态保持一致，没有在图片尚未返回时继续推进。真实工作进程关闭后重新启动，也确认序号 1 的新图可读取，旧进程的画面标识被拒绝。
+
+专项检查可复现（先运行平台，测试环境另需 Playwright/Chromium）：
+
+```bash
+python scripts/check_simulation_frame_delivery.py --url http://127.0.0.1:8091 --out outputs/frame-delivery-check-new
+```
+
+![修复后的 Argoverse 真实 MetaDrive 连续播放](../demo/simulation/platform-argoverse-playback.png)
+
 ## 选择场景与两层变化
 
 左侧场景卡片直接显示 nuScenes 或 Argoverse。当前提供：

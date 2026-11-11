@@ -75,8 +75,8 @@
   try{viewer=new ReviewRenderer();}catch(error){S.rendererError=error;showError(error);}
 
   function renderCatalog(){const host=$('scene-list');host.replaceChildren();for(const item of S.catalog){const card=element('button','scene-card'+(keyOf(item)===S.key?' active':''));card.dataset.scene=keyOf(item);card.setAttribute('aria-pressed',String(keyOf(item)===S.key));const dataset=item.dataset==='argoverse'?'ARGOVERSE':'NUSCENES';card.innerHTML=`<div class="scene-card-kind"><span>${dataset}</span>${item.synthetic?'<span class="demo-label">DEMO</span>':'<span>●</span>'}</div><h3>${esc(item.title.replace(/^nuScenes · |^Argoverse · /,''))}</h3><p>${esc(item.source_label)}</p><div class="scene-card-counts"><span><b>${item.structure_updates??item.summary?.structure_updates??0}</b> 结构</span><span><b>${item.state_events??item.summary?.state_events??0}</b> 状态</span></div>`;card.onclick=()=>selectScene(keyOf(item));host.append(card);}}
-  async function selectScene(key){if(S.key===key&&S.scene)return;stopPlayback();const token=++S.sceneRequest;S.snapshotAbort?.abort();S.request++;S.key=key;S.pendingEngineAction=null;S.pendingCamera=null;S.pendingSeek=null;clearTimeout(S.cameraTimer);S.scene=null;S.snapshot=null;S.selected=null;S.validation=null;S.step=0;S.version='updated';$('map-version').value='updated';setMode('review');renderCatalog();setLoading(true);$('viewport-error').hidden=true;$('start-engine').disabled=true;$('export-planning').disabled=true;$('play-pause').disabled=true;$('timeline').disabled=true;try{const payload=await api('/api/scenes/'+encodeURIComponent(key));if(token!==S.sceneRequest)return;S.scene=payload;S.tab=payload.summary.state_events?'states':'structure';text('dataset-badge',payload.dataset==='argoverse'?'ARGOVERSE':'NUSCENES');text('scene-title',payload.title);text('scene-kind',payload.source.synthetic?'受控联调 · 独立标记':payload.source.kind==='reference_update'?'已交付参考更新':'真实算法状态');text('source-note',payload.source.label+'。'+(payload.dataset==='argoverse'?'当前源数据没有可关联的三维状态轨迹。':'状态附着在本场景道路上，未观测不等于清除。'));text('source-badge',payload.source.synthetic?'DEMO 道路修改 · 真实状态':payload.source.kind==='reference_update'?'参考更新 · 已写入地图':'真实状态输出');$('source-badge').classList.toggle('synthetic',payload.source.synthetic);text('data-status','本地数据已校验');text('structure-count',payload.changes.length);text('state-count','0 / '+payload.summary.state_events);text('layer-description',payload.changes.length?payload.summary.structure_updates+' 项源结构修改 · '+payload.changes.length+' 个仿真要素':'结构修改 0 项 · 状态事件仍独立显示');$('timeline').max=payload.frame_count-1;$('timeline').disabled=false;$('play-pause').disabled=false;$('start-engine').disabled=false;$('export-planning').disabled=false;text('total-time',timeText(payload.timeline.times_s.at(-1)));renderTimeMarkers();viewer?.load(payload);updateCameraButtons('follow');setLoading(false);if(S.rendererError)showError(S.rendererError);setTab(S.tab);await seek(0);if(payload.summary.state_events&&events().length){S.selected={kind:'state',id:eventId(events()[0])};viewer?.select();renderInspector();}else if(payload.changes.length){S.selected={kind:'structure',id:payload.changes[0].feature_id};viewer?.select();renderInspector();}updateTimeline();}catch(error){if(token===S.sceneRequest){showError(error);text('data-status','场景载入失败');}}}
-  function setMode(mode){S.mode=mode;if(mode==='engine')$('viewport-error').hidden=true;else if(S.rendererError)showError(S.rendererError);$('show-traffic').disabled=mode==='engine';$('show-traffic').parentElement.title=mode==='engine'?'引擎参与者保持原场景数据；此开关仅用于地图审阅':'';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));$('review-view').hidden=mode!=='review';$('engine-view').hidden=mode!=='engine';$('object-labels').hidden=mode!=='review';$('split-labels').hidden=mode!=='review'||S.version!=='compare';text('renderer-badge',mode==='review'?'三维源几何审阅 · 按源尺寸简化物体':'MetaDrive 引擎画面');$('map-version').querySelector('[value="compare"]').disabled=mode==='engine';if(mode==='engine'&&S.version==='compare'){S.version='updated';$('map-version').value='updated';}if(mode==='review')viewer?.resize();text('camera-hint',mode==='engine'?'拖动旋转引擎相机 · 右键平移 · 滚轮缩放':'左键旋转 · 右键平移 · 滚轮缩放');}
+  async function selectScene(key){if(S.key===key&&S.scene)return;stopPlayback();const token=++S.sceneRequest;S.snapshotAbort?.abort();S.request++;cancelFramePresentation();clearFrameError();S.key=key;S.pendingEngineAction=null;S.pendingCamera=null;S.pendingSeek=null;S.pendingFrameRetry=false;clearTimeout(S.cameraTimer);S.scene=null;S.snapshot=null;S.selected=null;S.validation=null;S.step=0;S.version='updated';$('map-version').value='updated';setMode('review');renderCatalog();setLoading(true);$('viewport-error').hidden=true;$('start-engine').disabled=true;$('export-planning').disabled=true;$('play-pause').disabled=true;$('timeline').disabled=true;try{const payload=await api('/api/scenes/'+encodeURIComponent(key));if(token!==S.sceneRequest)return;S.scene=payload;S.tab=payload.summary.state_events?'states':'structure';text('dataset-badge',payload.dataset==='argoverse'?'ARGOVERSE':'NUSCENES');text('scene-title',payload.title);text('scene-kind',payload.source.synthetic?'受控联调 · 独立标记':payload.source.kind==='reference_update'?'已交付参考更新':'真实算法状态');text('source-note',payload.source.label+'。'+(payload.dataset==='argoverse'?'当前源数据没有可关联的三维状态轨迹。':'状态附着在本场景道路上，未观测不等于清除。'));text('source-badge',payload.source.synthetic?'DEMO 道路修改 · 真实状态':payload.source.kind==='reference_update'?'参考更新 · 已写入地图':'真实状态输出');$('source-badge').classList.toggle('synthetic',payload.source.synthetic);text('data-status','本地数据已校验');text('structure-count',payload.changes.length);text('state-count','0 / '+payload.summary.state_events);text('layer-description',payload.changes.length?payload.summary.structure_updates+' 项源结构修改 · '+payload.changes.length+' 个仿真要素':'结构修改 0 项 · 状态事件仍独立显示');$('timeline').max=payload.frame_count-1;$('timeline').disabled=false;$('play-pause').disabled=false;$('start-engine').disabled=false;$('export-planning').disabled=false;text('total-time',timeText(payload.timeline.times_s.at(-1)));renderTimeMarkers();viewer?.load(payload);updateCameraButtons('follow');setLoading(false);if(S.rendererError)showError(S.rendererError);setTab(S.tab);await seek(0);if(payload.summary.state_events&&events().length){S.selected={kind:'state',id:eventId(events()[0])};viewer?.select();renderInspector();}else if(payload.changes.length){S.selected={kind:'structure',id:payload.changes[0].feature_id};viewer?.select();renderInspector();}updateTimeline();}catch(error){if(token===S.sceneRequest){showError(error);text('data-status','场景载入失败');}}}
+  function setMode(mode){if(mode!==S.mode)cancelFramePresentation();S.mode=mode;if(mode==='review')$('pending-state').hidden=true;if(mode==='engine')$('viewport-error').hidden=true;else if(S.rendererError)showError(S.rendererError);$('show-traffic').disabled=mode==='engine';$('show-traffic').parentElement.title=mode==='engine'?'引擎参与者保持原场景数据；此开关仅用于地图审阅':'';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));$('review-view').hidden=mode!=='review';$('engine-view').hidden=mode!=='engine';$('object-labels').hidden=mode!=='review';$('split-labels').hidden=mode!=='review'||S.version!=='compare';text('renderer-badge',mode==='review'?'三维源几何审阅 · 按源尺寸简化物体':'MetaDrive 引擎画面');$('map-version').querySelector('[value="compare"]').disabled=mode==='engine';if(mode==='engine'&&S.version==='compare'){S.version='updated';$('map-version').value='updated';}if(mode==='review')viewer?.resize();text('camera-hint',mode==='engine'?'拖动旋转引擎相机 · 右键平移 · 滚轮缩放':'左键旋转 · 右键平移 · 滚轮缩放');}
   function renderTimeMarkers(){const host=$('time-markers');host.replaceChildren();const source=S.scene.state_source;if(!source)return;const stamps=S.scene.timeline.source_timestamps_ns;for(const event of source.events||[]){const sample=(event.samples||[]).filter(s=>s.observation==='supports_change'&&s.quality>0).sort((a,b)=>a.timestamp_ns.localeCompare(b.timestamp_ns))[0];if(!sample)continue;const index=stamps.findIndex(t=>t!=null&&BigInt(t)>=BigInt(sample.timestamp_ns));if(index<0)continue;const mark=element('i','time-marker');mark.style.left=(index/(S.scene.frame_count-1)*100)+'%';mark.title='状态首次观测';host.append(mark);}}
   function updateTimeline(){if(!S.scene)return;const t=S.scene.timeline.times_s[S.step];text('current-time',timeText(t));text('frame-readout',`帧 ${S.step} / ${S.scene.frame_count-1}`);$('timeline').value=S.step;$('timeline').style.setProperty('--progress',(100*S.step/(S.scene.frame_count-1))+'%');const ego=currentEgo();text('coordinates',ego?`X ${ego.position[0].toFixed(1)} · Y ${ego.position[1].toFixed(1)} m`:'源城市 XY · 米');text('time-source',S.mode==='engine'?'真实引擎 · 记录回放':'记录轨迹回放 · 状态按源时间');}
   async function seek(raw,{fromEngine=false}={}){if(!S.scene)return;const step=clamp(Math.round(raw),0,S.scene.frame_count-1);if(S.mode==='engine'&&!fromEngine){if(!S.engine.ready||S.engine.scene_id!==S.key||S.engine.version!==version()){toast('请先启动当前场景和道路版本的 MetaDrive。');return;}if(S.engineCommandBusy){S.pendingSeek=step;return;}await engineCommand({command:'seek',step});return;}S.step=step;S.snapshot=null;viewer?.clearStates();viewer?.updateActors();updateTimeline();const token=++S.request,key=S.key,ver=version();S.snapshotAbort?.abort();const abort=new AbortController();S.snapshotAbort=abort;text('pending-state','正在对齐状态…');$('pending-state').hidden=false;try{const snapshot=await api(`/api/scenes/${encodeURIComponent(key)}/snapshot?step=${step}&version=${ver}`,{signal:abort.signal});if(token!==S.request||key!==S.key||step!==S.step||ver!==version())return;S.snapshot=snapshot;if(S.selected?.kind==='state'&&!events().some(e=>eventId(e)===S.selected.id))S.selected=events().length?{kind:'state',id:eventId(events()[0])}:null;viewer?.updateActors();viewer?.updateStates();text('state-count',`${events().length} / ${S.scene.summary.state_events}`);renderInspector();$('pending-state').hidden=true;}catch(error){if(error.name!=='AbortError'&&token===S.request){$('pending-state').hidden=true;toast('状态读取失败：'+error.message);}}}
@@ -92,26 +92,168 @@
   async function loadValidation(){const host=$('validation-panel');if(!S.scene)return;const key=S.key,ver=version();if(!S.validation){host.replaceChildren(element('p','validation-note','正在核对地图、状态和评估依据…'));try{const data=await api('/api/scenes/'+encodeURIComponent(key)+'/validation?version='+ver);if(key!==S.key||ver!==version())return;S.validation=data;}catch(error){if(key===S.key&&ver===version())host.replaceChildren(element('p','validation-note','无法读取验证结果：'+error.message));return;}}renderValidation();}
   function renderValidation(){const host=$('validation-panel'),data=S.validation;host.replaceChildren();if(!data)return;const integrity=data.integrity||{};const card=element('section','validation-card');card.append(element('h3','', '地图写入与数据一致性'),element('p',integrity.passed?'pass':'fail',integrity.passed?`写入一致性通过 · ${integrity.summary?.warnings||0} 类源数据提示`:'存在需要查看的检查结果'));for(const check of integrity.checks||[]){const row=element('div','validation-check'+(check.status==='fail'?' fail':''));row.append(element('span','',check.status==='pass'?'✓':check.status==='fail'?'×':'!'));row.append(document.createTextNode(check.label||check.name));if(check.status==='warning'||check.status==='fail'){const details=element('details','validation-issue');const summary=element('summary');summary.append(row);details.append(summary);const d=check.details||{};const mappings={preserved_source_centerlines_outside_polygon:'源中心线超出车道面',source_lanes_without_polygon:'源转换中缺道路面的车道',invalid_source_polygons:'源多边形问题',preserved_source_issues:'保留的源连接缺口',excluded_external_references:'已排除的区域外连接'};for(const[k,label]of Object.entries(mappings)){if(d[k]!=null){const count=Array.isArray(d[k])?d[k].length:d[k];if(count)details.append(element('p','validation-note',`${label}：${count}`));}}if(d.note||d.error)details.append(element('p','validation-note',d.note||d.error));card.append(details);}else card.append(row);}host.append(card);const d=data.detection||{},detect=element('section','validation-card');detect.append(element('h3','', '算法检出评估'),element('p','',d.label||d.scope_description||d.scope||'独立标注评估'));if(d.scope_description)detect.append(element('p','',d.scope_description));if(d.available&&d.metrics){const g=element('div','metric-grid');for(const[k,label]of[['precision','精确率'],['recall','召回率'],['f1','F1']]){const m=element('div');m.append(element('b','',k==='f1'?(d.metrics[k]==null?'—':Number(d.metrics[k]).toFixed(2)):percent(d.metrics[k])),element('small','',label));g.append(m);}detect.append(g);if(d.final_model_structural_updates!=null)detect.append(element('p','',`最终算法结构写入：${d.final_model_structural_updates} 项`));if(d.reference_updates_available!=null)detect.append(element('p','',`已交付参考更新：${d.reference_updates_available} 项（单独记账）`));if(d.geometry_accuracy){const a=d.geometry_accuracy;detect.append(element('p','',`局部几何：${a.passed} / ${a.total} 在 ${a.tolerance_m} m 容差内`));}detect.append(element('p','', '指标按上述评估范围计算，不等同于整张地图的正确率。'));}else detect.append(element('p','', '缺少独立真值，当前不能报告可信的检测正确率。'));for(const line of d.limitations||[])detect.append(element('p','',line));host.append(detect);for(const line of data.limitations||[])host.append(element('p','validation-note',line));}
 
+  function cancelFramePresentation() {
+    S.engineFrameGeneration=(S.engineFrameGeneration||0)+1;
+    S.engineFrameAbort?.abort();
+    S.engineFrameAbort=null;
+  }
+  function frameContextMatches(key,ver) {
+    return S.mode==='engine'&&key===S.key&&ver===version();
+  }
+  function hasDisplayedFrame(key=S.key,ver=version()) {
+    const shown=S.engineDisplayedFrame,image=$('engine-frame');
+    return Boolean(shown&&shown.key===key&&shown.version===ver&&image.complete&&image.naturalWidth>0);
+  }
+  function restoreDisplayedFrameState() {
+    if(!hasDisplayedFrame())return false;
+    const shown=S.engineDisplayedFrame;
+    S.snapshotAbort?.abort();S.request++;
+    S.step=shown.step;S.snapshot=shown.snapshot;
+    $('engine-frame').hidden=false;
+    viewer?.updateActors();viewer?.updateStates();updateTimeline();
+    text('state-count',`${events().length} / ${S.scene.summary.state_events}`);renderInspector();
+    return true;
+  }
+  function clearFrameError() {
+    S.engineFrameError=null;
+    $('engine-frame-error').hidden=true;
+  }
+  function reportFrameError(error,result,key,ver) {
+    if(!frameContextMatches(key,ver)||error.name==='AbortError')return;
+    stopPlayback();
+    S.pendingSeek=S.pendingCamera=S.pendingEngineAction=null;S.pendingFrameRetry=false;
+    clearTimeout(S.cameraTimer);
+    S.engineFrameError={key,version:ver,result,message:error.message||String(error)};
+    const displayed=hasDisplayedFrame(key,ver);
+    if(displayed)restoreDisplayedFrameState();
+    const retained=displayed?`仍显示第 ${S.engineDisplayedFrame.step} 帧，时间轴和导出也保持在这一帧。`:'尚未收到可显示的引擎画面。';
+    text('engine-frame-error-text',`第 ${result.step} 帧未能显示，回放已暂停。${retained} ${S.engineFrameError.message}`);
+    $('engine-frame-error').hidden=false;
+    $('engine-frame').hidden=!displayed;
+    $('engine-placeholder').hidden=true;
+    setLoading(false);
+    text('playback-note','画面读取失败 · 重试成功后可继续播放');
+  }
+  function abortableDelay(ms,signal) {
+    return new Promise((resolve,reject)=>{
+      if(signal.aborted){reject(new DOMException('Frame request cancelled','AbortError'));return;}
+      const onAbort=()=>{clearTimeout(timer);reject(new DOMException('Frame request cancelled','AbortError'));};
+      const timer=setTimeout(()=>{signal.removeEventListener('abort',onAbort);resolve();},ms);
+      signal.addEventListener('abort',onAbort,{once:true});
+    });
+  }
+  async function decodeEngineFrame(result,key,ver,signal) {
+    if(typeof result.frame_id!=='string'||!result.frame_id||!Number.isInteger(result.sequence))
+      throw new Error('服务器未提供有效画面标识，请重启本地平台服务并刷新页面。');
+    const query=new URLSearchParams({frame_id:result.frame_id,scene_id:key,version:ver,sequence:String(result.sequence)});
+    const url='/api/engine/frame.png?'+query.toString();
+    let lastError;
+    for(let attempt=0;attempt<3;attempt++) {
+      let blobUrl=null;
+      const requestAbort=new AbortController();
+      const onAbort=()=>requestAbort.abort();
+      if(signal.aborted)throw new DOMException('Frame request cancelled','AbortError');
+      signal.addEventListener('abort',onAbort,{once:true});
+      const timer=setTimeout(()=>requestAbort.abort(),20000);
+      try {
+        text('pending-state',attempt?`正在重试画面 (${attempt+1}/3)…`:'正在接收引擎画面…');
+        $('pending-state').hidden=false;
+        const response=await fetch(url,{cache:'no-store',signal:requestAbort.signal});
+        if(!response.ok) {
+          let detail='';
+          try {const body=await response.json();detail=body.error||body.message||'';}catch{}
+          throw new Error(`画面请求失败（HTTP ${response.status}）${detail?'：'+detail:''}`);
+        }
+        if(!response.headers.get('Content-Type')?.toLowerCase().startsWith('image/png'))
+          throw new Error('服务器返回的内容不是 PNG 画面。');
+        const blob=await response.blob();
+        if(!blob.size)throw new Error('服务器返回了空画面。');
+        blobUrl=URL.createObjectURL(blob);
+        const image=new Image();
+        image.id='engine-frame';image.alt='MetaDrive 引擎实时画面';image.draggable=false;
+        image.dataset.frameId=result.frame_id;image.dataset.sequence=String(result.sequence);image.dataset.step=String(result.step);
+        image.src=blobUrl;
+        await image.decode();
+        if(signal.aborted)throw new DOMException('Frame request cancelled','AbortError');
+        if(!image.naturalWidth||!image.naturalHeight)throw new Error('引擎画面无法解码。');
+        return {image,blobUrl};
+      } catch(error) {
+        if(blobUrl)URL.revokeObjectURL(blobUrl);
+        if(signal.aborted)throw new DOMException('Frame request cancelled','AbortError');
+        lastError=error.name==='AbortError'?new Error('画面读取超时。'):error;
+      } finally {
+        clearTimeout(timer);signal.removeEventListener('abort',onAbort);
+      }
+      if(attempt<2)await abortableDelay(250*(attempt+1),signal);
+    }
+    throw lastError;
+  }
   async function pollEngine(jobId,sceneKey,sceneVersion){for(;;){await new Promise(resolve=>setTimeout(resolve,250));const status=await api('/api/engine/status');if(sceneKey!==S.key||sceneVersion!==version())return null;if(status.scene_id!==sceneKey||status.version!==sceneVersion)throw new Error('引擎已切换到其他场景或道路版本，请重新启动当前场景。');S.engine={...S.engine,...status};if(!status.busy){if(status.error)throw new Error(typeof status.error==='string'?status.error:JSON.stringify(status.error));if(status.job_id&&jobId&&status.job_id!==jobId)throw new Error('引擎任务已被其他操作替换，请重新启动当前场景。');return status.last_result||{};}text('loading-text',status.progress?.message||'MetaDrive 正在载入或定位场景');}}
-  async function applyEngineResult(result,key,ver){if(!result||key!==S.key||ver!==version())return;if(!S.scene||result.scene_id!==S.scene.scene_id||result.dataset!==S.scene.dataset||result.map_features_sha256!==S.scene.versions[ver].map_sha256||result.live_engine!==true)throw new Error('引擎场景或地图版本与当前选择不一致，已拒绝显示。');S.engine.ready=true;S.engine.scene_id=key;S.engine.version=ver;S.engine.last_result=result;if(S.mode!=='engine'){setLoading(false);return;}if(result.camera&&!S.pendingCamera)S.engineCamera=JSON.parse(JSON.stringify(result.camera));$('engine-placeholder').hidden=true;$('engine-frame').src='/api/engine/frame.png?sequence='+result.sequence+'&scene_id='+encodeURIComponent(key)+'&version='+ver;$('engine-frame').hidden=false;setLoading(false);if(finite(result.step))await seek(result.step,{fromEngine:true});text('data-status','MetaDrive 已连接 · 同场景两层加载');}
-  async function launchEngine(){if(!S.scene)return;if(S.engineCommandBusy){toast('引擎正在完成当前操作，请稍候。');return;}stopPlayback();setMode('engine');const key=S.key,ver=version(),step=S.step;setEngineBusy(true);S.engine.ready=false;S.pendingSeek=null;S.pendingCamera=null;S.pendingEngineAction=null;$('engine-frame').hidden=true;$('engine-placeholder').hidden=true;$('viewport-error').hidden=true;setLoading(true,'正在启动真实 MetaDrive 引擎');try{const job=await api('/api/engine/open',{method:'POST',body:JSON.stringify({scene_id:key,version:ver,step})});const result=await pollEngine(job.job_id,key,ver);await applyEngineResult(result,key,ver);if(key===S.key&&ver===version()&&(!$('show-structure').checked||!$('show-states').checked))S.pendingEngineAction={command:'overlays',structure:$('show-structure').checked,state:$('show-states').checked};}catch(error){if(key===S.key){setLoading(false);$('engine-placeholder').hidden=false;toast('MetaDrive 启动失败：'+error.message);}}finally{setEngineBusy(false);flushEngineQueue();}}
-  function setEngineBusy(busy){S.engineCommandBusy=busy;$('map-version').disabled=busy;$('start-engine').disabled=busy||!S.scene;if(S.mode==='engine'){text('pending-state','引擎处理中…');$('pending-state').hidden=!busy;}}
-  async function engineCommand(command){if(!S.scene||!S.engine.ready)return;if(S.engineCommandBusy){if(command.command==='seek')S.pendingSeek=command.step;else if(command.command==='camera')S.pendingCamera=command;else S.pendingEngineAction=command;return;}const key=S.key,ver=version();setEngineBusy(true);try{const job=await api('/api/engine/command',{method:'POST',body:JSON.stringify({...command,expected_scene_id:key,expected_version:ver})});const result=await pollEngine(job.job_id,key,ver);await applyEngineResult(result,key,ver);}catch(error){if(key===S.key){stopPlayback();toast('引擎操作失败：'+error.message);}}finally{setEngineBusy(false);flushEngineQueue();}}
-  function flushEngineQueue(){if(S.engineCommandBusy||S.mode!=='engine'||!S.engine.ready)return;if(S.pendingSeek!=null){const step=S.pendingSeek;S.pendingSeek=null;engineCommand({command:'seek',step});return;}if(S.pendingCamera){const command=S.pendingCamera;S.pendingCamera=null;engineCommand(command);return;}if(S.pendingEngineAction){const command=S.pendingEngineAction;S.pendingEngineAction=null;engineCommand(command);}}
-  function scheduleEngineCamera(delay=140){const c=S.engineCamera;if(!c||!S.engine.ready)return;S.pendingCamera={command:'camera',yaw:c.yaw,pitch:c.pitch,distance:c.distance,pan:[...(c.pan||[0,0])],target:c.target||'ego'};clearTimeout(S.cameraTimer);S.cameraTimer=setTimeout(flushEngineQueue,delay);}
+  async function applyEngineResult(result,key,ver) {
+    if(!result||key!==S.key||ver!==version())return false;
+    if(!S.scene||result.scene_id!==S.scene.scene_id||result.dataset!==S.scene.dataset||result.map_features_sha256!==S.scene.versions[ver].map_sha256||result.live_engine!==true)
+      throw new Error('引擎场景或地图版本与当前选择不一致，已拒绝显示。');
+    S.engine.ready=true;S.engine.scene_id=key;S.engine.version=ver;S.engine.last_result=result;
+    if(S.mode!=='engine'){setLoading(false);return false;}
+    cancelFramePresentation();
+    const generation=S.engineFrameGeneration,abort=new AbortController();
+    S.engineFrameAbort=abort;
+    let decoded=null;
+    try {
+      decoded=await decodeEngineFrame(result,key,ver,abort.signal);
+      text('pending-state','正在对齐画面与状态…');
+      const snapshot=await api(`/api/scenes/${encodeURIComponent(key)}/snapshot?step=${result.step}&version=${ver}`,{signal:abort.signal});
+      if(snapshot.key!==key||snapshot.step!==result.step||snapshot.version!==ver||snapshot.map_sha256!==result.map_features_sha256)
+        throw new Error('画面与状态的帧号或地图版本不一致，已拒绝显示。');
+      if(!frameContextMatches(key,ver)||generation!==S.engineFrameGeneration||abort.signal.aborted)
+        return false;
+      // Publish an already decoded image and its matching snapshot together.
+      // Never replace the visible image with a network URL that can fail later.
+      const previous=S.engineDisplayedFrame;
+      const oldImage=$('engine-frame');
+      decoded.image.hidden=false;
+      oldImage.replaceWith(decoded.image);
+      S.engineDisplayedFrame={key,version:ver,frame_id:result.frame_id,sequence:result.sequence,step:result.step,result,snapshot,blobUrl:decoded.blobUrl};
+      decoded=null;
+      if(previous?.blobUrl)URL.revokeObjectURL(previous.blobUrl);
+      S.snapshotAbort?.abort();S.request++;
+      S.step=result.step;S.snapshot=snapshot;
+      if(result.camera&&!S.pendingCamera)S.engineCamera=JSON.parse(JSON.stringify(result.camera));
+      if(S.selected?.kind==='state'&&!events().some(e=>eventId(e)===S.selected.id))S.selected=events().length?{kind:'state',id:eventId(events()[0])}:null;
+      viewer?.updateActors();viewer?.updateStates();updateTimeline();
+      text('state-count',`${events().length} / ${S.scene.summary.state_events}`);renderInspector();
+      clearFrameError();$('engine-placeholder').hidden=true;setLoading(false);
+      text('data-status','MetaDrive 已连接 · 画面与状态已对齐');
+      return true;
+    } catch(error) {
+      if(error.name==='AbortError'||!frameContextMatches(key,ver)||generation!==S.engineFrameGeneration)return false;
+      reportFrameError(error,result,key,ver);
+      return false;
+    } finally {
+      if(decoded?.blobUrl)URL.revokeObjectURL(decoded.blobUrl);
+      if(S.engineFrameAbort===abort)S.engineFrameAbort=null;
+    }
+  }
+  async function launchEngine(){if(!S.scene)return;if(S.engineCommandBusy){toast('引擎正在完成当前操作，请稍候。');return;}stopPlayback();setMode('engine');const key=S.key,ver=version(),step=S.step;setEngineBusy(true);S.engine.ready=false;S.pendingSeek=null;S.pendingCamera=null;S.pendingEngineAction=null;S.pendingFrameRetry=false;cancelFramePresentation();clearFrameError();$('engine-frame').hidden=!hasDisplayedFrame(key,ver)||S.engineDisplayedFrame.step!==step;$('engine-placeholder').hidden=true;$('viewport-error').hidden=true;setLoading(true,'正在启动真实 MetaDrive 引擎');try{const job=await api('/api/engine/open',{method:'POST',body:JSON.stringify({scene_id:key,version:ver,step})});const result=await pollEngine(job.job_id,key,ver);const shown=await applyEngineResult(result,key,ver);if(shown&&key===S.key&&ver===version()&&(!$('show-structure').checked||!$('show-states').checked))S.pendingEngineAction={command:'overlays',structure:$('show-structure').checked,state:$('show-states').checked};}catch(error){if(frameContextMatches(key,ver)&&error.name!=='AbortError'){setLoading(false);const restored=restoreDisplayedFrameState();$('engine-placeholder').hidden=restored;$('engine-frame').hidden=!restored;toast('MetaDrive 启动失败：'+error.message);}}finally{setEngineBusy(false);flushEngineQueue();}}
+  function setEngineBusy(busy){S.engineCommandBusy=busy;$('map-version').disabled=busy;$('start-engine').disabled=busy||!S.scene;$('retry-engine-frame').disabled=busy;$('regenerate-engine-frame').disabled=busy;if(S.mode==='engine'){text('pending-state','引擎处理中…');$('pending-state').hidden=!busy;}}
+  async function engineCommand(command){if(!S.scene||!S.engine.ready)return;if(S.engineFrameError&&command.command!=='frame'){updateTimeline();toast('画面尚未恢复，请先重试画面或重新生成当前帧。');return;}if(S.engineCommandBusy){if(command.command==='seek')S.pendingSeek=command.step;else if(command.command==='camera')S.pendingCamera=command;else S.pendingEngineAction=command;return;}const key=S.key,ver=version();S.pendingFrameRetry=false;setEngineBusy(true);try{const job=await api('/api/engine/command',{method:'POST',body:JSON.stringify({...command,expected_scene_id:key,expected_version:ver})});const result=await pollEngine(job.job_id,key,ver);await applyEngineResult(result,key,ver);}catch(error){if(frameContextMatches(key,ver)&&error.name!=='AbortError'){stopPlayback();toast('引擎操作失败：'+error.message);}}finally{setEngineBusy(false);flushEngineQueue();}}
+  function flushEngineQueue(){if(S.engineCommandBusy||S.mode!=='engine'||!S.engine.ready||S.engineFrameError)return;if(S.pendingSeek!=null){const step=S.pendingSeek;S.pendingSeek=null;engineCommand({command:'seek',step});return;}if(S.pendingFrameRetry){S.pendingFrameRetry=false;retryEngineFrame();return;}if(S.pendingCamera){const command=S.pendingCamera;S.pendingCamera=null;engineCommand(command);return;}if(S.pendingEngineAction){const command=S.pendingEngineAction;S.pendingEngineAction=null;engineCommand(command);}}
+  async function retryEngineFrame(){if(S.engineCommandBusy){S.pendingFrameRetry=true;return;}S.pendingFrameRetry=false;const candidate=S.engineFrameError;const key=candidate?.key||S.key,ver=candidate?.version||version(),result=candidate?.result||S.engine.last_result;if(!result||!frameContextMatches(key,ver))return;setEngineBusy(true);try{await applyEngineResult(result,key,ver);}catch(error){reportFrameError(error,result,key,ver);}finally{setEngineBusy(false);flushEngineQueue();}}
+  function scheduleEngineCamera(delay=140){const c=S.engineCamera;if(!c||!S.engine.ready||S.engineFrameError)return;S.pendingCamera={command:'camera',yaw:c.yaw,pitch:c.pitch,distance:c.distance,pan:[...(c.pan||[0,0])],target:c.target||'ego'};clearTimeout(S.cameraTimer);S.cameraTimer=setTimeout(flushEngineQueue,delay);}
   function updateCameraButtons(preset){document.querySelectorAll('[data-camera]').forEach(button=>button.classList.toggle('active',button.dataset.camera===preset));}
   function setCameraPreset(name){if(!S.scene)return;if(S.mode==='engine'){if(!S.engine.ready){toast('先启动 MetaDrive，再调整引擎视角。');return;}engineCommand({command:'camera',preset:name});}else viewer?.preset(name);updateCameraButtons(name);}
   function stopPlayback(){S.playing=false;S.playGeneration=(S.playGeneration||0)+1;clearTimeout(S.playTimer);$('play-pause').setAttribute('aria-label','播放');$('play-pause').innerHTML='<svg><use href="#i-play"/></svg>';text('playback-note','暂停中 · 拖动进度条查看任意时刻');}
   function play(){
     if(!S.scene)return;
     if(S.playing){stopPlayback();return;}
+    if(S.mode==='engine'&&S.engineFrameError){toast('画面读取失败，先重试画面后再播放。');return;}
     if(S.mode==='engine'&&(!S.engine.ready||S.engine.scene_id!==S.key||S.engine.version!==version())){toast('请先启动当前场景的 MetaDrive。');return;}
     S.playing=true;
     const generation=S.playGeneration=(S.playGeneration||0)+1;
     $('play-pause').setAttribute('aria-label','暂停');
     $('play-pause').innerHTML='<svg><use href="#i-pause"/></svg>';
     text('playback-note',S.mode==='engine'?'引擎帧推进 · 受本机渲染速度影响':'正在回放 · 状态随源时间更新');
-    if(S.step>=S.scene.frame_count-1){S.step=0;seek(0);}
+    const restartAtStart=S.step>=S.scene.frame_count-1;
     const tick=async()=>{
       if(!S.playing||generation!==S.playGeneration)return;
       if(S.step>=S.scene.frame_count-1){stopPlayback();text('playback-note','本段回放结束 · 可拖动返回任意时刻');return;}
@@ -126,13 +268,23 @@
       if(!S.playing||generation!==S.playGeneration)return;
       S.playTimer=setTimeout(tick,Math.max(5,interval-(performance.now()-start)));
     };
-    tick();
+    const begin=async()=>{
+      if(restartAtStart){
+        while(S.engineCommandBusy&&S.playing&&generation===S.playGeneration)
+          await new Promise(resolve=>setTimeout(resolve,50));
+        if(!S.playing||generation!==S.playGeneration)return;
+        await seek(0);
+        if(!S.playing||generation!==S.playGeneration||S.step!==0)return;
+      }
+      tick();
+    };
+    begin();
   }
   async function changeVersion(value){if(!S.scene)return;if(S.mode==='engine'&&S.engineCommandBusy){$('map-version').value=S.version;toast('请等当前引擎操作完成后切换道路版本。');return;}stopPlayback();S.version=value;S.validation=null;$('split-labels').hidden=S.mode!=='review'||value!=='compare';if(S.mode==='engine'){await launchEngine();}else{viewer?.render();await seek(S.step);}renderDetails();if(S.tab==='validation')loadValidation();}
   async function exportPlanning(){if(!S.scene)return;const key=S.key,step=S.step,ver=version();try{const data=await api(`/api/scenes/${encodeURIComponent(key)}/planning?step=${step}&version=${ver}`);const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=element('a');a.href=url;a.download=`planning-${key}-${ver}-frame${step}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast(`已导出 ${key} 第 ${step} 帧：道路图、当前状态及来源，不包含未来轨迹。`);}catch(error){toast('导出失败：'+error.message);}}
   function showContract(){if(!S.scene)return;text('contract-json',JSON.stringify({scene:S.scene.scene_id,dataset:S.scene.dataset,map_selection:version(),step:S.step,source_timestamp_ns:S.snapshot?.source_timestamp_ns||null,coordinate_reference:S.scene.identity,map_version:S.scene.versions[version()].map_sha256,planning_contract:S.scene.planning_contract},null,2));$('contract-dialog').showModal();}
   async function setOverlay(){viewer?.render();if(S.mode==='engine'&&S.engine.ready)await engineCommand({command:'overlays',structure:$('show-structure').checked,state:$('show-states').checked});}
-  document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{stopPlayback();setMode(button.dataset.mode);$('show-traffic').disabled=S.mode==='engine';$('show-traffic').parentElement.title=S.mode==='engine'?'引擎参与者保持原场景数据；此开关仅用于地图审阅':'';if(S.mode==='engine'){const ready=S.engine.ready&&S.engine.scene_id===S.key&&S.engine.version===version();$('engine-placeholder').hidden=ready;$('engine-frame').hidden=!ready;if(ready&&S.engine.last_result?.step!==S.step){setLoading(true,'正在将引擎定位到选中帧');engineCommand({command:'seek',step:S.step});}else if(ready)applyEngineResult(S.engine.last_result,S.key,version());}else setLoading(false);updateTimeline();});
+  document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{stopPlayback();setMode(button.dataset.mode);$('show-traffic').disabled=S.mode==='engine';$('show-traffic').parentElement.title=S.mode==='engine'?'引擎参与者保持原场景数据；此开关仅用于地图审阅':'';if(S.mode==='engine'){const ready=S.engine.ready&&S.engine.scene_id===S.key&&S.engine.version===version();$('engine-placeholder').hidden=ready;$('engine-frame').hidden=!ready||!hasDisplayedFrame()||S.engineDisplayedFrame.step!==S.step;if(ready&&S.engineFrameError){restoreDisplayedFrameState();$('engine-frame-error').hidden=false;setLoading(false);}else if(ready&&S.engine.last_result?.step!==S.step){setLoading(true,'正在将引擎定位到选中帧');engineCommand({command:'seek',step:S.step});}else if(ready)retryEngineFrame();}else setLoading(false);updateTimeline();});
   document.querySelectorAll('[data-camera]').forEach(button=>button.onclick=()=>setCameraPreset(button.dataset.camera));
   document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>setTab(button.dataset.tab));
   $('start-engine').onclick=launchEngine;$('engine-launch-inline').onclick=launchEngine;$('map-version').onchange=e=>changeVersion(e.target.value);$('change-search').oninput=renderInspector;
@@ -141,7 +293,8 @@
   $('timeline').addEventListener('input',e=>{stopPlayback();const next=Number(e.target.value);clearTimeout(S.seekTimer);S.seekTimer=setTimeout(()=>seek(next),60);});$('timeline').addEventListener('change',e=>{clearTimeout(S.seekTimer);seek(Number(e.target.value));});
   $('export-planning').onclick=exportPlanning;$('export-planning-dialog').onclick=exportPlanning;$('planning-contract').onclick=showContract;$('close-contract').onclick=()=>$('contract-dialog').close();$('retry-scene').onclick=()=>{const key=S.key;S.key=null;selectScene(key);};
   document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName)||$('contract-dialog').open)return;if(e.code==='Space'){e.preventDefault();play();}if(e.key==='ArrowLeft'){e.preventDefault();stopPlayback();seek(S.step-1);}if(e.key==='ArrowRight'){e.preventDefault();stopPlayback();seek(S.step+1);}});
-  $('engine-frame').addEventListener('error',()=>{if(S.mode==='engine'&&S.engine.ready)toast('引擎图像暂未读取成功，可调整视角重试。');});
-  window.MAP_PLATFORM={get state(){return S;},get camera(){return viewer?.cameraConfig;},selectScene,seek,setMode,setCameraPreset,selectItem,launchEngine,stopPlayback,play};
+  $('retry-engine-frame').onclick=retryEngineFrame;
+  $('regenerate-engine-frame').onclick=()=>engineCommand({command:'frame'});
+  window.MAP_PLATFORM={get state(){return S;},get camera(){return viewer?.cameraConfig;},selectScene,seek,setMode,setCameraPreset,selectItem,launchEngine,stopPlayback,play,retryEngineFrame};
   (async()=>{try{const data=await api('/api/scenes');S.catalog=Array.isArray(data)?data:data.scenes||[];if(!S.catalog.length)throw new Error('当前仓库没有可运行的场景数据。');renderCatalog();const requested=new URLSearchParams(location.search).get('scene');const first=S.catalog.find(item=>keyOf(item)===requested)||S.catalog.find(item=>keyOf(item)==='nuscenes-scene0980')||S.catalog[0];await selectScene(keyOf(first));}catch(error){showError(error);text('data-status','本地服务连接失败');}})();
 })();

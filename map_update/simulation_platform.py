@@ -4,6 +4,7 @@ HTTP requests never supply filesystem paths or Python callbacks. A single
 dedicated child owns Panda3D on its main thread, including on macOS. The web
 review renderer and the actual simulator are explicitly separate view modes.
 """
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 import gzip
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -27,6 +28,9 @@ class BusyError(ValueError):
 
 class EngineBroker:
     """Serialize engine mutations; a seek must finish before another begins."""
+    FRAME_CACHE_LIMIT = 8
+    FRAME_CACHE_BYTES = 24 * 1024 * 1024
+
     def __init__(self, repo_root, python=None):
         self.repo = Path(repo_root).resolve()
         self.python = str(python or sys.executable)
@@ -38,6 +42,8 @@ class EngineBroker:
         self.responses = queue.Queue()
         self.log = None
         self.closed = False
+        self.frames = OrderedDict()
+        self.frame_bytes = 0
         self.state = dict(busy=False, job_id=None, last_result=None, error=None,
                           scene_id=None, version=None, ready=False)
 
@@ -50,6 +56,13 @@ class EngineBroker:
             return
         if self.process is not None:
             self._stop_process()
+        # A restarted worker numbers its frames from one. Old high-numbered
+        # files would make its eight-file cleanup delete the new first frame.
+        for path in self.root.glob('frame-*.png'):
+            path.unlink(missing_ok=True)
+        with self.lock:
+            self.frames.clear()
+            self.frame_bytes = 0
         self.responses = queue.Queue()
         self.log = (self.root / 'worker.log').open('a', encoding='utf-8')
         self.process = subprocess.Popen(
@@ -84,6 +97,8 @@ class EngineBroker:
             self.state.update(busy=True, job_id=identifier, error=None, progress=None)
             if scene_id is not None:
                 self.state.update(scene_id=scene_id, version=version, last_result=None, ready=False)
+                self.frames.clear()
+                self.frame_bytes = 0
         self.executor.submit(self._execute, identifier, dict(command))
         return {'job_id': identifier}
 
@@ -107,10 +122,14 @@ class EngineBroker:
                     error = response.get('error', 'MetaDrive operation failed')
                     raise RuntimeError(error if isinstance(error, str) else json.dumps(error, ensure_ascii=False))
                 result = response.get('result', {})
-                with self.lock:
-                    self.state.update(last_result=result, ready=command.get('command') != 'close')
                 if command.get('command') == 'close':
+                    with self.lock:
+                        self.state.update(last_result=result, ready=False)
+                        self.frames.clear()
+                        self.frame_bytes = 0
                     self._stop_process()
+                else:
+                    self._publish_result(result)
                 break
         except queue.Empty:
             self._stop_process()
@@ -123,20 +142,58 @@ class EngineBroker:
             with self.lock:
                 self.state['busy'] = False
 
-    def frame(self, *, scene_id=None, version=None, sequence=None):
-        status = self.status()
-        if scene_id is not None and (scene_id != status['scene_id'] or version != status['version']):
-            raise ValueError('Requested frame belongs to a different scene or map version')
-        result = status.get('last_result') or {}
-        if sequence is not None and str(sequence) != str(result.get('sequence')):
-            raise ValueError('Requested frame is no longer the current verified engine result')
+    def _publish_result(self, result):
+        """Bind immutable PNG bytes before advertising a completed frame.
+
+        Browsers may fetch frame N after the worker has advanced to N+1. A
+        bounded byte cache preserves that exact image independently of worker
+        file cleanup. Opaque IDs cannot be reused after a worker restart.
+        """
+        result = dict(result)
         filename = result.get('frame') or result.get('frame_file') or result.get('frame_path')
-        if not isinstance(filename, str):
-            raise FileNotFoundError('仿真画面尚未生成。')
-        path = (self.root / filename).resolve()
-        if not path.is_relative_to(self.root) or path.suffix.lower() != '.png':
-            raise ValueError('Invalid simulation frame path')
-        return path.read_bytes()
+        data = None
+        if filename is not None:
+            if not isinstance(filename, str):
+                raise ValueError('Invalid simulation frame path')
+            path = (self.root / filename).resolve()
+            if not path.is_relative_to(self.root) or path.suffix.lower() != '.png':
+                raise ValueError('Invalid simulation frame path')
+            data = path.read_bytes()
+            if not data.startswith(b'\x89PNG\r\n\x1a\n') or not data.endswith(b'IEND\xaeB`\x82'):
+                raise ValueError('MetaDrive 未生成完整 PNG 图像，请重启引擎查看渲染错误。')
+            if len(data) > self.FRAME_CACHE_BYTES:
+                raise ValueError('Rendered image exceeds the frame cache size limit')
+            result['frame_id'] = uuid.uuid4().hex
+        with self.lock:
+            if data is not None:
+                self.frames[result['frame_id']] = {
+                    'scene_id': self.state['scene_id'], 'version': self.state['version'],
+                    'sequence': result.get('sequence'), 'data': data,
+                }
+                self.frame_bytes += len(data)
+                while (len(self.frames) > self.FRAME_CACHE_LIMIT
+                       or self.frame_bytes > self.FRAME_CACHE_BYTES):
+                    _, old = self.frames.popitem(last=False)
+                    self.frame_bytes -= len(old['data'])
+            self.state.update(last_result=result, ready=True)
+
+    def frame(self, *, scene_id=None, version=None, sequence=None, frame_id=None):
+        with self.lock:
+            if scene_id is not None and (scene_id != self.state['scene_id'] or version != self.state['version']):
+                raise ValueError('Requested frame belongs to a different scene or map version')
+            if frame_id is not None:
+                record = self.frames.get(frame_id)
+            elif sequence is not None:
+                raise ValueError('Frames are no longer addressable by sequence alone; frame_id is required')
+            else:
+                record = self.frames.get((self.state.get('last_result') or {}).get('frame_id'))
+            if record is None:
+                raise ValueError('Requested frame is no longer available; refresh the current engine frame')
+            if record['scene_id'] != self.state['scene_id'] or record['version'] != self.state['version']:
+                raise ValueError('Requested frame belongs to a different scene or map version')
+            if sequence is not None and str(record['sequence']) != str(sequence):
+                raise ValueError('Requested frame ID and sequence do not match')
+            return record['data']
 
     def _stop_process(self):
         process = self.process
@@ -271,8 +328,12 @@ class PlatformHandler(BaseHTTPRequestHandler):
         elif path == '/api/engine/status':
             self._send(self.server.engine.status())
         elif path == '/api/engine/frame.png':
+            frame_id = _one(query, 'frame_id', None)
+            if not frame_id:
+                raise ValueError('画面请求缺少唯一标识，请刷新平台页面后重新启动 MetaDrive。')
             self._send(self.server.engine.frame(scene_id=_one(query, 'scene_id', None),
-                       version=_one(query, 'version', None), sequence=_one(query, 'sequence', None)), 'image/png')
+                       version=_one(query, 'version', None), sequence=_one(query, 'sequence', None),
+                       frame_id=frame_id), 'image/png')
         elif path.startswith('/api/scenes/'):
             pieces = path.split('/')
             if len(pieces) not in (4, 5) or not pieces[3]:
