@@ -20,6 +20,11 @@ python scripts/run_updated_simulation.py --database-path demo/simulation/highlig
 Mac 本机不加 `--offscreen`；Esc 退出。需要手动驾驶时才显式使用 `--mode manual`。
 首次安装、导出自己的地图及控制器接入见 [仿真说明](../../docs/simulation_bridge.md)。
 
+固定局部对照框的 BEFORE / AFTER 使用相同尺度和范围，显示修改前后位置及变化摘要。
+按 U 聚焦当前修改、Q 回跟车、J / K 切换修改项；不会改变自动回放或物理地图。
+当前演示仅把起点附近一条白色虚线沿城市 X 平移 1 米，见 [前后对照图](comparison.svg)。
+行驶到第 137 步时，该修改中心已在约 62 米外，常驻对照框仍可查看它。
+
 每份目录保留完整导出结果，包括场景、索引、前后地图、规划地图、更新日志、
 状态事件、障碍清单和哈希审计。场景索引相对本目录解析，补面读取仓库内
 原始地图，不依赖云端路径。示例包含 pickle，仅加载可信数据。

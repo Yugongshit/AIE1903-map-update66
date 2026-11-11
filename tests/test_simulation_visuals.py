@@ -4,7 +4,7 @@ import math
 from types import SimpleNamespace
 import unittest
 
-from map_update.simulation_visuals import attach_update_overlay, dashed_segments, prepare_update_overlay
+from map_update.simulation_visuals import UpdateOverlay, attach_update_overlay, dashed_segments, prepare_update_overlay
 
 
 def line(x=100):
@@ -65,6 +65,80 @@ class SimulationVisualsTests(unittest.TestCase):
         handle.close()
         self.assertEqual(scenario, saved)
         self.assertEqual(report["changed_features"], 0)
+
+    def test_comparison_stays_on_edit_when_car_moves_and_selection_wraps(self):
+        log = [{"feature_id": "first", "operation": "replace", "before": line(), "after": line(101)},
+               {"feature_id": "second", "operation": "add", "before": None, "after": line(150)}]
+        prepared = prepare_update_overlay(log, source_to_runtime_offset=(-100, -200), synthetic=True)
+        env = SimpleNamespace(agent=SimpleNamespace(position=[0, 0]))
+        handle = UpdateOverlay(prepared, env=env, patch_log=log)
+        bounds = deepcopy(handle.comparison["viewport"]["bounds_xyxy"])
+        handle.refresh()
+        first_distance = handle.distance_m
+        env.agent.position = [100, 0]
+        handle.refresh()
+        self.assertEqual(handle.comparison["viewport"]["bounds_xyxy"], bounds)
+        self.assertGreater(handle.distance_m, first_distance)
+        self.assertIn("dx +1.00 m", handle._summary())
+        self.assertEqual(handle.comparison["before"]["paths"][0]["role"], "previous")
+        self.assertEqual(handle.comparison["after"]["paths"][0]["role"], "updated")
+        handle.select_change(-1)
+        self.assertEqual(handle.comparison["feature_id"], "second")
+        self.assertFalse(handle.comparison["before"]["present"])
+        handle.select_change(1)
+        self.assertEqual(handle.comparison["feature_id"], "first")
+        self.assertEqual(handle.comparison["viewport"]["bounds_xyxy"], bounds)
+        handle.close()
+
+    def test_focus_only_moves_camera_in_already_centered_coordinates(self):
+        log = [{"feature_id": "first", "operation": "replace", "before": line(), "after": line(101)}]
+        prepared = prepare_update_overlay(log, source_to_runtime_offset=(-100, -200))
+        calls = []
+        camera = SimpleNamespace(
+            stop_track=lambda **kwargs: calls.append(("stop_track", kwargs)),
+            set_bird_view_pos=lambda position: calls.append(("bird", position)),
+            camera=SimpleNamespace(setPos=lambda *p: calls.append(("position", p)),
+                                   lookAt=lambda *p: calls.append(("look", p))))
+        lens = SimpleNamespace(getFov=lambda: (60, 45))
+        env = SimpleNamespace(main_camera=camera, episode_step=137,
+                              config={"agent_policy": "ReplayEgoCarPolicy", "manual_control": False},
+                              agent=SimpleNamespace(position=[-20, -60]),
+                              engine=SimpleNamespace(cam=SimpleNamespace(node=lambda: SimpleNamespace(getLens=lambda: lens))))
+        config, position = deepcopy(env.config), list(env.agent.position)
+        handle = UpdateOverlay(prepared, env=env, patch_log=log)
+        self.assertTrue(handle.focus_selected())
+        self.assertEqual(calls[0], ("stop_track", {"bird_view_on_current_position": False}))
+        self.assertEqual(calls[1][1][:2], [3, 0])
+        self.assertGreaterEqual(calls[1][1][2], 12)
+        self.assertEqual(env.config, config)
+        self.assertEqual(env.agent.position, position)
+        self.assertEqual(env.episode_step, 137)
+        handle.close()
+
+    def test_empty_comparison_cannot_focus_or_invent_an_edit(self):
+        handle = UpdateOverlay(prepare_update_overlay([]))
+        handle.select_change(1)
+        self.assertFalse(handle.focus_selected())
+        self.assertTrue(handle.comparison["empty"])
+        self.assertIsNone(handle.prepared["report"]["comparison_ui"]["selected_feature_id"])
+        handle.close()
+
+    def test_attribute_only_edit_displays_real_difference_and_reports_full_ids(self):
+        before = {**line(), "exit_lanes": ["long-original-lane-id", "unchanged-lane-id"]}
+        after = {**line(), "exit_lanes": ["unchanged-lane-id", "long-new-lane-id", "second-new-lane-id"]}
+        log = [{"feature_id": "lane", "operation": "replace", "before": before, "after": after}]
+        handle = UpdateOverlay(prepare_update_overlay(log), patch_log=log)
+        self.assertEqual(handle._summary(), "Exit Lanes: 2 -> 3 (+2 / -1)")
+        change = handle.prepared["report"]["comparison_ui"]["attribute_changes"][0]
+        self.assertEqual(change["before"], before["exit_lanes"])
+        self.assertEqual(change["after"], after["exit_lanes"])
+        handle.close()
+        after = {**line(), "type": "ROAD_LINE_SOLID_SINGLE_WHITE"}
+        log = [{"feature_id": "line", "operation": "replace", "before": line(), "after": after}]
+        handle = UpdateOverlay(prepare_update_overlay(log), patch_log=log)
+        self.assertIn("Type: broken single white -> solid single white", handle._summary())
+        self.assertNotIn("below", handle._summary())
+        handle.close()
 
 
 if __name__ == "__main__":

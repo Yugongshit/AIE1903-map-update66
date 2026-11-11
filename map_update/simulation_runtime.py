@@ -360,8 +360,11 @@ The original database files are never written by this runner.
                 if overlay_handle is not None:
                     overlay_handle.draw_2d(env.top_down_renderer)
             elif render == "3D":
-                env.render(text={"mode": mode, "step": env.episode_step,
-                                 "environment": "source geometry; missing surroundings left unspecified"})
+                if overlay_handle is not None:
+                    overlay_handle.refresh()
+                status = ({"Replay frame": f"{env.episode_step}/{scene_length - 1}"}
+                          if mode == "replay" else {"mode": mode, "step": env.episode_step})
+                env.render(text=status)
             # ScenarioEnv's training success threshold can end an episode
             # before the recorded trajectory ends. Playback follows the full
             # recording, bounded by limit above, as ScenarioNet's viewer does.
