@@ -1,0 +1,393 @@
+{
+  "schema": "simulation-control-stability-1.0",
+  "date": "2026-11-11",
+  "baseline_commit": "038cc9d",
+  "environment": "Linux cloud; real MetaDrive/Panda3D and headless Chromium",
+  "scene": "nuscenes-scene0980",
+  "start_step": 120,
+  "method": "Sample control visibility, text, disabled state and computed styles on browser animation frames and DOM mutations while distinct decoded engine images advance. Baseline uses the prior frontend against the same backend.",
+  "runs": {
+    "before": {
+      "observe_only": true,
+      "completed": true,
+      "frontend_sha256": "cf3b2686abeee2e5eaad2b1e7cd6be47f8ca7bb16b1a71cdf11b2c73c23672c7",
+      "sample_count": 248,
+      "displayed_frames": [
+        {
+          "frame_id": "d48b485b88cd4b90810b8442946af4da",
+          "step": 120,
+          "snapshot_step": 120,
+          "image_step": 120,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "ea49f324ee28449a9928b05cfadd8b7f",
+          "step": 121,
+          "snapshot_step": 121,
+          "image_step": 121,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "46ec77f485644d8e94f0b673e79befb0",
+          "step": 123,
+          "snapshot_step": 123,
+          "image_step": 123,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "4910b48d72ed4ed3a1bd24e837e8d410",
+          "step": 125,
+          "snapshot_step": 125,
+          "image_step": 125,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "8275efd76dd54fe0a3dca7c59a8f63ce",
+          "step": 127,
+          "snapshot_step": 127,
+          "image_step": 127,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "ad518710221c4e8faa75d00411670ae4",
+          "step": 129,
+          "snapshot_step": 129,
+          "image_step": 129,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "e1463dc03fae4d3db1b18fd453d6ca2a",
+          "step": 131,
+          "snapshot_step": 131,
+          "image_step": 131,
+          "width": 1000,
+          "height": 650
+        }
+      ],
+      "controls": {
+        "start-engine": {
+          "distinct_states": 2,
+          "transitions": 12,
+          "states": [
+            {
+              "background": "rgb(97, 224, 204)",
+              "color": "rgb(11, 36, 35)",
+              "disabled": false,
+              "opacity": "1",
+              "text": null,
+              "visible": true
+            },
+            {
+              "background": "rgb(97, 224, 204)",
+              "color": "rgb(11, 36, 35)",
+              "disabled": true,
+              "opacity": "0.45",
+              "text": null,
+              "visible": true
+            }
+          ]
+        },
+        "map-version": {
+          "distinct_states": 2,
+          "transitions": 12,
+          "states": [
+            {
+              "background": "rgb(23, 39, 51)",
+              "color": "rgb(170, 170, 170)",
+              "disabled": true,
+              "opacity": "0.7",
+              "text": null,
+              "visible": true
+            },
+            {
+              "background": "rgb(23, 39, 51)",
+              "color": "rgb(255, 255, 255)",
+              "disabled": false,
+              "opacity": "1",
+              "text": null,
+              "visible": true
+            }
+          ]
+        },
+        "pending-state": {
+          "distinct_states": 3,
+          "transitions": 18,
+          "states": [
+            {
+              "background": "rgba(14, 27, 41, 0.85)",
+              "color": "rgb(232, 206, 135)",
+              "disabled": false,
+              "opacity": "1",
+              "text": "引擎处理中…",
+              "visible": false
+            },
+            {
+              "background": "rgba(14, 27, 41, 0.85)",
+              "color": "rgb(232, 206, 135)",
+              "disabled": false,
+              "opacity": "1",
+              "text": "引擎处理中…",
+              "visible": true
+            },
+            {
+              "background": "rgba(14, 27, 41, 0.85)",
+              "color": "rgb(232, 206, 135)",
+              "disabled": false,
+              "opacity": "1",
+              "text": "正在接收引擎画面…",
+              "visible": true
+            }
+          ]
+        }
+      },
+      "errors": []
+    },
+    "after": {
+      "observe_only": false,
+      "completed": true,
+      "frontend_sha256": "da64ba1ed039de96b6e422d00a0b456497a73f23cf82314a65878640c4e0c6e8",
+      "sample_count": 236,
+      "displayed_frames": [
+        {
+          "frame_id": "09e7d318fbcb4b9d8b7a72050c0fc36a",
+          "step": 120,
+          "snapshot_step": 120,
+          "image_step": 120,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "c5d989ccb2384397bbaaf60545e2e625",
+          "step": 121,
+          "snapshot_step": 121,
+          "image_step": 121,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "76c0c1a3c0ab42a98bce94de251ccf4b",
+          "step": 123,
+          "snapshot_step": 123,
+          "image_step": 123,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "9f558f8e31be47c0bd91c9a5a981942e",
+          "step": 125,
+          "snapshot_step": 125,
+          "image_step": 125,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "95c962a957e64d0ba0280144ee7314e9",
+          "step": 127,
+          "snapshot_step": 127,
+          "image_step": 127,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "b405c9c5626e41249aee2c96dbc069e0",
+          "step": 129,
+          "snapshot_step": 129,
+          "image_step": 129,
+          "width": 1000,
+          "height": 650
+        },
+        {
+          "frame_id": "2d8689e3e8d54880a79a67ec0e5c600a",
+          "step": 131,
+          "snapshot_step": 131,
+          "image_step": 131,
+          "width": 1000,
+          "height": 650
+        }
+      ],
+      "controls": {
+        "start-engine": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgb(97, 224, 204)",
+              "color": "rgb(11, 36, 35)",
+              "disabled": true,
+              "opacity": "0.45",
+              "text": null,
+              "visible": true
+            }
+          ]
+        },
+        "map-version": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgb(23, 39, 51)",
+              "color": "rgb(170, 170, 170)",
+              "disabled": true,
+              "opacity": "0.7",
+              "text": null,
+              "visible": true
+            }
+          ]
+        },
+        "pending-state": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgba(14, 27, 41, 0.85)",
+              "color": "rgb(232, 206, 135)",
+              "disabled": false,
+              "opacity": "1",
+              "text": "正在回放",
+              "visible": true
+            }
+          ]
+        }
+      },
+      "errors": []
+    }
+  },
+  "checks": [
+    {
+      "name": "source range leaves enough frames for continuous playback",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "startup locks launch and road-version controls against duplicate requests",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "double click starts exactly one engine job",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "initial scene is paused and controls unlock after a decoded frame",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "at least six distinct advancing real images are displayed with matching timestamps",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "start-engine stays visually stable across playback frames",
+      "passed": true,
+      "details": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgb(97, 224, 204)",
+            "color": "rgb(11, 36, 35)",
+            "disabled": true,
+            "opacity": "0.45",
+            "text": null,
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "map-version stays visually stable across playback frames",
+      "passed": true,
+      "details": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgb(23, 39, 51)",
+            "color": "rgb(170, 170, 170)",
+            "disabled": true,
+            "opacity": "0.7",
+            "text": null,
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "pending-state stays visually stable across playback frames",
+      "passed": true,
+      "details": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgba(14, 27, 41, 0.85)",
+            "color": "rgb(232, 206, 135)",
+            "disabled": false,
+            "opacity": "1",
+            "text": "正在回放",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "pause drains the current command and unlocks launch and road-version controls",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "manual next-frame still advances exactly one source frame while paused",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "pausing an in-flight advance keeps conflicting controls locked",
+      "passed": true,
+      "details": {
+        "busy": true,
+        "playing": false,
+        "launchDisabled": true,
+        "versionDisabled": true
+      }
+    },
+    {
+      "name": "controls unlock when the paused in-flight advance finishes",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "road-version reload locks conflicting controls",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "road-version switch reloads once and keeps the displayed source frame",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "review playback does not inherit the engine playback control lock",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "no uncaught browser errors",
+      "passed": true,
+      "details": []
+    }
+  ],
+  "frame_delivery_regression": {
+    "passed_checks": 27,
+    "errors": [],
+    "injected_png_delay_ms": 900,
+    "unexpected_advances_during_png": []
+  }
+}
