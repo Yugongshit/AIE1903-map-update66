@@ -35,7 +35,9 @@ class EngineBroker:
         self.repo = Path(repo_root).resolve()
         self.python = str(python or sys.executable)
         self.directory = tempfile.TemporaryDirectory(prefix='map-review-engine-')
-        self.root = Path(self.directory.name)
+        # macOS may return /var/folders/... while resolve() uses
+        # /private/var/folders/.... Compare canonical paths on both sides.
+        self.root = Path(self.directory.name).resolve()
         self.lock = threading.Lock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='metadrive-session')
         self.process = None

@@ -109,6 +109,49 @@ class PlatformHttpTests(unittest.TestCase):
 
 
 class EngineBrokerTests(unittest.TestCase):
+    def test_macos_style_symlinked_temporary_directory_can_publish_frames(self):
+        # macOS exposes /var/folders through a symlink to /private/var/folders.
+        # Reproduce that filesystem layout instead of mocking Path.resolve().
+        temporary_directory = tempfile.TemporaryDirectory
+        with temporary_directory() as directory:
+            root = Path(directory).resolve()
+            real_tmp = root/'private'/'var'/'folders'
+            real_tmp.mkdir(parents=True)
+            alias = root/'var'
+            alias.symlink_to(real_tmp.parent, target_is_directory=True)
+            with patch('map_update.simulation_platform.tempfile.TemporaryDirectory',
+                       side_effect=lambda **kwargs: temporary_directory(dir=alias/'folders', **kwargs)):
+                broker = EngineBroker(root)
+            try:
+                broker.state.update(scene_id='example', version='updated')
+                filename = 'frame-00000001.png'
+                (broker.root/filename).write_bytes(png_pixel(50))
+                broker._publish_result({'sequence': 1, 'frame_file': filename})
+                result = broker.status()['last_result']
+                self.assertEqual(broker.root, broker.root.resolve())
+                self.assertEqual(broker.frame(scene_id='example', version='updated',
+                                             sequence=1, frame_id=result['frame_id']), png_pixel(50))
+            finally:
+                broker.close()
+
+    def test_canonical_frame_root_still_rejects_paths_outside_its_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            outside = root/'outside.png'
+            outside.write_bytes(png_pixel(100))
+            broker = EngineBroker(root)
+            try:
+                escaped = broker.root/'escape.png'
+                escaped.symlink_to(outside)
+                for filename in (str(outside), escaped.name):
+                    with self.subTest(filename=filename):
+                        with self.assertRaisesRegex(ValueError, 'Invalid simulation frame path'):
+                            broker._publish_result({'sequence': 1, 'frame_file': filename})
+                        self.assertFalse(broker.frames)
+                        self.assertFalse(broker.status()['ready'])
+            finally:
+                broker.close()
+
     def test_frame_cache_is_bounded_and_rejects_expired_ids_without_substitution(self):
         with tempfile.TemporaryDirectory() as root:
             broker = EngineBroker(root)
