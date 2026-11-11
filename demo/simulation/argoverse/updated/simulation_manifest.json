@@ -1,0 +1,278 @@
+{
+  "schema": "simulation-map-export-1.0",
+  "dataset": "argoverse",
+  "scene_id": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+  "map": "0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021",
+  "coordinate": "Argoverse_city_XY",
+  "units": "m",
+  "scenario_file": "sd_argoverse_reference_03e2e06b4ed9b591.pkl",
+  "exported_scenario_sha256": "50906fd4983c4d683bd2795fbf60aa433e17cab280687f27e43cc62cf9aa726d",
+  "provenance": {
+    "pipeline_result_sha256": "e6f4031bcc712f2294dd484eea4a00a6dafd5cf64d229eb5d0a0c03b717e084e",
+    "source_scenario_sha256": null,
+    "source_map_features_sha256": "7b95c766b742c0ded97a67aa68e9d8da265c8cfee2443973610e690dbf4fee03",
+    "source_reference_prior_map_sha256": "00b0d443e12977d441714ac378a87513bde84892d624b815bb444a247735b26f",
+    "source_reference_updated_map_sha256": "a1d9a6246c77b501a73ab773f3507760a177b1d6642ce2fdbc79a3e6a7e8ab9b",
+    "reference_patch_log_sha256": "9ce2afd12d6db977f0326a453ee0a70d8250d9cc660f0404ba6399aa37cc62dc",
+    "source_ego_frames_sha256": "ff27c70ef4415bdf1063146da7aa6e93b29a6fbe97373470182e1c8eb81657f0",
+    "ego_trajectory_manifest_sha256": "5fe44f518affbec9132f30f6836fd0f6bbbe886c21ab21b096de7774ac760baa",
+    "tracks_sha256": "2c1cc60bb59080b1ee4bce017a1609d93fca0374b923b4660d92d51eabf6da51",
+    "source_tracks_sha256": null,
+    "exported_tracks_sha256": "2c1cc60bb59080b1ee4bce017a1609d93fca0374b923b4660d92d51eabf6da51",
+    "tracks_unchanged_between_map_versions": true,
+    "dynamic_tracks_unchanged": true,
+    "obstacle_mode": "recorded",
+    "obstacle_manifest_sha256": "09e7264f9409a3cfb6fb822dc6c511f03dd3d89ac1ce5b2fe6b3b6f9a0788e6f",
+    "persisted_obstacle_ids": [],
+    "state_event_observations_unchanged": true,
+    "obstacle_persistence_is_simulation_policy": false,
+    "observed_permanence_claimed": false,
+    "coordinate_transform": "city XY retained; map/ego Z flattened to zero because source map has no heights; MetaDrive centralizes once",
+    "workflow": [
+      "reference_map_update",
+      "simulation_map_export",
+      "planning",
+      "vehicle_control"
+    ],
+    "source": "delivered_ground_truth",
+    "update_source": "reference_update",
+    "confirmation_source": "reference",
+    "model_prediction": false,
+    "synthetic": false,
+    "source_files": [
+      {
+        "path": "/workspace/AIE1903-map-update66/outputs/simulation-bridge/source-pipeline/result.json",
+        "sha256": "e6f4031bcc712f2294dd484eea4a00a6dafd5cf64d229eb5d0a0c03b717e084e",
+        "role": "completed_pipeline_result"
+      },
+      {
+        "path": "/workspace/AIE1903-map-update66/outputs/simulation-bridge/source-pipeline/argoverse_material_reference_updated_map.json",
+        "sha256": "b95bf38de4563bf8e32d744fc6560d4f014a6a37ed06403def37e32b0b407ab7",
+        "role": "updated_map"
+      },
+      {
+        "path": "/workspace/AIE1903-map-update66/outputs/simulation-bridge/source-pipeline/argoverse_material_reference_rollback_map.json",
+        "sha256": "7346d478d508f5b721cc7a70f897b053dadd3e45f46dd82537b5333d3adef511",
+        "role": "rollback_map"
+      },
+      {
+        "path": "/workspace/AIE1903-map-update66/outputs/simulation-bridge/source-pipeline/argoverse_material_reference_patch_log.json",
+        "sha256": "62fec503c3526a2ce52e62e7d7cdd2ef4eba816813c26b23a222544dc7f94f23",
+        "role": "patch_log"
+      },
+      {
+        "path": "/workspace/AIE1903-map-update66/AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/prior_map.json",
+        "sha256": "d93d0311117e9c74039611013f005de1f5bebca665476b694eb8d5c0e560176b",
+        "role": "source_scene_prior_map.json"
+      },
+      {
+        "path": "/workspace/AIE1903-map-update66/AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/tables/frames.jsonl",
+        "sha256": "ff27c70ef4415bdf1063146da7aa6e93b29a6fbe97373470182e1c8eb81657f0",
+        "role": "source_scene_tables_frames.jsonl"
+      },
+      {
+        "path": "/workspace/AIE1903-map-update66/AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1/run.json",
+        "sha256": "74fb09037a0c635aca3f16479d713d0ab58c98c48b70901d41492b15df613465",
+        "role": "source_scene_run.json"
+      }
+    ],
+    "reference_delivery_provenance": {
+      "source_files": [
+        {
+          "path": "deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/file_manifest.json",
+          "sha256": "b9b2f658d4566f2521d0b5cbe1e4aedca96fdcf1ac686157774835b2e7f64df7",
+          "role": "evaluation_only_after_prediction_freeze_manifest"
+        },
+        {
+          "path": "deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/gt_object_inventory.jsonl",
+          "sha256": "7281fbdf565218c48ab8722da63c296e6eea102fd11ce13df5161ecef9bb65fe",
+          "role": "evaluation_only_after_prediction_freeze"
+        },
+        {
+          "path": "deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/gt_changed_objects.jsonl",
+          "sha256": "c915e1bb89fce7537c64979ce59e06072134132c72e4c50e7b8055fb49b15a0a",
+          "role": "evaluation_only_after_prediction_freeze"
+        },
+        {
+          "path": "deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/prior_map_reference.json",
+          "sha256": "d93d0311117e9c74039611013f005de1f5bebca665476b694eb8d5c0e560176b",
+          "role": "evaluation_only_after_prediction_freeze"
+        },
+        {
+          "path": "deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M8_v1/provenance.json",
+          "sha256": "8380a787dbd952cf568f3f641e4ccddbc503e2500626beb06b3dd4af56411281",
+          "role": "evaluation_only_after_prediction_freeze"
+        }
+      ],
+      "prediction_freeze_sha256": "b07eaced72764cee06e753816d60ac0cca8dd8d9b911a5f905e7f64f38335b6c",
+      "used_for_model_prediction": false
+    },
+    "source_environment": "source_geometry_only",
+    "converted_patch_display_order": "distance_to_initial_measured_ego_then_feature_id",
+    "unavailable_geometry": [
+      "map_elevation",
+      "buildings",
+      "terrain",
+      "tracked_other_traffic"
+    ],
+    "variant": "updated",
+    "map_features_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+    "map_patch_log_sha256": "41da542fe40efef97b363f47e6a3a4af7675a7ede5df01480d7f2ed8fcead25f",
+    "applied_reference_operations": 93
+  },
+  "summary": {
+    "map_features": 753,
+    "structural_operations": 170,
+    "reference_structural_operations": 93,
+    "available_reference_operations": 93,
+    "lane_operations": 84,
+    "lanes": 240,
+    "crossings": 33,
+    "state_events": 0,
+    "matched_state_tracks": 0,
+    "unmatched_state_instances": 0,
+    "persisted_obstacles": 0,
+    "new_obstacles_spawned": 0,
+    "ego_tracks": 1,
+    "other_traffic_tracks": 0,
+    "ego_source_frames": 582,
+    "simulation_steps": 582
+  },
+  "topology": {
+    "introduced_issues": [],
+    "preserved_source_issues": [
+      {
+        "feature_id": "ls-168053844",
+        "field": "exit_lanes",
+        "target_id": "ls-168053832",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168053852",
+        "field": "entry_lanes",
+        "target_id": "ls-168054060",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168054098",
+        "field": "entry_lanes",
+        "target_id": "ls-168055030",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168081743",
+        "field": "exit_lanes",
+        "target_id": "ls-168081870",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168082049",
+        "field": "entry_lanes",
+        "target_id": "ls-168081870",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168083433",
+        "field": "exit_lanes",
+        "target_id": "ls-168083445",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168083485",
+        "field": "entry_lanes",
+        "target_id": "ls-168083314",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168084854",
+        "field": "exit_lanes",
+        "target_id": "ls-168084922",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      }
+    ],
+    "external_references": [
+      {
+        "feature_id": "ls-168053844",
+        "field": "exit_lanes",
+        "target_id": "ls-168053832",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168053852",
+        "field": "entry_lanes",
+        "target_id": "ls-168054060",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168054098",
+        "field": "entry_lanes",
+        "target_id": "ls-168055030",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168081743",
+        "field": "exit_lanes",
+        "target_id": "ls-168081870",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168082049",
+        "field": "entry_lanes",
+        "target_id": "ls-168081870",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168083433",
+        "field": "exit_lanes",
+        "target_id": "ls-168083445",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168083485",
+        "field": "entry_lanes",
+        "target_id": "ls-168083314",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      },
+      {
+        "feature_id": "ls-168084854",
+        "field": "exit_lanes",
+        "target_id": "ls-168084922",
+        "reason": "outside_supplied_map",
+        "navigation_action": "excluded_no_geometry"
+      }
+    ],
+    "modified_lane_issues": [],
+    "external_references_are_navigable": false
+  },
+  "files": {
+    "planning_map": "planning_map.json",
+    "states": "state_event_layer.json",
+    "patch_log": "map_patch_log.json",
+    "obstacles": "obstacle_manifest.json",
+    "reference_patch_log": "reference_patch_log.json",
+    "ego_trajectory": "ego_trajectory_manifest.json"
+  },
+  "limitations": [
+    "Reference changes are supplied ground truth, not model detections.",
+    "Source map has XY only; all road/ego heights are flattened for simulation.",
+    "Centerlines are derived from supplied boundaries; ego dimensions are simulation configuration.",
+    "No 3D traffic tracks, buildings, terrain or signals are supplied.",
+    "Double-dashed marking patterns use the engine single-dashed rendering type; original semantics retained.",
+    "Source references outside the supplied map are reported and excluded from navigation."
+  ]
+}

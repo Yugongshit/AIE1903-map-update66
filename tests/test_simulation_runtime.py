@@ -14,6 +14,34 @@ from map_update.simulation_runtime import (
 
 
 class RuntimeContractTests(unittest.TestCase):
+    def test_controller_rejects_state_observations_from_another_scene(self):
+        scenario = {'id': 'other-scene', 'length': 201,
+                    'metadata': {'dataset': 'argoverse', 'map': 'other-city'}, 'map_features': {}}
+        env = SimpleNamespace(engine=SimpleNamespace(data_manager=SimpleNamespace(current_scenario=scenario)),
+                              agent=SimpleNamespace(), episode_step=1)
+        bundle = {'dataset': 'nuscenes', 'scene_id': 'scene-0980',
+                  'map': 'singapore-onenorth', 'scenario_length': 201}
+        with self.assertRaisesRegex(ValueError, 'State source identity differs'):
+            controller_state(env, state_source=bundle)
+
+    def test_state_timeline_hash_is_checked_before_engine_load(self):
+        from map_update.simulation_bridge import feature_sha256
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'dataset_summary.pkl').touch()
+            (root / 'scene.pkl').write_bytes(b'example scenario')
+            (root / 'map_patch_log.json').write_text('[]')
+            manifest = {'scenario_file': 'scene.pkl', 'exported_scenario_sha256':
+                        sha256(b'example scenario').hexdigest(), 'provenance': {
+                            'map_patch_log_sha256': feature_sha256([]),
+                            'state_source_sha256': feature_sha256({'events': ['source']})}}
+            (root / 'simulation_manifest.json').write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'missing its bound state'):
+                run(root, render='none', steps=1)
+            (root / 'state_source.json').write_text(json.dumps({'events': ['stale']}))
+            with self.assertRaisesRegex(ValueError, 'State observation timeline no longer matches'):
+                run(root, render='none', steps=1)
+
     def test_stale_update_annotation_is_rejected_before_engine_load(self):
         from map_update.simulation_bridge import feature_sha256
         with tempfile.TemporaryDirectory() as directory:

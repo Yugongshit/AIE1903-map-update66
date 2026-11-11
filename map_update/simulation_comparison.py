@@ -14,7 +14,9 @@ from math import ceil, dist, floor, isfinite, log10
 
 SCHEMA = 'simulation-map-comparison-1.0'
 TOLERANCE_M = 1e-7
-ATTRIBUTE_FIELDS = ('type', 'entry_lanes', 'exit_lanes', 'left_neighbor',
+ATTRIBUTE_FIELDS = ('source_lane_type', 'vehicle_access', 'source_marking_type',
+                    'source_left_lane_mark_type', 'source_right_lane_mark_type', 'is_intersection',
+                    'type', 'entry_lanes', 'exit_lanes', 'left_neighbor',
                     'right_neighbor', 'speed_limit_kmh', 'speed_limit_mph')
 TOPOLOGY_FIELDS = {'entry_lanes', 'exit_lanes', 'left_neighbor', 'right_neighbor'}
 COLORS = {'previous': '#f9c65b', 'removed': '#ff777c', 'updated': '#32e8c7'}
@@ -188,6 +190,7 @@ the existing overlay deliberately carries only geometry and feature types.
     result = {'schema': SCHEMA, 'empty': not items, 'selected_index': selected_index,
               'changed_features': len(items), 'feature_id': None, 'label': None, 'operation': None,
               'synthetic': synthetic, 'context_paths': context,
+              'update_source': prepared_overlay.get('report', {}).get('update_source'),
               'coordinate_frame': prepared_overlay.get('report', {}).get('coordinate_frame', 'metadrive_centered_m'),
               'affects_physics_or_planning': False, 'source': 'executed_map_patch_log',
               'state_events_presented_as_map_edits': False}
@@ -277,9 +280,11 @@ def render_comparison_svg(prepared, *, width=1440, height=760):
     feature_id = model.get('feature_id') or 'No structural edits'
     title = 'MAP UPDATE  /  LOCAL COMPARISON'
     badge = ('NO STRUCTURAL EDITS' if model['empty'] else
-             'CONTROLLED DEMO' if model['synthetic'] else 'APPLIED MAP PATCH')
+             'CONTROLLED DEMO' if model['synthetic'] else
+             'REFERENCE UPDATE' if model.get('update_source') == 'reference_update' else 'APPLIED MAP PATCH')
     subtitle = ('No structural map edits were exported; no differences are drawn.' if model['empty'] else
                 'Controlled demonstration; not a detected change.' if model['synthetic'] else
+                'Supplied reference update applied to the simulation map; not a model prediction.' if model.get('update_source') == 'reference_update' else
                 'Actual exported patch geometry. No inferred edits are drawn.')
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width:g}" height="{height:g}" viewBox="0 0 {width:g} {height:g}" role="img" aria-labelledby="title desc">',
            f'<title id="title">{escape(title)}</title><desc id="desc">{escape(subtitle)} Before and after use identical scale and coordinates.</desc>',

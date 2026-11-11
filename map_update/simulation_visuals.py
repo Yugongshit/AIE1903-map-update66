@@ -75,7 +75,8 @@ def _midpoint(points):
     return list(points[-1])
 
 
-def prepare_update_overlay(patch_log, *, source_to_runtime_offset=(0, 0), synthetic=False):
+def prepare_update_overlay(patch_log, *, source_to_runtime_offset=(0, 0), synthetic=False,
+                           update_source=None, reference_operations=None):
     """Create drawing instructions from source-world geometries, never the map.
 
 ``source_to_runtime_offset`` is the existing scenario metadata field
@@ -132,6 +133,7 @@ nuScenes lane polylines can store yaw in their third component.
               "height_above_ground_m": 0.18,
               "overlay_only": True, "affects_physics_or_planning": False,
               "synthetic": bool(synthetic), "changed_features": len(items),
+              "update_source": update_source, "reference_operations": reference_operations,
               "state_events_highlighted_as_map_edits": False,
               "legend": [text for text, _ in legend],
               "items": [{key: value for key, value in item.items() if key != "paths"} for item in items]}
@@ -140,12 +142,14 @@ nuScenes lane polylines can store yaw in their third component.
 
 class UpdateOverlay:
     """Own annotation nodes; call close before closing the MetaDrive engine."""
-    def __init__(self, prepared, world_node=None, legend_node=None, *, env=None, patch_log=None):
+    def __init__(self, prepared, world_node=None, legend_node=None, *, env=None, patch_log=None,
+                 label_nodes=None):
         self.prepared = prepared
         self.world_node = world_node
         self.legend_node = legend_node
         self.env = env
         self.patch_log = patch_log
+        self.label_nodes = label_nodes or {}
         self.selected_index = 0
         self.key_listener = None
         self.distance_text = None
@@ -168,7 +172,10 @@ class UpdateOverlay:
             "summary_lines": self.comparison.get("summary_lines", []),
             "keys": {"J": "previous edit", "K": "next edit", "U": "focus edit in 3D", "Q": "follow car"},
             "distance_to_edit_m": self.distance_m,
+            "world_labels": "selected_edit_only; all_changed_geometry_remains_visible",
         }
+        for feature_id, node in self.label_nodes.items():
+            node.show() if feature_id == self.comparison.get('feature_id') else node.hide()
 
     def select_change(self, delta):
         """Change the comparison target without moving the car or its camera."""
@@ -233,6 +240,15 @@ class UpdateOverlay:
             return "No geometry or supported attribute difference"
         return lines[0] if lines else self.comparison.get("operation", "").upper()
 
+    def _source_label(self):
+        report = self.prepared['report']
+        if report['synthetic']:
+            return 'DEMO: controlled edit, not a detected change'
+        if report.get('update_source') == 'reference_update':
+            count = report.get('reference_operations')
+            return '{} reference updates applied'.format(count) if count is not None else 'SOURCE: delivered reference updates'
+        return 'Applied map edit; replay continues'
+
     def _draw_comparison_3d(self):
         """Draw a fixed, shared-scale before/after card at the top right."""
         from panda3d.core import CardMaker, LineSegs, TextNode, TransparencyAttrib
@@ -259,8 +275,8 @@ class UpdateOverlay:
             node.setBin("fixed", 102)
             return label
 
-        card("comparison background", 0, 1.08, -.81, 0, (.025, .04, .06, .96))
         model = self.comparison
+        card("comparison background", 0, 1.08, -.23 if model['empty'] else -.81, 0, (.025, .04, .06, .96))
         text("comparison title", "MAP CHANGE" + ("  /  DEMO" if model.get("synthetic") else ""), .035, -.055, .041)
         if model["empty"]:
             text("no map changes", "NO MAP CHANGES APPLIED", .035, -.12)
@@ -309,7 +325,7 @@ class UpdateOverlay:
             text(side + " scale label", "{:g} m".format(scale), left+length+.018, -.610, .027)
         text("same view explanation", "Same position / scale  |  X right, Y up", .035, -.655, .028)
         text("comparison selection keys", "J / K: select edit    U: focus    Q: follow car", .035, -.701, .028)
-        text("comparison status", "DEMO: controlled edit, not a detected change" if model.get("synthetic") else "Applied map edit; replay continues", .035, -.752, .028,
+        text("comparison status", self._source_label(), .035, -.752, .028,
              (1, .79, .37, 1) if model.get("synthetic") else (.7, .78, .84, 1))
 
     def close(self):
@@ -320,6 +336,7 @@ class UpdateOverlay:
             if node is not None:
                 node.removeNode()
         self.world_node = self.legend_node = None
+        self.label_nodes = {}
         self.env = None
 
     def set_visible(self, visible):
@@ -371,10 +388,11 @@ rejects a rotated renderer rather than displaying a displaced annotation.
                 color = [int(value * 255) for value in COLORS[path["role"]][:3]]
                 segments = dashed_segments(path["points"]) if path["dashed"] else [path["points"]]
                 for segment in segments:
-                    pygame.draw.lines(surface, color, False, [pixel(point) for point in segment], 5)
-            label = font.render(item["label"], True, (255, 255, 255), (15, 20, 24))
-            pos = pixel(item["label_position"])
-            surface.blit(label, (pos[0] + 7, pos[1] - 20))
+                    pygame.draw.lines(surface, color, False, [pixel(point) for point in segment], 3)
+            if item['feature_id'] == self.comparison.get('feature_id'):
+                label = font.render(item["label"], True, (255, 255, 255), (15, 20, 24))
+                pos = pixel(item["label_position"])
+                surface.blit(label, (pos[0] + 7, pos[1] - 20))
         self._draw_comparison_2d(surface)
         renderer.blit()
 
@@ -382,7 +400,7 @@ rejects a rotated renderer rather than displaying a displaced annotation.
         import pygame
         model = self.comparison
         left, top = max(12, surface.get_width()-478), 12
-        pygame.draw.rect(surface, (7, 11, 16), (left, top, 466, 292), border_radius=8)
+        pygame.draw.rect(surface, (7, 11, 16), (left, top, 466, 70 if model['empty'] else 316), border_radius=8)
         font, small = pygame.font.Font(None, 24), pygame.font.Font(None, 20)
         def text(value, x, y, color=(225, 235, 245), compact=False):
             surface.blit((small if compact else font).render(value, True, color), (left+x, top+y))
@@ -423,9 +441,10 @@ rejects a rotated renderer rather than displaying a displaced annotation.
         distance = " | Car: {:.1f} m away".format(self.distance_m) if self.distance_m is not None else ""
         text("Same position / scale"+distance, 12, 248, compact=True)
         text("J / K: select edit  |  U / Q: focus / follow in 3D", 12, 270, compact=True)
+        text(self._source_label(), 12, 294, compact=True)
 
 
-def attach_update_overlay(env, patch_log, *, synthetic=False):
+def attach_update_overlay(env, patch_log, *, synthetic=False, update_source=None, reference_operations=None):
     """Return ``(handle, serializable_report)`` for the currently loaded scene.
 
 For 2D, also call ``handle.draw_2d(env.top_down_renderer)`` after each top-down
@@ -434,7 +453,8 @@ render. A physics-only run returns the report without importing Panda3D here.
     metadata = env.engine.data_manager.current_scenario["metadata"]
     prepared = prepare_update_overlay(patch_log,
                                       source_to_runtime_offset=metadata.get("old_origin_in_current_coordinate", [0, 0]),
-                                      synthetic=synthetic)
+                                      synthetic=synthetic, update_source=update_source,
+                                      reference_operations=reference_operations)
     if env.engine.mode == "none":
         return UpdateOverlay(prepared, env=env, patch_log=patch_log), prepared["report"]
 
@@ -448,12 +468,13 @@ render. A physics-only run returns the report without importing Panda3D here.
     legend.setShaderOff(1)
     legend.setDepthTest(False)
     legend.setDepthWrite(False)
+    label_nodes = {}
     try:
         for item in prepared["items"]:
             for path in item["paths"]:
                 lines = LineSegs(item["label"] + " " + path["role"])
                 lines.setColor(*COLORS[path["role"]])
-                lines.setThickness(5 if path["dashed"] else 7)
+                lines.setThickness(2 if path["dashed"] else 3)
                 segments = dashed_segments(path["points"]) if path["dashed"] else [path["points"]]
                 for segment in segments:
                     lines.moveTo(segment[0][0], segment[0][1], 0.18)
@@ -461,13 +482,15 @@ render. A physics-only run returns the report without importing Panda3D here.
                         lines.drawTo(point[0], point[1], 0.18)
                 world.attachNewNode(lines.create())
             position = item["label_position"]
+            label_root = world.attachNewNode('selected-update-' + item['feature_id'])
+            label_nodes[item['feature_id']] = label_root
             text = TextNode(item["label"])
             text.setText(item["label"] + " " + item["operation"].upper())
             text.setTextColor(1, 1, 1, 1)
             text.setAlign(TextNode.ACenter)
             text.setShadow(.06, .06)
             text.setShadowColor(0, 0, 0, 1)
-            node = world.attachNewNode(text)
+            node = label_root.attachNewNode(text)
             node.setTransparency(TransparencyAttrib.MAlpha)
             # Draw glyphs as an annotation after the 3D scene. In the offscreen
             # PBR path, a transparent card at the same depth can hide the text.
@@ -485,8 +508,9 @@ render. A physics-only run returns the report without importing Panda3D here.
             pole.setThickness(2)
             pole.moveTo(position[0], position[1], .2)
             pole.drawTo(position[0], position[1], 1.1)
-            world.attachNewNode(pole.create())
-        handle = UpdateOverlay(prepared, world, legend, env=env, patch_log=patch_log)
+            label_root.attachNewNode(pole.create())
+        handle = UpdateOverlay(prepared, world, legend, env=env, patch_log=patch_log,
+                               label_nodes=label_nodes)
         handle._draw_comparison_3d()
         from direct.showbase.DirectObject import DirectObject
         handle.key_listener = DirectObject()

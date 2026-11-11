@@ -184,7 +184,8 @@ def map_xy_digest(features) -> str:
                              allow_nan=False).encode("utf-8")).hexdigest()
 
 
-def controller_state(env, *, goal=None, goal_radius=2.0, source_map_features=None) -> dict:
+def controller_state(env, *, goal=None, goal_radius=2.0, source_map_features=None,
+                     state_source=None) -> dict:
     scenario = env.engine.data_manager.current_scenario
     metadata = scenario["metadata"]
     vehicle = env.agent
@@ -195,6 +196,15 @@ def controller_state(env, *, goal=None, goal_radius=2.0, source_map_features=Non
     if getattr(getattr(env.engine, "traffic_manager", None), "persistence_definitions", None):
         from .simulation_obstacle_runtime import runtime_obstacle_report
         obstacles = runtime_obstacle_report(env)["objects"]
+    attached_states = None
+    if state_source is not None:
+        if (state_source.get('dataset') != metadata.get('dataset')
+                or state_source.get('scene_id') != scenario.get('id')
+                or state_source.get('map') != metadata.get('map')
+                or state_source.get('scenario_length') != scenario.get('length')):
+            raise ValueError('State source identity differs from the loaded simulation scene')
+        from .simulation_states import state_snapshot
+        attached_states = state_snapshot(state_source, step, source_to_runtime_offset=offset)
     return {
         "step": step,
         "simulation_time_s": float(step * env.config["physics_world_step_size"] * env.config["decision_repeat"]),
@@ -220,13 +230,14 @@ def controller_state(env, *, goal=None, goal_radius=2.0, source_map_features=Non
         "map_features_runtime": scenario["map_features"],
         "map_features": source_map_features,
         "persistent_obstacles_runtime": obstacles,
+        "map_state_snapshot": attached_states,
     }
 
 
 def run(database_path, *, mode="replay", render="3D", steps=600,
         scenario_index=0, controller=None, action=None, goal=None,
         goal_radius=2.0, no_traffic=False, snapshot=None, offscreen=False,
-        environment_geometry=None, show_updates=True) -> dict:
+        environment_geometry=None, show_updates=True, show_states=True) -> dict:
     """Load a trusted local ScenarioNet dataset and run one finite episode.
 
 Database files use pickle, as required by MetaDrive. Only pass trusted data.
@@ -278,6 +289,16 @@ The original database files are never written by this runner.
         from .simulation_bridge import feature_sha256
         if obstacle_manifest is None or feature_sha256(obstacle_manifest) != manifest["provenance"]["obstacle_manifest_sha256"]:
             raise ValueError("Obstacle policy no longer matches its export manifest hash")
+    state_source = None
+    state_digest = (manifest or {}).get("provenance", {}).get("state_source_sha256")
+    if state_digest:
+        from .simulation_bridge import feature_sha256
+        state_path = database_path / "state_source.json"
+        if not state_path.is_file():
+            raise ValueError("Export is missing its bound state observation timeline")
+        state_source = json.loads(state_path.read_text(encoding="utf-8"))
+        if feature_sha256(state_source) != state_digest:
+            raise ValueError("State observation timeline no longer matches its export manifest hash")
 
     try:
         from metadrive.envs.scenario_env import ScenarioEnv
@@ -318,6 +339,9 @@ The original database files are never written by this runner.
     scene_report = None
     update_report = None
     overlay_handle = None
+    state_handle = None
+    state_report = None
+    state_trace = []
     try:
         import numpy
         from metadrive.engine.core import engine_core
@@ -329,6 +353,8 @@ The original database files are never written by this runner.
         env = env_class(config)
         env.reset(seed=scenario_index)
         scenario = env.engine.data_manager.current_scenario
+        if state_digest and scenario['metadata'].get('map_update_bridge', {}).get('state_source_sha256') != state_digest:
+            raise ValueError('Loaded scenario is not bound to this state observation timeline')
         if render == "3D":
             from .simulation_environment import attach_source_environment
             surface_handle, scene_report = attach_source_environment(env, extra=environment_geometry)
@@ -336,18 +362,35 @@ The original database files are never written by this runner.
         if show_updates:
             from .simulation_visuals import attach_update_overlay
             overlay_handle, update_report = attach_update_overlay(
-                env, patch_log, synthetic=bool(manifest and manifest.get("provenance", {}).get("synthetic")))
+                env, patch_log, synthetic=bool(manifest and manifest.get("provenance", {}).get("synthetic")),
+                update_source=(manifest or {}).get('provenance', {}).get('update_source'),
+                reference_operations=(manifest or {}).get('summary', {}).get('reference_structural_operations'))
             resources.callback(overlay_handle.close)
         source_features = scenario_map_features(scenario["map_features"], scenario["metadata"])
-        initial = controller_state(env, goal=goal, goal_radius=goal_radius, source_map_features=source_features)
+        initial = controller_state(env, goal=goal, goal_radius=goal_radius,
+                                   source_map_features=source_features, state_source=state_source)
+        if show_states and initial['map_state_snapshot'] is not None:
+            from .simulation_state_visuals import attach_state_overlay
+            state_handle, state_report = attach_state_overlay(env, initial['map_state_snapshot'])
+            resources.callback(state_handle.close)
+        current = initial
         scene_length = int(env.engine.data_manager.current_scenario_length)
         # Traffic replay has no observations beyond this recorded time window.
         limit = episode_step_limit(steps, scene_length, mode=mode, no_traffic=no_traffic)
         for _ in range(limit):
-            state = controller_state(env, goal=goal, goal_radius=goal_radius, source_map_features=source_features)
+            state = current
             command = validated_action(callback(state)) if callback is not None else fixed_action
             _, _, terminated, truncated, info = env.step(command)
-            current = controller_state(env, goal=goal, goal_radius=goal_radius, source_map_features=source_features)
+            current = controller_state(env, goal=goal, goal_radius=goal_radius,
+                                       source_map_features=source_features, state_source=state_source)
+            if current['map_state_snapshot'] is not None:
+                attached = current['map_state_snapshot']
+                state_trace.append({'step': current['step'],
+                                    'source_timestamp_ns': attached.get('source_timestamp_ns'),
+                                    'observation_cutoff_ns': attached.get('observation_cutoff_ns'),
+                                    'summary': attached.get('summary', {})})
+                if state_handle is not None:
+                    state_handle.refresh(attached)
             trace.append({"step": current["step"],
                           "position_scenario_m": current["position_scenario_m"],
                           "speed_m_s": current["speed_m_s"], "action": command})
@@ -359,6 +402,8 @@ The original database files are never written by this runner.
                            target_vehicle_heading_up=False)
                 if overlay_handle is not None:
                     overlay_handle.draw_2d(env.top_down_renderer)
+                if state_handle is not None:
+                    state_handle.draw_2d(env.top_down_renderer)
             elif render == "3D":
                 if overlay_handle is not None:
                     overlay_handle.refresh()
@@ -374,7 +419,7 @@ The original database files are never written by this runner.
         else:
             if limit < steps:
                 ended = "recorded_window_end"
-        final = controller_state(env, goal=goal, goal_radius=goal_radius, source_map_features=source_features)
+        final = current
         if snapshot_path is not None:
             snapshot_path.parent.mkdir(parents=True, exist_ok=True)
             env.engine.graphicsEngine.renderFrame()
@@ -392,6 +437,8 @@ The original database files are never written by this runner.
             "terrain": "source geometry only; no invented surrounding terrain",
             "render_compatibility": compatibility,
             "source_environment": scene_report, "update_highlights": update_report,
+            "state_highlights": state_report,
+            "state_snapshot": final['map_state_snapshot'], "state_trace": state_trace,
             "obstacle_mode": obstacle_manifest.get("mode") if obstacle_manifest else "recorded",
             "obstacle_trace": obstacle_trace,
             "persistent_obstacles": ({"active_count": obstacle_trace[-1]["active_count"],

@@ -38,6 +38,65 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(plan["points"][0], [2.0, 0.0])
         self.assertEqual(plan["points"][-1], [28.0, 0.0])
 
+    def test_bus_lane_update_blocks_ordinary_car_but_preserves_bus_route(self):
+        features = network()
+        features["start"]["exit_lanes"] = ["short"]
+        for feature in features.values():
+            feature.update(source_lane_type="VEHICLE", vehicle_access=["vehicle", "bus"])
+        before = plan_route(features, [2, 0], [28, 0])
+        self.assertEqual(before["lane_ids"], ["start", "short", "end"])
+        features["short"].update(source_lane_type="BUS", vehicle_access=["bus"])
+        after = plan_route(features, [2, 0], [28, 0])
+        self.assertEqual(after["status"], "no_route")
+        self.assertEqual(after["reason"], "no_directed_path_to_goal")
+        self.assertEqual(after["access_excluded_lane_ids"], ["short"])
+        bus = plan_route(features, [2, 0], [28, 0], vehicle_class="bus")
+        self.assertEqual(bus["lane_ids"], before["lane_ids"])
+
+    def test_bus_lane_update_routes_ordinary_vehicle_over_existing_detour(self):
+        features = network()
+        features["short"].update(source_lane_type="BUS", vehicle_access=["bus"])
+        car = plan_route(features, [2, 0], [28, 0])
+        self.assertEqual(car["lane_ids"], ["start", "detour", "end"])
+        self.assertEqual(car["vehicle_class"], "vehicle")
+
+    def test_unknown_or_conflicting_permissions_do_not_create_access(self):
+        for restriction in (
+                {"source_lane_type": "UNKNOWN"},
+                {"source_lane_type": None},
+                {"source_lane_type": {"type": "VEHICLE"}},
+                {"vehicle_access": None},
+                {"vehicle_access": "vehicle"},
+                {"vehicle_access": ["unknown"]},
+                {"vehicle_access": ["vehicle", "unknown"]},
+                {"source_lane_type": "UNKNOWN", "vehicle_access": ["vehicle"]},
+                {"source_lane_type": "BUS", "vehicle_access": ["vehicle"]},
+                {"source_lane_type": "VEHICLE", "vehicle_access": []}):
+            with self.subTest(restriction=restriction):
+                features = {"only": dict(lane([[0, 0], [10, 0]]), **restriction)}
+                result = plan_route(features, [2, 0], [8, 0])
+                self.assertEqual(result["status"], "no_route")
+                self.assertEqual(result["reason"], "no_accessible_lane_centerlines")
+
+    def test_source_lane_use_is_kept_when_access_list_is_absent(self):
+        features = {"only": dict(lane([[0, 0], [10, 0]]), source_lane_type="BUS")}
+        self.assertEqual(plan_route(features, [2, 0], [8, 0])["status"], "no_route")
+        self.assertEqual(plan_route(features, [2, 0], [8, 0], vehicle_class="bus")["status"], "planned")
+
+    def test_bike_lane_is_closed_to_both_vehicle_classes(self):
+        features = {"only": dict(lane([[0, 0], [10, 0]]),
+                                 source_lane_type="BIKE", vehicle_access=["bicycle"])}
+        for vehicle_class in ("vehicle", "bus"):
+            self.assertEqual(plan_route(features, [2, 0], [8, 0], vehicle_class=vehicle_class)["status"], "no_route")
+
+    def test_invalid_vehicle_classes_are_rejected(self):
+        for vehicle_class in (None, "VEHICLE", "bicycle", "unknown", ["vehicle"]):
+            with self.subTest(vehicle_class=vehicle_class):
+                with self.assertRaises(ValueError):
+                    plan_route(network(), [2, 0], [28, 0], vehicle_class=vehicle_class)
+                with self.assertRaises(ValueError):
+                    LaneGraphController(vehicle_class=vehicle_class)
+
     def test_disconnected_goal_no_route(self):
         features = network()
         features["start"]["exit_lanes"] = []
@@ -99,6 +158,21 @@ class PlannerTests(unittest.TestCase):
         state["step"], state["map_version"] = 2, "v2"
         state["map_features_runtime"]["start"]["exit_lanes"] = []
         self.assertEqual(controller(state), [0, -1])
+
+    def test_lane_use_update_changes_controller_plan_and_bus_class_is_explicit(self):
+        features = network()
+        features["start"]["exit_lanes"] = ["short"]
+        state = self.state(features)
+        controller = LaneGraphController()
+        self.assertGreater(controller(state)[1], 0)
+        state["step"], state["map_version"] = 1, "bus-update"
+        features["short"].update(source_lane_type="BUS", vehicle_access=["bus"])
+        self.assertEqual(controller(state), [0, -1])
+        self.assertEqual(controller.diagnostics()["access_excluded_lane_ids"], ["short"])
+        bus_controller = LaneGraphController(vehicle_class="bus")
+        self.assertGreater(bus_controller(state)[1], 0)
+        self.assertEqual(bus_controller.diagnostics()["lane_ids"], ["start", "short", "end"])
+        self.assertEqual(bus_controller.diagnostics()["vehicle_class"], "bus")
 
     def test_reaching_goal_brakes(self):
         controller = LaneGraphController()

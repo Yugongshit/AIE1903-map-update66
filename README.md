@@ -2,23 +2,25 @@
 
 当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
-**地图更新 → 仿真 → Planning 接口：** 可将地图模块结果导出为新的 ScenarioNet 数据库。查看可视化时默认按原始轨迹自动回放；规划实验可显式接入控制器。默认只绘制有来源的地图几何，路障/锥桶首次出现后持续保留；更新区域用青色、旧位置用橙色虚线标注。支持新的城市坐标目标；原 M4 交付仍作为离线基线保存。[接入说明与启动命令](docs/simulation_bridge.md)。
+**地图更新 → 仿真 → Planning：** 仿真分别加载道路结构和附着状态。Argoverse 场景使用已交付的 **93 项参考结构更新**；nuScenes 场景按源时间显示 **23 个状态事件、全程 74 个关联实例**。车道/标线/拓扑修改进入道路地图，障碍状态保留为带时间的附着层。默认沿记录轨迹自动回放。[数据来源、启动与规划接口](docs/simulation_bridge.md)。
 
-**已有仿真环境，直接启动：** `git pull --ff-only` 后，激活 `conda activate aie1903-sim`。
-执行 `python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"` 对齐新增绘制依赖，然后运行：
+**已有仿真环境，直接启动：** 在本机项目根目录同步代码并激活已有环境，无需重建环境或另下地图压缩包。
 
 ```bash
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
+git pull --ff-only
+conda activate aie1903-sim
+python scripts/run_updated_simulation.py --database-path demo/simulation/argoverse/updated --mode replay --render 3D
 ```
 
-车辆按记录轨迹自动行驶，背景交通保留。地图已随仓库提交，无需另下压缩包。
-`highlighted` 带 DEMO 更新标记；改成
-`demo/simulation/persistent` 可查看真实算法输出。Mac 本地窗口不要加 `--offscreen`。
-首次安装见[环境说明](docs/simulation_bridge.md#安装)。
+上面查看已修改的 Argoverse 道路；将路径改成 `demo/simulation/argoverse/original` 可运行同场景、同轨迹的修改前版本。参考更新来自交付材料，不冒充模型检出。查看 nuScenes 的障碍状态层：
 
-**怎样看出改动：** 固定的 BEFORE / AFTER 局部对照使用相同范围和比例，显示具体变化。
-按 **U** 看当前修改位置、**Q** 回跟车、**J / K** 切换修改项，车辆仍自动回放。
-[查看当前 DEMO 的 1 米标线位移对照](demo/simulation/comparison.svg)。
+```bash
+python scripts/run_updated_simulation.py --database-path demo/simulation/nuscenes-states --mode replay --render 3D
+```
+
+**怎样看出变化：** 右侧 BEFORE / AFTER 同范围、同比例显示道路改动；青色为更新后、橙色虚线为原几何，**J / K** 切换、**U** 聚焦。左侧状态卡配合黄色活动轮廓、紫色未知/陈旧轮廓；**N / M** 切换事件、**I** 聚焦、**V** 隐藏/显示状态标注。**Q** 返回跟车视角，车辆仍自动回放。状态标注不会把行人、路障写成永久道路结构。
+
+Mac 本地窗口不要加 `--offscreen`。首次安装或缺依赖见[环境说明](docs/simulation_bridge.md#安装)。旧 `highlighted` 的一米标线移动保留为明确标记的 DEMO，已不作为默认示例。
 
 **新增三维地图：** 默认以街道尺度显示可旋转、缩放的三维视图，保留黄色状态、红色结构变化和共享相机的滑动对照；支持俯视、手机手势及一键切回二维。道路采用原始 XY 几何；35 个路障和 11 个锥桶按标注尺寸与朝向显示通用造型，3 个杂物保留真实轮廓。可直接点击“看路障／看锥桶”放大查看。[使用与实现说明](docs/3d_map_view_20261109.md)。
 

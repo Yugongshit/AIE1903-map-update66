@@ -1,80 +1,190 @@
 # 地图更新在前，仿真与 Planning 在后
 
-MetaDrive 是开源驾驶仿真软件库，可通过 Python 运行三维渲染、车辆物理和控制。
-ScenarioNet 是场景转换与管理工具，`converted/` 是转换后的场景数据库目录。
+MetaDrive 是通过 Python 运行的开源驾驶仿真软件库，提供三维渲染、车辆物理和控制。
+ScenarioNet 负责场景转换与管理，`converted/` 是转换后的场景数据库目录。
 
-## 已安装过依赖：从 GitHub 同步后直接启动
+当前接入保留地图模块的两类输出：**结构修改写入道路底图；状态事件作为带来源、时间和状态的附着层**。
+Planning 可以同时读取更新后的道路、当前附着状态和已加载的物理障碍。
 
-在本机项目根目录执行（例如 Mac 的 `~/Desktop/AIE1903-map-update66`）：
+## 已有环境：同步后直接打开
+
+在 Mac 的项目根目录执行，例如 `~/Desktop/AIE1903-map-update66`：
 
 ```bash
 git pull --ff-only
 conda activate aie1903-sim
-python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
+python scripts/run_updated_simulation.py --database-path demo/simulation/argoverse/updated --mode replay --render 3D
 ```
 
-无需重新创建已有环境或另下压缩包。两份完整数据库随 Git 提交：
-`demo/simulation/highlighted` 为带 DEMO 标记的受控改图，
-`demo/simulation/persistent` 为真实算法输出（0 项结构修改），两者均保留持久障碍。
-激活后 `python -c "import sys, metadrive; print(sys.executable); print(metadrive.__file__)"`
-可以核对使用的环境。新绘制需要 Shapely 2.1+；示例 pickle 使用 NumPy 2.2.6 导出，
-依赖版本与验证环境保持一致。若提示模型资源缺失，运行 `python -m metadrive.pull_asset`。
-
-查看可视化默认 `replay`：自车沿原始轨迹自动行驶，背景交通保留，不需要键盘开车。
-Mac 本机使用图形窗口，不加 Linux 离屏截图用的 `--offscreen`。Esc 退出；
-Q 为跟车视角，B 为俯视相机。当前云终端的 `.venv-sim` 和 `/workspace` 路径不适用于本机。
-
-如果 `git pull` 报 GitHub 443 端口连接超时，代码并未更新，后续的新入口自然不存在。
-“与 origin/main 一致”只是在比较本机缓存的远程引用。此时无需重装已经满足的依赖。
-可以先用本机原有入口自动回放，再处理本机访问 GitHub 的网络连接：
+这是已修改的 Argoverse 道路。完整数据库随仓库提交，无需另下压缩包或重建已有环境。
+默认 `replay` 沿记录轨迹自动行驶，无需键盘开车。关闭窗口后，可运行修改前的同场景对照：
 
 ```bash
-python -m scenarionet.sim --database_path "AIE1903 原始资料/simulation/converted/scene-0980" --render 3D --scenario_index 0
+python scripts/run_updated_simulation.py --database-path demo/simulation/argoverse/original --mode replay --render 3D
 ```
 
-原有入口使用旧场景；新的持久障碍和更新标记在同步成功后用上面的新入口查看。
+查看 nuScenes 道路上的障碍状态：
 
-## 处理流程
-
-新的接入顺序是：
-
-```text
-观测 / 已确认的地图编辑
-        ↓
-地图更新模块：结构补丁 + 有时间和来源的状态事件
-        ↓
-export_simulation_map.py → 新的 ScenarioNet 场景数据库
-        ↓
-MetaDrive 加载更新后的道路和车道图
-        ↓
-手动驾驶 / 使用新目标的规划控制器 → 物理仿真 → 实际轨迹日志
+```bash
+python scripts/run_updated_simulation.py --database-path demo/simulation/nuscenes-states --mode replay --render 3D
 ```
 
-原始 `converted/scene-0980` 保留为对照。导出不会覆盖输入、不会把已有
-轨迹当作新的规划结果。原 M4 交付保留为离线静态基线；新的接口让规划器
-读取仿真实际加载的地图，而不是原交付中固定的 `inputs/base_map.json`。
+Mac 本地窗口不加 `--offscreen`。Esc 退出，Q 返回跟车视角，B 使用俯视相机。
+二维视图用 `--render 2D`。原 `scenarionet.sim` 入口不会加载本项目新增的状态标注与持久障碍适配。
 
-## 为什么原来的场景旁边是山
+## 两类变化实际加载了什么
 
-MetaDrive 默认地形从自己的 `assets/textures/terrain/heightfield.png` 加载，默认
-`height_scale=50`。这是引擎背景，不是 nuScenes 实测城市地形。
-按用户要求撤销“把整个背景换成平地”的方案，默认关闭通用地形，
-只绘制源地图的道路、人行道和横道多边形。转换器遗漏的连接区道路面从同城
-原地图按确切 token 补齐，并记录文件哈希；修改过的要素不会用旧面覆盖。
-缺少数据的周边留空，不能把空白解读成真实地面没有建筑。
-当前 converter 读取道路、车道、标线、横道、路缘和交通参与者，没有重建
-建筑立面、高度或纹理；平面地图能构成道路三维仿真，但不能凭空恢复真实楼宇。
-建筑需要另行提供有坐标对齐依据的轮廓、高度、点云或模型。
-仓库原始地图没有建筑/地形层；nuScenes 车道中心线的第三列是航向角，不是
-高程。已加入 `--environment-geometry <JSON>` 接口，可加载有来源、同城同场景的
-建筑轮廓与明确高度，或带 XYZ 高程的地形面。此扩展目前仅用于绘制，不生成
-建筑/地形碰撞体；无数据时不编造建筑。格式见 `simulation_environment.py`。
+| 输出 | 仿真中的作用 | 当前随仓库提供的数据 |
+| --- | --- | --- |
+| 道路结构 | 修改车道面、中心线、标线、连接关系及通行属性，成为仿真和规划读取的道路图 | Argoverse 的 93 项已交付参考更新：27 项新增、66 项替换，涉及 84 项车道、9 项横道 |
+| 附着状态 | 将事件与已有对象按确切实例 ID 对齐，显示观测位置、时间、活动/未知等状态；不写进纯道路底图 | nuScenes 的 23 个算法状态事件，311 次支持变化的观测，全程关联 74 个不同实例 |
+
+这两个数据库属于不同城市坐标和场景，分别运行。Argoverse 使用同场景的 582 帧实测自车位姿，
+约 58.1 秒；现有车辆检测没有可用的三维轨迹，因此该场景只回放自车。
+nuScenes 保留原有车辆、行人和自行车的动态轨迹。
+
+### 道路修改的来源
+
+Argoverse 的 93 项来自 pipeline 的 `material_reference_replay`，有完整前后地图、精确要素 ID 和补丁日志，
+来源为 `delivered_ground_truth` / `reference_update`。它们已经写入仿真数据库，**不再只展示一条人工移动标线**。
+原图为 219 条车道、27 个横道；更新后为 240 条车道、33 个横道。
+一项源车道更新可对应车道面和左右标线等多个仿真要素，因此“93 项源更新”与界面的仿真要素数量不同。
+本次实际对应 **170 项仿真要素修改：84 项车道、77 项标线、9 项横道**。
+
+参考更新与模型检出分别记录。目前检测管线的 nuScenes 6 个、Argoverse 54 个结构候选，
+最终动作仍为 `no_update`；局部观测曲线尚未形成完整、确定的替换操作。
+例如 nuScenes 的局部差异候选同时仍能观测到原参考线，不能据此直接断言原线移动。
+这不是等待批准：导出器会直接执行满足对象身份、修改操作和完整几何条件的算法结构输出。
+当前的 93 项应称为“已交付参考更新进入仿真”，不能称为算法检测出的 93 项变化。
+
+Argoverse 车道中心线由源左右边界等弧长采样推导，并记录该来源。
+BUS/BIKE 用途与 `vehicle_access` 保留在仿真地图中；普通车辆规划不会把公交/自行车专用道当作普通车道。
+源裁剪区域之外的连接单独记录，不凭空补路。
+自车模型默认长/宽/高为 4.5/1.9/1.5 米，这是仿真车辆配置，源材料未提供实测车身尺寸。
+
+### 状态事件与物理障碍
+
+23 个事件关联的 74 个历史实例为 45 个路障、26 个锥桶、3 个杂物。
+其中 71 个按源实例 ID 关联原有仿真轨迹，不重复生成模型；3 个杂物保留源轮廓并标明 `FOOTPRINT ONLY`。
+仅看最终一帧会剩下 49 个关联实例，因此状态时间线保留完整历史观测。
+普通背景行人、车辆不会自动被标为“地图变化”；后续若算法产出它们的状态事件，可通过同一附着层表达。
+
+状态按原始 41 个关键帧与转换后的 201 帧对齐，每段源关键帧对应 5 个仿真步。
+插值步使用最近已到达关键帧的状态，并显示观测时间与观测年龄；未来观测不会提前出现。
+缺少新观测时保留最后位置并显示未知状态，不能把“未看到”写成“已清除”。
+明确清除事件撤下其状态标注。
+
+物理障碍的持续存在是另一项已选择的仿真策略：61 个路障、42 个锥桶在各自首次有效观测后，
+固定当时的位置、朝向、尺寸并持续保留，首次出现前不提前生成。
+这 103 个物理对象与 74 个状态事件关联实例的统计范围不同。
+状态标注变为未知或被隐藏，不会让已保留的障碍模型消失，也不会把动态行人冻结在原地。
+
+## 怎样看出修改前后
+
+道路结构使用右侧固定的 **BEFORE / AFTER** 对照，两格共享坐标范围与比例。
+世界坐标中的青色实线表示更新后/新增几何，橙色虚线表示原几何，红色虚线表示删除几何。
+`U01`、`U02` 等编号对应实际 `map_patch_log.json` 中的仿真要素。
+所有修改几何持续着色；世界标签只显示当前选中项，避免大量编号遮挡道路。
+也可直接打开[开场道路的前后对照](../demo/simulation/argoverse/comparison.svg)，
+或[最初网页链接中新增车道 ls-168084972 的对照](../demo/simulation/argoverse/linked-road-addition.svg)。
+实际仿真截图：[道路更新](../demo/simulation/argoverse/preview.png)、[附着状态](../demo/simulation/nuscenes-states/preview.png)。
+纯属性变化会显示属性前后值；只有全部对应顶点发生相同位移时，才显示统一位移数值。
+这些高亮色是查看辅助，不替代道路标线的原始材质和类型。
+
+附着状态使用左侧卡片及对象轮廓：黄色表示当前观测活动，紫色虚线表示未知/陈旧。
+卡片显示选中事件、状态和观测时间；有仿真模型的对象按确切身份关联，缺模型的杂物只画源轮廓。
+状态轮廓表示源观测位置，已持久化模型的位置可能来自更早的首次观测，两者含义不同。
+
+三维窗口的操作如下；二维窗口支持 J/K、N/M 和 V，聚焦和跟车相机操作用于三维窗口。
+
+| 按键 | 作用 |
+| --- | --- |
+| J / K | 上一个 / 下一个道路修改 |
+| U | 聚焦选中的道路修改 |
+| N / M | 上一个 / 下一个状态事件 |
+| I | 聚焦选中的状态事件 |
+| V | 显示 / 隐藏状态轮廓和身份标签；摘要卡显示 ON/OFF，物理对象仍存在 |
+| Q | 返回跟车视角 |
+
+选中项和相机操作不改变车辆回放。`--hide-updates` 隐藏道路修改标注；`--hide-states` 隐藏状态标注。
+二者均不撤销已加载的数据。右侧显示“无道路修改”时，仍可通过左侧查看状态事件。
+旧 `demo/simulation/highlighted` 保留为一米标线移动的 `DEMO`，仅用于受控接入检查。
+
+## 重新运行地图模块并导出
+
+以下输出目录都应为新目录：
+
+```bash
+python scripts/run_change_pipeline.py --out outputs/sim-source
+python scripts/export_simulation_map.py --database-path "AIE1903 原始资料/simulation/converted/scene-0980" --pipeline-result outputs/sim-source/result.json --state-source-root "AIE1903 原始资料" --out outputs/nuscenes-states
+python scripts/export_argoverse_simulation.py --pipeline-result outputs/sim-source/result.json --m2-package "AIE1903 原始资料/deliveries/0cfNzxkFwK3x3JB9HpcKIqoRCztSAreo__Winter_2021_M2_v1" --out outputs/argoverse-simulation
+```
+
+最后一条生成 `original/` 和 `updated/` 两份同场景数据库。
+nuScenes 的 `--state-source-root` 提供 `processed/frames.csv` 与 `objects.csv`，导出完整可移植的 `state_source.json`。
+运行生成后的数据库不再依赖这些 CSV 的本机路径。
+
+导出目录包括场景 pickle、`planning_map.json`、`map_before.json`、`map_after.json`、
+`map_patch_log.json`、状态/障碍资料和 `simulation_manifest.json`。
+Argoverse 还保留 93 项源参考修改的 `reference_patch_log.json`。
+场景、补丁日志、状态时间线及障碍策略用哈希绑定，运行前校验对应关系。
+
+本次验证：全套 444 项测试，443 项通过、1 项因既有 fixture 缺失跳过。
+Argoverse 原图和更新图均完整回放 581 步，两版自车轨迹一致；从实际引擎读回
+170 项修改，几何、连接关系、用途和通行权限均与导出一致。
+nuScenes 已运行二维和三维状态视图；第 137 步显示 16 个已出现事件、61 个实例，
+其中 58 个绑定已有物体、3 个只有源轮廓。N/M/I/V 的引擎事件测试确认不会改变车辆位置、时间步或回放策略。
+完整 200 步回放显示全部 23 个事件、74 个历史实例，71 个关联已有物体；103 个持久障碍全部保留且无预期对象缺失。
+
+完整车道/拓扑及外部显式修改也可通过 nuScenes 导出器的 `--patch <JSON>` 输入。
+补丁绑定场景身份、坐标和原场景哈希；替换/删除绑定旧要素哈希。
+车道编辑须提供中心线、道路多边形和出入口关系；单独移动一条标线不会推断整条道路的新拓扑。
+`--obstacle-mode recorded` 可导出原始障碍轨迹有效性，默认 `persistent` 保留首次观测后的静态障碍。
+
+## 接入自己的 Planning
+
+流程是“地图模块 → 新道路图及附着状态 → 规划 → 控制 → 仿真反馈”。
+默认回放只用于检查环境和可视化；自主规划需要显式使用 `--mode controller`。
+接口为 `controller(state) -> [steering, throttle_or_brake]`，两项均在 `[-1, 1]`。
+
+`state` 提供更新后的 `map_features_runtime`、`map_state_snapshot`、
+`persistent_obstacles_runtime`、车辆位置/航向/速度，以及目标和坐标原点。
+道路与状态分开传入；规划器可结合二者做决策，不必把障碍写成永久车道结构。
+`--goal X Y` 使用对应场景的原始城市 XY 米制坐标。
+
+例如，使用自己的 `your_planner.py` 中的 `control` 函数：
+
+```bash
+python scripts/run_updated_simulation.py --database-path demo/simulation/nuscenes-states --mode controller --controller your_planner:control --goal 420 1210 --render 3D --report outputs/my-driving-run.json
+```
+
+项目自带 `map_update.simulation_planner:controller`，作为有向车道图搜索与低速跟踪示例，
+读取更新后的通行属性，尚不负责动态避障或信号灯决策。
+`--no-traffic` 关闭移动交通与信号灯，持久障碍仍存在；报告保留该配置及实际轨迹、动作和碰撞结果。
+有记录交通时运行受记录时窗限制；超出源记录的状态不会冒充新的观测。
+
+需要键盘驾驶时才使用 `--mode manual`，W/S 加速与制动，A/D 转向。
+回放不会因为启用地图或状态可视化而切换成手动驾驶。
+
+## 道路之外的真实环境
+
+MetaDrive 默认山体来自其通用地形资源，并非这些场景的测量结果。
+当前只画有来源的道路、人行道、横道等几何；缺失的建筑和地形保持未提供。
+源 XY 道路的显示高度是渲染约定，不能当作实测高程；nuScenes 中心线第三列为航向角。
+
+`--environment-geometry <JSON>` 可加载坐标匹配、有来源的建筑轮廓与明确高度，或 XYZ 地形面。
+这部分当前用于绘制，不生成建筑/地形碰撞体。格式见 `map_update/simulation_environment.py`。
+要恢复真实街景，仍需同场景点云、建筑模型或其他实际环境资料。
 
 ## 安装
 
-在有图形桌面的电脑上使用 Python 3.10 或 3.11。ScenarioNet 当前源码拒绝
-Python 3.12 及以上。在仓库根目录执行：
+已有 `aie1903-sim` 环境不必重新创建。缺少新增绘制依赖时，在激活的环境中执行：
+
+```bash
+python -m pip install "numpy==2.2.6" "shapely>=2.1,<3"
+```
+
+首次安装使用 Python 3.10 或 3.11；ScenarioNet 当前源码不支持 Python 3.12 及以上：
 
 ```bash
 conda create -n aie1903-sim python=3.10 -y
@@ -83,179 +193,17 @@ python -m pip install -r requirements-simulation.txt
 python -m metadrive.pull_asset
 ```
 
-最后一条从 MetaDrive 官方发布获取匹配版本的模型资源。当前云环境验证用
-`.venv-sim/bin/python`，桌面图形窗口和无窗口物理验证分别记录，不相互代替。
+最后一条获取 MetaDrive 官方模型资源。可用
+`python -c "import sys, metadrive; print(sys.executable); print(metadrive.__file__)"` 核对当前解释器和安装位置。
 
-## 先执行地图模块，再导出仿真地图
+## 云端截图与检查
 
-每次选择新的输出目录：
-
-```bash
-python scripts/run_change_pipeline.py --out outputs/sim-source
-python scripts/export_simulation_map.py --database-path "AIE1903 原始资料/simulation/converted/scene-0980" --pipeline-result outputs/sim-source/result.json --out outputs/sim-updated
-```
-
-本次真实 nuScenes 结果为 23 个状态事件和 0 项结构修改。因此这条命令会
-保留道路几何，携带地图模块的状态与来源；不能为了演示而假称已检测到改路。
-默认 `--obstacle-mode persistent`：路障和锥桶第一次有效出现后，位置、朝向和
-尺寸固定在该次观测值，之后持续存在。首次出现前不提前生成，沿用原实例 ID，
-避免同一物体重复创建。普通车辆、行人和自行车仍保留原动态轨迹。
-这是用户选择的仿真场景构建策略；原始观测与地图状态事件不改写。
-用 `--obstacle-mode recorded` 可导出原始轨迹有效性供对照。
-
-`obstacle_manifest.json` 记录每个对象的首次出现帧、位置、尺寸和来源；运行器
-跳过这些明确对象原先的20帧过滤，设置静态碰撞体，并按源尺寸缩放通用模型。
-车辆驶离视野、后续没有检测或录制窗口结束，都不会自动删除已保留的障碍。
-
-已确认且满足完整写入合同的标线几何/属性修改、新增和删除，可直接从 pipeline
-结果自动适配。导出器重新检查事件的最终动作、证据门控、原几何和确切目标。
-完整车道/拓扑编辑及外部编辑通过 `--patch <JSON>` 输入。补丁绑定 dataset、scene_id、map、米制
-坐标、原场景 SHA-256；替换/删除还绑定旧要素哈希。只按确切 feature ID
-修改；不靠最近距离猜目标。车道编辑需完整的中心线、道路多边形和出入口关系，
-引用变更在一个补丁中一起提交。仅移动画出的标线不会自动推导新的车道中心线。
-
-Argoverse 的参考变化不能套用到 nuScenes scene-0980；需要其自身转换后的
-场景和坐标/身份适配。本次桥接以仓库已有的 nuScenes 场景为验证对象。
-
-## 在更新后的环境里回放或驾驶
+有 EGL 的 Linux 环境可离屏保存实际三维画面，截图和报告均使用新路径：
 
 ```bash
-python scripts/run_updated_simulation.py --database-path outputs/sim-updated --mode replay --render 3D
+python scripts/run_updated_simulation.py --database-path demo/simulation/nuscenes-states --mode replay --render 3D --offscreen --steps 137 --snapshot outputs/states-frame137.png --report outputs/states-frame137.json
+python -m unittest discover -s tests -p 'test_simulation*.py' -v
 ```
 
-默认回放沿原始轨迹自动行驶，可直接查看地图修改和持久障碍。回放结果不能当作
-新规划成果。二维视图使用 `--render 2D`。
-
-需要自行驾驶时才将模式换成 `--mode manual`：W 加速、S 制动、A/D 转向。
-俯视相机模式的 WASD 移动相机，按 Q 返回驾驶。手动驾驶模式不使用
-`ReplayEgoCarPolicy`，也不再因为偏离记录轨迹就按旧终点结束。
-它仍使用 MetaDrive 的内部导航组件维持引擎兼容，但旧路线不作为新规划目标。
-
-## 自己指定目标并接规划器
-
-`--goal X Y` 使用原场景城市 XY（米），不是经纬度或屏幕坐标。运行时
-MetaDrive 会平移坐标原点；控制器状态同时提供原坐标、平移量和实际加载的地图。
-
-规划器接口为 `controller(state) -> [steering, throttle_or_brake]`，两项范围
-均为 `[-1, 1]`。例如：
-
-```bash
-python scripts/run_updated_simulation.py --database-path outputs/sim-updated --mode controller --controller your_planner:control --goal 420 1210 --render 3D --report outputs/my-driving-run.json
-```
-
-其中 `your_planner.py` 是你自己的 Python 模块，暴露 `control(state)` 函数。
-`state` 包含车辆实时位置/航向/速度、更新后的 `map_features_runtime`、
-`goal_scenario_m` 和 `runtime_origin_in_scenario_m`；以代码中
-`controller_state` 为完整接口定义。不要修改传入的共享地图对象。
-`persistent_obstacles_runtime` 提供当前已经出现的持久障碍位姿与尺寸，供规划器使用。
-
-仓库提供一个基于车道后继图搜索和低速路径跟踪的研究基线。以下命令在导出
-地图上选择城市坐标 `(430, 1235)` 为目标，关闭背景交通以单独检验控制器：
-
-```bash
-python scripts/run_updated_simulation.py --database-path outputs/sim-updated --mode controller --controller map_update.simulation_planner:controller --goal 430 1235 --goal-radius 0.5 --no-traffic --render 3D --report outputs/planned-run.json
-```
-
-`--no-traffic` 关闭移动交通与信号灯，仍保留持久化地图障碍。
-移除此参数会加载原记录中的动态交通参与者；此基线本身不避让它们。
-它用于检查
-“更新地图 → 新目标 → 控制动作 → 仿真反馈”这条链路，不能声称完成了动态
-避障、交通规则规划或实车可执行性验证。
-
-报告记录实际行驶轨迹、动作、碰撞/到达结果与载入地图信息。
-为了避免把缺失的后续交通当成空路，有背景交通时运行受原记录时窗限制。
-`--no-traffic` 只用于隔离控制实验，必须在结果中明确标识。
-
-## 更新部分怎样标出来
-
-默认显示实际执行的 `map_patch_log.json`，编号 `U01`、`U02` 等与报告中的
-要素 ID 一一对应。固定局部对照框同时展示 **BEFORE（修改前）** 和
-**AFTER（修改后）**，两格使用完全相同的坐标范围和比例；车辆驶离后仍能比较。
-等量平移会标出真实的 X/Y 位移与距离；一般形变不会用平均数冒充统一位移。
-新增、删除和属性修改分别给出说明，不能只靠颜色猜测发生了什么。
-
-世界里的青色实线为更新后/新增几何，橙色虚线为更新前几何，红色虚线为删除几何。
-这些是高亮注释，颜色和虚实不表示源标线材质也被改成这些颜色或类型。
-三维窗口按 **U** 聚焦当前修改位置，**Q** 回到跟车视角，**J / K** 查看上一项/下一项。
-镜头和选中项只影响查看方式，车辆仍按记录自动回放，实际加载的物理地图不切换版本。
-二维视图也提供固定局部对照。
-
-当前 `highlighted` 只把起点附近一条白色虚线沿城市 X 方向平移 **1 米**；
-第 137 步自车距这处修改中心约 62 米，所以仅靠原来的跟车画面和图例很难看出差异。
-可直接看 [同范围的前后对照图](../demo/simulation/comparison.svg)；
-它由同一份修改日志生成，明确保留 DEMO 标记。
-
-`--hide-updates` 仅隐藏注释，不撤销地图修改。
-受控实验显示 `DEMO U01` 与 DEMO 图例；零结构修改显示 `NO MAP CHANGES APPLIED`。
-当前真实算法输出的道路结构修改为 0，23 个状态事件不能冒充底图修改。
-路障持久保留是一项独立的仿真策略，不代表所有路障都是新检测出的地图修改。
-注释不参与碰撞或规划。
-更新日志的哈希绑定到导出清单和场景文件；加载时校验，避免用旧注释标记新地图。
-旧版导出缺少此绑定时需重新运行导出命令。
-
-## 显式受控改图示例
-
-此例把自车附近一条标线沿城市 X 平移 1 米，只检验数据导出和引擎加载。
-输出标记 `synthetic=true`，不是从观测算法得到的结构变化，也不用于检测指标。
-
-```bash
-python scripts/build_simulation_demo_patch.py --scenario "AIE1903 原始资料/simulation/converted/scene-0980/scene-0980_0/sd_nuscenes_scene0980_v1.0-trainval_scene-0980.pkl" --out outputs/sim-demo-patch.json
-python scripts/export_simulation_map.py --database-path "AIE1903 原始资料/simulation/converted/scene-0980" --pipeline-result outputs/sim-source/result.json --patch outputs/sim-demo-patch.json --out outputs/sim-demo
-python scripts/run_updated_simulation.py --database-path outputs/sim-demo --mode replay --render 3D
-```
-
-ScenarioNet 的场景文件为 pickle；只加载可信来源的本地数据库。导出器保留
-原数据并生成独立数据库、规划地图和审计信息，拒绝覆盖已有输出目录。
-
-## 云端离屏截图
-
-有 EGL 软件渲染支持的 Linux 环境可用以下入口保存实际仿真画面：
-
-```bash
-python scripts/run_updated_simulation.py --database-path outputs/sim-demo --mode controller --action 0 0 --render 3D --offscreen --steps 4 --snapshot outputs/sim-3d.png --report outputs/sim-3d.json
-```
-
-离屏模式将 MetaDrive 默认硬编码的 16 倍 MSAA 关闭，以兼容软件帧缓冲；
-只改变抗锯齿设置，不改变道路几何。兼容适配在引擎关闭后恢复，不修改上游源码。
-`--offscreen` 不支持键盘手动驾驶；桌面交互启动不加这个参数。
-
-## 最新实际验证
-
-- 前后对照：97 项仿真相关测试通过；第 137 步实际三维画面仍显示固定局部对照。
-  U / Q / J / K 已通过引擎事件实测，镜头切换不改变车辆位置、策略或时间步；
-  137 步回放轨迹、实际地图哈希和交通模式与加入对照框前完全一致。二维入口也已实跑。
-- 自动回放修正：78 项仿真相关测试通过；CLI 省略 `--mode` 时使用回放，
-  保留背景交通并完整播放记录的 200 个步进，不再被训练用到达信号提前截断。
-- 此前完整基线 `.venv-sim/bin/python -m unittest discover -s tests -v`：378 项，377 通过，
-  1 项因原有历史场景 fixture 缺失跳过。普通 Python 的仿真测试也通过；
-  没有安装可选 Shapely 时明确跳过 8 项几何测试。
-- 真实 pipeline 输出可导出为 702 个地图要素、23 个状态事件；46 个实例
-  匹配到原轨迹，3 个杂物实例未在转换数据中找到，审计中保留缺口。
-- 明确标记 synthetic 的标线 +1 米修改已从实际引擎 `map_data` 读回核对，
-  原始场景文件哈希不变；不是只改网页画线。
-- 61 个路障和 42 个锥桶固定在首次观测位姿；实际运行 205 步，超过原 201 帧，
-  已出现对象数量只增不减，103 个对象最终全部保留，位置不漂移，无预期对象缺失。
-- 三维绘制 508 个源地图多边形，其中 194 个连接区道路面来自原地图精确匹配。
-  未生成山、草地或虚构建筑。二维和 EGL 三维入口均实际运行通过。
-- 更新标注显示受控修改的青色新位置、橙色虚线旧位置及 `DEMO U01` 标签。
-- 此前无持久障碍的规划接口验证中，新目标 `(430,1235)`、到达半径 0.5 米，
-  96 步后距离目标 0.4163 米。此历史结果不能证明当前规划基线会避让持久障碍。
-
-开发验证结果在 `outputs/simulation-bridge/`（该目录不进源码 Git）：
-`source-map-highlighted-final.png` 为当前三维截图，配套 JSON 保存加载审计；
-`persistent-final-205.json` 保存真实场景的 205 步障碍验证，
-`source-map-2d-final.json` 保存二维验证。
-`persistent-final/` 是真实零结构更新、带持久障碍的数据库；`highlighted-final/`
-是带 `DEMO` 标识的受控修改数据库，不代表真实检测成果。
-
-可运行的两份数据库已完整复制到 Git 跟踪的 `demo/simulation/`，从仓库根目录打开：
-
-```bash
-python scripts/run_updated_simulation.py --database-path demo/simulation/highlighted --mode replay --render 3D
-```
-
-当前云会话未提供远程桌面能力，且 `DISPLAY` 未设置；请使用上面的离屏截图
-命令查看三维画面。本地图形窗口使用已激活仿真环境的 `python`，默认自动回放。
-
-要查看真实算法结果，将数据库路径换为 `demo/simulation/persistent`。
-这里使用新的运行入口；直接执行上游 `scenarionet.sim` 不会加载这些显示和持久化适配。
+`--offscreen` 使用兼容软件渲染的抗锯齿配置，不支持键盘手动驾驶。
+报告包含实际载入地图、补丁高亮、当前状态快照、状态时间线摘要和轨迹，便于核对画面与数据。

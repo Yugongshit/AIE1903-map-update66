@@ -12,6 +12,21 @@ def line(x=100):
 
 
 class SimulationVisualsTests(unittest.TestCase):
+    def test_world_labels_follow_selection_without_hiding_changed_geometry(self):
+        class Node:
+            def show(self): self.visible = True
+            def hide(self): self.visible = False
+        patch = [{'feature_id': name, 'operation': 'replace', 'before': line(), 'after': line(101)}
+                 for name in ('a', 'b')]
+        nodes = {name: Node() for name in ('a', 'b')}
+        handle = UpdateOverlay(prepare_update_overlay(patch), patch_log=patch, label_nodes=nodes)
+        self.assertTrue(nodes['a'].visible)
+        self.assertFalse(nodes['b'].visible)
+        handle.select_change(1)
+        self.assertFalse(nodes['a'].visible)
+        self.assertTrue(nodes['b'].visible)
+        self.assertEqual(len(handle.prepared['items']), 2)
+
     def test_replacement_offsets_once_and_keeps_source_unchanged(self):
         patch = [{"feature_id": "lane-1", "operation": "replace", "before": line(), "after": line(101)}]
         saved = deepcopy(patch)

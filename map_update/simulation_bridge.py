@@ -517,7 +517,8 @@ def _state_join(scenario, data, identity):
     return layer, joins
 
 
-def export_simulation_map(database_path, pipeline_result, out, patch=None, obstacle_mode='persistent'):
+def export_simulation_map(database_path, pipeline_result, out, patch=None, obstacle_mode='persistent',
+                          state_source_root=None):
     """Export one nuScenes scene; all output is written to a new directory."""
     database = Path(database_path).resolve()
     result_path = Path(pipeline_result).resolve()
@@ -541,6 +542,10 @@ def export_simulation_map(database_path, pipeline_result, out, patch=None, obsta
     patch_value = _resolved_patch(scenario, data, patch_value, source_hash, pipeline_hash)
     updated, changes, topology_issues = apply_patch(scenario, patch_value, source_hash)
     states, joins = _state_join(scenario, data, identity)
+    state_source = None
+    if state_source_root is not None:
+        from .simulation_states import build_state_source
+        state_source = build_state_source(scenario, data, state_source_root)
     from .simulation_obstacles import STATIC_OBSTACLE_TYPES, apply_obstacle_policy
     updated, obstacles = apply_obstacle_policy(updated, obstacle_mode)
     original_dynamic = {k: v for k, v in scenario['tracks'].items() if v.get('type') not in STATIC_OBSTACLE_TYPES}
@@ -566,6 +571,8 @@ def export_simulation_map(database_path, pipeline_result, out, patch=None, obsta
                   'obstacle_manifest_sha256': feature_sha256(obstacles),
                   'persisted_obstacle_ids': [obj['track_id'] for obj in obstacles['objects'] if obj['persisted']],
                   'state_event_observations_unchanged': True,
+                  'state_source_sha256': feature_sha256(state_source) if state_source is not None else None,
+                  'state_replay_clock': 'source_keyframes_with_converter_substeps' if state_source is not None else None,
                   'obstacle_persistence_is_simulation_policy': obstacle_mode == 'persistent',
                   'observed_permanence_claimed': False,
                   'coordinate_transform': 'none; MetaDrive centralizes once when loading',
@@ -579,6 +586,7 @@ def export_simulation_map(database_path, pipeline_result, out, patch=None, obsta
                    'map_version': provenance['map_features_sha256'],
                    'map_features': json_value(updated['map_features']),
                    'state_event_layer': states, 'state_track_links': joins,
+                   'state_source_file': 'state_source.json' if state_source is not None else None,
                    'obstacle_manifest': obstacles,
                    'provenance': provenance,
                    'planning_contract': {
@@ -607,6 +615,9 @@ def export_simulation_map(database_path, pipeline_result, out, patch=None, obsta
                                 'Argoverse maps require their own matching converted scenario and adapter.',
                                 'Persistent barriers/cones are a chosen simulation policy, not a finding of observed permanence or road closure.',
                                 'A supplied map patch is not independent detection accuracy.']}
+    if state_source is not None:
+        manifest['files']['state_source'] = 'state_source.json'
+        manifest['summary']['state_timeline'] = state_source.get('summary', {})
     # Stage complete artifacts before exposing the output directory.
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix='.simulation-export-', dir=target.parent))
@@ -616,6 +627,8 @@ def export_simulation_map(database_path, pipeline_result, out, patch=None, obsta
         (temporary / 'dataset_mapping.pkl').write_bytes(pickle.dumps({filename: ''}, protocol=4))
         _write_json(temporary / 'planning_map.json', planner_map)
         _write_json(temporary / 'state_event_layer.json', states)
+        if state_source is not None:
+            _write_json(temporary / 'state_source.json', state_source)
         _write_json(temporary / 'obstacle_manifest.json', obstacles)
         _write_json(temporary / 'map_patch_log.json', changes)
         _write_json(temporary / 'applied_patch.json', patch_value)

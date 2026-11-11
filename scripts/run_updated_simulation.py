@@ -26,6 +26,7 @@ def main():
     parser.add_argument("--no-traffic", action="store_true", help="Disable moving traffic/signals; persistent map obstacles remain")
     parser.add_argument("--environment-geometry", type=Path, help="Source-attributed building/terrain geometry JSON in the scene's city coordinates")
     parser.add_argument("--hide-updates", action="store_true", help="Hide update annotations; map geometry is unchanged")
+    parser.add_argument("--hide-states", action="store_true", help="Hide attached-state annotations; obstacle models and state data remain")
     parser.add_argument("--snapshot", type=Path, help="Save a 3D PNG at the end; refuses an existing path")
     parser.add_argument("--offscreen", action="store_true", help="3D offscreen render via Panda3D EGL; replay/controller mode only")
     parser.add_argument("--report", type=Path, help="New JSON report path; never overwrites a file")
@@ -37,12 +38,13 @@ def main():
                      scenario_index=args.scenario_index, controller=args.controller,
                      action=args.action, goal=args.goal, goal_radius=args.goal_radius,
                      no_traffic=args.no_traffic, snapshot=args.snapshot, offscreen=args.offscreen,
-                     environment_geometry=args.environment_geometry, show_updates=not args.hide_updates)
+                     environment_geometry=args.environment_geometry, show_updates=not args.hide_updates,
+                     show_states=not args.hide_states)
         if args.report is not None:
             args.report.parent.mkdir(parents=True, exist_ok=True)
             with args.report.open("x", encoding="utf-8") as handle:
                 json.dump(result, handle, ensure_ascii=False, indent=2)
-        print(json.dumps({k: v for k, v in result.items() if k not in {"trace", "obstacle_trace", "export_manifest"}},
+        print(json.dumps({k: v for k, v in result.items() if k not in {"trace", "obstacle_trace", "export_manifest", "state_trace", "state_snapshot"}},
                          ensure_ascii=False, indent=2))
     except (ValueError, RuntimeError, ImportError, FileExistsError) as error:
         parser.exit(2, str(error) + "\n")

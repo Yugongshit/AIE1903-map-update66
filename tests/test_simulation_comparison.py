@@ -19,6 +19,14 @@ def comparison(before, after, *, operation='replace', synthetic=False, panel_siz
 
 
 class SimulationComparisonTests(unittest.TestCase):
+    def test_bus_access_update_is_visible_even_with_identical_geometry(self):
+        model = comparison(line(source_lane_type='VEHICLE', vehicle_access=['vehicle', 'bus']),
+                           line(source_lane_type='BUS', vehicle_access=['bus']))
+        self.assertEqual(model['translation']['kind'], 'unchanged')
+        self.assertEqual([item['field'] for item in model['attribute_changes']],
+                         ['source_lane_type', 'vehicle_access'])
+        self.assertIn('Source Lane Type: vehicle -> bus', model['summary_lines'])
+
     def test_uniform_translation_is_measured_from_all_vertices(self):
         model = comparison(line(), line([[103., 204.], [113., 204.], [123., 204.]]))
         translation = model['translation']

@@ -2,14 +2,52 @@
 
 This research baseline follows explicitly supplied directed lane connections and
 uses a user-selected goal. It never reads an ego recording or old navigation
-trajectory. It is not a collision-avoidance, traffic-rule or free-space planner;
-the simulation runner must retain collision termination. Coordinates below are
+trajectory. Source lane-use restrictions are honored, but this is not a full
+traffic-rule, collision-avoidance or free-space planner; the simulation runner
+must retain collision termination. Coordinates below are
 metric XY in one common frame (runtime-centered XY in ``controller``).
 """
 from __future__ import annotations
 
 import heapq
 import math
+
+
+_SOURCE_LANE_ACCESS = {
+    "VEHICLE": {"vehicle", "bus"},
+    "BUS": {"bus"},
+    "BIKE": {"bicycle"},
+}
+_VEHICLE_CLASSES = {"vehicle", "bus"}
+
+
+def _validate_vehicle_class(vehicle_class):
+    if not isinstance(vehicle_class, str) or vehicle_class not in _VEHICLE_CLASSES:
+        raise ValueError("vehicle_class must be 'vehicle' or 'bus'")
+    return vehicle_class
+
+
+def _lane_accessible(feature, vehicle_class):
+    """Keep supplied lane restrictions even when MetaDrive types are identical.
+
+Old nuScenes exports have neither field and retain their existing lane graph.
+When source restrictions are present, missing/unknown values cannot grant new
+access. An explicit access list may narrow a known source lane's permission,
+but cannot turn a BUS or BIKE lane into an ordinary vehicle lane.
+"""
+    if "source_lane_type" in feature:
+        source_type = feature["source_lane_type"]
+        if not isinstance(source_type, str) or vehicle_class not in _SOURCE_LANE_ACCESS.get(source_type, set()):
+            return False
+    if "vehicle_access" in feature:
+        access = feature["vehicle_access"]
+        if not isinstance(access, list) or any(
+                not isinstance(value, str) or value not in {"vehicle", "bus", "bicycle"}
+                for value in access):
+            return False
+        if vehicle_class not in access:
+            return False
+    return True
 
 
 def _xy(point):
@@ -69,7 +107,8 @@ def _angle(value):
 
 
 def plan_route(map_features, start, goal, *, heading_rad=None,
-               max_snap_distance_m=3.0, max_connection_gap_m=5.0):
+               max_snap_distance_m=3.0, max_connection_gap_m=5.0,
+               vehicle_class="vehicle"):
     """Dijkstra over the current map's directed ``exit_lanes`` connections.
 
 The nearest heading-compatible start lane and nearest goal lane are selected.
@@ -77,15 +116,20 @@ Goals behind the start on that same lane are rejected: no invented reverse or
 lane-change connection is introduced. Goals must lie near a lane centerline;
 their projected endpoint and requested endpoint are both reported. Explicit
 connections with a large geometric gap are not bridged through unknown space.
+Source BUS/BIKE restrictions are applied before matching or searching lanes.
 """
+    vehicle_class = _validate_vehicle_class(vehicle_class)
     start, goal = _xy(start), _xy(goal)
     if heading_rad is not None and not math.isfinite(heading_rad):
         raise ValueError("heading_rad must be finite")
     if max_snap_distance_m <= 0 or max_connection_gap_m < 0:
         raise ValueError("Invalid lane matching distance")
-    lanes = {}
+    lanes, excluded_lanes = {}, []
     for key, feature in map_features.items():
         if feature.get("type") not in {"LANE_SURFACE_STREET", "LANE_SURFACE_UNSTRUCTURE", "LANE_FREEWAY"}:
+            continue
+        if not _lane_accessible(feature, vehicle_class):
+            excluded_lanes.append(str(key))
             continue
         points = [_xy(p) for p in feature.get("polyline", [])]
         if len(points) < 2 or _length(points) <= 1e-9:
@@ -94,10 +138,12 @@ connections with a large geometric gap are not bridged through unknown space.
 
     result = {"status": "no_route", "reason": None, "lane_ids": [],
               "points": [], "requested_goal": list(goal),
+              "vehicle_class": vehicle_class,
+              "access_excluded_lane_ids": sorted(excluded_lanes),
               "uses_recorded_trajectory": False,
               "scope": "directed_lane_graph_only_no_obstacle_or_signal_avoidance"}
     if not lanes:
-        return dict(result, reason="no_supported_lane_centerlines")
+        return dict(result, reason="no_accessible_lane_centerlines" if excluded_lanes else "no_supported_lane_centerlines")
     starts, goals = [], []
     for key, (points, _) in lanes.items():
         a, b = _project(start, points), _project(goal, points)
@@ -160,10 +206,11 @@ or step zero invalidates the cached route. Goal changes also trigger planning.
 This controller ignores traffic and obstacles; it is a planning integration
 example, not a claim of safe autonomous driving.
 """
-    def __init__(self, cruise_speed_m_s=3.0):
+    def __init__(self, cruise_speed_m_s=3.0, *, vehicle_class="vehicle"):
         if not math.isfinite(cruise_speed_m_s) or cruise_speed_m_s <= 0:
             raise ValueError("Cruise speed must be finite and positive")
         self.cruise_speed_m_s = cruise_speed_m_s
+        self.vehicle_class = _validate_vehicle_class(vehicle_class)
         self._key = None
         self._plan = {"status": "not_started", "reason": "no_callback_yet"}
         self._last_step = None
@@ -171,6 +218,7 @@ example, not a claim of safe autonomous driving.
     def diagnostics(self):
         return {**self._plan, "coordinate_frame": "metadrive_centered_m",
                 "cruise_speed_m_s": self.cruise_speed_m_s,
+                "vehicle_class": self.vehicle_class,
                 "collision_avoidance": False, "traffic_signal_compliance": False}
 
     def __call__(self, state):
@@ -191,9 +239,10 @@ example, not a claim of safe autonomous driving.
             raise ValueError("Goal radius must be finite and positive")
         goal_distance = math.dist(position, goal)
         step = state.get("step", 0)
-        key = (id(features), state.get("map_version"), state.get("scenario_id"), origin, goal, goal_radius)
+        key = (id(features), state.get("map_version"), state.get("scenario_id"), origin, goal, goal_radius, self.vehicle_class)
         if key != self._key or (self._last_step is not None and step < self._last_step) or step == 0:
-            self._plan = plan_route(features, position, goal, heading_rad=heading)
+            self._plan = plan_route(features, position, goal, heading_rad=heading,
+                                    vehicle_class=self.vehicle_class)
             self._plan["goal_radius_m"] = goal_radius
             # This controller follows the centerline. It cannot reach a goal
             # disk that does not intersect that line, even if lane matching
