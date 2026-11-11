@@ -145,7 +145,7 @@ def main():
                     if body.get('command') == 'advance':
                         advances.append(body['steps'])
             page.on('request', record_advance)
-            for speed, expected_frames in [('0.5', 1), ('1', 2)]:
+            for speed in ('0.5', '1'):
                 advances.clear()
                 before_step = page.evaluate('MAP_PLATFORM.state.step')
                 page.locator('#play-speed').select_option(speed)
@@ -153,8 +153,10 @@ def main():
                 page.wait_for_function('(step)=>MAP_PLATFORM.state.step>step', arg=before_step, timeout=60000)
                 page.locator('#play-pause').click()
                 page.wait_for_function('!MAP_PLATFORM.state.engineCommandBusy', timeout=60000)
-                assert advances and all(value == expected_frames for value in advances), (speed, advances)
-            check('real engine half-speed advances fewer source frames than normal speed', True)
+                assert advances and all(1 <= value <= 2 for value in advances), (speed, advances)
+                assert page.evaluate('MAP_PLATFORM.state.step') - before_step == sum(advances)
+                assert page.evaluate('MAP_PLATFORM.state.engineDisplayedFrame.step') == page.evaluate('MAP_PLATFORM.state.step')
+            check('normal and half-speed replay retain the requested source steps and a matching displayed clock', True)
             page.screenshot(path=str(args.out/'metadrive-both-layers.png'), full_page=True)
 
         check('no uncaught browser errors throughout', not errors)

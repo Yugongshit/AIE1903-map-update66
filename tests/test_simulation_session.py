@@ -102,7 +102,10 @@ class SimulationSessionTests(unittest.TestCase):
             session._stop_native_camera = lambda: calls.append('stop_camera')
             session._attach_annotations = lambda: calls.append('attach_at_'+str(env.episode_step))
             session._refresh_state = lambda: calls.append('refresh_at_'+str(env.episode_step))
-            session.frame = lambda: {'step': env.episode_step}
+            def frame():
+                session._refresh_state()
+                return {'step': env.episode_step}
+            session.frame = frame
             self.assertEqual(session.seek(5), {'step': 5})
             self.assertEqual(env.resets, 1)
             self.assertEqual(env.actions, [[0., 0.]]*5)
@@ -127,11 +130,11 @@ class SimulationSessionTests(unittest.TestCase):
     def test_backward_seek_selection_reports_only_current_observed_event(self):
         with tempfile.TemporaryDirectory() as directory:
             session = SimulationSession(directory)
-            session.env = object()
+            session.env = SimpleNamespace(episode_step=5)
             session.export = {'states': {}}
             session.source_features = {}
             session.selected_event_id = 'later-event'
-            handle = SimpleNamespace(selected_event_id='early-event', panel_node=None,
+            handle = SimpleNamespace(selected_event_id='early-event', panel_node=None, visible=True,
                                      refresh=lambda snapshot: None, set_visible=lambda visible: None)
             session.state_handle = handle
             with patch('map_update.simulation_session.controller_state',
@@ -154,6 +157,46 @@ class SimulationSessionTests(unittest.TestCase):
                                'position_scenario_m': [100., 200.], 'map_features_runtime': {}}
             self.assertEqual(session.status()['map_center_scenario_m'], [103., 204.])
             self.assertEqual(session.map_center, [3., 4.])
+
+    def test_fast_forward_suspends_auxiliary_buffers_and_restores_each_state(self):
+        class Window:
+            def __init__(self, active): self.active = active
+            def isActive(self): return self.active
+            def setActive(self, value): self.active = value
+        windows = [Window(True), Window(True), Window(False)]
+        env = SimpleNamespace(engine=SimpleNamespace(win=windows[0],
+              graphicsEngine=SimpleNamespace(getWindows=lambda: windows)))
+        with self.assertRaises(RuntimeError):
+            with _suspended_rendering(env):
+                self.assertEqual([window.active for window in windows], [False, False, False])
+                raise RuntimeError('physics step failed')
+        self.assertEqual([window.active for window in windows], [True, True, False])
+
+    def test_camera_only_refresh_reuses_state_but_new_step_and_selection_update(self):
+        with tempfile.TemporaryDirectory() as directory:
+            session = SimulationSession(directory)
+            session.env = SimpleNamespace(episode_step=10)
+            session.export, session.source_features = {'states': {}}, {}
+            redraws = []
+            handle = SimpleNamespace(selected_event_id='event-a', panel_node=None, visible=True,
+                                     refresh=lambda snapshot: redraws.append(snapshot),
+                                     set_visible=lambda visible: None)
+            session.state_handle = handle
+            with patch('map_update.simulation_session.controller_state',
+                       return_value={'map_state_snapshot': {'step': 10}}) as build:
+                session._refresh_state()
+                session.camera['yaw'] = 180
+                session._refresh_state()
+                self.assertEqual(build.call_count, 1)
+                self.assertEqual(len(redraws), 1)
+                handle.selected_event_id = 'event-b'
+                session._refresh_state()
+                self.assertEqual(build.call_count, 1)
+                self.assertEqual(len(redraws), 2)
+                session.env.episode_step = 11
+                session._refresh_state()
+                self.assertEqual(build.call_count, 2)
+                self.assertEqual(len(redraws), 3)
 
 
 if __name__ == '__main__':

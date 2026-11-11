@@ -88,6 +88,41 @@ class PlatformHttpTests(unittest.TestCase):
             with patch.object(self.server.engine, 'submit', side_effect=BusyError('busy')):
                 self.assertEqual(self.request('/api/engine/command', 'POST', {'command': 'seek', 'step': 10})[0], 409)
 
+    def test_completed_command_returns_result_without_a_separate_status_poll(self):
+        status_value = {'job_id': 'fast', 'busy': False, 'ready': True,
+                        'last_result': {'step': 5, 'frame_id': 'image'}, 'error': None}
+        with patch.object(self.server.engine, 'status', return_value=status_value) as status:
+            with patch.object(self.server.engine, 'submit', return_value={'job_id': 'fast'}) as submit:
+                code, _, body = self.request('/api/engine/command', 'POST',
+                                             {'command': 'seek', 'step': 5, 'wait_ms': 1000})
+        self.assertEqual(code, 200)
+        self.assertEqual(json.loads(body)['status']['last_result']['step'], 5)
+        self.assertNotIn('wait_ms', submit.call_args.args[0])
+        status.assert_any_call(wait_ms=1000, job_id='fast')
+
+    def test_status_wait_is_bounded_and_command_wait_does_not_accept_invalid_values(self):
+        for value in ('-1', '1001', '1.5', 'a', '1&wait_ms=2'):
+            self.assertEqual(self.request('/api/engine/status?wait_ms=' + value)[0], 400)
+        for value in (-1, 1001, 1.5, True, '1000'):
+            self.assertEqual(self.request('/api/engine/command', 'POST',
+                                         {'command': 'frame', 'wait_ms': value})[0], 400)
+
+    def test_inline_snapshot_is_cached_for_camera_updates_but_bound_to_scene_version_and_clock(self):
+        payload = {'scene_id': 'physical-scene', 'dataset': 'nuscenes',
+                   'versions': {'updated': {'map_sha256': 'new'}, 'original': {'map_sha256': 'old'}}}
+        result = {'scene_id': 'physical-scene', 'dataset': 'nuscenes', 'step': 2,
+                  'map_features_sha256': 'new', 'source_timestamp_ns': '1234'}
+        snapshot = {'step': 2, 'source_timestamp_ns': '1234', 'map_sha256': 'new'}
+        with patch.object(self.server, 'scene', return_value=payload):
+            with patch('map_update.simulation_platform_data.build_snapshot', return_value=snapshot) as build:
+                self.assertEqual(self.server.engine_snapshot(result, 'example', 'updated'), snapshot)
+                self.assertEqual(self.server.engine_snapshot(result, 'example', 'updated'), snapshot)
+                build.assert_called_once_with(payload, 2, 'updated')
+                with self.assertRaisesRegex(ValueError, 'identities'):
+                    self.server.engine_snapshot(result, 'example', 'original')
+                with self.assertRaisesRegex(ValueError, 'timestamps'):
+                    self.server.engine_snapshot({**result, 'source_timestamp_ns': 'future'}, 'example', 'updated')
+
     def test_http_serves_the_requested_immutable_image_after_playback_advances(self):
         broker = self.server.engine
         broker.state.update(scene_id='example', version='updated')
@@ -247,10 +282,12 @@ class EngineBrokerTests(unittest.TestCase):
                 " if message['command']=='close':break\n")
             broker = EngineBroker(root)
             try:
-                broker.submit({'command': 'open'}, scene_id='example', version='updated')
+                job = broker.submit({'command': 'open'}, scene_id='example', version='updated')
                 with self.assertRaises(BusyError):
                     broker.submit({'command': 'seek', 'step': 9})
-                self.wait_job(broker)
+                completed = broker.status(wait_ms=1000, job_id=job['job_id'])
+                self.assertFalse(completed['busy'])
+                self.assertEqual(completed['job_id'], job['job_id'])
                 self.assertTrue(broker.status()['ready'])
                 broker.submit({'command': 'seek', 'step': 7})
                 self.wait_job(broker)
@@ -261,6 +298,17 @@ class EngineBrokerTests(unittest.TestCase):
                 broker.submit({'command': 'open'}, scene_id='example', version='original')
                 self.wait_job(broker)
                 self.assertTrue(broker.status()['ready'])
+            finally:
+                broker.close()
+
+    def test_status_wait_does_not_wait_on_a_replacement_job(self):
+        with tempfile.TemporaryDirectory() as root:
+            broker = EngineBroker(root)
+            try:
+                broker.state.update(busy=True, job_id='replacement')
+                with patch.object(broker.completed, 'wait', side_effect=AssertionError('must not wait')):
+                    status = broker.status(wait_ms=1000, job_id='old-job')
+                self.assertEqual(status['job_id'], 'replacement')
             finally:
                 broker.close()
 

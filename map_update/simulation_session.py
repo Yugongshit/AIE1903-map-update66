@@ -117,14 +117,21 @@ def load_bound_export(database_path):
 @contextmanager
 def _suspended_rendering(env):
     """Fast-forward physics and recorded policies without rendering each step."""
-    window = getattr(env.engine, 'win', None)
-    active = window.isActive() if window is not None else None
-    if window is not None:
+    graphics = getattr(env.engine, 'graphicsEngine', None)
+    if graphics is not None and hasattr(graphics, 'getWindows'):
+        windows = list(graphics.getWindows())
+    else:
+        window = getattr(env.engine, 'win', None)
+        windows = [window] if window is not None else []
+    # PBR creates intermediate/shadow buffers separate from the main output.
+    # Disabling only engine.win still renders those buffers every physics step.
+    previous = [(window, window.isActive()) for window in windows]
+    for window, _ in previous:
         window.setActive(False)
     try:
         yield
     finally:
-        if window is not None:
+        for window, active in previous:
             window.setActive(active)
 
 
@@ -149,6 +156,8 @@ class SimulationSession:
         self.show_structure = self.show_states = True
         self.selected_feature_id = self.selected_event_id = None
         self.map_center = [0., 0.]
+        self._state_step = None
+        self._annotation_selection = None
 
     def open(self, database_path, *, step=0):
         bound = load_bound_export(database_path)
@@ -174,7 +183,7 @@ class SimulationSession:
             from metadrive.policy.replay_policy import ReplayEgoCarPolicy
             from metadrive.obs.state_obs import LidarStateObservation
             from metadrive.scenario.utils import get_number_of_scenarios
-            from panda3d.core import loadPrcFileData
+            from panda3d.core import ConfigVariableInt, loadPrcFileData
             count = get_number_of_scenarios(str(bound['root']))
             if count != 1:
                 raise ValueError('Interactive review requires one scene per exported database')
@@ -183,6 +192,9 @@ class SimulationSession:
             if indexed_path.resolve() != (bound['root'] / bound['manifest']['scenario_file']).resolve():
                 raise ValueError('Database index selects a different scenario from the verified export')
             self.resources.enter_context(rendering_adapters(engine_core, numpy, offscreen=True))
+            compression = ConfigVariableInt('png-compression-level')
+            self.resources.callback(compression.setValue, compression.getValue())
+            compression.setValue(1)  # Same lossless pixels; less CPU on localhost.
             if sys.platform.startswith('linux'):
                 loadPrcFileData('', 'load-display p3headlessgl')
             config = environment_config(bound['root'], mode='replay', render='3D', steps=100000,
@@ -249,17 +261,26 @@ class SimulationSession:
         camera.run_task = False
 
     def _refresh_state(self):
-        self.current = controller_state(self.env, source_map_features=self.source_features,
-                                        state_source=self.export['states'])
+        changed = self.current is None or self._state_step != self.env.episode_step
+        if changed:
+            self.current = controller_state(self.env, source_map_features=self.source_features,
+                                            state_source=self.export['states'])
+            self._state_step = self.env.episode_step
         if self.state_handle is not None:
-            self.state_handle.refresh(self.current['map_state_snapshot'])
+            selection = self.state_handle.selected_event_id
+            if changed or self._annotation_selection != selection:
+                self.state_handle.refresh(self.current['map_state_snapshot'])
+                self._annotation_selection = self.state_handle.selected_event_id
             self.selected_event_id = self.state_handle.selected_event_id
-            self.state_handle.set_visible(self.show_states)
+            if self.state_handle.visible != self.show_states:
+                self.state_handle.set_visible(self.show_states)
             if self.state_handle.panel_node is not None:
                 self.state_handle.panel_node.hide()
         if self.update_handle is not None:
-            self.update_handle.refresh()
-            self.update_handle.set_visible(self.show_structure)
+            if changed:
+                self.update_handle.refresh()
+            if self.update_handle.visible != self.show_structure:
+                self.update_handle.set_visible(self.show_structure)
             if self.update_handle.legend_node is not None:
                 self.update_handle.legend_node.hide()
 
@@ -267,6 +288,7 @@ class SimulationSession:
         from .simulation_environment import attach_source_environment
         from .simulation_visuals import attach_update_overlay
         self.annotations.close()
+        self._needs_render_warmup = True
         self.annotations = ExitStack()
         self.update_handle = self.state_handle = None
         surface, self.environment_report = attach_source_environment(self.env)
@@ -280,10 +302,12 @@ class SimulationSession:
         self.annotations.callback(self.update_handle.close)
         self.current = controller_state(self.env, source_map_features=self.source_features,
                                         state_source=self.export['states'])
+        self._state_step = self.env.episode_step
         if self.current['map_state_snapshot'] is not None:
             from .simulation_state_visuals import attach_state_overlay
             self.state_handle, _ = attach_state_overlay(self.env, self.current['map_state_snapshot'])
             self.annotations.callback(self.state_handle.close)
+            self._annotation_selection = self.state_handle.selected_event_id
         if self.selected_feature_id is not None:
             self._select_feature(self.selected_feature_id)
         if self.selected_event_id is not None and self.state_handle is not None:
@@ -300,6 +324,7 @@ class SimulationSession:
             # Reset removes objects that had appeared only in a later frame.
             self.annotations.close()
             self.update_handle = self.state_handle = None
+            self._state_step = self._annotation_selection = None
             self.env.reset(seed=0)
             self._stop_native_camera()
             with _suspended_rendering(self.env):
@@ -310,7 +335,6 @@ class SimulationSession:
             with _suspended_rendering(self.env):
                 while self.env.episode_step < step:
                     self.env.step([0., 0.])
-            self._refresh_state()
         return self.frame()
 
     def advance(self, steps=1):
@@ -350,14 +374,12 @@ class SimulationSession:
                 raise ValueError('State event has not been observed at this replay frame')
             self.state_handle.selected_event_id = event_id
             self.selected_event_id = event_id
-            self.state_handle.refresh(self.current['map_state_snapshot'])
             points = [p for row in self.state_handle.selected_objects() for path in row['runtime_paths'] for p in path]
             if not points:
                 raise ValueError('Selected event has no source geometry at this frame')
             self.selection_center = [(min(p[i] for p in points)+max(p[i] for p in points))/2 for i in (0, 1)]
         if focus:
             self.camera.update(target='selection', pan=[0., 0.], pitch=65., distance=35.)
-        self._refresh_state()
         return self.frame()
 
     def overlays(self, *, structure=None, state=None):
@@ -369,7 +391,6 @@ class SimulationSession:
             self.show_structure = structure
         if state is not None:
             self.show_states = state
-        self._refresh_state()
         return self.frame()
 
     def frame(self):
@@ -383,7 +404,11 @@ class SimulationSession:
         self.env.main_camera.camera.setPos(*position)
         self.env.main_camera.camera.lookAt(*look_at)
         self.env.engine.graphicsEngine.renderFrame()
-        self.env.engine.graphicsEngine.renderFrame()
+        # Prime a newly loaded/reset scene once. Steady playback and camera
+        # movement need one complete render, not two copies of the same step.
+        if getattr(self, '_needs_render_warmup', True):
+            self.env.engine.graphicsEngine.renderFrame()
+            self._needs_render_warmup = False
         self.sequence += 1
         self.frame_file = 'frame-{:08d}.png'.format(self.sequence)
         destination = self.output_dir / self.frame_file
@@ -440,6 +465,8 @@ class SimulationSession:
                     self.env.close()
             finally:
                 self.env = None
+                self.current = None
+                self._state_step = self._annotation_selection = None
                 self.state_handle = self.update_handle = None
                 self.resources.close()
 

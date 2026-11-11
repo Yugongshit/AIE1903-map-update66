@@ -1,0 +1,482 @@
+{
+  "schema": "simulation-browser-performance-1.0",
+  "date": "2026-11-11",
+  "baseline_commit": "13799ef2c7227c3c04b793d0a0015aa96f37bbea",
+  "environment": "Same Linux cloud executor, real MetaDrive/Panda3D with software rendering, headless Chromium; not measured on macOS.",
+  "workload": "nuScenes scene-0980 updated map; 1x playback from step 0 until at least 20; three paused yaw drags at step 20; redraw 20, backward 20 to 5, forward 5 to 20.",
+  "caveats": [
+    "Single accepted end-to-end run per version; timings vary by machine and load.",
+    "Adaptive display batching ends the optimized run at step 21 versus baseline step 20; source progression is compared per wall second. Every physics step is still executed.",
+    "Delivered FPS counts distinct decoded images actually observed at browser animation frames, not source step count.",
+    "Camera and scrub runs start at identical poses; the optimized run aligns to step 20 outside the timed playback.",
+    "Startup excluded from comparison because worker/cache warmness differs.",
+    "Short performance workload covers steps 0–21; correctness regression separately exercises later states and Argoverse."
+  ],
+  "optimized_file_sha256": {
+    "map_update/simulation_platform.js": "cf3b2686abeee2e5eaad2b1e7cd6be47f8ca7bb16b1a71cdf11b2c73c23672c7",
+    "map_update/simulation_platform.py": "e30f6b97ea1d0a2ea6b2d1dff65d402b5cd2e253fd4c4b7da782ac5977eb23ff",
+    "map_update/simulation_session.py": "e2e3f3a54cce04b1a8e731d47c769b99429607ef98304c183c819f0fe035f607",
+    "scripts/benchmark_simulation_platform.py": "1962785a5df56bb603b1de7d253e92e246560cec03b6dad22fa536e3c1643027"
+  },
+  "runs": {
+    "baseline": {
+      "passed": true,
+      "configuration": {
+        "scene_id": "scene-0980",
+        "dataset": "nuscenes",
+        "timestep_s": 0.1,
+        "speed": 1,
+        "viewport": [
+          1600,
+          1000
+        ],
+        "device_pixel_ratio": 1,
+        "map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+      },
+      "frontend_sha256": "2318365257842b2738e7f098ef3cbd01ccbe9c007f407b55e1a75d17d236032c",
+      "image_size_px": [
+        1000,
+        650
+      ],
+      "playback": {
+        "start_step": 0,
+        "last_step": 20,
+        "wall_seconds": 19.20649999999404,
+        "source_seconds": 2,
+        "source_seconds_per_wall_second": 0.10413141384430379,
+        "delivered_images": 10,
+        "delivered_images_per_second": 0.5206570692215189,
+        "mean_image_interval_ms": 1923.2600000000002,
+        "max_image_interval_ms": 2399.9000000000015,
+        "source_step_gaps": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ]
+      },
+      "camera": {
+        "samples": [
+          {
+            "dx_px": 40,
+            "step": 20,
+            "latency_ms": 1113.7999999940366,
+            "before": {
+              "target": "ego",
+              "yaw": 0,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            },
+            "after": {
+              "target": "ego",
+              "yaw": 344,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "dx_px": -80,
+            "step": 20,
+            "latency_ms": 1114.3999999910593,
+            "before": {
+              "target": "ego",
+              "yaw": 344,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            },
+            "after": {
+              "target": "ego",
+              "yaw": 16,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "dx_px": 40,
+            "step": 20,
+            "latency_ms": 1114.7999999940366,
+            "before": {
+              "target": "ego",
+              "yaw": 16,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            },
+            "after": {
+              "target": "ego",
+              "yaw": 0,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            }
+          }
+        ],
+        "mean_ms": 1114.3333333263774,
+        "median_ms": 1114.3999999910593,
+        "max_ms": 1114.7999999940366
+      },
+      "scrub": {
+        "samples": [
+          {
+            "from_step": 20,
+            "to_step": 20,
+            "direction": "backward",
+            "latency_ms": 1074.5999999910564
+          },
+          {
+            "from_step": 20,
+            "to_step": 5,
+            "direction": "backward",
+            "latency_ms": 6023.699999997021
+          },
+          {
+            "from_step": 5,
+            "to_step": 20,
+            "direction": "forward",
+            "latency_ms": 6828.199999999997
+          }
+        ],
+        "mean_ms": 4642.166666662692,
+        "median_ms": 6023.699999997021,
+        "max_ms": 6828.199999999997
+      },
+      "checks": [
+        {
+          "name": "requested source range exists",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "playback delivers genuine increasing source frames through the requested range",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "three paused yaw changes produce three matching-step images",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "every browser-visible image matches its step, snapshot and selected map hash",
+          "passed": true,
+          "details": []
+        },
+        {
+          "name": "all presented engine images have a corresponding readable PNG response",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "no browser JavaScript or HTTP errors",
+          "passed": true,
+          "details": {
+            "javascript": [],
+            "http": []
+          }
+        }
+      ],
+      "observed_image_samples": 2257,
+      "image_identity_violations": 0,
+      "browser_errors": [],
+      "http_errors": []
+    },
+    "optimized": {
+      "passed": true,
+      "configuration": {
+        "scene_id": "scene-0980",
+        "dataset": "nuscenes",
+        "timestep_s": 0.1,
+        "speed": 1,
+        "viewport": [
+          1600,
+          1000
+        ],
+        "device_pixel_ratio": 1,
+        "map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+        "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+      },
+      "frontend_sha256": "cf3b2686abeee2e5eaad2b1e7cd6be47f8ca7bb16b1a71cdf11b2c73c23672c7",
+      "image_size_px": [
+        1000,
+        650
+      ],
+      "playback": {
+        "start_step": 0,
+        "last_step": 21,
+        "wall_seconds": 6.959,
+        "source_seconds": 2.1,
+        "source_seconds_per_wall_second": 0.3017674953297888,
+        "delivered_images": 11,
+        "delivered_images_per_second": 1.5806868802988936,
+        "mean_image_interval_ms": 634.8181818181819,
+        "max_image_interval_ms": 983.2000000000007,
+        "source_step_gaps": [
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ]
+      },
+      "camera": {
+        "samples": [
+          {
+            "dx_px": 40,
+            "step": 20,
+            "latency_ms": 594.999999994041,
+            "before": {
+              "target": "ego",
+              "yaw": 0,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            },
+            "after": {
+              "target": "ego",
+              "yaw": 344,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "dx_px": -80,
+            "step": 20,
+            "latency_ms": 546.09999999106,
+            "before": {
+              "target": "ego",
+              "yaw": 344,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            },
+            "after": {
+              "target": "ego",
+              "yaw": 16,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "dx_px": 40,
+            "step": 20,
+            "latency_ms": 785.5999999940395,
+            "before": {
+              "target": "ego",
+              "yaw": 16,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            },
+            "after": {
+              "target": "ego",
+              "yaw": 0,
+              "pitch": 30,
+              "distance": 24,
+              "pan": [
+                0,
+                0
+              ]
+            }
+          }
+        ],
+        "mean_ms": 642.2333333263801,
+        "median_ms": 594.999999994041,
+        "max_ms": 785.5999999940395
+      },
+      "scrub": {
+        "samples": [
+          {
+            "from_step": 20,
+            "to_step": 20,
+            "direction": "backward",
+            "latency_ms": 503.1999999910586
+          },
+          {
+            "from_step": 20,
+            "to_step": 5,
+            "direction": "backward",
+            "latency_ms": 4015.999999991058
+          },
+          {
+            "from_step": 5,
+            "to_step": 20,
+            "direction": "forward",
+            "latency_ms": 579.8999999910593
+          }
+        ],
+        "mean_ms": 1699.6999999910586,
+        "median_ms": 579.8999999910593,
+        "max_ms": 4015.999999991058
+      },
+      "checks": [
+        {
+          "name": "requested source range exists",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "playback delivers genuine increasing source frames through the requested range",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "three paused yaw changes produce three matching-step images",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "every browser-visible image matches its step, snapshot and selected map hash",
+          "passed": true,
+          "details": []
+        },
+        {
+          "name": "all presented engine images have a corresponding readable PNG response",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "no browser JavaScript or HTTP errors",
+          "passed": true,
+          "details": {
+            "javascript": [],
+            "http": []
+          }
+        }
+      ],
+      "observed_image_samples": 1428,
+      "image_identity_violations": 0,
+      "browser_errors": [],
+      "http_errors": []
+    }
+  },
+  "comparison": {
+    "delivered_fps_ratio": 3.0359462566451283,
+    "source_progress_ratio": 2.897948699524895,
+    "camera_latency_reduction_percent": 46.6080402011114,
+    "forward_seek_latency_reduction_percent": 91.50727863871796
+  },
+  "regression": {
+    "python_focused_tests": {
+      "passed": 42,
+      "scope": [
+        "tests.test_simulation_platform",
+        "tests.test_simulation_session",
+        "tests.test_simulation_platform_data"
+      ]
+    },
+    "platform_browser": {
+      "passed": 21,
+      "checks": [
+        "scene is explicitly nuScenes and both layer toggles exist",
+        "source geometry canvas renders without JavaScript errors",
+        "timeline displays only observations available at frame 137",
+        "review camera can look behind without advancing time",
+        "backward scrub removes future state instances",
+        "play and pause work",
+        "one same-scene payload contains both structural edits and current states",
+        "before and after share the same scene clock and camera",
+        "selected road edit shows explicit before/after geometry",
+        "Planning export binds current map, timestamp and both layers without a recorded route",
+        "detector accuracy is independent of reference-map application",
+        "accuracy metrics are visible to the user",
+        "real MetaDrive opens at the selected frame with both kinds of changes",
+        "rear camera changes the real engine view without moving ego",
+        "real engine backward/forward seek reconstructs the same world",
+        "event list focuses actual MetaDrive annotations",
+        "map version switch keeps the frame and attached states",
+        "original map can focus the corresponding changed location without applying the edit",
+        "returning to updated map restores its verified hash",
+        "normal and half-speed replay retain the requested source steps and a matching displayed clock",
+        "no uncaught browser errors throughout"
+      ],
+      "errors": []
+    },
+    "frame_delivery_browser": {
+      "passed": 27,
+      "checks": [
+        "engine command acknowledgement matches requested job",
+        "first genuine Argoverse frame is a readable PNG",
+        "engine command acknowledgement matches requested job",
+        "previous frame remains byte-identical after the engine advances",
+        "wrong scene cannot read another frame",
+        "wrong map version cannot read another frame",
+        "wrong frame ID cannot read another frame",
+        "wrong sequence cannot read another frame",
+        "sequence alone cannot read a frame from a different engine lifetime",
+        "browser presents a decoded real engine image before committing the selected frame",
+        "Planning export stays on the image presented during a slow PNG download",
+        "no subsequent advance is issued while an engine PNG is in flight",
+        "timeline and visible image stay on the prior committed frame throughout PNG delay",
+        "a transient image error retries the same frame and recovers",
+        "persistent PNG failures pause playback and retain the last decoded frame and clock",
+        "persistent failure has an actionable visible retry control",
+        "Planning remains bound to the visible prior frame after an image failure",
+        "explicit retry recovers the failed candidate without hiding or skipping its image",
+        "every sampled presentation has a loaded image and matching timeline/state",
+        "multiple distinct real engine images were visibly presented",
+        "re-entering engine mode hides a stale image until the reviewed frame is decoded",
+        "Planning stays on the selected review time while an outdated engine image is hidden",
+        "review-to-engine transition presents the requested frame with its matching state",
+        "failed review-to-engine transition restores the prior image and matching clock together",
+        "retry after a review-to-engine failure presents the original requested frame",
+        "immediate mode re-entry after a canceled PNG queues and presents the current engine frame",
+        "no uncaught browser JavaScript errors"
+      ],
+      "errors": [],
+      "injected_png_delay_ms": 900,
+      "unexpected_advances_during_png": []
+    }
+  }
+}

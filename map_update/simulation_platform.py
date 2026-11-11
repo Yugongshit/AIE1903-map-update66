@@ -31,7 +31,7 @@ class EngineBroker:
     FRAME_CACHE_LIMIT = 8
     FRAME_CACHE_BYTES = 24 * 1024 * 1024
 
-    def __init__(self, repo_root, python=None):
+    def __init__(self, repo_root, python=None, snapshot_provider=None):
         self.repo = Path(repo_root).resolve()
         self.python = str(python or sys.executable)
         self.directory = tempfile.TemporaryDirectory(prefix='map-review-engine-')
@@ -39,6 +39,8 @@ class EngineBroker:
         # /private/var/folders/.... Compare canonical paths on both sides.
         self.root = Path(self.directory.name).resolve()
         self.lock = threading.Lock()
+        self.completed = threading.Condition(self.lock)
+        self.snapshot_provider = snapshot_provider
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='metadrive-session')
         self.process = None
         self.responses = queue.Queue()
@@ -49,8 +51,16 @@ class EngineBroker:
         self.state = dict(busy=False, job_id=None, last_result=None, error=None,
                           scene_id=None, version=None, ready=False)
 
-    def status(self):
-        with self.lock:
+    def status(self, *, wait_ms=0, job_id=None):
+        wait_ms = _wait_ms(wait_ms)
+        with self.completed:
+            deadline = time.monotonic() + wait_ms / 1000
+            while (wait_ms and self.state['busy'] and not self.closed
+                   and (job_id is None or self.state['job_id'] == job_id)):
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                self.completed.wait(remaining)
             return json.loads(json.dumps(self.state))
 
     def _start(self):
@@ -141,8 +151,9 @@ class EngineBroker:
             with self.lock:
                 self.state.update(error=str(error), ready=False)
         finally:
-            with self.lock:
+            with self.completed:
                 self.state['busy'] = False
+                self.completed.notify_all()
 
     def _publish_result(self, result):
         """Bind immutable PNG bytes before advertising a completed frame.
@@ -166,6 +177,12 @@ class EngineBroker:
             if len(data) > self.FRAME_CACHE_BYTES:
                 raise ValueError('Rendered image exceeds the frame cache size limit')
             result['frame_id'] = uuid.uuid4().hex
+        if self.snapshot_provider is not None and result.get('live_engine') is True:
+            # Bundle the matching snapshot in the completion response. The
+            # browser can decode the PNG without a second serial JSON request.
+            with self.lock:
+                scene_id, version = self.state['scene_id'], self.state['version']
+            result['snapshot'] = self.snapshot_provider(result, scene_id, version)
         with self.lock:
             if data is not None:
                 self.frames[result['frame_id']] = {
@@ -215,8 +232,9 @@ class EngineBroker:
         self.process = self.log = None
 
     def close(self):
-        with self.lock:
+        with self.completed:
             self.closed = True
+            self.completed.notify_all()
         self._stop_process()
         self.executor.shutdown(wait=True, cancel_futures=True)
         self.directory.cleanup()
@@ -242,16 +260,23 @@ def _version(value):
     return value
 
 
+def _wait_ms(value):
+    if type(value) is not int or not 0 <= value <= 1000:
+        raise ValueError('wait_ms must be an integer between 0 and 1000')
+    return value
+
+
 class PlatformServer(ThreadingHTTPServer):
     daemon_threads = True
 
     def __init__(self, address, repo_root, *, engine_python=None):
         super().__init__(address, PlatformHandler)
         self.repo = Path(repo_root).resolve()
-        self.engine = EngineBroker(self.repo, engine_python)
         self.payloads = {}
         self.validations = {}
+        self.snapshots = OrderedDict()
         self.cache_lock = threading.Lock()
+        self.engine = EngineBroker(self.repo, engine_python, snapshot_provider=self.engine_snapshot)
 
     def scene(self, key):
         from .simulation_platform_data import load_scene
@@ -270,6 +295,27 @@ class PlatformServer(ThreadingHTTPServer):
                 metrics = self.repo / 'demo/simulation/validation/detection_metrics.json'
                 self.validations[cache_key] = validate_database(database, detection_metrics=metrics if metrics.exists() else None)
             return self.validations[cache_key]
+
+    def engine_snapshot(self, result, key, version):
+        from .simulation_platform_data import build_snapshot
+        payload = self.scene(key)
+        if (result.get('scene_id') != payload['scene_id'] or result.get('dataset') != payload['dataset']
+                or result.get('map_features_sha256') != payload['versions'][version]['map_sha256']):
+            raise ValueError('Engine frame and scene snapshot identities do not match')
+        cache_key = (key, version, result.get('step'))
+        with self.cache_lock:
+            snapshot = self.snapshots.get(cache_key)
+            if snapshot is None:
+                snapshot = build_snapshot(payload, result.get('step'), version)
+                self.snapshots[cache_key] = snapshot
+                while len(self.snapshots) > 32:
+                    self.snapshots.popitem(last=False)
+            else:
+                self.snapshots.move_to_end(cache_key)
+        stamp = result.get('source_timestamp_ns')
+        if stamp is not None and stamp != snapshot['source_timestamp_ns']:
+            raise ValueError('Engine frame and scene snapshot timestamps do not match')
+        return snapshot
 
     def server_close(self):
         self.engine.close()
@@ -328,7 +374,11 @@ class PlatformHandler(BaseHTTPRequestHandler):
                         'engine_label': 'MetaDrive / Panda3D', 'review_label': '场景地图审阅',
                         'source_geometry_only': True, 'planning_schema': 'simulation-planning-handoff-1.0'})
         elif path == '/api/engine/status':
-            self._send(self.server.engine.status())
+            wait_text = _one(query, 'wait_ms', '0')
+            if not wait_text.isascii() or not wait_text.isdecimal():
+                raise ValueError('wait_ms must be an integer between 0 and 1000')
+            self._send(self.server.engine.status(wait_ms=_wait_ms(int(wait_text)),
+                                                job_id=_one(query, 'job_id', None)))
         elif path == '/api/engine/frame.png':
             frame_id = _one(query, 'frame_id', None)
             if not frame_id:
@@ -395,6 +445,7 @@ class PlatformHandler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(length))
         if not isinstance(body, dict):
             raise ValueError('Simulation command must be an object')
+        wait_ms = _wait_ms(body.pop('wait_ms', 0))
         path = urlsplit(self.path).path
         if path == '/api/engine/open':
             key, version = body.get('scene_id'), _version(body.get('version', 'updated'))
@@ -405,7 +456,7 @@ class PlatformHandler(BaseHTTPRequestHandler):
             if type(step) is not int or step < 0:
                 raise ValueError('Replay step must be a nonnegative integer')
             command = {'command': 'open', 'database_path': str(database), 'step': step}
-            self._send(self.server.engine.submit(command, scene_id=key, version=version), status=202)
+            self._send_job(self.server.engine.submit(command, scene_id=key, version=version), wait_ms)
         elif path == '/api/engine/command':
             expected_scene = body.pop('expected_scene_id', None)
             expected_version = body.pop('expected_version', None)
@@ -421,7 +472,17 @@ class PlatformHandler(BaseHTTPRequestHandler):
                 raise ValueError('Unsupported simulation command or fields')
             if not self.server.engine.status()['ready'] and command != 'close':
                 raise ValueError('请先启动选中场景的 MetaDrive。')
-            self._send(self.server.engine.submit(body, expected_scene_id=expected_scene,
-                                                expected_version=expected_version), status=202)
+            self._send_job(self.server.engine.submit(body, expected_scene_id=expected_scene,
+                                                    expected_version=expected_version), wait_ms)
         else:
             raise KeyError('Unknown simulation endpoint')
+
+    def _send_job(self, job, wait_ms):
+        if wait_ms:
+            status = self.server.engine.status(wait_ms=wait_ms, job_id=job['job_id'])
+            if status['job_id'] != job['job_id']:
+                raise BusyError('仿真任务已被另一页面替换，请重新启动当前场景。')
+            if not status['busy']:
+                self._send({**job, 'status': status})
+                return
+        self._send(job, status=202)
