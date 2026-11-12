@@ -194,6 +194,36 @@ class SimulationStateVisualsTests(unittest.TestCase):
         self.assertEqual(len(groups), 1)
         self.assertEqual(len(groups[0]["instance_ids"]), 6)
 
+    def test_explicit_overview_keeps_annotations_and_labels_fixed_when_live_objects_move(self):
+        env, objects = environment()
+        data = snapshot([source_object(status='scene_overview')], [event(state='scene_overview')])
+        data.update(scope='full_scene_overview', frozen=True, source_timestamp_ns=None,
+                    clock_mode='full_scene_fixed_overview', source_snapshot_age_s=None)
+        handle, report = attach_state_overlay(env, data)
+        initial = deepcopy(report['objects'])
+        labels = deepcopy(report['label_groups'])
+        objects['live-1'].position = [500., 600.]
+        env.episode_step = 100
+        handle.refresh(data)
+        self.assertEqual(report['objects'], initial)
+        self.assertEqual(report['label_groups'], labels)
+        self.assertEqual(initial[0]['anchor_runtime_m'], [2., 2.5])
+        self.assertFalse(initial[0]['historical'])
+        self.assertIn('SCENE OVERVIEW', labels[0]['label'])
+        self.assertNotIn('OBSERVED_ACTIVE', labels[0]['label'])
+        self.assertIsNone(report['selected_event_last_seen_age_s'])
+        self.assertIn('FULL SCENE OVERVIEW - FIXED', [line for line, _ in handle._panel_lines()])
+        handle.close()
+
+    def test_overview_status_cannot_masquerade_as_a_current_observation(self):
+        data = snapshot([source_object(status='scene_overview')], [event(state='scene_overview')])
+        with self.assertRaisesRegex(ValueError, 'explicit frozen'):
+            prepare_state_annotations(data)
+        data.update(scope='full_scene_overview', frozen=True)
+        data['objects'][0]['last_observed_timestamp_ns'] = '130'
+        with self.assertRaisesRegex(ValueError, 'Future instance'):
+            prepare_state_annotations(data)
+
 
 if __name__ == "__main__":
     unittest.main()

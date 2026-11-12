@@ -1,0 +1,418 @@
+{
+  "schema": "simulation-fixed-overview-validation-1.0",
+  "date": "2026-11-12",
+  "environment": "Real MetaDrive/Panda3D on Linux cloud, Chromium; macOS not directly tested",
+  "scope": "Platform fixed full-scene preview; standalone runtime and causal Planning snapshots retain their original policy",
+  "source_scene": "nuscenes-scene0980",
+  "counts": {
+    "state_events": 23,
+    "state_instances": 74,
+    "static_models": 103
+  },
+  "pose_comparison": "Same source IDs, fixed annotation geometry, and native static model poses across steps 0 / 137 / 5 and map reload; physical pose floats compared after rounding to 6 decimal places.",
+  "files_sha256": {
+    "map_update/simulation_platform.js": "dab1943af3c48688e01dbbe3f17edbae1f547517c4ed1d091ae7ab5075287a95",
+    "map_update/simulation_platform.html": "a6d1e5fe1a3aa1e9be7e3ed1bcb4c2b2c57cfdd87708c4c2029c7129857df5d1",
+    "map_update/simulation_states.py": "b4fac283fc684819f025e806f01b933384b6255f780dd1c894e2dbc0c530c64b",
+    "map_update/simulation_platform_data.py": "ed3fdcf52725d8cef816288a2b69abc132bf61d1a0b114d76ac61f4fa0be5f7b",
+    "map_update/simulation_session.py": "bc4cb66eac392ea47e675a4c6e6f727b4ac3e32e601b687c023567146f3431aa",
+    "map_update/simulation_obstacle_runtime.py": "1840a44e4745628ee0d4d956a8c44a54365cc592971708e376d6b5f1f8420d1f",
+    "map_update/simulation_state_visuals.py": "49048c2d185e5f90c97c951b9733601103264b403288b12fbd4a72f4d004ffcc"
+  },
+  "overview": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "frame zero already contains all 23 frozen events and 74 source instances",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "all 103 static source objects are available in the review from the beginning",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "the visible event list includes changes observed later in the recording",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "a later-observed event can be selected in review at frame zero",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "Planning at zero retains 7 current events and 20 observed instances",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "Planning excludes the frozen overview, future tracks and recorded ego route",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "review overview and static poses stay fixed at frame 137",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "review overview and static poses stay fixed at frame 5",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "real MetaDrive opens with every fixed state annotation and static model",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "every displayed state is explicitly a scene overview",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "a later-observed event can focus real MetaDrive at frame zero",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "native annotation identities and geometry stay frozen at frame 137",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "all 103 physical obstacle identities and poses stay fixed at frame 137",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "ego and source clock continue to replay at frame 137",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "native annotation identities and geometry stay frozen at frame 5",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "all 103 physical obstacle identities and poses stay fixed at frame 5",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "ego and source clock continue to replay at frame 5",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "road version reload keeps the complete frozen scene and selected time",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "native full-scene preview does not contaminate current-time Planning export",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "no uncaught browser JavaScript errors",
+        "passed": true,
+        "details": []
+      }
+    ],
+    "frames": [
+      {
+        "label": "start",
+        "step": 0,
+        "source_timestamp_ns": "1537845352297764000",
+        "frame_id": "a8200805410c4e66ab8978267919cccf",
+        "display_scope": "full_scene_overview",
+        "event_count": 23,
+        "instance_count": 74,
+        "persistent_obstacles": 103,
+        "display_state_sha256": "958f424d62d07054cdfac77006a29fbb181410e7e53c856c8755f8cadce91a4c",
+        "annotation_sha256": "88fa592f1c15ee38c1c0afc210a412cbf2c37779835e8fb5b13249dfa468f143",
+        "physical_pose_sha256": "082595e4bccdcbb1f2c876b9b30159d6fe5997425ee4cea56e324b76eb5f52f3",
+        "ego_position_scenario_m": [
+          440.8624213746864,
+          1258.779371767053
+        ],
+        "map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39"
+      },
+      {
+        "label": "seek-137",
+        "step": 137,
+        "source_timestamp_ns": "1537845365896839800",
+        "frame_id": "3863c782ce614d0babb3e870986d99e5",
+        "display_scope": "full_scene_overview",
+        "event_count": 23,
+        "instance_count": 74,
+        "persistent_obstacles": 103,
+        "display_state_sha256": "958f424d62d07054cdfac77006a29fbb181410e7e53c856c8755f8cadce91a4c",
+        "annotation_sha256": "88fa592f1c15ee38c1c0afc210a412cbf2c37779835e8fb5b13249dfa468f143",
+        "physical_pose_sha256": "082595e4bccdcbb1f2c876b9b30159d6fe5997425ee4cea56e324b76eb5f52f3",
+        "ego_position_scenario_m": [
+          417.04015384233776,
+          1194.6932435321896
+        ],
+        "map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39"
+      },
+      {
+        "label": "seek-5",
+        "step": 5,
+        "source_timestamp_ns": "1537845352797644000",
+        "frame_id": "97253f461f6d484da110969d49719059",
+        "display_scope": "full_scene_overview",
+        "event_count": 23,
+        "instance_count": 74,
+        "persistent_obstacles": 103,
+        "display_state_sha256": "958f424d62d07054cdfac77006a29fbb181410e7e53c856c8755f8cadce91a4c",
+        "annotation_sha256": "88fa592f1c15ee38c1c0afc210a412cbf2c37779835e8fb5b13249dfa468f143",
+        "physical_pose_sha256": "082595e4bccdcbb1f2c876b9b30159d6fe5997425ee4cea56e324b76eb5f52f3",
+        "ego_position_scenario_m": [
+          440.3363887480575,
+          1257.6498943853467
+        ],
+        "map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39"
+      },
+      {
+        "label": "original-map",
+        "step": 5,
+        "source_timestamp_ns": "1537845352797644000",
+        "frame_id": "67532653e23a421ebcda2409f614a87b",
+        "display_scope": "full_scene_overview",
+        "event_count": 23,
+        "instance_count": 74,
+        "persistent_obstacles": 103,
+        "display_state_sha256": "958f424d62d07054cdfac77006a29fbb181410e7e53c856c8755f8cadce91a4c",
+        "annotation_sha256": "88fa592f1c15ee38c1c0afc210a412cbf2c37779835e8fb5b13249dfa468f143",
+        "physical_pose_sha256": "082595e4bccdcbb1f2c876b9b30159d6fe5997425ee4cea56e324b76eb5f52f3",
+        "ego_position_scenario_m": [
+          440.3363887480575,
+          1257.6498943853467
+        ],
+        "map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39"
+      }
+    ],
+    "planning_at_zero": {
+      "events": 7,
+      "instances": 20,
+      "persistent_obstacles": 29,
+      "late_event_excluded": "S0980-OCC-scene-0980-O023"
+    },
+    "errors": []
+  },
+  "platform_regression": {
+    "checks": [
+      "scene is explicitly nuScenes and both layer toggles exist",
+      "source geometry canvas renders without JavaScript errors",
+      "current-time snapshot retains only observations available at frame 137",
+      "review camera can look behind without advancing time",
+      "backward scrub removes future observations from the current-time snapshot",
+      "play and pause work",
+      "one same-scene payload contains both structural edits and current states",
+      "before and after share the same scene clock and camera",
+      "selected road edit shows explicit before/after geometry",
+      "Planning export binds current map, timestamp and both layers without a recorded route",
+      "detector accuracy is independent of reference-map application",
+      "accuracy metrics are visible to the user",
+      "real MetaDrive opens at the selected frame with both kinds of changes",
+      "rear camera changes the real engine view without moving ego",
+      "real engine backward/forward seek reconstructs the same world",
+      "event list focuses actual MetaDrive annotations",
+      "map version switch keeps the frame and attached states",
+      "original map can focus the corresponding changed location without applying the edit",
+      "returning to updated map restores its verified hash",
+      "normal and half-speed replay retain the requested source steps and a matching displayed clock",
+      "no uncaught browser errors throughout"
+    ],
+    "errors": []
+  },
+  "control_stability": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "source range leaves enough frames for continuous playback",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "startup locks launch and road-version controls against duplicate requests",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "double click starts exactly one engine job",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "initial scene is paused and controls unlock after a decoded frame",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "at least six distinct advancing real images are displayed with matching timestamps",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "start-engine stays visually stable across playback frames",
+        "passed": true,
+        "details": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgb(97, 224, 204)",
+              "color": "rgb(11, 36, 35)",
+              "disabled": true,
+              "opacity": "0.45",
+              "text": null,
+              "visible": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "map-version stays visually stable across playback frames",
+        "passed": true,
+        "details": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgb(23, 39, 51)",
+              "color": "rgb(170, 170, 170)",
+              "disabled": true,
+              "opacity": "0.7",
+              "text": null,
+              "visible": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "pending-state stays visually stable across playback frames",
+        "passed": true,
+        "details": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgba(14, 27, 41, 0.85)",
+              "color": "rgb(232, 206, 135)",
+              "disabled": false,
+              "opacity": "1",
+              "text": "正在回放",
+              "visible": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "pause drains the current command and unlocks launch and road-version controls",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "manual next-frame still advances exactly one source frame while paused",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "pausing an in-flight advance keeps conflicting controls locked",
+        "passed": true,
+        "details": {
+          "busy": true,
+          "playing": false,
+          "launchDisabled": true,
+          "versionDisabled": true
+        }
+      },
+      {
+        "name": "controls unlock when the paused in-flight advance finishes",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "road-version reload locks conflicting controls",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "road-version switch reloads once and keeps the displayed source frame",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "review playback does not inherit the engine playback control lock",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "no uncaught browser errors",
+        "passed": true,
+        "details": []
+      }
+    ],
+    "controls": {
+      "start-engine": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgb(97, 224, 204)",
+            "color": "rgb(11, 36, 35)",
+            "disabled": true,
+            "opacity": "0.45",
+            "text": null,
+            "visible": true
+          }
+        ]
+      },
+      "map-version": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgb(23, 39, 51)",
+            "color": "rgb(170, 170, 170)",
+            "disabled": true,
+            "opacity": "0.7",
+            "text": null,
+            "visible": true
+          }
+        ]
+      },
+      "pending-state": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgba(14, 27, 41, 0.85)",
+            "color": "rgb(232, 206, 135)",
+            "disabled": false,
+            "opacity": "1",
+            "text": "正在回放",
+            "visible": true
+          }
+        ]
+      }
+    },
+    "errors": []
+  },
+  "unit_tests": {
+    "passed": 71,
+    "modules": [
+      "tests.test_simulation_states",
+      "tests.test_simulation_platform_data",
+      "tests.test_simulation_obstacle_runtime",
+      "tests.test_simulation_session",
+      "tests.test_simulation_state_visuals"
+    ]
+  }
+}

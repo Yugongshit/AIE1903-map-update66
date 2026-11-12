@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from map_update.scene import footprint
-from map_update.simulation_states import build_state_source, state_snapshot
+from map_update.simulation_states import build_state_source, state_overview, state_snapshot
 from map_update.state_events import build_state_event_layer
 
 
@@ -75,6 +75,81 @@ class SimulationStateTests(unittest.TestCase):
         self.assertEqual(objects["new"]["status"], "observed_active")
         self.assertTrue(objects["debris"]["missing_model"])
         self.assertEqual(objects["debris"]["matched_track_ids"], [])
+
+    def test_overview_has_every_instance_fixed_at_its_first_supported_observation(self):
+        bundle = self.build([event("A", [sample(0, ["old"]), sample(1, ["new", "debris"]),
+                                         sample(2, ["old"])]),
+                             event("B", [sample(1, ["old"], "B")])])
+        before = deepcopy(bundle)
+        overview = state_overview(bundle)
+        objects = {obj["instance_id"]: obj for obj in overview["objects"]}
+        self.assertEqual(set(objects), {"old", "new", "debris"})
+        self.assertEqual(objects["old"]["center_xy"], [100., 200.])
+        self.assertEqual(objects["old"]["source_frame_id"], "0")
+        self.assertEqual(objects["old"]["event_ids"], ["A", "B"])
+        self.assertEqual(objects["new"]["center_xy"], [101., 200.])
+        self.assertEqual(len(overview["events"]), 2)
+        self.assertTrue(all(obj["status"] == "scene_overview" and obj["frozen"] for obj in objects.values()))
+        self.assertEqual(overview["scope"], "full_scene_overview")
+        self.assertFalse(overview["planning_eligible"])
+        self.assertIsNone(overview["source_timestamp_ns"])
+        self.assertEqual(bundle, before)
+        self.assertEqual([obj["instance_id"] for obj in state_snapshot(bundle, 0)["objects"]], ["old"])
+
+    def test_overview_preserves_a_past_change_even_when_source_observations_clear_it(self):
+        clear = {**sample(1, []), "observation": "supports_prior", "fully_observed": True}
+        source_event = event("A", [sample(0, ["old"]), clear])
+        source_event["ttl_s"] = 0
+        bundle = self.build([source_event])
+        overview = state_overview(bundle)
+        self.assertEqual(overview["objects"][0]["instance_id"], "old")
+        self.assertEqual(overview["events"][0]["properties"]["state"], "scene_overview")
+        self.assertEqual(state_snapshot(bundle, 10)["objects"], [])
+        self.assertEqual(state_snapshot(bundle, 10)["layer"]["cleared_events"][0]["event_id"], "A")
+
+    def test_overview_is_deterministic_across_input_order_and_translates_geometry_once(self):
+        bundle = self.build([event("B", [sample(2, ["old"], "B"), sample(0, ["old"], "B")]),
+                             event("A", [sample(1, ["new", "debris"])])])
+        reordered = deepcopy(bundle)
+        reordered["events"].reverse()
+        for source_event in reordered["events"]:
+            source_event["samples"].reverse()
+        self.assertEqual(state_overview(bundle), state_overview(reordered))
+        overview = state_overview(bundle, (-100, -200))
+        old = next(obj for obj in overview["objects"] if obj["instance_id"] == "old")
+        self.assertEqual(old["center_runtime_xy"], [0., 0.])
+        original = old["geometry_city"]["coordinates"][0][0]
+        self.assertEqual(old["runtime_paths"][0][0], [original[0]-100, original[1]-200])
+        self.assertEqual(overview["events"], overview["layer"]["features"])
+
+    def test_overview_rejects_invalid_bundle_and_nonfinite_offsets(self):
+        with self.assertRaises(ValueError):
+            state_overview({"schema": "unknown"})
+        for offset in ([0], [float('inf'), 0], [0, float('nan')]):
+            with self.subTest(offset=offset), self.assertRaises(ValueError):
+                state_overview(self.build(), offset)
+
+    def test_overview_event_provenance_covers_the_full_union_beyond_its_first_sample(self):
+        source = Path(__file__).resolve().parents[1] / 'demo/simulation/nuscenes-states/state_source.json'
+        overview = state_overview(json.loads(source.read_text()))
+        feature = next(event for event in overview['events'] if event['id'] == 'S0980-OCC-scene-0980-O008')
+        prop = feature['properties']
+        first_instances = [source for source in prop['first_support_source_ids'] if source.startswith('instance:')]
+        self.assertEqual(len(first_instances), 1)
+        self.assertEqual(prop['overview_instance_count'], 9)
+        self.assertEqual(len(feature['geometry']['geometries']), 9)
+        members = {obj['instance_id']: obj for obj in overview['objects'] if prop['event_id'] in obj['event_ids']}
+        self.assertEqual(prop['overview_instance_ids'], sorted(members))
+        self.assertEqual(prop['history'][0]['source_ids'], sorted(prop['first_support_source_ids']))
+        self.assertEqual(len(prop['history']), 1)
+        self.assertEqual(len(prop['overview_source_observations']), 9)
+        for representative in prop['overview_source_observations']:
+            obj = members[representative['instance_id']]
+            self.assertEqual(representative['source_timestamp_ns'], obj['first_supported_timestamp_ns'])
+            self.assertEqual(representative['source_frame_id'], obj['source_frame_id'])
+            for prefix, field in [('instance:', 'instance_id'), ('frame:', 'source_frame_id'),
+                                  ('sample:', 'sample_token'), ('annotation:', 'annotation_token')]:
+                self.assertIn(prefix+representative[field], prop['source_ids'])
 
     def test_future_objects_not_shown_and_sample_hold_does_not_flicker(self):
         bundle = self.build()

@@ -1,7 +1,8 @@
 """Interactive, serial MetaDrive replay sessions for the local review platform.
 
-Every frame is rendered by Panda3D/MetaDrive. Seeking backwards reconstructs the
-episode from frame zero, so persistent obstacles never leak from a later frame.
+Every frame is rendered by Panda3D/MetaDrive. Static scene changes are presented
+as a fixed full-scene preview; current observation snapshots remain time-bound.
+Seeking backwards reconstructs the episode and restores the same preview.
 The platform owns play/pause scheduling; this module advances only on commands.
 """
 from __future__ import annotations
@@ -149,6 +150,8 @@ class SimulationSession:
         self.export = None
         self.state_handle = self.update_handle = None
         self.current = None
+        self.overview = None
+        self.overview_hash = None
         self.sequence = 0
         self.frame_file = None
         self.camera = validated_camera({}, {'preset': 'follow'})
@@ -209,7 +212,8 @@ class SimulationSession:
             if self.persistent:
                 from .simulation_obstacle_runtime import persistent_obstacle_adapter
                 config.update(no_traffic=False, static_traffic_object=True)
-                self.resources.enter_context(persistent_obstacle_adapter(scenario_env_module, bound['obstacles']))
+                self.resources.enter_context(persistent_obstacle_adapter(
+                    scenario_env_module, bound['obstacles'], preload_all=True))
             self.env = ScenarioEnv(config)
             self.env.reset(seed=0)
             self.length = int(self.env.engine.data_manager.current_scenario_length)
@@ -268,8 +272,8 @@ class SimulationSession:
             self._state_step = self.env.episode_step
         if self.state_handle is not None:
             selection = self.state_handle.selected_event_id
-            if changed or self._annotation_selection != selection:
-                self.state_handle.refresh(self.current['map_state_snapshot'])
+            if (changed and self.overview is None) or self._annotation_selection != selection:
+                self.state_handle.refresh(self.overview if self.overview is not None else self.current['map_state_snapshot'])
                 self._annotation_selection = self.state_handle.selected_event_id
             self.selected_event_id = self.state_handle.selected_event_id
             if self.state_handle.visible != self.show_states:
@@ -303,9 +307,16 @@ class SimulationSession:
         self.current = controller_state(self.env, source_map_features=self.source_features,
                                         state_source=self.export['states'])
         self._state_step = self.env.episode_step
-        if self.current['map_state_snapshot'] is not None:
+        self.overview = None
+        if self.export['states'] is not None:
+            from .simulation_states import state_overview
+            metadata = self.env.engine.data_manager.current_scenario['metadata']
+            self.overview = state_overview(self.export['states'],
+                source_to_runtime_offset=metadata.get('old_origin_in_current_coordinate', [0, 0]))
+        self.overview_hash = feature_sha256(self.overview) if self.overview is not None else None
+        if self.overview is not None:
             from .simulation_state_visuals import attach_state_overlay
-            self.state_handle, _ = attach_state_overlay(self.env, self.current['map_state_snapshot'])
+            self.state_handle, _ = attach_state_overlay(self.env, self.overview)
             self.annotations.callback(self.state_handle.close)
             self._annotation_selection = self.state_handle.selected_event_id
         if self.selected_feature_id is not None:
@@ -321,7 +332,7 @@ class SimulationSession:
         if type(step) is not int or not 0 <= step < self.length:
             raise ValueError('Replay step must lie within the recorded scene')
         if step < self.env.episode_step:
-            # Reset removes objects that had appeared only in a later frame.
+            # Replay actors rewind; full-scene static preview is restored at reset.
             self.annotations.close()
             self.update_handle = self.state_handle = None
             self._state_step = self._annotation_selection = None
@@ -371,7 +382,7 @@ class SimulationSession:
                 raise ValueError('This scene has no attached-state timeline')
             ids = [row['event_id'] for row in self.state_handle.prepared['events']]
             if event_id not in ids:
-                raise ValueError('State event has not been observed at this replay frame')
+                raise ValueError('State event is not part of this scene overview')
             self.state_handle.selected_event_id = event_id
             self.selected_event_id = event_id
             points = [p for row in self.state_handle.selected_objects() for path in row['runtime_paths'] for p in path]
@@ -445,12 +456,18 @@ class SimulationSession:
             'structure_visible': self.show_structure, 'states_visible': self.show_states,
             'selected_feature_id': self.selected_feature_id, 'selected_event_id': self.selected_event_id,
             'state_summary': snapshot['summary'] if snapshot else None,
+            'display_scope': 'full_scene_overview',
+            'display_state_summary': self.overview['summary'] if self.overview is not None else None,
+            'display_state_sha256': self.overview_hash,
             'state_events': self.state_handle.prepared['events'] if self.state_handle is not None else [],
             'state_objects': self.state_handle.prepared['objects'] if self.state_handle is not None else [],
             'source_timestamp_ns': snapshot['source_timestamp_ns'] if snapshot else None,
             'observation_cutoff_ns': snapshot['observation_cutoff_ns'] if snapshot else None,
             'persistent_obstacle_count': obstacle['active_count'] if obstacle else 0,
             'persistent_obstacle_ids': sorted(obstacle['objects']) if obstacle else [],
+            'persistent_obstacles_runtime': obstacle['objects'] if obstacle else {},
+            'obstacle_display_scope': obstacle['display_scope'] if obstacle else 'no_static_objects',
+            'preview_future_objects_visible': obstacle['future_objects_visible_early'] if obstacle else False,
             'missing_expected_obstacles': obstacle['missing_expected_ids'] if obstacle else [],
             'comparison': self.update_handle.comparison,
             'export_verified': True,
@@ -466,6 +483,8 @@ class SimulationSession:
             finally:
                 self.env = None
                 self.current = None
+                self.overview = None
+                self.overview_hash = None
                 self._state_step = self._annotation_selection = None
                 self.state_handle = self.update_handle = None
                 self.resources.close()

@@ -198,6 +198,38 @@ class SimulationSessionTests(unittest.TestCase):
                 self.assertEqual(build.call_count, 2)
                 self.assertEqual(len(redraws), 3)
 
+    def test_full_scene_annotations_stay_cached_while_current_observation_clock_advances(self):
+        with tempfile.TemporaryDirectory() as directory:
+            session = SimulationSession(directory)
+            session.env = SimpleNamespace(episode_step=0)
+            session.export, session.source_features = {'states': {}}, {}
+            session.overview = {'scope': 'full_scene_overview', 'frozen': True, 'objects': ['late-object']}
+            redraws = []
+            handle = SimpleNamespace(selected_event_id='late-event', panel_node=None, visible=True,
+                                     refresh=lambda snapshot: redraws.append(snapshot),
+                                     set_visible=lambda visible: None)
+            session.state_handle = handle
+            with patch('map_update.simulation_session.controller_state', side_effect=lambda *a, **k:
+                       {'map_state_snapshot': {'step': session.env.episode_step}}) as build:
+                session._refresh_state()
+                session.env.episode_step = 137
+                session._refresh_state()
+                self.assertEqual(build.call_count, 2)
+                self.assertEqual(session.current['map_state_snapshot']['step'], 137)
+                self.assertEqual(redraws, [session.overview])
+
+    def test_scene_overview_event_can_be_focused_before_its_observation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            session = SimulationSession(directory)
+            session.env = SimpleNamespace(episode_step=0)
+            session.state_handle = SimpleNamespace(prepared={'events': [{'event_id': 'late-event'}]},
+                selected_event_id=None, selected_objects=lambda: [{'runtime_paths': [[[5., 6.], [7., 8.]]]}])
+            session.frame = lambda: {'step': 0}
+            self.assertEqual(session.select(event_id='late-event'), {'step': 0})
+            self.assertEqual(session.selected_event_id, 'late-event')
+            self.assertEqual(session.selection_center, [6., 7.])
+            self.assertEqual(session.camera['target'], 'selection')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -202,6 +202,114 @@ def _translate(geometry, offset):
     return {"type": geometry["type"], "coordinates": moved[0] if geometry["type"] == "LineString" else moved}
 
 
+def state_overview(bundle, source_to_runtime_offset=(0, 0)):
+    """Freeze every supported scene change for offline display from the start.
+
+    Each instance uses its first supported source footprint, with deterministic
+    quality/identity tie-breaking. Later clearance and missing observations do
+    not remove it from this scene overview. This is deliberately separate from
+    ``state_snapshot`` and must never be used as current Planning observations.
+    """
+    if not isinstance(bundle, dict) or bundle.get("schema") != SCHEMA:
+        raise ValueError("Unsupported simulation state source bundle")
+    if len(source_to_runtime_offset) != 2:
+        raise ValueError("State runtime offset must contain XY")
+    offset = [float(value) for value in source_to_runtime_offset]
+    if not all(isfinite(value) for value in offset):
+        raise ValueError("State runtime offset must be finite")
+    frames = bundle["source_frames"]
+    first_stamp, last_stamp = (_timestamp(frames[index]["timestamp_ns"]) for index in (0, -1))
+    chosen, associations, first_events = {}, defaultdict(set), {}
+    for event in sorted(bundle["events"], key=lambda item: item["event_id"]):
+        eid = event["event_id"]
+        supported = [sample for sample in event.get("samples", [])
+                     if sample.get("observation") == "supports_change" and sample.get("quality", 0) > 0]
+        supported.sort(key=lambda sample: (_timestamp(sample["timestamp_ns"]),
+                                          -sample["quality"], _digest(sample)))
+        if not supported:
+            continue
+        first_events[eid] = (event, supported[0])
+        for sample in supported:
+            key = (_timestamp(sample["timestamp_ns"]), -sample["quality"], eid, _digest(sample))
+            for token, geometry in _objects_in_sample(sample):
+                associations[token].add(eid)
+                if token not in chosen or key < chosen[token][0]:
+                    chosen[token] = (key, sample, geometry)
+    objects = []
+    for token, (_, sample, geometry) in sorted(chosen.items()):
+        source = bundle["object_sources"][token]
+        row = source["observations"][sample["frame_id"]]
+        if row["timestamp_ns"] != sample["timestamp_ns"]:
+            raise ValueError("Overview object differs from its exact source observation")
+        geometry = deepcopy(geometry)
+        runtime = _translate(geometry, offset)
+        event_ids = sorted(associations[token])
+        objects.append({"instance_id": token, "instance_token": token, "object_id": "instance:"+token,
+                        "event_ids": event_ids, "event_states": {eid: "scene_overview" for eid in event_ids},
+                        "category": source["category"], "type": source["type"], "status": "scene_overview",
+                        "historical": False, "missing_model": source["missing_model"],
+                        "matched_track_ids": list(source["matched_track_ids"]),
+                        "last_observed_timestamp_ns": sample["timestamp_ns"],
+                        "first_supported_timestamp_ns": sample["timestamp_ns"],
+                        "source_frame_id": sample["frame_id"],
+                        "geometry_city": geometry, "geometry_runtime": runtime,
+                        "runtime_paths": deepcopy(runtime["coordinates"]),
+                        "geometry_role": "fixed_first_supported_footprint_for_scene_overview",
+                        "annotation_token": row["annotation_token"], "sample_token": row["sample_token"],
+                        "length_m": row["length_m"], "width_m": row["width_m"], "height_m": row["height_m"],
+                        "yaw_rad": row["yaw_rad"], "center_xy": list(row["center_xy"]),
+                        "center_runtime_xy": [row["center_xy"][i]+offset[i] for i in range(2)],
+                        "scope": "full_scene_overview", "frozen": True, "base_map_modified": False})
+    features = []
+    for eid, (event, sample) in sorted(first_events.items()):
+        first = deepcopy(event)
+        first["samples"] = [deepcopy(sample)]
+        feature = build_state_event_layer([first], sample["timestamp_ns"])["features"][0]
+        members = [obj for obj in objects if eid in obj["event_ids"]]
+        if members:
+            feature["geometry"] = {"type": "GeometryCollection",
+                                   "geometries": [deepcopy(obj["geometry_city"]) for obj in members]}
+        first_sources = deepcopy(feature["properties"]["source_ids"])
+        representatives = [{"instance_id": obj["instance_id"], "source_frame_id": obj["source_frame_id"],
+                            "source_timestamp_ns": obj["first_supported_timestamp_ns"],
+                            "sample_token": obj["sample_token"], "annotation_token": obj["annotation_token"]}
+                           for obj in members]
+        sources = set(first_sources)
+        for source in representatives:
+            sources.update(("instance:"+source["instance_id"], "frame:"+source["source_frame_id"],
+                            "sample:"+source["sample_token"], "annotation:"+source["annotation_token"]))
+        feature["properties"].update(state="scene_overview", validity="offline_scene_overview",
+                                     current_quality=None, first_supported_timestamp_ns=sample["timestamp_ns"],
+                                     geometry_role="union_of_fixed_first_supported_instance_footprints",
+                                     first_support_source_ids=first_sources, source_ids=sorted(sources),
+                                     overview_instance_ids=[obj["instance_id"] for obj in members],
+                                     overview_instance_count=len(members),
+                                     overview_source_observations=representatives,
+                                     scope="full_scene_overview", frozen=True)
+        features.append(feature)
+    counts = {"features": len(features), "scene_overview": len(features), "observed_active": 0,
+              "unknown": 0, "stale": 0, "cleared": 0}
+    layer = {"type": "FeatureCollection", "schema": "simulation-state-overview-layer-1.0",
+             "features": features, "cleared_events": [], "summary": counts,
+             "scope": "full_scene_overview", "frozen": True,
+             "coordinate_reference": deepcopy(bundle["coordinate_reference"])}
+    return {"schema": "simulation-state-overview-1.0", "scope": "full_scene_overview", "frozen": True,
+            "scene_id": bundle["scene_id"], "map": bundle["map"], "step": None,
+            "source_timestamp_ns": None, "source_snapshot_age_s": None,
+            "observation_cutoff_ns": str(last_stamp), "source_frame_id": None,
+            "source_range_ns": [str(first_stamp), str(last_stamp)],
+            "clock_mode": "full_scene_fixed_overview", "sampling_policy": "first_supported_observation_per_instance",
+            "coordinate_reference": deepcopy(bundle["coordinate_reference"]), "source_to_runtime_offset_m": offset,
+            "layer": layer, "events": features, "objects": objects,
+            "summary": {"events": deepcopy(counts), "objects": len(objects),
+                        "objects_by_status": {"scene_overview": len(objects)},
+                        "matched_instances": sum(not obj["missing_model"] for obj in objects),
+                        "missing_model_instances": sum(obj["missing_model"] for obj in objects)},
+            "base_map_modified": False, "new_obstacles_spawned": False,
+            "planning_eligible": False, "may_include_later_observations": True,
+            "traffic_is_not_automatically_a_map_state_event": True}
+
+
 def state_snapshot(bundle, step, source_to_runtime_offset=(0, 0)):
     """Return attached state annotations at one replay step, without mutation.
 

@@ -1,9 +1,10 @@
 """Static visibility and dimension contracts without importing the renderer."""
 from types import SimpleNamespace
+from copy import deepcopy
 import unittest
 
 from map_update.simulation_obstacle_runtime import (
-    persistent_objects, persistent_spawn_spec, traffic_manager_class,
+    persistent_objects, persistent_spawn_spec, traffic_manager_class, runtime_obstacle_report,
 )
 
 
@@ -87,6 +88,44 @@ class PersistentObstacleRuntimeTests(unittest.TestCase):
                     'objects': [definition(), definition()]}
         with self.assertRaisesRegex(ValueError, 'unique'):
             persistent_objects(manifest)
+
+    def test_full_scene_preview_preloads_first_pose_without_rewriting_recorded_validity(self):
+        source = track()
+        saved = deepcopy(source)
+        start = persistent_spawn_spec('barrier', source, definition(), 0, preload_all=True)
+        later = persistent_spawn_spec('barrier', source, definition(), 900, preload_all=True)
+        self.assertEqual(start, later)
+        self.assertEqual(start['position'], [5., 6.])
+        self.assertEqual(start['heading_theta'], .7)
+        self.assertEqual(source, saved)
+        self.assertIsNone(persistent_spawn_spec('barrier', source, definition(), 0))
+
+    def test_preloaded_static_is_not_duplicated_and_background_tracks_remain_available(self):
+        manager = traffic_manager_class(FakeManager, {'barrier': definition()},
+                    object_classes={'TRAFFIC_BARRIER': 'MeasuredBarrier'}, preload_all=True)()
+        original = deepcopy(manager.current_traffic_data)
+        manager.spawn_static_object('VendorBarrier', 'barrier', track())
+        manager.episode_step = 2
+        manager.spawn_static_object('VendorBarrier', 'barrier', track())
+        self.assertEqual(len(manager.calls), 1)
+        self.assertEqual(manager.current_traffic_data, original)
+        self.assertIn('vehicle', manager.current_traffic_data)
+        self.assertTrue(manager.full_scene_preview)
+
+    def test_preloaded_runtime_report_explicitly_identifies_early_preview_objects(self):
+        obstacle = SimpleNamespace(position=[5., 6.], heading_theta=.7, LENGTH=2., WIDTH=.4,
+                                   HEIGHT=1., body=SimpleNamespace(isStatic=lambda: True))
+        manager = SimpleNamespace(persistence_definitions={'barrier': definition()},
+                                  full_scene_preview=True, _scenario_id_to_obj_id={'barrier': 'runtime-1'},
+                                  spawned_objects={'runtime-1': obstacle})
+        env = SimpleNamespace(episode_step=0, engine=SimpleNamespace(traffic_manager=manager))
+        report = runtime_obstacle_report(env)
+        self.assertEqual(report['expected_ids'], ['barrier'])
+        self.assertEqual(report['missing_expected_ids'], [])
+        self.assertTrue(report['future_objects_visible_early'])
+        self.assertEqual(report['display_scope'], 'full_scene_overview')
+        self.assertEqual(report['objects']['barrier']['position_runtime_m'], [5., 6.])
+        self.assertTrue(report['objects']['barrier']['static'])
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .simulation_bridge import LANE_TYPES, feature_sha256, json_value, load_scenario
 from .simulation_comparison import ATTRIBUTE_FIELDS
-from .simulation_states import state_snapshot
+from .simulation_states import state_overview, state_snapshot
 
 
 _SCENES = {
@@ -255,6 +255,50 @@ def _display_polygons(repo_root, manifest, maps, changes):
     return additions, reports
 
 
+def _empty_overview(identity):
+    counts = {'features': 0, 'scene_overview': 0, 'observed_active': 0, 'unknown': 0, 'stale': 0, 'cleared': 0}
+    return {'schema': 'simulation-state-overview-1.0', 'scope': 'full_scene_overview', 'frozen': True,
+            'scene_id': identity['scene_id'], 'map': identity['map'], 'step': None,
+            'source_timestamp_ns': None, 'source_snapshot_age_s': None, 'observation_cutoff_ns': None,
+            'source_range_ns': [], 'clock_mode': 'no_state_observations_supplied',
+            'sampling_policy': 'first_supported_observation_per_instance',
+            'events': [], 'objects': [],
+            'layer': {'type': 'FeatureCollection', 'features': [], 'cleared_events': [], 'summary': counts},
+            'summary': {'events': deepcopy(counts), 'objects': 0, 'objects_by_status': {},
+                        'matched_instances': 0, 'missing_model_instances': 0},
+            'planning_eligible': False, 'may_include_later_observations': False,
+            'base_map_modified': False, 'new_obstacles_spawned': False}
+
+
+def _static_overview_actors(tracks, manifest, overview, timeline):
+    """Offline static models at their original first observed pose, from frame 0."""
+    associations = {identifier: obj for obj in overview['objects'] for identifier in obj['matched_track_ids']}
+    actors = []
+    for definition in sorted(manifest.get('objects', []), key=lambda item: item['track_id']):
+        if not definition.get('persisted'):
+            continue
+        identifier, first = definition['track_id'], definition['first_seen_step']
+        track = tracks.get(identifier)
+        if (track is None or track['is_ego'] or track['type'] not in ('TRAFFIC_BARRIER', 'TRAFFIC_CONE')
+                or type(first) is not int or not 0 <= first < len(track['valid']) or not track['valid'][first]
+                or any(track['valid'][:first]) or track['original_id'] != definition['instance_id']):
+            raise ValueError('Static overview differs from its first source observation')
+        state = associations.get(identifier)
+        if state is not None and state['instance_id'] != track['original_id']:
+            raise ValueError('State overview instance differs from its simulation track')
+        actor = {key: deepcopy(track[key]) for key in ('id', 'type', 'category', 'original_id', 'is_ego', 'persistent')}
+        actor.update({key: deepcopy(track[key][first]) for key in ('position', 'heading', 'length', 'width', 'height')})
+        actor.update(velocity=[0.] * len(track['velocity'][first]), valid=True,
+                     state_event_ids=deepcopy(state['event_ids']) if state else [],
+                     state_status='scene_overview' if state else None, is_map_state_change=state is not None,
+                     scope='full_scene_overview', frozen=True, planning_eligible=False,
+                     source_step=first, first_seen_step=first,
+                     source_timestamp_ns=timeline['source_timestamps_ns'][first],
+                     geometry_role='fixed_first_observed_static_pose_for_scene_overview')
+        actors.append(actor)
+    return actors
+
+
 def load_scene(repo_root, scene_key):
     """Return a JSON-ready offline-review payload after checking source hashes."""
     entry = _entry(scene_key)
@@ -317,11 +361,15 @@ def load_scene(repo_root, scene_key):
         patch['source_kind'] = entry['kind']
     identity = {key: manifest[key] for key in ('dataset', 'scene_id', 'map', 'coordinate', 'units')}
     display_polygons, supplements = _display_polygons(repo_root, manifest, maps, patches)
+    overview = state_overview(source) if source is not None else _empty_overview(identity)
+    static_overview = _static_overview_actors(tracks, obstacles, overview, timeline)
     contract = {'coordinates': 'source_city_XY_metres', 'viewer_origin_is_display_only': True,
                 'map_layers': ['road_structure', 'attached_states'], 'state_layer_modifies_road_map': False,
                 'vehicle_access_and_topology_retained': True,
                 'recorded_ego_track_is_not_a_planned_route': True,
                 'future_recorded_tracks_excluded_from_planning_export': True,
+                'full_scene_preview_excluded_from_planning_export': True,
+                'display_scope': 'full_scene_overview_offline_only',
                 'unobserved_state_is_not_clearance': True,
                 'background_traffic': 'recorded; not reactive',
                 'safety_or_collision_avoidance_validation': 'not_claimed'}
@@ -339,6 +387,7 @@ def load_scene(repo_root, scene_key):
             'display_polygons': display_polygons, 'source_polygon_supplement': supplements,
             'changes': patches, 'tracks': tracks, 'ego_track_id': ego_id,
             'state_source': source, 'obstacle_manifest': obstacles,
+            'state_overview': overview, 'static_overview_actors': static_overview,
             'planning_contract': contract, 'provenance': {**deepcopy(provenance),
                                                          'exported_scenario_sha256': manifest['exported_scenario_sha256']},
             'full_recorded_tracks_scope': 'offline_review_only_not_planning_input',

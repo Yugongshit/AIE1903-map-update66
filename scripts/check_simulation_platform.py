@@ -42,7 +42,7 @@ def main():
             page.wait_for_function('(step)=>MAP_PLATFORM.state.snapshot?.step===step && MAP_PLATFORM.state.step===step', arg=step, timeout=60000)
 
         seek(137)
-        check('timeline displays only observations available at frame 137',
+        check('current-time snapshot retains only observations available at frame 137',
               page.evaluate('MAP_PLATFORM.state.snapshot.states.objects.length') == 61
               and page.evaluate('MAP_PLATFORM.state.snapshot.states.events.length') == 16)
         page.locator('[data-camera=rear]').click()
@@ -50,7 +50,7 @@ def main():
               page.evaluate('MAP_PLATFORM.camera.yaw') == 180 and page.evaluate('MAP_PLATFORM.state.step') == 137)
         page.screenshot(path=str(args.out/'states-rear.png'), full_page=True)
         seek(0)
-        check('backward scrub removes future state instances', page.evaluate('MAP_PLATFORM.state.snapshot.states.objects.map(o=>o.instance_id).sort()') == baseline)
+        check('backward scrub removes future observations from the current-time snapshot', page.evaluate('MAP_PLATFORM.state.snapshot.states.objects.map(o=>o.instance_id).sort()') == baseline)
         page.locator('#play-pause').click()
         page.wait_for_function('MAP_PLATFORM.state.step>=2', timeout=20000)
         page.locator('#play-pause').click()
@@ -117,7 +117,9 @@ def main():
             check('real engine backward/forward seek reconstructs the same world',
                   repeated['position_scenario_m'] == initial_pose
                   and repeated['persistent_obstacle_ids'] == result['persistent_obstacle_ids']
-                  and early['persistent_obstacle_count'] < repeated['persistent_obstacle_count'])
+                  and early['persistent_obstacle_ids'] == repeated['persistent_obstacle_ids']
+                  and early['persistent_obstacle_count'] == repeated['persistent_obstacle_count'] == 103
+                  and early['display_state_sha256'] == repeated['display_state_sha256'])
             page.locator('[data-tab=states]').click()
             page.locator('.detail-focus').click()
             page.wait_for_function('MAP_PLATFORM.state.engine.last_result?.camera.target==="selection" && !MAP_PLATFORM.state.engineCommandBusy', timeout=120000)

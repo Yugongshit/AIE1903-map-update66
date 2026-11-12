@@ -4,7 +4,9 @@ Only exported barriers/cones are affected. This is a selected simulation policy,
 not a claim that an observed object remained present outside the recording.
 MetaDrive already retains spawned static objects; this adapter also admits late
 observations, uses their measured dimensions and keeps them with moving traffic
-disabled. The third-party source files and global bindings are restored on exit.
+disabled. The platform can explicitly preload all static objects for a fixed
+offline overview; ordinary simulation remains gated by first observation.
+The third-party source files and global bindings are restored on exit.
 """
 from contextlib import contextmanager
 import math
@@ -41,10 +43,12 @@ def _scalar(value):
     return float(value.item() if hasattr(value, 'item') else value)
 
 
-def persistent_spawn_spec(track_id, track, definition, step):
-    """Use the actual loaded, centered first observation; never spawn it early."""
+def persistent_spawn_spec(track_id, track, definition, step, *, preload_all=False):
+    """Use the loaded first observation; early visibility is preview-only."""
+    if type(preload_all) is not bool:
+        raise ValueError('Full-scene preload must be boolean')
     first = definition['first_seen_step']
-    if step < first:
+    if step < first and not preload_all:
         return None
     if track.get('type') != definition['type']:
         raise ValueError('Persisted object type differs from its track')
@@ -64,13 +68,16 @@ def persistent_spawn_spec(track_id, track, definition, step):
     return dict(position=position, heading_theta=heading, static=True, **dims)
 
 
-def traffic_manager_class(base, definitions, *, no_moving_traffic=False, object_classes=None):
+def traffic_manager_class(base, definitions, *, no_moving_traffic=False, object_classes=None, preload_all=False):
     """Create an adapter class; object_classes is injected for engine-free tests."""
     definitions = dict(definitions)
+    if type(preload_all) is not bool:
+        raise ValueError('Full-scene preload must be boolean')
 
     class PersistentScenarioTrafficManager(base):
         persistence_definitions = definitions
         moving_traffic_disabled = no_moving_traffic
+        full_scene_preview = preload_all
 
         @property
         def current_traffic_data(self):
@@ -86,7 +93,8 @@ def traffic_manager_class(base, definitions, *, no_moving_traffic=False, object_
             # first observed on the last frame is still an explicit object.
             if scenario_id in self._scenario_id_to_obj_id:
                 return
-            spec = persistent_spawn_spec(scenario_id, track, definitions[scenario_id], self.episode_step)
+            spec = persistent_spawn_spec(scenario_id, track, definitions[scenario_id], self.episode_step,
+                                         preload_all=preload_all)
             if spec is None:
                 return
             name = scenario_id if self.engine.global_config['force_reuse_object_name'] else None
@@ -155,7 +163,7 @@ def _measured_classes():
 
 
 @contextmanager
-def persistent_obstacle_adapter(scenario_env_module, manifest, *, no_moving_traffic=False):
+def persistent_obstacle_adapter(scenario_env_module, manifest, *, no_moving_traffic=False, preload_all=False):
     """Scope the ScenarioEnv traffic-manager binding to one live engine."""
     definitions = persistent_objects(manifest)
     if not definitions:
@@ -163,12 +171,15 @@ def persistent_obstacle_adapter(scenario_env_module, manifest, *, no_moving_traf
         return
     original = scenario_env_module.ScenarioTrafficManager
     scenario_env_module.ScenarioTrafficManager = traffic_manager_class(
-        original, definitions, no_moving_traffic=no_moving_traffic, object_classes=_measured_classes())
+        original, definitions, no_moving_traffic=no_moving_traffic, object_classes=_measured_classes(),
+        preload_all=preload_all)
     try:
         yield {'active': True, 'objects': len(definitions), 'mode': 'persistent',
                'moving_traffic_disabled': no_moving_traffic,
                'collision_geometry': 'first-observed oriented source bounding box',
                'visual_geometry': 'generic model fitted to first-observed dimensions',
+               'display_scope': 'full_scene_overview' if preload_all else 'current_observations',
+               'future_objects_visible_early': preload_all,
                'observed_permanence': False}
     finally:
         scenario_env_module.ScenarioTrafficManager = original
@@ -177,8 +188,9 @@ def persistent_obstacle_adapter(scenario_env_module, manifest, *, no_moving_traf
 def runtime_obstacle_report(env):
     manager = getattr(env.engine, 'traffic_manager', None)
     definitions = getattr(manager, 'persistence_definitions', {})
+    preload_all = getattr(manager, 'full_scene_preview', False)
     mapping = getattr(manager, '_scenario_id_to_obj_id', {}) or {}
-    expected = sorted(key for key, row in definitions.items() if row['first_seen_step'] <= env.episode_step)
+    expected = sorted(key for key, row in definitions.items() if preload_all or row['first_seen_step'] <= env.episode_step)
     active = sorted(key for key in mapping if key in definitions)
     poses = {}
     for key in active:
@@ -188,5 +200,7 @@ def runtime_obstacle_report(env):
                       'length_m': float(obj.LENGTH), 'width_m': float(obj.WIDTH),
                       'height_m': float(obj.HEIGHT), 'static': bool(obj.body.isStatic())}
     return {'mode': 'persistent' if definitions else 'recorded', 'step': int(env.episode_step),
+            'display_scope': 'full_scene_overview' if preload_all else 'current_observations',
+            'future_objects_visible_early': bool(preload_all),
             'expected_ids': expected, 'active_ids': active, 'active_count': len(active),
             'missing_expected_ids': sorted(set(expected) - set(active)), 'objects': poses}

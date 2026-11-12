@@ -68,6 +68,45 @@ class SimulationPlatformDataTests(unittest.TestCase):
         future = {obj['track_id'] for obj in self.nuscenes['obstacle_manifest']['objects'] if obj['first_seen_step'] > 0}
         self.assertFalse(visible & future)
 
+    def test_full_scene_overview_is_fixed_while_causal_snapshots_advance_and_rewind(self):
+        overview = deepcopy(self.nuscenes['state_overview'])
+        self.assertEqual(len(overview['events']), 23)
+        self.assertEqual(len(overview['objects']), 74)
+        self.assertEqual(overview['summary']['missing_model_instances'], 3)
+        self.assertTrue(overview['frozen'])
+        self.assertFalse(overview['planning_eligible'])
+        self.assertTrue(all(obj['status'] == 'scene_overview' for obj in overview['objects']))
+        for step in (0, 137, 200, 0):
+            current = build_snapshot(self.nuscenes, step)
+            self.assertEqual(self.nuscenes['state_overview'], overview)
+            self.assertNotIn('scene_overview', {obj['status'] for obj in current['states']['objects']})
+        self.assertEqual(build_snapshot(self.nuscenes, 0)['summary']['state_instances'], 20)
+
+    def test_static_overview_contains_all_barriers_and_cones_at_fixed_source_poses(self):
+        actors = self.nuscenes['static_overview_actors']
+        self.assertEqual(len(actors), 103)
+        self.assertEqual(len({actor['id'] for actor in actors}), len(actors))
+        self.assertEqual(sum(actor['is_map_state_change'] for actor in actors), 71)
+        self.assertTrue(any(actor['first_seen_step'] > 0 for actor in actors))
+        for actor in actors:
+            track = self.nuscenes['tracks'][actor['id']]
+            first = actor['source_step']
+            self.assertEqual(first, actor['first_seen_step'])
+            self.assertIn(actor['type'], ('TRAFFIC_BARRIER', 'TRAFFIC_CONE'))
+            self.assertFalse(actor['is_ego'])
+            self.assertTrue(actor['frozen'] and actor['valid'])
+            self.assertFalse(actor['planning_eligible'])
+            self.assertEqual(actor['position'], track['position'][first])
+            self.assertEqual(actor['heading'], track['heading'][first])
+            self.assertTrue(all(value == 0 for value in actor['velocity']))
+
+    def test_argoverse_without_states_has_an_explicit_empty_overview(self):
+        overview = self.argoverse['state_overview']
+        self.assertEqual(overview['events'], [])
+        self.assertEqual(overview['objects'], [])
+        self.assertEqual(self.argoverse['static_overview_actors'], [])
+        self.assertEqual(len(self.argoverse['changes']), 170)
+
     def test_background_people_are_not_automatically_marked_as_map_changes(self):
         actors = build_snapshot(self.nuscenes, 137)['actors']
         people = [actor for actor in actors if actor['type'] == 'PEDESTRIAN']
@@ -132,6 +171,9 @@ class SimulationPlatformDataTests(unittest.TestCase):
         self.assertIsNone(handoff['requested_goal'])
         self.assertNotIn('tracks', handoff)
         self.assertNotIn('state_source', handoff)
+        self.assertNotIn('state_overview', handoff)
+        self.assertNotIn('static_overview_actors', handoff)
+        self.assertTrue(handoff['planning_contract']['full_scene_preview_excluded_from_planning_export'])
         self.assertEqual(handoff['source_timestamp_ns'], '1537845352297764000')
         self.assertEqual(handoff['map_version'], self.nuscenes['versions']['updated']['map_sha256'])
         self.assertEqual(handoff['map_state_snapshot']['summary']['objects'], 20)
@@ -140,6 +182,8 @@ class SimulationPlatformDataTests(unittest.TestCase):
             self.assertIsInstance(item['heading'], float)
             self.assertNotIn('state', item)
         self.assertTrue(all(not item['is_ego'] for item in handoff['current_objects']))
+        self.assertTrue(all(item.get('scope') != 'full_scene_overview' for item in handoff['current_objects']))
+        self.assertTrue(all(item['status'] != 'scene_overview' for item in handoff['map_state_snapshot']['objects']))
 
     def test_invalid_steps_are_rejected_instead_of_silently_clamped(self):
         for step in (-1, 201, True, 1.5, '3'):

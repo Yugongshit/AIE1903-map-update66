@@ -4,6 +4,8 @@ These are annotations: no objects, collision shapes, map edits, or policies are
 created. Source footprints stay at their observation coordinates. Identity
 markers can follow an existing simulator object without claiming a new source
 observation. Panda3D and pygame are imported only by drawing methods.
+An explicitly frozen full-scene overview also fixes identity anchors and labels
+to source footprints, while retaining a distinct preview scope and status.
 """
 from __future__ import annotations
 
@@ -14,7 +16,8 @@ from .simulation_visuals import dashed_segments
 
 
 STATE_COLORS = {"observed_active": (1., .91, .12, 1.),
-                "unknown": (.78, .40, 1., 1.), "stale": (.78, .40, 1., 1.)}
+                "unknown": (.78, .40, 1., 1.), "stale": (.78, .40, 1., 1.),
+                "scene_overview": (1., .91, .12, 1.)}
 
 
 def _point(value):
@@ -39,6 +42,7 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
 """
     if not isinstance(snapshot, dict) or not isinstance(snapshot.get("objects"), list):
         raise ValueError("State annotations require a state snapshot")
+    overview = snapshot.get('scope') == 'full_scene_overview' and snapshot.get('frozen') is True
     layer = snapshot.get("layer", {})
     cutoff = snapshot.get("observation_cutoff_ns")
     cutoff_value = int(cutoff) if cutoff is not None else None
@@ -49,6 +53,8 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
         state = prop.get("state")
         if not isinstance(identifier, str) or not identifier or state not in STATE_COLORS:
             raise ValueError("Unsupported source state event")
+        if (state == 'scene_overview') != overview:
+            raise ValueError('Scene overview states require an explicit frozen full-scene scope')
         seen = prop.get("last_seen_timestamp_ns")
         if cutoff_value is not None and seen is not None and int(seen) > cutoff_value:
             raise ValueError("Future event cannot appear in a state annotation")
@@ -71,6 +77,8 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
         state = row.get("status")
         if state not in STATE_COLORS:
             raise ValueError("Unsupported source object state")
+        if (state == 'scene_overview') != overview:
+            raise ValueError('Scene overview objects require an explicit frozen full-scene scope')
         seen = row.get("last_observed_timestamp_ns")
         if cutoff_value is not None and seen is not None and int(seen) > cutoff_value:
             raise ValueError("Future instance cannot appear in a state annotation")
@@ -86,15 +94,15 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
             raise ValueError('State annotation height must come from a positive finite source dimension')
         item = {"instance_id": identifier, "event_ids": associated, "status": state,
                 "category": row.get("category", row.get("type", "unknown")),
-                "historical": bool(row.get("historical", state != "observed_active")),
+                "historical": False if overview else bool(row.get("historical", state != "observed_active")),
                 "last_observed_timestamp_ns": seen, "runtime_paths": paths,
                 "source_footprint_center_runtime_m": center,
-                "anchor_runtime_m": _point(next(iter(live.values()))["position_runtime_m"]) if live else center,
+                "anchor_runtime_m": _point(next(iter(live.values()))["position_runtime_m"]) if live and not overview else center,
                 "bound_object_ids": sorted(live), "matched_track_ids": track_ids,
                 "missing_model": bool(row.get("missing_model")),
                 "footprint_only": not bool(live),
                 "source_height_m": height,
-                "geometry_role": "source_observation_footprint_not_current_extent"}
+                "geometry_role": "fixed_full_scene_preview_footprint" if overview else "source_observation_footprint_not_current_extent"}
         if identifier in objects:
             previous = objects[identifier]
             if any(previous[key] != item[key] for key in ("status", "runtime_paths", "last_observed_timestamp_ns")):
@@ -107,6 +115,8 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
         event["instance_ids"] = sorted(key for key, row in objects.items() if event["event_id"] in row["event_ids"])
     counts = Counter(event["state"] for event in events)
     return {"events": events, "objects": list(objects.values()),
+            "scope": 'full_scene_overview' if overview else 'current_observations',
+            "frozen": overview,
             "source_timestamp_ns": snapshot.get("source_timestamp_ns"),
             "observation_cutoff_ns": cutoff,
             "clock_mode": snapshot.get("clock_mode"),
@@ -114,6 +124,7 @@ scenario track ID. ``runtime_paths`` is already centered: never offset it again.
             "summary": {"events_seen": len(events), "source_instances": len(objects),
                         "observed_active": counts["observed_active"], "unknown": counts["unknown"],
                         "stale": counts["stale"], "cleared": len(layer.get("cleared_events", [])),
+                        "scene_overview": counts['scene_overview'],
                         "bound_instances": sum(bool(o["bound_object_ids"]) for o in objects.values()),
                         "footprint_only_instances": sum(o["footprint_only"] for o in objects.values()),
                         "missing_model_instances": sum(o["missing_model"] for o in objects.values())}}
@@ -162,14 +173,17 @@ does not produce several overlapping copies of ``FOOTPRINT ONLY``.
     for key in order:
         rows, event = grouped[key], events[key]
         missing_only = all(row["missing_model"] for row in rows)
-        status = event["state"] if key == selected_event_id else (
+        status = 'scene_overview' if prepared.get('frozen') else event["state"] if key == selected_event_id else (
             "observed_active" if all(row["status"] == "observed_active" for row in rows) else "unknown")
         if missing_only:
             categories = {str(row["category"]).split(".")[-1] for row in rows}
             category = next(iter(categories)) if len(categories) == 1 else "source"
             text = "{}: {} {} footprint{}".format(event["label"], len(rows), category, "" if len(rows) == 1 else "s")
+            if status == 'scene_overview':
+                text += ' | SCENE OVERVIEW'
         else:
-            text = "{} {} | {} source objects".format(event["label"], status.upper(), len(rows))
+            text = "{} {} | {} source objects".format(event["label"],
+                'SCENE OVERVIEW' if status == 'scene_overview' else status.upper(), len(rows))
         groups.append({"event_id": key, "label": text, "status": status,
                        "anchor_runtime_m": _center([[row["anchor_runtime_m"] for row in rows]]),
                        "instance_ids": [row["instance_id"] for row in rows],
@@ -222,6 +236,8 @@ class StateOverlay:
         return [row for row in self.prepared["objects"] if self.selected_event_id in row["event_ids"]]
 
     def _selected_age(self):
+        if self.prepared.get('frozen'):
+            return None
         selected = self.selected()
         now = self.prepared.get("source_timestamp_ns")
         seen = selected.get("last_seen_timestamp_ns") if selected else None
@@ -279,6 +295,18 @@ class StateOverlay:
             distance = dist(list(self.env.agent.position)[:2], _center([p for row in rows for p in row["runtime_paths"]]))
         bound = sum(bool(row["bound_object_ids"]) for row in rows)
         white = (.88, .93, .98, 1)
+        if self.prepared.get('frozen'):
+            return [("FULL SCENE OVERVIEW - FIXED", white),
+                    ("All recorded changes shown from the start", white),
+                    ("Events: {} | source instances: {}".format(summary['events_seen'], summary['source_instances']), white),
+                    ("First supported source footprints; fixed poses", white),
+                    (("{} {}".format(selected['label'], str(selected['change_type']).upper())) if selected else "NO SCENE STATE EVENTS", STATE_COLORS['scene_overview']),
+                    (category_text, white),
+                    ("Bound {} | footprint only {}".format(bound, len(rows)-bound), white),
+                    ("N/M: state  I: focus  Q: follow car", white),
+                    ("V: {} annotations [{}]".format("hide" if self.visible else "show", "ON" if self.visible else "OFF"), white),
+                    ("Yellow: full-scene preview", STATE_COLORS['scene_overview']),
+                    ("Preview includes later source observations", white)]
         clock_label = ("Past recording; no new observations" if self.prepared.get("clock_mode") == "outside_recorded_window"
                        else "Frame snapshot age: {:.3f} s".format(age) if age is not None
                        else "No source observation reached")
@@ -326,7 +354,7 @@ class StateOverlay:
             lines.setColor(*STATE_COLORS[row["status"]])
             lines.setThickness(4 if chosen else 2)
             for path in row["runtime_paths"]:
-                paths = [path] if row["status"] == "observed_active" else dashed_segments(path, dash=.35, gap=.20)
+                paths = [path] if row["status"] in ('observed_active', 'scene_overview') else dashed_segments(path, dash=.35, gap=.20)
                 for segment in paths:
                     lines.moveTo(segment[0][0], segment[0][1], .22)
                     for point in segment[1:]:
@@ -412,7 +440,7 @@ class StateOverlay:
             for row in self.prepared["objects"]:
                 color = tuple(round(v*255) for v in STATE_COLORS[row["status"]][:3])
                 for path in row["runtime_paths"]:
-                    segments = [path] if row["status"] == "observed_active" else dashed_segments(path, dash=.35, gap=.20)
+                    segments = [path] if row["status"] in ('observed_active', 'scene_overview') else dashed_segments(path, dash=.35, gap=.20)
                     for segment in segments:
                         pygame.draw.lines(surface, color, False, [pixel(p) for p in segment], 4 if self.selected_event_id in row["event_ids"] else 2)
         pygame.draw.rect(surface, (7, 11, 16), (12, 43, 430, 266), border_radius=8)
