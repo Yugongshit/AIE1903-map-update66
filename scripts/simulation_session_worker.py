@@ -27,10 +27,16 @@ def main():
             identifier = None
             message = None
             try:
-                if len(line) > 65536:
-                    raise ValueError('Session command is too large')
                 message = json.loads(line)
                 identifier = message.get('id') if isinstance(message, dict) else None
+                # HTTP controls remain capped at 32 KiB. The trusted broker
+                # adds both verified maps to a fleet launch after validation.
+                # Keep the job ID on errors so the broker never waits for a
+                # response that it cannot associate with its request.
+                fleet_open = isinstance(message, dict) and message.get('command') == 'open' and message.get('fleet') is not None
+                limit = 32 * 1024 * 1024 if fleet_open else 65536
+                if len(line.encode('utf-8')) > limit:
+                    raise ValueError('Session command is too large')
                 result = session.command(message)
                 response = {'id': identifier, 'ok': True, 'result': result}
             except Exception as error:

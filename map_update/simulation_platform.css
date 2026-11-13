@@ -3,3 +3,21 @@
 .validation-issue{border-top:1px solid #344b59;margin-top:6px;padding-top:3px}.validation-issue summary{cursor:pointer;color:#d3b57b;font-size:10px}.validation-issue summary .validation-check{display:inline;color:#d3b57b}.validation-issue p{margin:8px 0 8px 10px;color:#a7b7bc}.validation-issue summary::marker{color:#d3b57b}
 
 .engine-frame-error{position:absolute;z-index:4;top:61px;left:20px;right:20px;max-width:660px;border:1px solid #a77454;border-radius:8px;background:#34271fed;padding:14px 16px;box-shadow:0 8px 28px #0006}.engine-frame-error strong{font-size:13px;font-weight:600;color:#f5d3a7}.engine-frame-error p{font-size:11px;line-height:1.8;color:#d8bd9e;margin:8px 0 12px;overflow-wrap:anywhere}.engine-frame-error>div{display:flex;gap:8px;flex-wrap:wrap}.engine-frame-error .button{font-size:11px;padding:7px 10px;min-height:31px;border-color:#9c7659;color:#f0d7b4;background:#442e21}.engine-frame-error[hidden]{display:none}
+
+/* Multi-car planning is opt-in; replay retains its existing layout and controls. */
+.fleet-panel{flex:0 0 auto;border-bottom:1px solid var(--line);background:#11212b;max-height:360px;overflow:auto;font-size:11px}
+.fleet-panel>summary{display:flex;align-items:center;gap:14px;cursor:pointer;padding:10px 20px;color:#a4bcca;list-style:none}
+.fleet-panel>summary::before{content:'▸';color:#65e2cb}.fleet-panel[open]>summary::before{content:'▾'}
+.fleet-panel>summary strong{color:#c8e6df;font-weight:550}.fleet-panel>summary span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fleet-content{padding:0 20px 12px}.fleet-settings{display:flex;align-items:end;gap:10px;flex-wrap:wrap}
+.fleet-settings label{display:grid;gap:5px;color:#93adbd;flex:1;min-width:135px}.fleet-settings select{width:100%;font-size:11px;padding:7px 9px}.fleet-settings .button{font-size:11px;padding:9px 12px}
+.fleet-description{color:#8da7b8;line-height:1.65;font-size:10px;margin:8px 0}.fleet-goals>summary{cursor:pointer;color:#b4c9d4;font-size:10px}.fleet-goals>summary span{color:#829ba9;margin-left:7px}
+.fleet-goal-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:8px 0}.fleet-goal-fields label{display:grid;gap:4px;font-size:10px;color:#9fb7c6}.fleet-goal-fields input{min-width:0;width:100%;background:#0c1923;border:1px solid #304657;border-radius:4px;color:#cbdce6;padding:6px;font:inherit}
+.fleet-runtime-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0;color:#a7c8cd;font-size:10px}.fleet-runtime-toolbar .button{font-size:10px;padding:6px 9px}
+.fleet-vehicles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.fleet-vehicle{background:#0c1923;border:1px solid #2e4c60;border-left:3px solid #69b6ff;border-radius:5px;padding:9px 10px;min-width:0}.fleet-vehicle[data-vehicle="C"]{border-left-color:#c9a0ff}
+.fleet-vehicle-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;margin-bottom:6px}.fleet-vehicle-heading label{display:flex;align-items:center;gap:5px;font-size:10px;color:#99b5c3}.fleet-vehicle p{font-size:10px;margin:4px 0;color:#a0b8c6;overflow-wrap:anywhere;line-height:1.45}.fleet-vehicle [data-field="motion"]{color:#c7dce5}.fleet-vehicle .text-button{font-size:10px;margin-top:3px;padding:0}
+.fleet-legend{display:flex;gap:13px;flex-wrap:wrap;color:#9cb3c3;font-size:9px;margin-top:8px}.fleet-before::before,.fleet-route::before,.fleet-trace::before{content:'';display:inline-block;width:16px;border-top:2px solid #b8cad5;vertical-align:middle;margin-right:5px}.fleet-before::before{border-top-style:dashed}.fleet-trace::before{border-top-width:4px}
+.fleet-panel [hidden]{display:none!important}
+@media(max-width:700px){.fleet-content{padding-left:12px;padding-right:12px}.fleet-panel>summary{padding-left:12px}.fleet-settings label{min-width:110px}.fleet-vehicles{grid-template-columns:1fr}.fleet-panel{max-height:300px}}
+
+.fleet-vehicle-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}.fleet-follow.button{font-size:10px;padding:5px 9px;min-height:26px}.fleet-follow.active{color:#65e2cb;border-color:#58a99b;background:#193d3b}

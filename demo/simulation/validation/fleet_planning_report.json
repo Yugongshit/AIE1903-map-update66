@@ -1,0 +1,1033 @@
+{
+  "schema": "native-shared-map-validation-summary-1.0",
+  "validated_date_utc": "2026-11-13",
+  "engine": "MetaDrive / Panda3D / Bullet",
+  "scope": "Two packaged scenes, six full offline runs and two 20-step online runs with rewind; no source geometry or collision rules changed for these experiments.",
+  "limitations": [
+    "Low-speed directed-lane planning and emergency braking; traffic signals and right of way are not implemented.",
+    "Source traffic replays recorded motion and does not cooperate with recipient vehicles.",
+    "Offline full knowledge is an explicit preloaded prior; online observations use their source timestamps.",
+    "An unavailable legal detour produces a stop, not an invented road or lane change.",
+    "These are two supplied-scene engineering checks, not a statistical driving safety or detection accuracy benchmark.",
+    "nuScenes old/structure recipients did not reach the local braking zone within the 20 s source recording. Early shared-state stopping is demonstrated; a collision-prevention rate is not estimated.",
+    "Route connectivity is checked against each recipient's received map. This does not establish signal, right-of-way, or all updated-world traffic-rule compliance."
+  ],
+  "scenes": [
+    {
+      "scene_key": "nuscenes-scene0980",
+      "checks": {
+        "same_physical_map": true,
+        "same_missions": true,
+        "frame_bound_own_vehicle_inputs": true,
+        "all_routes_use_source_connections": true,
+        "no_recipient_collision": true,
+        "recipients_use_physics": true,
+        "clear_corridor_vehicle_actually_reaches_goal": true,
+        "no_invented_nuscenes_structure_changes": true,
+        "full_prior_blocks_occupied_route": true,
+        "full_prior_vehicle_remains_stopped": true,
+        "old_map_vehicle_physically_drives": true,
+        "shared_state_brakes_earlier_than_old_map": true,
+        "disconnected_vehicle_retains_knowledge": true,
+        "reconnected_vehicle_receives_latest": true,
+        "rewind_does_not_leak_later_structure": true,
+        "delivery_history_replays_same_versions": true,
+        "physics_replay_is_repeatable": true
+      },
+      "cases": [
+        {
+          "scene_key": "nuscenes-scene0980",
+          "mode": "offline",
+          "variant": "old",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+          "steps": 200,
+          "simulated_time_s": 20.0,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                452.4745992235023,
+                1285.0183625507443
+              ],
+              "final_position_city_m": [
+                429.6071828416664,
+                1233.5961327838986
+              ],
+              "goal_city_m": [
+                394.9109698552177,
+                1154.1503448625629
+              ],
+              "distance_travelled_m": 56.28128501670786,
+              "net_displacement_m": 56.27756610030795,
+              "goal_distance_m": 86.69175516762174,
+              "max_speed_m_s": 2.999957049122669,
+              "max_reported_lateral_error_m": 0.012247813052015237,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": null,
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "c7c1fb15-c672-4e30-89e8-194b47efdb14",
+                "d8f00bbd-afa6-42d1-b3bf-129e914379bd",
+                "4d1aff52-d4bc-4444-adbd-1698dacaf8b0",
+                "274d236d-6d4c-4579-b0b4-1dd6fcc30550",
+                "71213690-7222-4882-a4cb-94610eda0ff3",
+                "da3704b9-a68e-47e7-b28e-2a70dce7039f",
+                "fc54378d-a2ee-401d-a1ed-245253eddc48"
+              ],
+              "final_lane_ids": [
+                "c7c1fb15-c672-4e30-89e8-194b47efdb14",
+                "d8f00bbd-afa6-42d1-b3bf-129e914379bd",
+                "4d1aff52-d4bc-4444-adbd-1698dacaf8b0",
+                "274d236d-6d4c-4579-b0b4-1dd6fcc30550",
+                "71213690-7222-4882-a4cb-94610eda0ff3",
+                "da3704b9-a68e-47e7-b28e-2a70dce7039f",
+                "fc54378d-a2ee-401d-a1ed-245253eddc48"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "93253e9ac31b4f874b9a7bcf00acc08a38d7b0dcadc6b6e4f46c180de0728e29",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 201
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                447.7752913049537,
+                1266.7539773273556
+              ],
+              "final_position_city_m": [
+                429.2758906892616,
+                1224.3730149555295
+              ],
+              "goal_city_m": [
+                428.6080858148818,
+                1222.8004647411344
+              ],
+              "distance_travelled_m": 46.30124336806435,
+              "net_displacement_m": 46.24255393792623,
+              "goal_distance_m": 1.7084722786862296,
+              "max_speed_m_s": 2.999979054487957,
+              "max_reported_lateral_error_m": 0.004247849527829483,
+              "first_motion_step": 2,
+              "first_braking_step": 141,
+              "first_braking_reason": "local_actor_braking_horizon",
+              "goal_reached_step": 171,
+              "goal_reached_time_s": 17.1,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "final_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "93253e9ac31b4f874b9a7bcf00acc08a38d7b0dcadc6b6e4f46c180de0728e29",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 201
+            }
+          },
+          "replay_checks": null
+        },
+        {
+          "scene_key": "nuscenes-scene0980",
+          "mode": "offline",
+          "variant": "structure",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+          "steps": 200,
+          "simulated_time_s": 20.0,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                452.4745992235023,
+                1285.0183625507443
+              ],
+              "final_position_city_m": [
+                429.6071828416664,
+                1233.5961327838986
+              ],
+              "goal_city_m": [
+                394.9109698552177,
+                1154.1503448625629
+              ],
+              "distance_travelled_m": 56.28128501670786,
+              "net_displacement_m": 56.27756610030795,
+              "goal_distance_m": 86.69175516762174,
+              "max_speed_m_s": 2.999957049122669,
+              "max_reported_lateral_error_m": 0.012247813052015237,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": null,
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "c7c1fb15-c672-4e30-89e8-194b47efdb14",
+                "d8f00bbd-afa6-42d1-b3bf-129e914379bd",
+                "4d1aff52-d4bc-4444-adbd-1698dacaf8b0",
+                "274d236d-6d4c-4579-b0b4-1dd6fcc30550",
+                "71213690-7222-4882-a4cb-94610eda0ff3",
+                "da3704b9-a68e-47e7-b28e-2a70dce7039f",
+                "fc54378d-a2ee-401d-a1ed-245253eddc48"
+              ],
+              "final_lane_ids": [
+                "c7c1fb15-c672-4e30-89e8-194b47efdb14",
+                "d8f00bbd-afa6-42d1-b3bf-129e914379bd",
+                "4d1aff52-d4bc-4444-adbd-1698dacaf8b0",
+                "274d236d-6d4c-4579-b0b4-1dd6fcc30550",
+                "71213690-7222-4882-a4cb-94610eda0ff3",
+                "da3704b9-a68e-47e7-b28e-2a70dce7039f",
+                "fc54378d-a2ee-401d-a1ed-245253eddc48"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "da7fb1cb8ff6e3e50fac3ea377dbb994ccfa7cda63778ff1d5033dc11d8f04f5",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 201
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                447.7752913049537,
+                1266.7539773273556
+              ],
+              "final_position_city_m": [
+                429.2758906892616,
+                1224.3730149555295
+              ],
+              "goal_city_m": [
+                428.6080858148818,
+                1222.8004647411344
+              ],
+              "distance_travelled_m": 46.30124336806435,
+              "net_displacement_m": 46.24255393792623,
+              "goal_distance_m": 1.7084722786862296,
+              "max_speed_m_s": 2.999979054487957,
+              "max_reported_lateral_error_m": 0.004247849527829483,
+              "first_motion_step": 2,
+              "first_braking_step": 141,
+              "first_braking_reason": "local_actor_braking_horizon",
+              "goal_reached_step": 171,
+              "goal_reached_time_s": 17.1,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "final_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "da7fb1cb8ff6e3e50fac3ea377dbb994ccfa7cda63778ff1d5033dc11d8f04f5",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 201
+            }
+          },
+          "replay_checks": null
+        },
+        {
+          "scene_key": "nuscenes-scene0980",
+          "mode": "offline",
+          "variant": "full",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+          "steps": 200,
+          "simulated_time_s": 20.0,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                452.4745992235023,
+                1285.0183625507443
+              ],
+              "final_position_city_m": [
+                452.4936994127113,
+                1285.0591016101926
+              ],
+              "goal_city_m": [
+                394.9109698552177,
+                1154.1503448625629
+              ],
+              "distance_travelled_m": 0.07182799131675016,
+              "net_displacement_m": 0.04499431289114675,
+              "goal_distance_m": 143.01354249336507,
+              "max_speed_m_s": 0.19840564236784267,
+              "max_reported_lateral_error_m": 0.0,
+              "first_motion_step": null,
+              "first_braking_step": 0,
+              "first_braking_reason": "shared_state_blocks_endpoint_lane",
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": "shared_state_blocks_endpoint_lane",
+              "first_route_status": "no_route",
+              "first_lane_ids": [],
+              "final_lane_ids": [],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "a61a5658ebc0952854b26192a588a6e912be6bab6aef42910f823e65d6469080",
+              "received_step": 0,
+              "known_state_objects": 74,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 201
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                447.7752913049537,
+                1266.7539773273556
+              ],
+              "final_position_city_m": [
+                429.2758906892616,
+                1224.3730149555295
+              ],
+              "goal_city_m": [
+                428.6080858148818,
+                1222.8004647411344
+              ],
+              "distance_travelled_m": 46.30124336806435,
+              "net_displacement_m": 46.24255393792623,
+              "goal_distance_m": 1.7084722786862296,
+              "max_speed_m_s": 2.999979054487957,
+              "max_reported_lateral_error_m": 0.004247849527829483,
+              "first_motion_step": 2,
+              "first_braking_step": 141,
+              "first_braking_reason": "local_actor_braking_horizon",
+              "goal_reached_step": 171,
+              "goal_reached_time_s": 17.1,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "final_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "a61a5658ebc0952854b26192a588a6e912be6bab6aef42910f823e65d6469080",
+              "received_step": 0,
+              "known_state_objects": 74,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 201
+            }
+          },
+          "replay_checks": null
+        },
+        {
+          "scene_key": "nuscenes-scene0980",
+          "mode": "online",
+          "variant": "full",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+          "steps": 20,
+          "simulated_time_s": 2.0,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                452.4745992235023,
+                1285.0183625507443
+              ],
+              "final_position_city_m": [
+                451.25575862444225,
+                1282.4230065631955
+              ],
+              "goal_city_m": [
+                394.9109698552177,
+                1154.1503448625629
+              ],
+              "distance_travelled_m": 2.8673062460689978,
+              "net_displacement_m": 2.8673062459428076,
+              "goal_distance_m": 140.10214474166153,
+              "max_speed_m_s": 2.6010876886189953,
+              "max_reported_lateral_error_m": 1.536195348477348e-06,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": null,
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "c7c1fb15-c672-4e30-89e8-194b47efdb14",
+                "d8f00bbd-afa6-42d1-b3bf-129e914379bd",
+                "4d1aff52-d4bc-4444-adbd-1698dacaf8b0",
+                "274d236d-6d4c-4579-b0b4-1dd6fcc30550",
+                "71213690-7222-4882-a4cb-94610eda0ff3",
+                "da3704b9-a68e-47e7-b28e-2a70dce7039f",
+                "fc54378d-a2ee-401d-a1ed-245253eddc48"
+              ],
+              "final_lane_ids": [
+                "c7c1fb15-c672-4e30-89e8-194b47efdb14",
+                "d8f00bbd-afa6-42d1-b3bf-129e914379bd",
+                "4d1aff52-d4bc-4444-adbd-1698dacaf8b0",
+                "274d236d-6d4c-4579-b0b4-1dd6fcc30550",
+                "71213690-7222-4882-a4cb-94610eda0ff3",
+                "da3704b9-a68e-47e7-b28e-2a70dce7039f",
+                "fc54378d-a2ee-401d-a1ed-245253eddc48"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "ef60264841f45c1cef277e0971dbf8d42573ef6e47b8e275f7455b96eba9f84b",
+              "received_step": 20,
+              "known_state_objects": 20,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 21
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                447.7752913049537,
+                1266.7539773273556
+              ],
+              "final_position_city_m": [
+                446.6273592523414,
+                1264.13838818551
+              ],
+              "goal_city_m": [
+                428.6080858148818,
+                1222.8004647411344
+              ],
+              "distance_travelled_m": 2.856405880895442,
+              "net_displacement_m": 2.85640588088525,
+              "goal_distance_m": 45.094546565044745,
+              "max_speed_m_s": 2.5957767878559275,
+              "max_reported_lateral_error_m": 1.3231203714635978e-06,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": null,
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "final_lane_ids": [
+                "82d0cfc8-d47e-4b12-9ba9-3b8c52c7e99e",
+                "36067b6d-d9fe-45fc-ae93-afc4f84576c0",
+                "dc732962-4e53-4996-9860-a31a58ccb2eb",
+                "6fd0b3c9-85e1-4610-971a-8ab57779b400"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "ef60264841f45c1cef277e0971dbf8d42573ef6e47b8e275f7455b96eba9f84b",
+              "received_step": 20,
+              "known_state_objects": 20,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 21
+            }
+          },
+          "replay_checks": {
+            "rewind_removes_later_structure_delivery": true,
+            "delivery_history_replays_same_versions": true,
+            "physics_replay_position_error_m": {
+              "B": 0.0,
+              "C": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "scene_key": "argoverse-winter2021",
+      "checks": {
+        "same_physical_map": true,
+        "same_missions": true,
+        "frame_bound_own_vehicle_inputs": true,
+        "all_routes_use_source_connections": true,
+        "no_recipient_collision": true,
+        "recipients_use_physics": true,
+        "clear_corridor_vehicle_actually_reaches_goal": true,
+        "real_structure_changes_route": true,
+        "no_invented_argoverse_state_changes": true,
+        "both_road_versions_physically_reach_same_goal": true,
+        "disconnected_vehicle_retains_knowledge": true,
+        "reconnected_vehicle_receives_latest": true,
+        "rewind_does_not_leak_later_structure": true,
+        "delivery_history_replays_same_versions": true,
+        "physics_replay_is_repeatable": true,
+        "structure_publish_replans_subscriber_only": true
+      },
+      "cases": [
+        {
+          "scene_key": "argoverse-winter2021",
+          "mode": "offline",
+          "variant": "old",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+          "steps": 581,
+          "simulated_time_s": 58.1,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1116.328688744235,
+                -441.4789917934378
+              ],
+              "final_position_city_m": [
+                1121.3285266196012,
+                -392.23386125449736
+              ],
+              "goal_city_m": [
+                1122.8762276189714,
+                -392.94156510270267
+              ],
+              "distance_travelled_m": 86.9412303477931,
+              "net_displacement_m": 49.49829553204059,
+              "goal_distance_m": 1.7018293452094206,
+              "max_speed_m_s": 2.9956723217345775,
+              "max_reported_lateral_error_m": 0.9032948484479761,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": 389,
+              "goal_reached_time_s": 38.900000000000006,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084879",
+                "ls-168085012",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "final_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084879",
+                "ls-168085012",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "284ca1465b90c745bb9cf97c6feb160e6a5a1351b1c938bc041871f0a8b0ce00",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 582
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1131.67396653049,
+                -448.7948582637747
+              ],
+              "final_position_city_m": [
+                1104.320803764987,
+                -435.7117274272879
+              ],
+              "goal_city_m": [
+                1102.8080175651796,
+                -434.9835897877362
+              ],
+              "distance_travelled_m": 30.47482460487733,
+              "net_displacement_m": 30.32101294087531,
+              "goal_distance_m": 1.6789003866994174,
+              "max_speed_m_s": 2.998368595333366,
+              "max_reported_lateral_error_m": 0.005215406942873798,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": 114,
+              "goal_reached_time_s": 11.4,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962"
+              ],
+              "final_lane_ids": [
+                "ls-168084962"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "284ca1465b90c745bb9cf97c6feb160e6a5a1351b1c938bc041871f0a8b0ce00",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 582
+            }
+          },
+          "replay_checks": null
+        },
+        {
+          "scene_key": "argoverse-winter2021",
+          "mode": "offline",
+          "variant": "structure",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+          "steps": 581,
+          "simulated_time_s": 58.1,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1116.328688744235,
+                -441.4789917934378
+              ],
+              "final_position_city_m": [
+                1121.2717772757292,
+                -392.2362359035452
+              ],
+              "goal_city_m": [
+                1122.8762276189714,
+                -392.94156510270267
+              ],
+              "distance_travelled_m": 81.6122087500047,
+              "net_displacement_m": 49.49023269152954,
+              "goal_distance_m": 1.7526409167636532,
+              "max_speed_m_s": 2.988914139764852,
+              "max_reported_lateral_error_m": 0.9053693350766631,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": 372,
+              "goal_reached_time_s": 37.2,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084910",
+                "ls-168084875",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "final_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084910",
+                "ls-168084875",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "c5ddfb1b57596bfe19fb2e21864ad39a02ecd4a1b5218aae098613d4125193ea",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 582
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1131.67396653049,
+                -448.7948582637747
+              ],
+              "final_position_city_m": [
+                1104.320803764987,
+                -435.7117274272879
+              ],
+              "goal_city_m": [
+                1102.8080175651796,
+                -434.9835897877362
+              ],
+              "distance_travelled_m": 30.47482460487733,
+              "net_displacement_m": 30.32101294087531,
+              "goal_distance_m": 1.6789003866994174,
+              "max_speed_m_s": 2.998368595333366,
+              "max_reported_lateral_error_m": 0.005215406942873798,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": 114,
+              "goal_reached_time_s": 11.4,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962"
+              ],
+              "final_lane_ids": [
+                "ls-168084962"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "c5ddfb1b57596bfe19fb2e21864ad39a02ecd4a1b5218aae098613d4125193ea",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 582
+            }
+          },
+          "replay_checks": null
+        },
+        {
+          "scene_key": "argoverse-winter2021",
+          "mode": "offline",
+          "variant": "full",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+          "steps": 581,
+          "simulated_time_s": 58.1,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1116.328688744235,
+                -441.4789917934378
+              ],
+              "final_position_city_m": [
+                1121.2717772757292,
+                -392.2362359035452
+              ],
+              "goal_city_m": [
+                1122.8762276189714,
+                -392.94156510270267
+              ],
+              "distance_travelled_m": 81.6122087500047,
+              "net_displacement_m": 49.49023269152954,
+              "goal_distance_m": 1.7526409167636532,
+              "max_speed_m_s": 2.988914139764852,
+              "max_reported_lateral_error_m": 0.9053693350766631,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": 372,
+              "goal_reached_time_s": 37.2,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084910",
+                "ls-168084875",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "final_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084910",
+                "ls-168084875",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "c5ddfb1b57596bfe19fb2e21864ad39a02ecd4a1b5218aae098613d4125193ea",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 582
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1131.67396653049,
+                -448.7948582637747
+              ],
+              "final_position_city_m": [
+                1104.320803764987,
+                -435.7117274272879
+              ],
+              "goal_city_m": [
+                1102.8080175651796,
+                -434.9835897877362
+              ],
+              "distance_travelled_m": 30.47482460487733,
+              "net_displacement_m": 30.32101294087531,
+              "goal_distance_m": 1.6789003866994174,
+              "max_speed_m_s": 2.998368595333366,
+              "max_reported_lateral_error_m": 0.005215406942873798,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": 114,
+              "goal_reached_time_s": 11.4,
+              "final_stopped_reason": "goal_reached",
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962"
+              ],
+              "final_lane_ids": [
+                "ls-168084962"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "c5ddfb1b57596bfe19fb2e21864ad39a02ecd4a1b5218aae098613d4125193ea",
+              "received_step": 0,
+              "known_state_objects": 0,
+              "replan_count": 1,
+              "last_replan_reason": "initial_delivery",
+              "sample_count": 582
+            }
+          },
+          "replay_checks": null
+        },
+        {
+          "scene_key": "argoverse-winter2021",
+          "mode": "online",
+          "variant": "full",
+          "physical_map_version": "updated",
+          "physical_map_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+          "steps": 20,
+          "simulated_time_s": 2.0,
+          "planning_inputs_match_actual_car_and_frame": true,
+          "vehicles": {
+            "B": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1116.328688744235,
+                -441.4789917934378
+              ],
+              "final_position_city_m": [
+                1113.7414313589811,
+                -440.2459309566458
+              ],
+              "goal_city_m": [
+                1122.8762276189714,
+                -392.94156510270267
+              ],
+              "distance_travelled_m": 2.8660673228718068,
+              "net_displacement_m": 2.866066957483905,
+              "goal_distance_m": 48.178289006099334,
+              "max_speed_m_s": 2.59440659960927,
+              "max_reported_lateral_error_m": 0.0009925415761846642,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": null,
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084879",
+                "ls-168085012",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "final_lane_ids": [
+                "ls-168084962",
+                "ls-168084924",
+                "ls-168084910",
+                "ls-168084875",
+                "ls-168084906",
+                "ls-168084753"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "897cc020d0df8881b35ae64dd3f1396494026037d790a14793c40167fa0083e2",
+              "received_step": 5,
+              "known_state_objects": 0,
+              "replan_count": 2,
+              "last_replan_reason": "map_structure_received",
+              "sample_count": 21
+            },
+            "C": {
+              "motion_source": "metadrive_bullet_physics",
+              "uses_recorded_trajectory": false,
+              "initial_position_city_m": [
+                1131.67396653049,
+                -448.7948582637747
+              ],
+              "final_position_city_m": [
+                1129.0974742209196,
+                -447.5617096889456
+              ],
+              "goal_city_m": [
+                1102.8080175651796,
+                -434.9835897877362
+              ],
+              "distance_travelled_m": 2.8563907347402284,
+              "net_displacement_m": 2.8563907346296316,
+              "goal_distance_m": 29.143517829926267,
+              "max_speed_m_s": 2.5957628191874433,
+              "max_reported_lateral_error_m": 6.192089569457854e-06,
+              "first_motion_step": 2,
+              "first_braking_step": null,
+              "first_braking_reason": null,
+              "goal_reached_step": null,
+              "goal_reached_time_s": null,
+              "final_stopped_reason": null,
+              "first_route_status": "tracking",
+              "first_lane_ids": [
+                "ls-168084962"
+              ],
+              "final_lane_ids": [
+                "ls-168084962"
+              ],
+              "route_errors": [],
+              "collision_detected": false,
+              "first_collision_step": null,
+              "received_version": "897cc020d0df8881b35ae64dd3f1396494026037d790a14793c40167fa0083e2",
+              "received_step": 10,
+              "known_state_objects": 0,
+              "replan_count": 2,
+              "last_replan_reason": "map_structure_received",
+              "sample_count": 21
+            }
+          },
+          "replay_checks": {
+            "rewind_removes_later_structure_delivery": true,
+            "delivery_history_replays_same_versions": true,
+            "physics_replay_position_error_m": {
+              "B": 0.0,
+              "C": 0.0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "controller_sources_sha256": {
+    "map_update/simulation_shared_map.py": "16107321197536968398415682f11fd2df15ca6254e0cfa053c0ace5a20b04e3",
+    "map_update/simulation_fleet_scenarios.py": "858a4ab7f9f473114b04bb7c1cdd8be3b3719a727361bdc2aa291d7eaf138ee7",
+    "map_update/simulation_planner.py": "699977c382615b46229c495990b75e58952073f23af423f003fbbea7893df855",
+    "scripts/validate_simulation_fleet.py": "c32659d12bef9a5e2f83cabb27781ff1396b3e74f4305bea938e9ffa8ac52c6a"
+  },
+  "verification": {
+    "simulation_regression_tests": 255,
+    "simulation_regression_result": "passed",
+    "real_browser_checks": [
+      {
+        "name": "explicit fleet launch succeeds",
+        "passed": true
+      },
+      {
+        "name": "real engine and display agree at frame 20",
+        "passed": true
+      },
+      {
+        "name": "C moves using physics",
+        "passed": true
+      },
+      {
+        "name": "per-car planning export succeeds",
+        "passed": true
+      },
+      {
+        "name": "export uses displayed C pose, step and received knowledge",
+        "passed": true
+      },
+      {
+        "name": "review seek advances actual physics and trace",
+        "passed": true
+      },
+      {
+        "name": "follow C switches to its native camera",
+        "passed": true
+      },
+      {
+        "name": "online fleet launch succeeds",
+        "passed": true
+      },
+      {
+        "name": "B replans through genuine updated connectors",
+        "passed": true
+      },
+      {
+        "name": "unsubscribed C retains previous knowledge",
+        "passed": true
+      },
+      {
+        "name": "resubscribed C receives the published map",
+        "passed": true
+      },
+      {
+        "name": "rewind reproduces delivery commands and physical positions",
+        "passed": true
+      },
+      {
+        "name": "no browser exceptions",
+        "passed": true
+      }
+    ],
+    "browser_console_errors": [],
+    "original_replay_control_stability": "Passed six advancing decoded frames; zero toolbar/status transitions during playback.",
+    "native_overlay_visual_inspection": "B blue and C purple rings, routes and labels verified in an actual MetaDrive frame."
+  }
+}

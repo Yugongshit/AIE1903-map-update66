@@ -83,6 +83,75 @@ class PlatformHttpTests(unittest.TestCase):
                                           {'Content-Type': 'text/plain'})[0], 400)
             submit.assert_not_called()
 
+    def test_fleet_open_injects_only_verified_maps_and_missions(self):
+        payload = {'maps': {'original': {'old': {}}, 'updated': {'new': {}}}}
+        missions = [{'vehicle_id': 'B', 'goal_scenario_m': [3, 4]},
+                    {'vehicle_id': 'C', 'goal_scenario_m': [5, 6]}]
+        with patch.object(self.server, 'scene', return_value=payload), \
+                patch('map_update.simulation_fleet_scenarios.choose_fleet_missions', return_value=missions), \
+                patch('map_update.simulation_platform_data.scene_database', return_value=self.root/'verified'), \
+                patch.object(self.server.engine, 'submit', return_value={'job_id': 'fleet'}) as submit:
+            code, _, _ = self.request('/api/engine/open', 'POST', {'scene_id': 'example',
+                'fleet': {'mode': 'online', 'variant': 'full', 'goals': {'B': [7, 8]}}})
+            self.assertEqual(code, 202)
+            config = submit.call_args.args[0]['fleet']
+            self.assertEqual(config['maps'], payload['maps'])
+            self.assertEqual(config['missions'][0]['goal_scenario_m'], [7, 8])
+            self.assertEqual(config['missions'][1]['goal_scenario_m'], [5, 6])
+            for config in ({'maps': {}}, {'missions': []}, {'mode': 'anything'},
+                           {'goals': {'A': [0, 0]}}, {'goals': {'B': [True, 2]}},
+                           {'goals': {'B': [float('nan'), 2]}}):
+                self.assertEqual(self.request('/api/engine/open', 'POST',
+                    {'scene_id': 'example', 'fleet': config})[0], 400)
+            self.assertEqual(self.request('/api/engine/open', 'POST',
+                {'scene_id': 'example', 'version': 'original', 'fleet': {}})[0], 400)
+
+    def test_fleet_commands_validate_recipient_and_subscription(self):
+        with patch.object(self.server.engine, 'status', return_value={'ready': True}), \
+                patch.object(self.server.engine, 'submit', return_value={'job_id': 'fleet'}):
+            for fields in ({'action': 'publish'}, {'action': 'subscription', 'vehicle_id': 'B', 'enabled': False},
+                           {'action': 'deliver', 'vehicle_id': 'C'}):
+                self.assertEqual(self.request('/api/engine/command', 'POST', {'command': 'fleet', **fields})[0], 202)
+            for fields in ({'action': 'publish', 'vehicle_id': 'B'}, {'action': 'deliver', 'vehicle_id': 'A'},
+                           {'action': 'subscription', 'vehicle_id': 'B', 'enabled': 'false'}, {'action': 'unknown'}):
+                self.assertEqual(self.request('/api/engine/command', 'POST', {'command': 'fleet', **fields})[0], 400)
+
+    def test_recipient_export_is_bound_to_displayed_frame_and_receiver_knowledge(self):
+        from map_update.simulation_bridge import feature_sha256
+        features = {'lane': {'type': 'LANE_SURFACE_STREET', 'polyline': [[0, 0], [10, 0]],
+                             'exit_lanes': [], 'name': '旧道路'}}
+        payload = {'scene_id': 'physical', 'maps': {'original': features},
+                   'coordinate': 'source city', 'map': 'city', 'source': {'kind': 'real'},
+                   'versions': {'original': {'provenance': {'verified': True}}}}
+        broker = self.server.engine
+        broker.state.update(scene_id='example', version='updated')
+        received = {'scene_id': 'physical', 'vehicle_id': 'B', 'map_key': 'original',
+                    'map_features_sha256': feature_sha256(features), 'received_version': 'v1',
+                    'vehicle_state': {'step': 1, 'position': [1, 0]}, 'state_objects': [],
+                    'goal_scenario_m': [8, 0], 'uses_recorded_trajectory': False}
+        (broker.root/'frame.png').write_bytes(png_pixel(1))
+        broker._publish_result({'step': 1, 'sequence': 1, 'frame_file': 'frame.png',
+                                'fleet': {'planning_inputs': {'B': received}}})
+        frame_id = broker.status()['last_result']['frame_id']
+        received['vehicle_state']['step'] = 2
+        received['received_version'] = 'v2'
+        broker._publish_result({'step': 2, 'sequence': 2, 'frame_file': 'frame.png',
+                                'fleet': {'planning_inputs': {'B': received}}})
+        path = '/api/engine/fleet/planning?vehicle_id=B&frame_id=' + frame_id
+        with patch.object(self.server, 'scene', return_value=payload):
+            code, _, body = self.request(path)
+            self.assertEqual(code, 200)
+            value = json.loads(body)
+            self.assertEqual(value['vehicle_state']['step'], 1)
+            self.assertEqual(value['received_version'], 'v1')
+            self.assertEqual(value['map_features'], features)
+            self.assertEqual(value['world_map_version'], 'updated')
+            self.assertNotIn('tracks', value)
+            self.assertEqual(self.request(path.replace('vehicle_id=B', 'vehicle_id=C'))[0], 400)
+            self.assertEqual(self.request('/api/engine/fleet/planning?vehicle_id=B')[0], 400)
+            payload['maps']['original']['lane']['name'] = 'changed'
+            self.assertEqual(self.request(path)[0], 400)
+
     def test_busy_seek_does_not_accept_an_overlapping_mutation(self):
         with patch.object(self.server.engine, 'status', return_value={'ready': True}):
             with patch.object(self.server.engine, 'submit', side_effect=BusyError('busy')):
