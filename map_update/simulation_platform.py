@@ -6,12 +6,10 @@ review renderer and the actual simulator are explicitly separate view modes.
 """
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
-from copy import deepcopy
 import gzip
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
 import json
-import math
 import mimetypes
 from pathlib import Path
 import queue
@@ -190,8 +188,6 @@ class EngineBroker:
                 self.frames[result['frame_id']] = {
                     'scene_id': self.state['scene_id'], 'version': self.state['version'],
                     'sequence': result.get('sequence'), 'data': data,
-                    'step': result.get('step'),
-                    'fleet_inputs': deepcopy((result.get('fleet') or {}).get('planning_inputs', {})),
                 }
                 self.frame_bytes += len(data)
                 while (len(self.frames) > self.FRAME_CACHE_LIMIT
@@ -217,23 +213,6 @@ class EngineBroker:
             if sequence is not None and str(record['sequence']) != str(sequence):
                 raise ValueError('Requested frame ID and sequence do not match')
             return record['data']
-
-    def fleet_input(self, frame_id, vehicle_id):
-        """Return knowledge/pose from the displayed immutable frame, never latest."""
-        if not frame_id or vehicle_id not in {'B', 'C'}:
-            raise ValueError('A displayed frame_id and recipient vehicle_id B/C are required')
-        with self.lock:
-            record = self.frames.get(frame_id)
-            if record is None:
-                raise ValueError('Requested frame is no longer available; refresh the current engine frame')
-            if record['scene_id'] != self.state['scene_id'] or record['version'] != self.state['version']:
-                raise ValueError('Requested frame belongs to a different scene or map version')
-            value = record['fleet_inputs'].get(vehicle_id)
-            if value is None:
-                raise ValueError('This frame does not contain recipient-car planning inputs')
-            return {'frame_id': frame_id, 'scene_key': record['scene_id'],
-                    'world_map_version': record['version'], 'sequence': record['sequence'],
-                    'step': record['step'], 'input': deepcopy(value)}
 
     def _stop_process(self):
         process = self.process
@@ -316,60 +295,6 @@ class PlatformServer(ThreadingHTTPServer):
                 metrics = self.repo / 'demo/simulation/validation/detection_metrics.json'
                 self.validations[cache_key] = validate_database(database, detection_metrics=metrics if metrics.exists() else None)
             return self.validations[cache_key]
-
-    def fleet_config(self, key, version, config):
-        from .simulation_fleet_scenarios import choose_fleet_missions
-        if version != 'updated':
-            raise ValueError('多车实验使用更新后的物理地图；请通过车辆知识选项比较旧地图和更新地图。')
-        if not isinstance(config, dict) or set(config) - {'mode', 'variant', 'goals'}:
-            raise ValueError('Unsupported fleet configuration; maps and spawn missions are server-owned')
-        mode, variant = config.get('mode', 'offline'), config.get('variant', 'full')
-        if mode not in {'offline', 'online'} or variant not in {'old', 'structure', 'full'}:
-            raise ValueError('Invalid fleet mode or map knowledge variant')
-        payload = self.scene(key)
-        missions = choose_fleet_missions(payload)
-        goals = config.get('goals', {})
-        if not isinstance(goals, dict) or set(goals) - {'B', 'C'}:
-            raise ValueError('Goals may only address recipients B and C')
-        for mission in missions:
-            identifier = mission['vehicle_id']
-            if identifier in goals:
-                goal = goals[identifier]
-                if (not isinstance(goal, list) or len(goal) != 2 or
-                        any(isinstance(v, bool) or not isinstance(v, (int, float)) or
-                            not math.isfinite(v) or abs(v) > 1e8 for v in goal)):
-                    raise ValueError('Goal requires two finite source-city coordinates in metres')
-                mission['goal_scenario_m'] = list(goal)
-                mission['goal_origin'] = 'user_selected_source_city_coordinates'
-        return {'mode': mode, 'variant': variant, 'missions': missions, 'maps': payload['maps']}
-
-    def fleet_planning(self, frame_id, vehicle_id):
-        from .simulation_bridge import LANE_TYPES, feature_sha256
-        record = self.engine.fleet_input(frame_id, vehicle_id)
-        payload = self.scene(record['scene_key'])
-        result = record.pop('input')
-        map_key = result.get('map_key')
-        if map_key not in {'original', 'updated'}:
-            raise ValueError('Recipient map selection is invalid')
-        features = payload['maps'][map_key]
-        if (result.get('scene_id') != payload['scene_id'] or
-                result.get('map_features_sha256') != feature_sha256(features) or
-                result.get('vehicle_id') != vehicle_id or
-                result.get('vehicle_state', {}).get('step') != record['step']):
-            raise ValueError('Recipient planning input does not match the displayed frame and verified source map')
-        result.update(record, schema='simulation-fleet-planning-handoff-1.0',
-                      map_features=deepcopy(features),
-                      coordinate_reference={'frame': payload['coordinate'], 'map': payload['map'], 'units': 'm'},
-                      lane_graph={key: {field: deepcopy(feature.get(field)) for field in
-                                  ('entry_lanes', 'exit_lanes', 'vehicle_access', 'source_lane_type')}
-                                  for key, feature in features.items() if feature.get('type') in LANE_TYPES},
-                      provenance={'map': deepcopy(payload['versions'][map_key]['provenance']),
-                                  'source': deepcopy(payload['source']),
-                                  'data_scope': 'receiver_knowledge_and_actual_pose_at_displayed_frame',
-                                  'physical_static_world': 'reconstructed_full_scene_fixed_obstacles',
-                                  'local_sensor_scope': 'current_native_actors_within_25m_not_recorded_sensor_measurements',
-                                  'recorded_future_tracks_included': False})
-        return result
 
     def engine_snapshot(self, result, key, version):
         from .simulation_platform_data import build_snapshot
@@ -461,10 +386,6 @@ class PlatformHandler(BaseHTTPRequestHandler):
             self._send(self.server.engine.frame(scene_id=_one(query, 'scene_id', None),
                        version=_one(query, 'version', None), sequence=_one(query, 'sequence', None),
                        frame_id=frame_id), 'image/png')
-        elif path == '/api/engine/fleet/planning':
-            vehicle_id = _one(query, 'vehicle_id', None)
-            self._send(self.server.fleet_planning(_one(query, 'frame_id', None), vehicle_id),
-                       filename=f'planning-recipient-{vehicle_id}.json')
         elif path.startswith('/api/scenes/'):
             pieces = path.split('/')
             if len(pieces) not in (4, 5) or not pieces[3]:
@@ -482,9 +403,6 @@ class PlatformHandler(BaseHTTPRequestHandler):
                            filename=f'planning-{key}-{version}-frame{step}.json')
             elif action == 'validation':
                 self._send(self.server.validation(key, version))
-            elif action == 'fleet':
-                from .simulation_fleet_scenarios import fleet_profile
-                self._send(fleet_profile(self.server.scene(key)))
             else:
                 raise KeyError('Unknown scene action')
         else:
@@ -538,8 +456,6 @@ class PlatformHandler(BaseHTTPRequestHandler):
             if type(step) is not int or step < 0:
                 raise ValueError('Replay step must be a nonnegative integer')
             command = {'command': 'open', 'database_path': str(database), 'step': step}
-            if body.get('fleet') is not None:
-                command['fleet'] = self.server.fleet_config(key, version, body['fleet'])
             self._send_job(self.server.engine.submit(command, scene_id=key, version=version), wait_ms)
         elif path == '/api/engine/command':
             expected_scene = body.pop('expected_scene_id', None)
@@ -550,20 +466,10 @@ class PlatformHandler(BaseHTTPRequestHandler):
                 _version(expected_version)
             allowed = {'seek': {'step'}, 'advance': {'steps'}, 'camera': {'yaw', 'pitch', 'distance', 'pan', 'target', 'preset'},
                        'select': {'feature_id', 'event_id', 'focus'}, 'overlays': {'structure', 'state'},
-                       'fleet': {'action', 'vehicle_id', 'enabled'},
                        'frame': set(), 'status': set(), 'close': set()}
             command = body.get('command')
             if command not in allowed or set(body) - (allowed[command] | {'command'}):
                 raise ValueError('Unsupported simulation command or fields')
-            if command == 'fleet':
-                action = body.get('action')
-                fields = {'publish': set(), 'subscription': {'vehicle_id', 'enabled'}, 'deliver': {'vehicle_id'}}
-                if action not in fields or set(body) != fields[action] | {'command', 'action'}:
-                    raise ValueError('Unsupported fleet action or fields')
-                if action != 'publish' and body.get('vehicle_id') not in {'B', 'C'}:
-                    raise ValueError('Fleet recipient must be B or C')
-                if action == 'subscription' and type(body.get('enabled')) is not bool:
-                    raise ValueError('Subscription enabled must be a boolean')
             if not self.server.engine.status()['ready'] and command != 'close':
                 raise ValueError('请先启动选中场景的 MetaDrive。')
             self._send_job(self.server.engine.submit(body, expected_scene_id=expected_scene,

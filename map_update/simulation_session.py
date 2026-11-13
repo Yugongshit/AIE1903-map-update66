@@ -42,14 +42,12 @@ def validated_camera(current, command):
         if preset not in presets:
             raise ValueError('Unknown camera preset')
         result.update(presets[preset])
-        if preset in {'follow', 'rear', 'top'} and current.get('target') in {'recipient-B', 'recipient-C'}:
-            result['target'] = current['target']
     for name in ('yaw', 'pitch', 'distance'):
         if name in command:
             result[name] = _number(command[name], name)
     if 'target' in command:
-        if command['target'] not in {'ego', 'map', 'selection', 'recipient-B', 'recipient-C'}:
-            raise ValueError('Camera target must be ego, map, selection or a fleet recipient')
+        if command['target'] not in {'ego', 'map', 'selection'}:
+            raise ValueError('Camera target must be ego, map or selection')
         result['target'] = command['target']
     if 'pan' in command:
         value = command['pan']
@@ -147,7 +145,6 @@ class SimulationSession:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.width, self.height = width, height
         self.env = None
-        self.fleet = None
         self.resources = ExitStack()
         self.annotations = ExitStack()
         self.export = None
@@ -165,7 +162,7 @@ class SimulationSession:
         self._state_step = None
         self._annotation_selection = None
 
-    def open(self, database_path, *, step=0, fleet=None):
+    def open(self, database_path, *, step=0):
         bound = load_bound_export(database_path)
         if type(step) is not int or step < 0:
             raise ValueError('Replay step must be a nonnegative integer')
@@ -173,7 +170,6 @@ class SimulationSession:
             self.export['manifest'].get(key) == bound['manifest'].get(key)
             for key in ('dataset', 'scene_id', 'map'))
         saved_camera = deepcopy(self.camera) if same_scene else None
-        was_fleet = self.fleet is not None
         saved_selection = None
         if same_scene and self.selection_center is not None and self.current is not None:
             origin = self.current['runtime_origin_in_scenario_m']
@@ -242,22 +238,15 @@ class SimulationSession:
             if points:
                 self.map_center = [(min(float(p[i]) for p in points)+max(float(p[i]) for p in points))/2 for i in (0, 1)]
             self.camera = saved_camera or validated_camera({}, {'preset': 'follow'})
-            if fleet is not None and (not was_fleet or not same_scene):
-                self.camera = validated_camera({}, {'preset': 'follow', 'target': 'recipient-B'})
-            elif fleet is None and self.camera['target'] in {'recipient-B', 'recipient-C'}:
-                self.camera['target'] = 'ego'
             offset = metadata.get('old_origin_in_current_coordinate', [0, 0])
             self.selection_center = [saved_selection[i] + float(offset[i]) for i in (0, 1)] if saved_selection else None
             if self.camera['target'] == 'selection' and self.selection_center is None:
                 self.camera['target'] = 'ego'
             self.selected_feature_id = self.selected_event_id = None
             self._stop_native_camera()
-            if fleet is not None:
-                from .simulation_fleet import FleetRuntime
-                self.fleet = FleetRuntime(self.env, bound, fleet, self.source_features)
             with _suspended_rendering(self.env):
                 for _ in range(step):
-                    self._step()
+                    self.env.step([0., 0.])
             self._attach_annotations()
             return self.frame()
         except BaseException:
@@ -267,13 +256,6 @@ class SimulationSession:
     def _require(self):
         if self.env is None:
             raise ValueError('Choose a scene before controlling playback')
-
-    def _step(self):
-        if self.fleet is not None:
-            self.fleet.before_step()
-        self.env.step([0., 0.])
-        if self.fleet is not None:
-            self.fleet.after_step()
 
     def _stop_native_camera(self):
         camera = self.env.main_camera
@@ -354,20 +336,16 @@ class SimulationSession:
             self.annotations.close()
             self.update_handle = self.state_handle = None
             self._state_step = self._annotation_selection = None
-            if self.fleet is not None:
-                self.fleet.before_reset()
             self.env.reset(seed=0)
             self._stop_native_camera()
-            if self.fleet is not None:
-                self.fleet.reset()
             with _suspended_rendering(self.env):
                 for _ in range(step):
-                    self._step()
+                    self.env.step([0., 0.])
             self._attach_annotations()
         else:
             with _suspended_rendering(self.env):
                 while self.env.episode_step < step:
-                    self._step()
+                    self.env.step([0., 0.])
         return self.frame()
 
     def advance(self, steps=1):
@@ -381,21 +359,8 @@ class SimulationSession:
         camera = validated_camera(self.camera, command)
         if camera['target'] == 'selection' and self.selection_center is None:
             raise ValueError('Select a visible change before focusing it')
-        if camera['target'] in {'recipient-B', 'recipient-C'} and self.fleet is None:
-            raise ValueError('Launch a fleet session before following recipient B or C')
         self.camera = camera
         return self.frame()
-
-    def _camera_center(self):
-        target = self.camera['target']
-        if target in {'recipient-B', 'recipient-C'}:
-            if self.fleet is None:
-                raise ValueError('Recipient camera requires an active fleet')
-            vehicle = self.fleet.vehicles[target[-1]]
-            return list(vehicle.position[:2]), float(vehicle.heading_theta)
-        if target == 'ego':
-            return list(self.env.agent.position[:2]), float(self.env.agent.heading_theta)
-        return (self.map_center if target == 'map' else self.selection_center), 0.
 
     def _select_feature(self, feature_id):
         items = self.update_handle.prepared['items']
@@ -442,10 +407,11 @@ class SimulationSession:
     def frame(self):
         self._require()
         self._refresh_state()
-        if self.fleet is not None:
-            self.fleet.refresh_visuals()
-        center, heading = self._camera_center()
-        position, look_at = orbit_pose(self.camera, center, heading)
+        target = self.camera['target']
+        center = (list(self.env.agent.position[:2]) if target == 'ego' else self.map_center
+                  if target == 'map' else self.selection_center)
+        position, look_at = orbit_pose(self.camera, center,
+                                      self.env.agent.heading_theta if target == 'ego' else 0.)
         self.env.main_camera.camera.setPos(*position)
         self.env.main_camera.camera.lookAt(*look_at)
         self.env.engine.graphicsEngine.renderFrame()
@@ -504,7 +470,6 @@ class SimulationSession:
             'preview_future_objects_visible': obstacle['future_objects_visible_early'] if obstacle else False,
             'missing_expected_obstacles': obstacle['missing_expected_ids'] if obstacle else [],
             'comparison': self.update_handle.comparison,
-            'fleet': self.fleet.report() if self.fleet is not None else None,
             'export_verified': True,
         }
 
@@ -513,13 +478,8 @@ class SimulationSession:
             self.annotations.close()
         finally:
             try:
-                try:
-                    if self.fleet is not None:
-                        self.fleet.close()
-                finally:
-                    self.fleet = None
-                    if self.env is not None:
-                        self.env.close()
+                if self.env is not None:
+                    self.env.close()
             finally:
                 self.env = None
                 self.current = None
@@ -534,7 +494,7 @@ class SimulationSession:
             raise ValueError('Session command must be an object')
         name = message.get('command')
         if name == 'open':
-            return self.open(message['database_path'], step=message.get('step', 0), fleet=message.get('fleet'))
+            return self.open(message['database_path'], step=message.get('step', 0))
         if name == 'seek':
             return self.seek(message.get('step'))
         if name == 'advance':
@@ -546,12 +506,6 @@ class SimulationSession:
                                focus=message.get('focus', True))
         if name == 'overlays':
             return self.overlays(structure=message.get('structure'), state=message.get('state'))
-        if name == 'fleet':
-            self._require()
-            if self.fleet is None:
-                raise ValueError('Launch a fleet planning session before sharing maps')
-            self.fleet.command(message)
-            return self.frame()
         if name == 'frame':
             return self.frame()
         if name == 'status':
