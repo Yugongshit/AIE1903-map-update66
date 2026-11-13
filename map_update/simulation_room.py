@@ -327,7 +327,7 @@ Heartbeats extend a lease but never refresh an old driving command.
             result["expires_at_monotonic"] = deadline
         return result
 
-    def publish(self, result, frame_id=None, *, session_id, epoch):
+    def publish(self, result, frame_id=None, *, session_id, epoch, return_snapshot=True):
         """Bind present native states to an opaque rendered frame identity."""
         if not isinstance(result, dict):
             raise RoomError("invalid_state", "Native room result must be an object", 400)
@@ -354,9 +354,9 @@ Heartbeats extend a lease but never refresh an old driving command.
             for key, state in vehicle_states.items():
                 self._vehicles[key]["state"] = state
             self._objects = current_objects
-            return self.snapshot()
+            return self.snapshot() if return_snapshot else None
 
-    def snapshot(self):
+    def snapshot(self, *, include_objects=True, include_vehicle_state=True):
         with self._lock:
             now = self._clock()
             self._expire(now)
@@ -370,14 +370,18 @@ Heartbeats extend a lease but never refresh an old driving command.
                     "last_input_age_ms": round((now-slot["input_at"])*1000) if slot["input_at"] is not None else None,
                     "last_action_seq": slot["last_seq"], "received_at_s": slot["received_at_s"],
                     "observation_step": slot["observation_step"], "reason": control["reason"],
-                    "effective_action": control["action"],
-                    "state": deepcopy(slot["state"])}
-            return {"active": self._active, "session_id": self._session_id, "epoch": self._epoch,
+                    "effective_action": control["action"]}
+                if include_vehicle_state:
+                    vehicles[identifier]["state"] = deepcopy(slot["state"])
+            result = {"active": self._active, "session_id": self._session_id, "epoch": self._epoch,
                     "scene_id": self._scene, "version": self._version, "step": self._step,
                     "observation_step": self._published_step, "frame_id": self._frame_id,
-                    "vehicles": vehicles, "objects": deepcopy(self._objects),
+                    "vehicles": vehicles,
                     "coordinate_frame": "source_city_XY_metres", "clock_owner": "server",
                     "recorded_future_tracks_included": False,
                     "action_timeout_ms": round(self.manual_timeout_s*1000),
                     "lease_timeout_ms": round(self.lease_timeout_s*1000),
                     "external_max_lag_steps": self.external_max_lag_steps}
+            if include_objects:
+                result["objects"] = deepcopy(self._objects)
+            return result

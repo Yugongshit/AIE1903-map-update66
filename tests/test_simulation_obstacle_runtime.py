@@ -40,6 +40,39 @@ class FakeManager:
 
 
 class PersistentObstacleRuntimeTests(unittest.TestCase):
+    def test_fixed_source_box_stops_real_bullet_body_without_nonzero_inverse_mass(self):
+        # Renderer-free native regression. setStatic(True) alone preserves the
+        # vendor inverse mass and produces contacts while the car passes through.
+        try:
+            from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletWorld
+            from panda3d.core import NodePath
+            from map_update.simulation_obstacle_runtime import _measured_classes
+            classes = _measured_classes()
+        except ImportError:
+            self.skipTest('Requires the simulation interpreter with Panda3D/MetaDrive')
+        for name, cls in classes.items():
+            with self.subTest(source_type=name):
+                world = BulletWorld()
+                wall = BulletRigidBodyNode('source-fixed-box')
+                wall.addShape(BulletBoxShape((.15, 2., 1.)))
+                wall.setMass(cls.MASS)
+                wall.setStatic(True)
+                world.attachRigidBody(wall)
+                car = BulletRigidBodyNode('physical-car')
+                car.addShape(BulletBoxShape((2.25, .9, .6)))
+                car.setMass(1100.)
+                node = NodePath(car)
+                node.setPos(-5., 0., 0.)
+                car.setLinearVelocity((3., 0., 0.))
+                world.attachRigidBody(car)
+                for _ in range(150):
+                    world.doPhysics(.02, 1, .02)
+                self.assertEqual(wall.getInvMass(), 0.)
+                self.assertLess(node.getX(), -2.3)
+                self.assertLess(abs(car.getLinearVelocity().x), .05)
+                world.removeRigidBody(car)
+                world.removeRigidBody(wall)
+
     def test_first_observation_not_revealed_early_and_remains_beyond_recording(self):
         self.assertIsNone(persistent_spawn_spec('barrier', track(), definition(), 1))
         at_first = persistent_spawn_spec('barrier', track(), definition(), 2)

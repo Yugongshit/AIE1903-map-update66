@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from map_update.simulation_bridge import feature_sha256
 from map_update.simulation_interactive import (InteractiveRuntime, IDS, actor_state,
-    braking_actor, checked_action, validated_controls, validated_missions)
+    braking_actor, checked_action, physical_contacts, validated_controls, validated_missions)
 from map_update.simulation_session import SimulationSession, validated_camera
 
 
@@ -273,6 +273,69 @@ class InteractiveTests(unittest.TestCase):
         runtime.controls({'P1': {'mode': 'ai'}})
         runtime.before_step()
         self.assertEqual(feature_sha256(runtime.source_features), before)
+
+    def test_non_ai_mode_never_claims_the_builtin_goal_is_a_players_intent(self):
+        _, runtime = self.runtime()
+        runtime.before_step()
+        ai = runtime.report()['vehicles']['P1']
+        self.assertIsNotNone(ai['goal_scenario_m'])
+        self.assertEqual(ai['route_scope'], 'controller_plan_not_prediction')
+        for mode in ('manual', 'external'):
+            runtime.controls({'P1': {'mode': mode, 'action': [0., .1]}})
+            row = runtime.report()['vehicles']['P1']
+            self.assertIsNone(row['goal_scenario_m'])
+            self.assertIsNone(row['route'])
+            self.assertIsNone(row['patrol_goal_index'])
+            self.assertEqual(row['route_scope'], 'unavailable')
+            self.assertEqual(row['intent_source'], 'not_provided')
+
+    def test_live_chassis_pose_includes_native_lift_tilt_and_shape_offset(self):
+        import math
+        vehicle = Vehicle(name='tilted', position=[1., 2.], heading=0.)
+        c, s = math.cos(math.pi/6), math.sin(math.pi/6)
+        quat = SimpleNamespace(xform=lambda v: [v[1]*c-v[2]*s, -v[0], v[1]*s+v[2]*c])
+        vehicle.origin = SimpleNamespace(getQuat=lambda: quat, getZ=lambda: 2.)
+        vehicle.body = SimpleNamespace(getShapeTransform=lambda i: SimpleNamespace(getPos=lambda: [0., 0., .6]))
+        row = actor_state(vehicle, {'old_origin_in_current_coordinate': [-100., -200.]})
+        self.assertEqual(row['position_3d_city_m'], [101., 202., 2.])
+        self.assertAlmostEqual(row['chassis_center_city_m'][0], 100.7)
+        self.assertAlmostEqual(row['chassis_center_city_m'][2], 2.+.6*c)
+        self.assertEqual(row['orientation_basis_city']['forward'], [c, 0., s])
+        self.assertEqual(row['orientation_basis_city']['left'], [0., 1., 0.])
+
+    def test_bullet_contacts_filter_ground_and_separated_points_and_keep_solver_impulse(self):
+        own, wall, ground = object(), object(), object()
+        def manifold(a, b, distances):
+            points = [SimpleNamespace(getDistance=lambda d=d: d, getAppliedImpulse=lambda: 40.) for d in distances]
+            return SimpleNamespace(getNode0=lambda: a, getNode1=lambda: b, getManifoldPoints=lambda: points)
+        world = SimpleNamespace(getManifolds=lambda: [manifold(own, ground, [-.01]),
+            manifold(wall, own, [-.002, -.001, .04])])
+        contact = physical_contacts(world, {own: 'P1'}, {wall: {
+            'object_id': 'source-barrier', 'native_object_id': 'wall-native', 'type': 'TRAFFIC_BARRIER'}}, step=12)
+        self.assertEqual(len(contact['P1']), 1)
+        self.assertEqual(contact['P1'][0]['normal_impulse_ns'], 80.)
+        self.assertEqual(contact['P1'][0]['distance_m'], -.002)
+        self.assertEqual(contact['P1'][0]['object_id'], 'source-barrier')
+
+    def test_collision_history_survives_separation_without_claiming_active_contact(self):
+        env, runtime = self.runtime()
+        runtime.current_contacts['P1'] = [{'object_id': 'source-barrier', 'native_object_id': 'barrier',
+            'type': 'TRAFFIC_BARRIER', 'step': 1, 'normal_impulse_ns': 500., 'distance_m': -.001}]
+        env.episode_step = 1
+        runtime.after_step()
+        first = runtime.report()['vehicles']['P1']
+        self.assertTrue(first['collision_active'])
+        self.assertEqual(first['collision_event_count'], 1)
+        runtime.after_step()  # continued contact is not a new impact
+        self.assertEqual(runtime.report()['vehicles']['P1']['collision_event_count'], 1)
+        runtime.current_contacts['P1'] = []
+        env.episode_step = 2
+        runtime.after_step()
+        final = runtime.report()['vehicles']['P1']
+        self.assertFalse(final['collision_active'])
+        self.assertEqual(final['current_contacts'], [])
+        self.assertEqual(final['last_collision']['step'], 1)
+        self.assertEqual(final['last_collision']['contacts'][0]['object_id'], 'source-barrier')
 
     def test_ai_advances_only_through_supplied_patrol_goals_then_stops(self):
         env, runtime = self.runtime()

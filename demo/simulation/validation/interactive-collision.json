@@ -1,0 +1,389 @@
+{
+  "schema": "interactive-collision-validation-1.0",
+  "date": "2026-11-13",
+  "baseline_reproduces_reported_bug": true,
+  "same_actions_and_precontact_positions": true,
+  "diagnosis": "Fixed source obstacles retained vendor inverse mass despite the static flag; fixed classes now use mass zero.",
+  "before": {
+    "source_barrier": {
+      "id": "536e2da06b4e4fe38001622e3b18305c",
+      "type": "TRAFFIC_BARRIER",
+      "category": "movable_object.barrier",
+      "original_id": "536e2da06b4e4fe38001622e3b18305c",
+      "is_ego": false,
+      "persistent": true,
+      "position": [
+        441.323,
+        1272.058,
+        0.858
+      ],
+      "heading": 2.715540329881957,
+      "length": 0.299,
+      "width": 1.902,
+      "height": 1.055,
+      "velocity": [
+        0.0,
+        0.0
+      ],
+      "valid": true,
+      "state_event_ids": [
+        "S0980-OCC-scene-0980-O007"
+      ],
+      "state_status": "scene_overview",
+      "is_map_state_change": true,
+      "scope": "full_scene_overview",
+      "frozen": true,
+      "planning_eligible": false,
+      "source_step": 0,
+      "first_seen_step": 0,
+      "source_timestamp_ns": "1537845352297764000",
+      "geometry_role": "fixed_first_observed_static_pose_for_scene_overview"
+    },
+    "test_initial_pose_city_m": [
+      434.0381653306808,
+      1275.3642340873998
+    ],
+    "target_speed_m_s": 3.0,
+    "pose_assignments_after_spawn": 0,
+    "checks": {
+      "real_source_barrier_is_static_box": true,
+      "actual_barrier_contact_reported": true,
+      "nonzero_solver_impulse": true,
+      "impact_history_retained": true,
+      "car_center_does_not_pass_through_wall": false,
+      "car_decelerates_after_contact": true,
+      "no_ground_contact_reported_as_collision": true,
+      "source_map_hash_unchanged": true
+    },
+    "collision_model": "unchanged source-dimensioned fixed box; rigid vehicles, no damage model",
+    "sampling": "decision-end contacts, not a complete substep impact/impulse history",
+    "barrier_native_static": true,
+    "barrier_native_collision_shape": "BulletBoxShape",
+    "first_contact_step": 31,
+    "max_speed_m_s": 2.9694096096411937,
+    "max_chassis_center_z_m": 1.1594394445419312,
+    "max_abs_pitch_rad": 0.0407926745528553,
+    "max_abs_roll_rad": 0.0012574826390088552,
+    "max_wall_normal_position_m": 3.888258836648439,
+    "passed": false
+  },
+  "after_same_actions": {
+    "source_barrier": {
+      "id": "536e2da06b4e4fe38001622e3b18305c",
+      "type": "TRAFFIC_BARRIER",
+      "category": "movable_object.barrier",
+      "original_id": "536e2da06b4e4fe38001622e3b18305c",
+      "is_ego": false,
+      "persistent": true,
+      "position": [
+        441.323,
+        1272.058,
+        0.858
+      ],
+      "heading": 2.715540329881957,
+      "length": 0.299,
+      "width": 1.902,
+      "height": 1.055,
+      "velocity": [
+        0.0,
+        0.0
+      ],
+      "valid": true,
+      "state_event_ids": [
+        "S0980-OCC-scene-0980-O007"
+      ],
+      "state_status": "scene_overview",
+      "is_map_state_change": true,
+      "scope": "full_scene_overview",
+      "frozen": true,
+      "planning_eligible": false,
+      "source_step": 0,
+      "first_seen_step": 0,
+      "source_timestamp_ns": "1537845352297764000",
+      "geometry_role": "fixed_first_observed_static_pose_for_scene_overview"
+    },
+    "test_initial_pose_city_m": [
+      434.0381653306808,
+      1275.3642340873998
+    ],
+    "target_speed_m_s": 3.0,
+    "pose_assignments_after_spawn": 0,
+    "checks": {
+      "real_source_barrier_is_static_box": true,
+      "fixed_body_has_zero_inverse_mass": true,
+      "actual_barrier_contact_reported": true,
+      "nonzero_solver_impulse": true,
+      "impact_history_retained": true,
+      "car_center_does_not_pass_through_wall": true,
+      "car_decelerates_after_contact": true,
+      "physical_deceleration_while_commanding_forward": true,
+      "no_ground_contact_reported_as_collision": true,
+      "source_map_hash_unchanged": true,
+      "exact_same_action_sequence_as_baseline": true
+    },
+    "collision_model": "unchanged source-dimensioned fixed box; rigid vehicles, no damage model",
+    "sampling": "production fields at decision-end; test-only observer additionally reads each native substep",
+    "barrier_native_static": true,
+    "barrier_native_mass_kg": 0.0,
+    "barrier_native_inverse_mass": 0.0,
+    "barrier_native_collision_shape": "BulletBoxShape",
+    "first_contact_step": 31,
+    "max_speed_m_s": 2.8627198290416085,
+    "max_chassis_center_z_m": 1.1594394445419312,
+    "max_abs_pitch_rad": 0.010621486415860327,
+    "max_abs_roll_rad": 0.008416720888113677,
+    "max_wall_normal_position_m": -2.3936537658527213,
+    "passed": true
+  },
+  "high_speed": {
+    "source_barrier": {
+      "id": "536e2da06b4e4fe38001622e3b18305c",
+      "type": "TRAFFIC_BARRIER",
+      "category": "movable_object.barrier",
+      "original_id": "536e2da06b4e4fe38001622e3b18305c",
+      "is_ego": false,
+      "persistent": true,
+      "position": [
+        441.323,
+        1272.058,
+        0.858
+      ],
+      "heading": 2.715540329881957,
+      "length": 0.299,
+      "width": 1.902,
+      "height": 1.055,
+      "velocity": [
+        0.0,
+        0.0
+      ],
+      "valid": true,
+      "state_event_ids": [
+        "S0980-OCC-scene-0980-O007"
+      ],
+      "state_status": "scene_overview",
+      "is_map_state_change": true,
+      "scope": "full_scene_overview",
+      "frozen": true,
+      "planning_eligible": false,
+      "source_step": 0,
+      "first_seen_step": 0,
+      "source_timestamp_ns": "1537845352297764000",
+      "geometry_role": "fixed_first_observed_static_pose_for_scene_overview"
+    },
+    "test_initial_pose_city_m": [
+      418.55789165837746,
+      1282.3899815231246
+    ],
+    "target_speed_m_s": 10.0,
+    "pose_assignments_after_spawn": 0,
+    "checks": {
+      "real_source_barrier_is_static_box": true,
+      "fixed_body_has_zero_inverse_mass": true,
+      "actual_barrier_contact_reported": true,
+      "nonzero_solver_impulse": true,
+      "impact_history_retained": true,
+      "car_center_does_not_pass_through_wall": true,
+      "car_decelerates_after_contact": true,
+      "physical_deceleration_while_commanding_forward": true,
+      "no_ground_contact_reported_as_collision": true,
+      "source_map_hash_unchanged": true
+    },
+    "collision_model": "unchanged source-dimensioned fixed box; rigid vehicles, no damage model",
+    "sampling": "decision-end contacts, not a complete substep impact/impulse history",
+    "barrier_native_static": true,
+    "barrier_native_mass_kg": 0.0,
+    "barrier_native_inverse_mass": 0.0,
+    "barrier_native_collision_shape": "BulletBoxShape",
+    "first_contact_step": 57,
+    "max_speed_m_s": 8.116959880974859,
+    "max_chassis_center_z_m": 1.159439504146576,
+    "max_abs_pitch_rad": 0.02367874365719376,
+    "max_abs_roll_rad": 0.032739695696565214,
+    "max_wall_normal_position_m": -2.395880278364022,
+    "passed": true
+  },
+  "original_replay": {
+    "checks": {
+      "source_replay_pose_matches_at_all_samples": true,
+      "all_persistent_poses_and_dimensions_unchanged": true,
+      "fixed_source_bodies_keep_zero_inverse_mass": true,
+      "map_hash_unchanged": true,
+      "source_track_arrays_unchanged": true
+    },
+    "samples": [
+      {
+        "step": 10,
+        "actual": [
+          439.8074654153663,
+          1256.5026309776395
+        ],
+        "recorded": [
+          439.8074654270757,
+          1256.502631084344
+        ],
+        "ego_error_m": 1.0734519920845913e-07,
+        "persistent_objects_unchanged": true,
+        "physical_static_inverse_masses": [
+          0.0
+        ]
+      },
+      {
+        "step": 50,
+        "actual": [
+          433.83010516680065,
+          1243.539107828149
+        ],
+        "recorded": [
+          433.8301053253312,
+          1243.5391079783462
+        ],
+        "ego_error_m": 2.183829592831489e-07,
+        "persistent_objects_unchanged": true,
+        "physical_static_inverse_masses": [
+          0.0
+        ]
+      },
+      {
+        "step": 100,
+        "actual": [
+          423.81137500322643,
+          1217.2756715107053
+        ],
+        "recorded": [
+          423.81137563292987,
+          1217.2756706851553
+        ],
+        "ego_error_m": 1.0382962526648923e-06,
+        "persistent_objects_unchanged": true,
+        "physical_static_inverse_masses": [
+          0.0
+        ]
+      },
+      {
+        "step": 150,
+        "actual": [
+          413.68686519182506,
+          1187.4822602558224
+        ],
+        "recorded": [
+          413.6868651502506,
+          1187.4822611987747
+        ],
+        "ego_error_m": 9.438683415373716e-07,
+        "persistent_objects_unchanged": true,
+        "physical_static_inverse_masses": [
+          0.0
+        ]
+      },
+      {
+        "step": 199,
+        "actual": [
+          403.65023265398327,
+          1165.431227235803
+        ],
+        "recorded": [
+          403.6502336511661,
+          1165.4312248417825
+        ],
+        "ego_error_m": 2.5933968484509006e-06,
+        "persistent_objects_unchanged": true,
+        "physical_static_inverse_masses": [
+          0.0
+        ]
+      }
+    ],
+    "passed": true
+  },
+  "real_multi_browser": {
+    "live_engine": true,
+    "api_mocked": false,
+    "physics_mocked": false,
+    "checks": [
+      "host opens a real six-vehicle room",
+      "native result is physical and omits recorded moving traffic",
+      "ego starts waiting for external control",
+      "spectator is read-only",
+      "players retain independent follow cameras",
+      "an occupied vehicle rejects a second controller with HTTP 409",
+      "foreground keyboard acceleration is accepted before clock starts",
+      "three-second keyboard hold moves the physical P1 vehicle",
+      "key release brakes the physical vehicle",
+      "window blur brakes the physical vehicle",
+      "all clients show the same committed native step and pose",
+      "paused spectator GET requests never advance physics",
+      "legacy client step command cannot advance the shared room",
+      "live review uses no recorded snapshots, PNG polling or legacy commands",
+      "external observation includes current physical P1 without recorded future tracks",
+      "one external client atomically controls all five traffic vehicles",
+      "native engine applies external modes to all five actual cars",
+      "browser clients emit no JavaScript errors"
+    ],
+    "metrics": {
+      "keyboard_hold_wall_s": 3.399,
+      "keyboard_physics_steps": 22,
+      "keyboard_start": [
+        431.7007897905189,
+        1238.477442293176
+      ],
+      "keyboard_finish": [
+        428.9916642717201,
+        1232.2129693317502
+      ],
+      "keyboard_requested_action": [
+        0.0,
+        1.0
+      ],
+      "keyboard_displacement_m": 6.8252,
+      "keyboard_step": 22,
+      "keyboard_end_step": 22,
+      "synchronized_step": 53,
+      "last_step": 58,
+      "positions_city_m": {
+        "ego": [
+          440.8673160173114,
+          1258.7948717109202
+        ],
+        "P1": [
+          426.4742387346107,
+          1226.3805795002072
+        ],
+        "P2": [
+          447.77295003450695,
+          1266.748673944482
+        ],
+        "P3": [
+          432.04071841753307,
+          1263.6135406780331
+        ],
+        "P4": [
+          426.8049224428016,
+          1218.4851022052853
+        ],
+        "P5": [
+          447.4301293901283,
+          1274.264566926965
+        ]
+      },
+      "physical_vehicle_labels": {
+        "ego": "P0",
+        "P1": "P1",
+        "P2": "P2",
+        "P3": "P3",
+        "P4": "P4",
+        "P5": "P5"
+      }
+    },
+    "ok": true
+  },
+  "unit_tests": {
+    "simulation_suite": 286,
+    "passed": true
+  },
+  "reproduce": "python scripts/validate_interactive_collisions.py --out outputs/collision-check --speed 3",
+  "limits": [
+    "Only source barriers and cones have the fixed-source collision bodies described here; semantic overlays are not solid obstacles.",
+    "Cones are fixed research obstacles; there is no damage/deformation model.",
+    "Production contact telemetry is sampled at decision ends; the validation-only substep observer establishes nonzero physical impulses without claiming production peak impulses or exhaustive collision history.",
+    "A low-speed and an approximately 8.1 m/s actual impact do not guarantee all speeds, angles or scenes."
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "schema": "interactive-latency-validation-1.0",
+  "date": "2026-11-13",
+  "baseline_revision": "9e27ee0",
+  "reproduce": ".venv-sim/bin/python scripts/benchmark_interactive_latency.py --out outputs/interactive-latency --seconds 20 --viewers 3 --compact",
+  "workload": {
+    "scene": "nuscenes-scene0980",
+    "vehicle": "P1",
+    "seconds": 20,
+    "http_viewers": 3,
+    "viewer_interval_s": 0.15,
+    "input_interval_s": 0.1,
+    "input_action": [
+      0,
+      0.2
+    ],
+    "browser_rendering_included": false
+  },
+  "before": {
+    "seconds": 20.002458497008774,
+    "step": 116,
+    "steps_per_wall_second": 5.799287123497693,
+    "metrics": {
+      "input_ms": {
+        "count": 163,
+        "mean": 86.114,
+        "p50": 74.049,
+        "p95": 184.333,
+        "max": 254.282
+      },
+      "state_ms": {
+        "count": 349,
+        "mean": 124.455,
+        "p50": 112.831,
+        "p95": 245.149,
+        "max": 342.142
+      },
+      "state_bytes": {
+        "count": 349,
+        "mean": 168522.874,
+        "p50": 168717,
+        "p95": 169132,
+        "max": 169511
+      },
+      "jobs_ms": {
+        "count": 116,
+        "mean": 110.118,
+        "p50": 91.178,
+        "p95": 230.633,
+        "max": 315.784
+      },
+      "broker_status_ms": {
+        "count": 1395,
+        "mean": 5.524,
+        "p50": 0.061,
+        "p95": 22.815,
+        "max": 180.609
+      }
+    },
+    "errors": [],
+    "compact": false,
+    "phase": "paused",
+    "source": "real MetaDrive physics with three independent HTTP viewers and 10Hz input"
+  },
+  "after": {
+    "seconds": 20.000241293979343,
+    "step": 173,
+    "steps_per_wall_second": 8.649895641612988,
+    "metrics": {
+      "input_ms": {
+        "count": 188,
+        "mean": 14.228,
+        "p50": 4.82,
+        "p95": 47.179,
+        "max": 285.522
+      },
+      "state_ms": {
+        "count": 387,
+        "mean": 34.664,
+        "p50": 26.145,
+        "p95": 84.026,
+        "max": 318.991
+      },
+      "state_bytes": {
+        "count": 387,
+        "mean": 91503.45,
+        "p50": 94569,
+        "p95": 95679,
+        "max": 114753
+      },
+      "jobs_ms": {
+        "count": 173,
+        "mean": 52.22,
+        "p50": 41.639,
+        "p95": 135.591,
+        "max": 245.82
+      },
+      "broker_status_ms": {
+        "count": 2601,
+        "mean": 1.043,
+        "p50": 0.046,
+        "p95": 7.332,
+        "max": 189.526
+      },
+      "last_input_age_ms": {
+        "count": 387,
+        "mean": 63.437,
+        "p50": 62,
+        "p95": 123,
+        "max": 304
+      }
+    },
+    "errors": [],
+    "compact": true,
+    "phase": "paused",
+    "viewers": 3,
+    "native_input_stopped_reasons": {
+      "none": 173
+    },
+    "native_physics_steps_sampled": 173,
+    "same_physics_state_payload_bytes": {
+      "full": 269892,
+      "compact": 114648,
+      "matching_state_id": true,
+      "full_actor_count": 109,
+      "compact_actor_count": 109
+    },
+    "source": "real MetaDrive physics with independent HTTP viewers and 10Hz input",
+    "method": {
+      "viewer_interval_s": 0.15,
+      "driver_interval_s": 0.1,
+      "action": [
+        0,
+        0.2
+      ],
+      "browser_rendering_included": false,
+      "measurements_are_local_host_only": true
+    },
+    "environment": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "python": "3.10.22"
+    },
+    "source_sha256": {
+      "map_update/simulation_platform.py": "88edf8b45b2464dc2f87fdf166d53e48b6077e465b6eff19aab6a65e6864eb40",
+      "map_update/simulation_interactive_server.py": "ef30d9bf1cc6402b595a2065394344f4ea4bbccaaaede87cddb26d6d64605a53",
+      "map_update/simulation_room.py": "7ed3df43f5aa906fcb77242d9f0928dea9b31bc30d570dc9e424574595fec778",
+      "scripts/simulation_session_worker.py": "0ae9b3bb2f225bcdd216b05f98da2a31f529cc2e42a312cf9b427253a90fe49a",
+      "map_update/simulation_session.py": "d2aa09ba447ed2656ebcb917fb608c3e7c4361e20720dbecd61ecc639197fb83",
+      "map_update/simulation_interactive.py": "b0b8ff600412a95b6ab3ae53cebf3ba4c67442f356ec3e2a86a6e42c143823ea",
+      "map_update/simulation_obstacle_runtime.py": "80ed2be57d75849695966910662395c5faa954a1b554c189b28a11cb930724da"
+    }
+  },
+  "checks": [
+    {
+      "name": "Both runs completed real physical decisions without HTTP errors",
+      "passed": true
+    },
+    {
+      "name": "Compact and full responses describe the same physical state",
+      "passed": true
+    },
+    {
+      "name": "Compact response retains all six cars and 103 physical static actors",
+      "passed": true
+    },
+    {
+      "name": "Every after-run physical decision retained fresh manual control",
+      "passed": true
+    },
+    {
+      "name": "Observed input age remains below the unchanged 400 ms deadman limit",
+      "passed": true
+    }
+  ],
+  "limits": [
+    "These measurements use a cloud Linux host and real MetaDrive, not the users Mac and not browser FPS.",
+    "The after run also includes zero-mass fixed colliders and complete 3D pose/contact reporting; physics-rate differences cannot be attributed only to the server optimization.",
+    "Payload-size comparison uses one identical final physical state with all actors retained, independent of physics-rate differences.",
+    "Each version was measured once under the same three-viewer and 10 Hz input workload; tail latency can vary with other host activity.",
+    "The baseline did not record input-age or per-physics-decision deadman counters; those counters are only asserted for the after run."
+  ]
+}

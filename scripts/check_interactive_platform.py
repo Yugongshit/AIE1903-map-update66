@@ -107,7 +107,7 @@ def main():
                 return page
 
             host = new_page(base + '/simulation_platform.html?scene=nuscenes-scene0980')
-            host.locator('#interactive-panel > summary').click()
+            host.locator('#open-driving').click()
             if key:
                 host.locator('#simulation-control-key').fill(key)
             with host.expect_response(lambda response: response.url.endswith('/api/interactive/open')) as opened:

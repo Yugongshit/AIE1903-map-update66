@@ -26,6 +26,7 @@ class InteractiveCoordinator:
         self.job = None
         self.last_engine = None
         self.last_result = None
+        self.compact_result = None
         self.pending_camera = None
         self.pending_close = False
         self.camera_since_tick = False
@@ -73,7 +74,7 @@ class InteractiveCoordinator:
             self.identity = {k: identity[k] for k in ('session_id', 'epoch', 'host_token', 'join_token')}
             self.scene_key, self.version = key, version
             self.active, self.playing, self.phase, self.error = True, False, 'starting', None
-            self.last_engine = self.last_result = self.pending_camera = None
+            self.last_engine = self.last_result = self.compact_result = self.pending_camera = None
             self.pending_close = False
             self.camera_since_tick = False
             self.render_until = 0.
@@ -105,7 +106,7 @@ class InteractiveCoordinator:
                 self.active, self.phase = False, 'idle'
             return
         try:
-            self.room.publish(result, result.get('frame_id'), **identity)
+            self.room.publish(result, result.get('frame_id'), return_snapshot=False, **identity)
         except Exception as error:
             # Polling and the clock use the same completion path. A malformed
             # physical result must stop both from presenting stale observations
@@ -116,22 +117,37 @@ class InteractiveCoordinator:
         # Source observation histories are already loaded once with the scene.
         # Repeating them on every viewer poll wastes bandwidth and obscures
         # that these six vehicles are actual current physical actors.
-        result = {k: deepcopy(v) for k, v in result.items()
+        result = {k: v for k, v in result.items()
                   if k not in {'state_events', 'state_objects', 'persistent_obstacles_runtime'}}
         self.last_result = result
+        # The browser already has static map/state overlays. Its snapshot
+        # contains each actual actor once, including stationary colliders.
+        # Keep the complete result for Planning and backwards-compatible reads.
+        self.compact_result = {**result, 'interactive': {
+            key: value for key, value in result['interactive'].items() if key != 'static_actors'}}
         self.last_engine = {**state, 'last_result': result}
         self.phase = 'running' if self.playing else 'paused'
 
+    def _collect_completion(self):
+        if self.job:
+            state = self.server.engine.status(include_result=False)
+            if not state.get('busy') and state.get('job_id') == self.job['job_id']:
+                # Take one isolated copy per completion, never on every busy
+                # poll or every spectator request.
+                self._finish(self.server.engine.status())
+
     def _run(self):
         while not self.stopping:
-            self.wake.wait(.025)
+            # Readiness checks only copy small job metadata. A short wait
+            # avoids adding a 25 ms scheduling stall after every decision.
+            self.wake.wait(.01)
             self.wake.clear()
             with self.lock:
                 if not self.active:
                     continue
                 try:
                     if self.job:
-                        self._finish(self.server.engine.status())
+                        self._collect_completion()
                     if self.job:
                         continue
                     if self.pending_close:
@@ -163,21 +179,32 @@ class InteractiveCoordinator:
                 except Exception as error:
                     self.error, self.phase, self.playing = str(error), 'error', False
 
-    def state(self, *, render=False):
+    def state(self, *, render=False, compact=False, since_state_id=None, session_id=None):
         with self.lock:
+            if session_id is not None and (self.identity or {}).get('session_id') != session_id:
+                # A stale native-view tab must not keep asking a replacement
+                # room to generate costly PNGs before its identity is checked.
+                raise ValueError('该房间已关闭或重建，请使用新的邀请链接。')
             if render:
                 # Many spectators share one capture, and leaving the native
                 # image tab automatically expires its rendering interest.
                 self.render_until = time.monotonic() + 2.
                 self.wake.set()
             if self.job:
-                self._finish(self.server.engine.status())
+                self._collect_completion()
+            unchanged = bool(self.last_result and self.last_result.get('state_id') and
+                             since_state_id == self.last_result['state_id'])
+            result = None if unchanged else self.compact_result if compact else self.last_result
+            engine = ({**{key: deepcopy(value) for key, value in self.last_engine.items() if key != 'last_result'},
+                       'last_result': deepcopy(result)} if self.last_engine else
+                      {'ready': False, 'busy': bool(self.job), 'scene_id': self.scene_key,
+                       'version': self.version, 'last_result': None})
             return {'active': self.active, 'playing': self.playing, 'phase': self.phase,
                     'error': self.error, 'scene_id': self.scene_key, 'version': self.version,
-                    'room': self.room.snapshot() if self.identity else None,
-                    'engine': deepcopy(self.last_engine) if self.last_engine else
-                    {'ready': False, 'busy': bool(self.job), 'scene_id': self.scene_key,
-                     'version': self.version, 'last_result': None}}
+                    'state_unchanged': unchanged,
+                    'room': self.room.snapshot(include_objects=not compact,
+                                               include_vehicle_state=not compact) if self.identity else None,
+                    'engine': engine}
 
     def claim(self, body):
         with self.lock:
@@ -259,7 +286,7 @@ class InteractiveCoordinator:
             # truth merely because an older successful result is cached.
             if self.job:
                 try:
-                    self._finish(self.server.engine.status())
+                    self._collect_completion()
                 except Exception as error:
                     self.error, self.phase, self.playing = str(error), 'error', False
                     raise ValueError('Current physical observation is unavailable; reset or close the failed room') from error

@@ -32,6 +32,14 @@ def main():
                 if len(line) > 65536:
                     raise ValueError('Session command is too large')
                 result = session.command(message)
+                if result.get('interactive'):
+                    # Fixed source overlays are loaded once by the platform.
+                    # Sending their complete observation history on each live
+                    # control step delays the next action without adding any
+                    # current physical information. Keep all current actors,
+                    # collision state, frame and map identities untouched.
+                    result = {key: value for key, value in result.items() if key not in {
+                        'state_events', 'state_objects', 'persistent_obstacles_runtime'}}
                 response = {'id': identifier, 'ok': True, 'result': result}
             except Exception as error:
                 response = {'id': identifier, 'ok': False, 'error': str(error), 'error_type': type(error).__name__}

@@ -122,13 +122,59 @@ def _vehicle_class():
 
 def actor_state(vehicle, metadata, identifier=None):
     position = scenario_position(vehicle.position, metadata)
+    heading, height = float(vehicle.heading_theta), float(getattr(vehicle, 'HEIGHT', 1.) or 1.)
+    # The road-plane position is useful for planning, but is not a rendered
+    # chassis pose: Bullet can lift, pitch and roll a car during an impact.
+    # Export the actual collision-box center and a right-handed length/width/
+    # height basis. Vehicle boxes use local +Y forward, obstacle boxes +X.
+    c, s = math.cos(heading), math.sin(heading)
+    origin_xyz, center = [*position, 0.], [*position, height/2]
+    basis = {'forward': [c, s, 0.], 'left': [-s, c, 0.], 'up': [0., 0., 1.]}
+    if hasattr(vehicle, 'origin') and hasattr(vehicle, 'body'):
+        quat = vehicle.origin.getQuat()
+        local_forward = (0., 1., 0.) if hasattr(vehicle, 'FRONT_WHEELBASE') else (1., 0., 0.)
+        local_left = (-1., 0., 0.) if hasattr(vehicle, 'FRONT_WHEELBASE') else (0., 1., 0.)
+        basis = {key: [float(v) for v in quat.xform(axis)] for key, axis in
+                 (('forward', local_forward), ('left', local_left), ('up', (0., 0., 1.)))}
+        origin_xyz = [*position, float(vehicle.origin.getZ())]
+        offset = quat.xform(vehicle.body.getShapeTransform(0).getPos())
+        center = [origin_xyz[i]+float(offset[i]) for i in range(3)]
     return {'vehicle_id': identifier or str(vehicle.id), 'native_object_id': str(vehicle.id),
             'position_scenario_m': position, 'position_city_m': position,
+            'position_3d_city_m': origin_xyz, 'chassis_center_city_m': center,
+            'orientation_basis_city': basis,
+            'roll_rad': float(getattr(vehicle, 'roll', 0.)), 'pitch_rad': float(getattr(vehicle, 'pitch', 0.)),
             'position_runtime_m': [float(v) for v in vehicle.position[:2]],
             'velocity_m_s': [float(v) for v in vehicle.velocity[:2]],
-            'heading_rad': float(vehicle.heading_theta), 'speed_m_s': float(vehicle.speed),
+            'heading_rad': heading, 'speed_m_s': float(vehicle.speed),
             'length_m': float(vehicle.LENGTH), 'width_m': float(vehicle.WIDTH),
-            'height_m': float(getattr(vehicle, 'HEIGHT', 1.) or 1.), 'type': type(vehicle).__name__}
+            'height_m': height, 'type': type(vehicle).__name__}
+
+
+def physical_contacts(world, owned_bodies, actor_bodies, *, step):
+    """Read solved Bullet manifolds, excluding normal wheel/road contact.
+
+    Unlike a latched crash flag this reports contacts still present after the
+    current physics decision. Impulse comes from Bullet's actual solver; it is
+    not an invented damage value or a substitute for physical response.
+    """
+    contacts = {identifier: {} for identifier in owned_bodies.values()}
+    for manifold in world.getManifolds():
+        nodes = (manifold.getNode0(), manifold.getNode1())
+        points = [point for point in manifold.getManifoldPoints() if point.getDistance() <= 1e-5]
+        if not points:
+            continue
+        for index, node in enumerate(nodes):
+            identifier, other = owned_bodies.get(node), actor_bodies.get(nodes[1-index])
+            if identifier is None or other is None:
+                continue
+            key = other['native_object_id']
+            impulse = sum(max(0., float(point.getAppliedImpulse())) for point in points)
+            row = contacts[identifier].setdefault(key, dict(other, step=int(step),
+                normal_impulse_ns=0., distance_m=float(points[0].getDistance())))
+            row['normal_impulse_ns'] += impulse
+            row['distance_m'] = min(row['distance_m'], *(float(point.getDistance()) for point in points))
+    return {identifier: list(rows.values()) for identifier, rows in contacts.items()}
 
 
 def _footprint(actor):
@@ -190,6 +236,11 @@ class InteractiveRuntime:
         self.expires = {identifier: None for identifier in IDS}
         self.reasons = {identifier: 'waiting_for_action' if identifier == 'ego' else None for identifier in IDS}
         self.collisions = {identifier: [] for identifier in IDS}
+        self.current_contacts = {identifier: [] for identifier in IDS}
+        self.last_collision = {identifier: None for identifier in IDS}
+        self.collision_event_count = {identifier: 0 for identifier in IDS}
+        self._previous_contact_keys = {identifier: set() for identifier in IDS}
+        self._speeds_before = {identifier: 0. for identifier in IDS}
         self.controllers, self.diagnostics, self.braking = {}, {}, {}
         self.patrol_indices = {key: 0 for key in IDS[1:]}
         self.completed_goals = {key: 0 for key in IDS[1:]}
@@ -254,6 +305,7 @@ class InteractiveRuntime:
         actors = self.actors()
         for identifier, vehicle in self.vehicles.items():
             own = actor_state(vehicle, self.metadata, identifier)
+            self._speeds_before[identifier] = own['speed_m_s']
             action = list(self.requested[identifier])
             self.braking[identifier] = None
             if (self.modes[identifier] != 'ai' and self.expires[identifier] is not None
@@ -301,11 +353,42 @@ class InteractiveRuntime:
         return self.actions['ego']
 
     def after_step(self):
+        world = getattr(getattr(self.env.engine, 'physics_world', None), 'dynamic_world', None)
+        if world is not None:
+            aliases = {vehicle.id: identifier for identifier, vehicle in self.vehicles.items()}
+            manager = getattr(self.env.engine, 'traffic_manager', None)
+            definitions = getattr(manager, 'persistence_definitions', {})
+            aliases.update({value: key for key, value in getattr(manager, '_scenario_id_to_obj_id', {}).items()})
+            actors = {obj.body: {'object_id': str(aliases.get(obj.id, obj.id)),
+                      'native_object_id': str(obj.id),
+                      'type': definitions.get(aliases.get(obj.id), {}).get('type', type(obj).__name__)}
+                      for obj in self.env.engine.get_objects().values()
+                      if hasattr(obj, 'body') and hasattr(obj, 'LENGTH') and hasattr(obj, 'WIDTH')}
+            self.current_contacts = physical_contacts(world,
+                {vehicle.body: identifier for identifier, vehicle in self.vehicles.items()}, actors,
+                step=self.env.episode_step)
         for identifier, vehicle in self.vehicles.items():
             if identifier != 'ego':
                 vehicle.after_step()
-            if any(bool(getattr(vehicle, 'crash_'+kind, False)) for kind in ('vehicle', 'object', 'human', 'building')):
+            flags = {kind: bool(getattr(vehicle, 'crash_'+kind, False)) for kind in ('vehicle', 'object', 'human', 'building')}
+            contacts = self.current_contacts[identifier]
+            if contacts or any(flags.values()):
                 self.collisions[identifier].append(int(self.env.episode_step))
+                del self.collisions[identifier][:-100]
+            # A brief impact can end between decisions; retain native collision
+            # flags as evidence, without inventing an object ID or contact.
+            keys = {row['native_object_id'] for row in contacts} or {
+                'native_flag:'+kind for kind, hit in flags.items() if hit}
+            previous = self._previous_contact_keys[identifier]
+            previous_actors = {key for key in previous if not key.startswith('native_flag:')}
+            if keys and (not previous or (contacts and previous_actors and keys-previous_actors)):
+                self.collision_event_count[identifier] += 1
+                self.last_collision[identifier] = {'step': int(self.env.episode_step),
+                    'sim_time_s': float(self.env.episode_step*self.env.config['physics_world_step_size']*
+                                        self.env.config['decision_repeat']),
+                    'speed_before_m_s': self._speeds_before[identifier], 'speed_after_m_s': float(vehicle.speed),
+                    'contacts': deepcopy(contacts), 'native_collision_flags': flags}
+            self._previous_contact_keys[identifier] = keys
 
     def report(self):
         actors = self.actors()
@@ -319,10 +402,18 @@ class InteractiveRuntime:
                 stopped_reason=self.reasons[identifier], braking=self.braking.get(identifier),
                 collision={kind: bool(getattr(vehicle, 'crash_'+kind, False)) for kind in ('vehicle', 'object', 'human', 'building')},
                 collision_contact_steps=list(self.collisions[identifier][-100:]),
+                collision_active=bool(self.current_contacts[identifier]),
+                current_contacts=deepcopy(self.current_contacts[identifier]),
+                last_collision=deepcopy(self.last_collision[identifier]),
+                collision_event_count=self.collision_event_count[identifier],
                 motion_source='metadrive_bullet_physics', uses_recorded_trajectory=False,
-                color=list(COLORS[identifier]), route=deepcopy(self.diagnostics.get(identifier)),
-                goal_scenario_m=self.goal(identifier) if identifier in self.missions else None,
-                patrol_goal_index=self.patrol_indices.get(identifier),
+                color=list(COLORS[identifier]),
+                route=deepcopy(self.diagnostics.get(identifier)) if self.modes[identifier] == 'ai' else None,
+                route_scope=('controller_plan_not_prediction' if self.modes[identifier] == 'ai'
+                             and self.diagnostics.get(identifier) else 'unavailable'),
+                intent_source='builtin_lane_controller' if self.modes[identifier] == 'ai' else 'not_provided',
+                goal_scenario_m=self.goal(identifier) if self.modes[identifier] == 'ai' else None,
+                patrol_goal_index=self.patrol_indices.get(identifier) if self.modes[identifier] == 'ai' else None,
                 completed_patrol_goals=self.completed_goals.get(identifier, 0))
             vehicles[identifier] = row
         step = int(self.env.episode_step)
@@ -338,6 +429,10 @@ class InteractiveRuntime:
                 'source_recording_is_planning_input': False,
                 'observation_source': 'current_simulator_actor_states', 'occlusion_modelled': False,
                 'static_environment_scope': 'fixed_full_scene_offline_prior',
+                'static_collision_model': 'fixed_source_dimensioned_boxes_including_cones',
+                'collision_sampling': 'end_of_decision_bullet_manifolds_with_native_flags_for_transient_impacts',
+                'collision_contact_scope': 'controlled_cars_and_source_static_objects',
+                'vehicle_damage_modelled': False,
                 'ai_scope': 'independent_source_lane_following_and_nearby_actor_braking',
                 'ai_is_user_planning_module': False, 'traffic_signal_compliance': False,
                 'reset_supported': True, 'seek_supported': False,

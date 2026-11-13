@@ -1,0 +1,171 @@
+{
+  "schema": "interactive-display-validation-1.0",
+  "date": "2026-11-13",
+  "display_checks": {
+    "ok": true,
+    "ui_fixture_only": true,
+    "physics_mocked_for_rendering_checks": true,
+    "checks": [
+      "opening driving controls does not resize or overlap desktop map",
+      "attached-state selection retains its outline, label and inspector",
+      "compact snapshots retain all physical static actors",
+      "actual Bullet box center keeps height and does not flatten collision pose",
+      "physical orientation basis becomes full 3D rotation",
+      "active and retained collisions name their object and physical step",
+      "collision history survives after contact ends",
+      "smoothing remains between received poses and never changes authoritative state",
+      "paused frames do not continue moving or retain interpolation",
+      "saved real Bullet contact frame preserves its actual center and object identity",
+      "reset discards prior raised pose and smoothing history",
+      "small-screen driving controls remain outside the map and page width",
+      "leaving a room clears interpolation and pending animation",
+      "road selection retains original and updated highlighters after batching",
+      "original map selection still switches road geometry",
+      "updated map selection still switches road geometry",
+      "batching preserves every triangle, line segment, dashed distance and material",
+      "camera and map review issue no simulation stepping commands",
+      "browser has no JavaScript errors"
+    ],
+    "desktop_viewport": {
+      "x": 200,
+      "y": 216,
+      "width": 910,
+      "height": 647
+    },
+    "interpolation_samples": [
+      {
+        "visual": 445.8704213748056,
+        "truth": 446.8624213746864,
+        "interpolation": {
+          "from_step": 2,
+          "to_step": 3,
+          "alpha": 0.00800000011920929,
+          "max_delay_ms": 100
+        }
+      },
+      {
+        "visual": 446.3604213746268,
+        "truth": 446.8624213746864,
+        "interpolation": {
+          "from_step": 2,
+          "to_step": 3,
+          "alpha": 0.4979999999403935,
+          "max_delay_ms": 100
+        }
+      },
+      {
+        "visual": 446.3604213746268,
+        "truth": 446.8624213746864,
+        "interpolation": {
+          "from_step": 2,
+          "to_step": 3,
+          "alpha": 0.4979999999403935,
+          "max_delay_ms": 100
+        }
+      },
+      {
+        "visual": 446.8604213746268,
+        "truth": 446.8624213746864,
+        "interpolation": {
+          "from_step": 2,
+          "to_step": 3,
+          "alpha": 0.9979999999403936,
+          "max_delay_ms": 100
+        }
+      },
+      {
+        "visual": 446.8604213746268,
+        "truth": 446.8624213746864,
+        "interpolation": {
+          "from_step": 2,
+          "to_step": 3,
+          "alpha": 0.9979999999403936,
+          "max_delay_ms": 100
+        }
+      },
+      {
+        "visual": 446.8624213746864,
+        "truth": 446.8624213746864,
+        "interpolation": {
+          "from_step": 2,
+          "to_step": 3,
+          "alpha": 1,
+          "max_delay_ms": 100
+        }
+      }
+    ],
+    "ui_source_sha256": "45997aaa259a7c7229501e37e58b35665196680f63aae3295d59454f5b80e302"
+  },
+  "performance_comparison": {
+    "ui_fixture_only": true,
+    "browser_backend": "Chromium SwiftShader software WebGL",
+    "input": {
+      "state_frequency_hz": 10,
+      "fixed_response_delay_ms": 40,
+      "geometry": "repository nuScenes scene0980",
+      "poses": "explicit synthetic completed-state fixtures; no native physics"
+    },
+    "reproduce": [
+      "python scripts/benchmark_driving_ui.py --name baseline --revision 9e27ee0",
+      "python scripts/benchmark_driving_ui.py --name final"
+    ],
+    "source_sha256": {
+      "before": "1f619493e59b27c899838d375ed0fff5d0f365cd271fa595156a3908c1159241",
+      "after": "45997aaa259a7c7229501e37e58b35665196680f63aae3295d59454f5b80e302"
+    },
+    "metrics": {
+      "mean_draw_calls": {
+        "before": 450.4130434782609,
+        "after": 117.47826086956522
+      },
+      "render_cpu_p50_ms": {
+        "before": 5.899999991059303,
+        "after": 2.5
+      },
+      "render_cpu_p95_ms": {
+        "before": 17,
+        "after": 5.300000011920929
+      },
+      "poll_interval_p50_ms": {
+        "before": 223.7365850014612,
+        "after": 99.94775505037978
+      },
+      "idle_draws_in_2_2s": {
+        "before": 37,
+        "after": 0
+      },
+      "visual_distinct_positions": {
+        "before": 18,
+        "after": 46
+      },
+      "max_visual_lead_m": {
+        "before": 0.0,
+        "after": -0.001099999988078082
+      }
+    },
+    "map_controls_open": {
+      "before": {
+        "x": 218,
+        "y": 399.5,
+        "width": 920,
+        "height": 463.5
+      },
+      "after": {
+        "x": 200,
+        "y": 216,
+        "width": 910,
+        "height": 647
+      }
+    },
+    "limits": [
+      "CPU submission cost is measured, not native MetaDrive FPS or MacBook FPS.",
+      "Actual vehicle control is validated separately by outputs/interactive-platform-usability/report.json.",
+      "Interpolation only changes display mesh positions between received completed states; server API state is untouched."
+    ]
+  },
+  "real_physics_and_multiplayer_report": "interactive-collision.json",
+  "limits": [
+    "Display checks inject completed poses over actual map geometry; this is not a simulation physics benchmark.",
+    "Performance numbers use local software-rendered Chromium, not the users Mac. Authoritative Planning observations are never interpolated."
+  ]
+}

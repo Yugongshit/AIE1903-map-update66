@@ -113,13 +113,20 @@ def _measured_classes():
 
     def measured(base, name):
         class MeasuredObject(base):
+            # Bullet's setStatic(True) only changes collision flags. Retaining
+            # the vendor cone/barrier mass leaves nonzero inverse mass in the
+            # solver: it assigns an impulse to an object that cannot move,
+            # allowing cars to penetrate it. A fixed source obstacle must have
+            # zero mass (infinite resistance), as well as the static flag.
+            MASS = 0.
+
             def __init__(self, position, heading_theta, length, width, height, static=True,
                          random_seed=None, name=None):
                 self._source_length, self._source_width = float(length), float(width)
                 self.HEIGHT = float(height)
                 super().__init__(position=position, heading_theta=heading_theta, static=True,
                                  random_seed=random_seed, name=name)
-                # Source heading follows the object's long X axis. The vendor
+                # Source heading follows the object's length X axis. The vendor
                 # barrier box swaps X/Y, so replace it with source-oriented LWH.
                 for shape in list(self.body.getShapes()):
                     self.body.removeShape(shape)

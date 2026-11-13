@@ -28,7 +28,7 @@ def main():
         parser.exit(2, f'无法启动平台：{error}；可用 --port 8092 选择其他端口。\n')
     url = f'http://{args.host if args.host not in {"0.0.0.0", "::"} else "127.0.0.1"}:{server.server_port}/'
     print('场景与地图更新平台：' + url, flush=True)
-    print('选择场景后可审阅两层变化、启动 MetaDrive、拖动时间轴及导出 Planning 输入。Ctrl+C 关闭。', flush=True)
+    print('选择场景后可审阅地图或回放记录；右侧「驾驶控制」可启动五车交互。Ctrl+C 关闭。', flush=True)
     if not args.no_browser:
         threading.Timer(.5, lambda: webbrowser.open(url)).start()
     try:

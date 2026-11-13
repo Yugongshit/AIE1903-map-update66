@@ -6,6 +6,7 @@ import struct
 import tempfile
 import threading
 import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 import zlib
@@ -311,6 +312,43 @@ class EngineBrokerTests(unittest.TestCase):
                 self.assertEqual(status['job_id'], 'replacement')
             finally:
                 broker.close()
+
+    def test_metadata_status_does_not_copy_a_large_inflight_result(self):
+        with tempfile.TemporaryDirectory() as root:
+            broker = EngineBroker(root)
+            try:
+                broker.state.update(busy=True, job_id='physical-step', last_result={'step': 7, 'actors': [[1., 2.]]})
+                metadata = broker.status(include_result=False)
+                self.assertNotIn('last_result', metadata)
+                self.assertTrue(metadata['busy'])
+                self.assertEqual(metadata['job_id'], 'physical-step')
+                full = broker.status()
+                full['last_result']['actors'][0][0] = 999
+                self.assertEqual(broker.status()['last_result']['actors'], [[1., 2.]])
+            finally:
+                broker.close()
+
+    def test_live_snapshot_preserves_actual_3d_pose_and_collision_evidence(self):
+        vehicle = {'type': 'VEHICLE', 'vehicle_id': 'ego', 'position_scenario_m': [12., 18.],
+                   'heading_rad': .3, 'length_m': 4.5, 'width_m': 1.8, 'height_m': 1.5,
+                   'chassis_center_city_m': [12., 18., 1.1],
+                   'orientation_basis_city': {'forward': [1., 0., 0.], 'left': [0., .9, .1], 'up': [0., -.1, .9]},
+                   'position_3d_city_m': [12., 18., .5], 'pitch_rad': .1, 'roll_rad': .2,
+                   'collision_active': True, 'current_contacts': [{'object_id': 'barrier', 'step': 7}],
+                   'last_collision': {'step': 7, 'speed_before_m_s': 2.1, 'speed_after_m_s': .4},
+                   'collision_event_count': 1}
+        result = {'scene_id': 'source-scene', 'dataset': 'source-data', 'map_features_sha256': 'new-map', 'step': 7,
+                  'interactive': {'vehicles': {'ego': vehicle}, 'static_actors': [], 'sim_time_s': .7}}
+        payload = {'scene_id': 'source-scene', 'dataset': 'source-data', 'versions': {'updated': {'map_sha256': 'new-map'}}}
+        snapshot = PlatformServer.engine_snapshot(SimpleNamespace(scene=lambda key: payload), result, 'example', 'updated')
+        self.assertEqual(snapshot['ego']['chassis_center_city_m'], vehicle['chassis_center_city_m'])
+        self.assertEqual(snapshot['ego']['orientation_basis_city'], vehicle['orientation_basis_city'])
+        self.assertEqual(snapshot['ego']['last_collision'], vehicle['last_collision'])
+        self.assertTrue(snapshot['ego']['collision_active'])
+        self.assertEqual(snapshot['step'], 7)
+        self.assertEqual(snapshot['map_sha256'], 'new-map')
+        snapshot['ego']['orientation_basis_city']['up'][2] = -1
+        self.assertEqual(vehicle['orientation_basis_city']['up'][2], .9)
 
     def wait_job(self, broker):
         deadline = time.monotonic()+5

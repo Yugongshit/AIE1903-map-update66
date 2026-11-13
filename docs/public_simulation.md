@@ -10,7 +10,7 @@ GitHub Pages 提供地图网页和数据文件。玩家输入、物理碰撞及�
 
 部署下述后端后，在网页的服务器地址处填写其 HTTPS 地址并连接。主持人使用服务器控制密钥创建交互场景，再将页面生成的房间邀请链接分享给同伴。不要把服务器控制密钥放到分享链接、GitHub 仓库或群聊中。
 
-网页上的 **交互交通** 有五个可交互车辆席位 P1–P5，另有主规划车 ego。玩家领取一个空闲席位后，用 WASD / 方向键控制；无人接管的席位由内置 AI 驾驶，也可交给外部模块。已经有人驾驶的席位不能由另一位玩家直接抢占。具体动作、观察、心跳和外部 Planning 接入格式见[接口说明](interactive_planning_api.md)。
+网页右侧 **驾驶控制 → 交互交通** 有五个可交互车辆席位 P1–P5，另有主规划车 ego。控制区与地图并排，切换或展开它不会缩小地图高度；小屏幕上位于地图下方。玩家领取一个空闲席位后，用 WASD / 方向键控制；无人接管的席位由内置 AI 驾驶，也可交给外部模块。已经有人驾驶的席位不能由另一位玩家直接抢占。具体动作、观察、心跳和外部 Planning 接入格式见[接口说明](interactive_planning_api.md)。
 
 服务器推进同一个物理世界。多个网页查看它不会重复推进仿真；各车的新位置和速度会进入下一次 Planning 观察。Planning 模块如何改变路径与控制动作由接入模块决定。内置 AI 仅用于生成可交互交通，不代表你们同学的完整规划算法。
 
@@ -101,5 +101,7 @@ python scripts/check_public_simulation.py --url http://127.0.0.1:8112/ \
 ## 验证记录
 
 [交互平台验证报告](../demo/simulation/validation/interactive-platform.json) 保存了两种源地图的指纹、真实物理检查、三个独立浏览器联调结果，以及 Docker 中实际启动六车和生成 PNG 的结果。运行测试的外部控制器只用于验证接口，不是你们同学的规划模块，也不能据此宣称任意驾驶行为都不会碰撞。
+
+后续修复的[延迟对照](../demo/simulation/validation/interactive-latency.json)记录了三观众负载下的实际 HTTP 与物理步进数据；[碰撞对照](../demo/simulation/validation/interactive-collision.json)记录相同初态和动作序列下固定路障修复前后的真实响应，以及原记录回放回归。云端测试结果不等于所有客户端的帧率或所有撞击工况的保证。
 
 真实物理检查使用 `scripts/validate_interactive_simulation.py`；多人浏览器检查使用 `scripts/check_interactive_platform.py`，运行后者前先启动本机平台服务。原记录回放与交互房间分开验证，默认回放仍按源轨迹运行。

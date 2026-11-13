@@ -53,7 +53,7 @@ class EngineBroker:
         self.state = dict(busy=False, job_id=None, last_result=None, error=None,
                           scene_id=None, version=None, ready=False)
 
-    def status(self, *, wait_ms=0, job_id=None):
+    def status(self, *, wait_ms=0, job_id=None, include_result=True):
         wait_ms = _wait_ms(wait_ms)
         with self.completed:
             deadline = time.monotonic() + wait_ms / 1000
@@ -63,7 +63,12 @@ class EngineBroker:
                 if remaining <= 0:
                     break
                 self.completed.wait(remaining)
-            return json.loads(json.dumps(self.state))
+            # The physics clock polls job readiness frequently. Copying the
+            # whole scene result while it is still busy competes with control
+            # input and the worker's JSON reader for the Python interpreter.
+            value = self.state if include_result else {
+                key: value for key, value in self.state.items() if key != 'last_result'}
+            return json.loads(json.dumps(value))
 
     def _start(self):
         if self.process is not None and self.process.poll() is None:
@@ -321,17 +326,22 @@ class PlatformServer(ThreadingHTTPServer):
             raise ValueError('Engine frame and scene snapshot identities do not match')
         if result.get('interactive'):
             interactive = result['interactive']
+            physical_fields = ('chassis_center_city_m', 'orientation_basis_city', 'position_3d_city_m',
+                               'pitch_rad', 'roll_rad', 'collision_active', 'current_contacts',
+                               'last_collision', 'collision_event_count', 'collision')
             actors = [{'id': row.get('vehicle_id', row.get('native_object_id')), 'type': row['type'],
                        'is_ego': False, 'persistent': True, 'position': list(row['position_scenario_m']),
                        'heading': row['heading_rad'], 'length': row['length_m'],
-                       'width': row['width_m'], 'height': row.get('height_m', 1.)}
+                       'width': row['width_m'], 'height': row.get('height_m', 1.),
+                       **{name: deepcopy(row[name]) for name in physical_fields if name in row}}
                       for row in interactive.get('static_actors', [])]
             for identifier, row in interactive['vehicles'].items():
                 actors.append({'id': identifier, 'type': 'VEHICLE', 'category': 'vehicle',
                     'is_ego': identifier == 'ego', 'persistent': False,
                     'position': list(row['position_scenario_m']), 'heading': row['heading_rad'],
                     'length': row['length_m'], 'width': row['width_m'], 'height': row.get('height_m', 1.5),
-                    'velocity': row.get('velocity_m_s', [0., 0.]), 'interactive_vehicle': identifier})
+                    'velocity': row.get('velocity_m_s', [0., 0.]), 'interactive_vehicle': identifier,
+                    **{name: deepcopy(row[name]) for name in physical_fields if name in row}})
             # This is a new physical experiment on the source map, not a
             # timestamp-indexed replay of the source actors. Review overlays
             # already hold their explicitly offline static prior in the scene.
@@ -451,12 +461,15 @@ class PlatformHandler(BaseHTTPRequestHandler):
                         'control_key_required': self.server.control_key is not None})
         elif path == '/api/interactive/state':
             render = _one(query, 'render', '0')
-            if render not in {'0', '1'}:
-                raise ValueError('render must be 0 or 1')
-            state = self.server.interactive.state(render=render == '1')
+            compact = _one(query, 'compact', '0')
+            since = _one(query, 'since_state_id', None)
             requested = _one(query, 'session_id', None)
-            if requested is not None and (state.get('room') or {}).get('session_id') != requested:
-                raise ValueError('该房间已关闭或重建，请使用新的邀请链接。')
+            if render not in {'0', '1'} or compact not in {'0', '1'}:
+                raise ValueError('render and compact must be 0 or 1')
+            if since is not None and len(since) > 128:
+                raise ValueError('Invalid state identity')
+            state = self.server.interactive.state(render=render == '1', compact=compact == '1',
+                                                   since_state_id=since, session_id=requested)
             self._send(state)
         elif path == '/api/interactive/observation':
             self._send(self.server.interactive.observation(_one(query, 'session_id', None),

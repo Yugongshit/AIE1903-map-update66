@@ -80,6 +80,8 @@ class FakeBroker:
                   "map_features_sha256": "source-map", "camera": deepcopy(self.camera),
                   "interactive": {"vehicles": vehicles, "sim_time_s": self.step*.1,
                                   "static_actors": [{"vehicle_id": "barrier", "position_city_m": [20., 10.]}]}}
+        result['snapshot'] = {'step': self.step, 'map_sha256': 'source-map',
+                              'actors': [*deepcopy(list(vehicles.values())), {'id': 'barrier', 'position': [20., 10.]}]}
         if capture:
             result["frame_id"] = "fake-frame-"+str(self.counter)
         self.state.update(last_result=result, ready=True)
@@ -87,7 +89,8 @@ class FakeBroker:
     def status(self, **kwargs):
         with self.lock:
             self._complete_if_ready()
-            return deepcopy(self.state)
+            return deepcopy(self.state if kwargs.get('include_result', True) else {
+                key: value for key, value in self.state.items() if key != 'last_result'})
 
     def close(self):
         pass
@@ -388,6 +391,68 @@ class InteractiveHttpTests(unittest.TestCase):
         self.assertEqual(self.broker.step, 1)
         query = "/api/interactive/observation?session_id="+self.identity["session_id"]+"&vehicle_id=ego"
         self.assertEqual(self.request(query)[0], 400)
+
+    def test_compact_state_keeps_actual_actor_geometry_and_omits_only_duplicate_state(self):
+        self.open_room()
+        complete = self.state()
+        status, _, compact = self.request('/api/interactive/state?compact=1')
+        self.assertEqual(status, 200)
+        full_result, result = complete['engine']['last_result'], compact['engine']['last_result']
+        self.assertEqual(result['snapshot'], full_result['snapshot'])
+        self.assertEqual(result['interactive']['vehicles'], full_result['interactive']['vehicles'])
+        self.assertEqual(result['map_features_sha256'], full_result['map_features_sha256'])
+        self.assertEqual(result['state_id'], full_result['state_id'])
+        self.assertNotIn('static_actors', result['interactive'])
+        self.assertNotIn('objects', compact['room'])
+        self.assertNotIn('state', compact['room']['vehicles']['P1'])
+        self.assertIn('objects', complete['room'])
+        self.assertIn('static_actors', full_result['interactive'])
+        self.assertEqual(len(result['snapshot']['actors']), 7)
+        encoded = json.dumps(compact)
+        self.assertNotIn(self.identity['host_token'], encoded)
+        self.assertNotIn(self.identity['join_token'], encoded)
+
+    def test_unchanged_physics_does_not_cache_room_ownership_or_control_mode(self):
+        self.open_room()
+        state_id = self.state()['engine']['last_result']['state_id']
+        query = '/api/interactive/state?compact=1&since_state_id='+state_id
+        before = self.request(query)[2]
+        self.assertTrue(before['state_unchanged'])
+        self.assertIsNone(before['engine']['last_result'])
+        _, _, claim = self.post('claim', {**self.public_identity(), 'vehicle_id': 'P1',
+                                          'join_token': self.identity['join_token']})
+        claimed = self.request(query)[2]
+        self.assertTrue(claimed['room']['vehicles']['P1']['claimed'])
+        self.assertEqual(claimed['room']['vehicles']['P1']['mode'], 'manual')
+        self.assertIsNone(claimed['engine']['last_result'])
+        self.post('release', {**self.public_identity(), 'lease_token': claim['lease_token']})
+        released = self.request(query)[2]
+        self.assertFalse(released['room']['vehicles']['P1']['claimed'])
+        self.assertEqual(released['room']['vehicles']['P1']['mode'], 'ai')
+        self.assertEqual(self.host('mode', vehicle_id='P2', mode='external')[0], 200)
+        self.assertEqual(self.request(query)[2]['room']['vehicles']['P2']['mode'], 'external')
+        self.assertEqual(len(self.broker.commands), 1)
+        self.assertIsNotNone(self.request('/api/interactive/state?compact=1&since_state_id=old')[2]['engine']['last_result'])
+
+    def test_unchanged_state_still_expires_a_disconnected_control_lease(self):
+        self.open_room()
+        state_id = self.state()['engine']['last_result']['state_id']
+        self.post('claim', {**self.public_identity(), 'vehicle_id': 'P1', 'join_token': self.identity['join_token']})
+        now = time.monotonic()
+        with patch.object(self.server.interactive.room, '_clock', return_value=now+10):
+            state = self.request('/api/interactive/state?compact=1&since_state_id='+state_id)[2]
+        self.assertTrue(state['state_unchanged'])
+        self.assertFalse(state['room']['vehicles']['P1']['claimed'])
+        self.assertEqual(state['room']['vehicles']['P1']['mode'], 'ai')
+
+    def test_invalid_compact_query_cannot_change_room_or_advance_physics(self):
+        self.open_room()
+        for query in ('compact=yes', 'compact=1&compact=0', 'render=true', 'since_state_id='+'x'*129):
+            self.assertEqual(self.request('/api/interactive/state?'+query)[0], 400)
+        self.assertEqual(len(self.broker.commands), 1)
+        interest = self.server.interactive.render_until
+        self.assertEqual(self.request('/api/interactive/state?render=1&session_id=stale-room')[0], 400)
+        self.assertEqual(self.server.interactive.render_until, interest)
 
 
 if __name__ == "__main__":

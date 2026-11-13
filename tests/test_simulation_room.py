@@ -43,6 +43,19 @@ class InteractiveRoomTests(unittest.TestCase):
         self.assertEqual(snapshot["vehicles"]["ego"]["effective_action"], [0, -1])
         self.assertEqual(snapshot["vehicles"]["P2"]["mode"], "ai")
 
+    def test_compact_room_retains_authority_but_skips_duplicate_physical_state(self):
+        token = self.claim()
+        full = self.room.snapshot()
+        compact = self.room.snapshot(include_objects=False, include_vehicle_state=False)
+        self.assertNotIn('objects', compact)
+        self.assertNotIn('state', compact['vehicles']['P1'])
+        expected = {key: value for key, value in full['vehicles']['P1'].items() if key != 'state'}
+        self.assertEqual(compact['vehicles']['P1'], expected)
+        self.assertTrue(compact['vehicles']['P1']['claimed'])
+        self.clock.advance(4)
+        self.assertFalse(self.room.snapshot(include_objects=False)['vehicles']['P1']['claimed'])
+        self.assertNotIn(token, json.dumps(compact))
+
     def test_claim_needs_invitation_but_players_do_not_need_host_ticket(self):
         with self.assertRaises(RoomError) as failure:
             self.room.claim("P1", **self.identity)
