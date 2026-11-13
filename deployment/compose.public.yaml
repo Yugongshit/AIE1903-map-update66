@@ -1,0 +1,23 @@
+services:
+  simulation:
+    expose:
+      - "8091"
+  https:
+    image: caddy:2.10
+    restart: unless-stopped
+    environment:
+      SIMULATION_DOMAIN: ${SIMULATION_DOMAIN:?Set the DNS hostname pointing to this server}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      simulation:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+  caddy_config:

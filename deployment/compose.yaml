@@ -1,0 +1,13 @@
+services:
+  simulation:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    restart: unless-stopped
+    environment:
+      SIMULATION_CONTROL_KEY: ${SIMULATION_CONTROL_KEY:?Set a random server control key in deployment/.env}
+    ports:
+      - "127.0.0.1:8091:8091"
+    shm_size: 256mb
+    init: true
+    stop_grace_period: 20s

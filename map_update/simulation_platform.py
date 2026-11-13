@@ -6,6 +6,7 @@ review renderer and the actual simulator are explicitly separate view modes.
 """
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 import gzip
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
@@ -13,6 +14,7 @@ import json
 import mimetypes
 from pathlib import Path
 import queue
+import secrets
 import subprocess
 import sys
 import tempfile
@@ -163,8 +165,12 @@ class EngineBroker:
         file cleanup. Opaque IDs cannot be reused after a worker restart.
         """
         result = dict(result)
+        # Physical updates have their own identity even when no viewer needs
+        # a PNG. Never identify a newer pose snapshot with an older image.
+        result['state_id'] = uuid.uuid4().hex
         filename = result.get('frame') or result.get('frame_file') or result.get('frame_path')
         data = None
+        result.pop('frame_id', None)
         if filename is not None:
             if not isinstance(filename, str):
                 raise ValueError('Invalid simulation frame path')
@@ -269,7 +275,16 @@ def _wait_ms(value):
 class PlatformServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, repo_root, *, engine_python=None):
+    def __init__(self, address, repo_root, *, engine_python=None, control_key=None, allowed_origins=()):
+        self.control_key = control_key or None
+        if address[0] not in {'127.0.0.1', 'localhost', '::1'} and (not self.control_key or len(self.control_key) < 16):
+            raise ValueError('Public binding requires a control key of at least 16 characters')
+        self.allowed_origins = set()
+        for value in allowed_origins:
+            parsed = urlsplit(value)
+            if parsed.scheme not in {'http', 'https'} or not parsed.netloc or parsed.path not in {'', '/'} or parsed.query or parsed.fragment:
+                raise ValueError('Allowed origins must be exact HTTP(S) origins')
+            self.allowed_origins.add(parsed.scheme + '://' + parsed.netloc)
         super().__init__(address, PlatformHandler)
         self.repo = Path(repo_root).resolve()
         self.payloads = {}
@@ -277,6 +292,8 @@ class PlatformServer(ThreadingHTTPServer):
         self.snapshots = OrderedDict()
         self.cache_lock = threading.Lock()
         self.engine = EngineBroker(self.repo, engine_python, snapshot_provider=self.engine_snapshot)
+        from .simulation_interactive_server import InteractiveCoordinator
+        self.interactive = InteractiveCoordinator(self)
 
     def scene(self, key):
         from .simulation_platform_data import load_scene
@@ -302,6 +319,31 @@ class PlatformServer(ThreadingHTTPServer):
         if (result.get('scene_id') != payload['scene_id'] or result.get('dataset') != payload['dataset']
                 or result.get('map_features_sha256') != payload['versions'][version]['map_sha256']):
             raise ValueError('Engine frame and scene snapshot identities do not match')
+        if result.get('interactive'):
+            interactive = result['interactive']
+            actors = [{'id': row.get('vehicle_id', row.get('native_object_id')), 'type': row['type'],
+                       'is_ego': False, 'persistent': True, 'position': list(row['position_scenario_m']),
+                       'heading': row['heading_rad'], 'length': row['length_m'],
+                       'width': row['width_m'], 'height': row.get('height_m', 1.)}
+                      for row in interactive.get('static_actors', [])]
+            for identifier, row in interactive['vehicles'].items():
+                actors.append({'id': identifier, 'type': 'VEHICLE', 'category': 'vehicle',
+                    'is_ego': identifier == 'ego', 'persistent': False,
+                    'position': list(row['position_scenario_m']), 'heading': row['heading_rad'],
+                    'length': row['length_m'], 'width': row['width_m'], 'height': row.get('height_m', 1.5),
+                    'velocity': row.get('velocity_m_s', [0., 0.]), 'interactive_vehicle': identifier})
+            # This is a new physical experiment on the source map, not a
+            # timestamp-indexed replay of the source actors. Review overlays
+            # already hold their explicitly offline static prior in the scene.
+            return {'schema': 'simulation-platform-snapshot-1.0', 'key': key,
+                    'scene_id': payload['scene_id'], 'dataset': payload['dataset'],
+                    'version': version, 'map_sha256': result['map_features_sha256'],
+                    'step': result['step'], 'time_s': interactive.get('sim_time_s', result['step'] * .1),
+                    'source_timestamp_ns': None, 'clock': 'interactive_simulation',
+                    'actors': actors, 'ego': next(row for row in actors if row.get('is_ego')),
+                    'states': {'events': [], 'objects': [], 'scope': 'interactive_current_physics'},
+                    'structure': [], 'offline_static_prior': True,
+                    'recorded_future_tracks_included': False}
         cache_key = (key, version, result.get('step'))
         with self.cache_lock:
             snapshot = self.snapshots.get(cache_key)
@@ -318,6 +360,7 @@ class PlatformServer(ThreadingHTTPServer):
         return snapshot
 
     def server_close(self):
+        self.interactive.close()
         self.engine.close()
         super().server_close()
 
@@ -328,6 +371,32 @@ class PlatformHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         if len(args) > 1 and str(args[1]).startswith(('4', '5')):
             super().log_message(fmt, *args)
+
+    def _origin_allowed(self, origin):
+        parsed = urlsplit(origin)
+        return (parsed.scheme in {'http', 'https'} and parsed.netloc == self.headers.get('Host')
+                or origin in self.server.allowed_origins)
+
+    def _admin(self):
+        if self.server.control_key is None:
+            return
+        authorization = self.headers.get('Authorization', '')
+        if not authorization.startswith('Bearer ') or not secrets.compare_digest(authorization[7:].encode(), self.server.control_key.encode()):
+            raise PermissionError('创建或重启引擎需要服务器控制密钥。')
+
+    def do_OPTIONS(self):
+        origin = self.headers.get('Origin')
+        if not origin or not self._origin_allowed(origin):
+            self._send({'error': 'Origin is not allowed'}, status=403)
+            return
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Origin', origin)
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Max-Age', '600')
+        self.send_header('Vary', 'Origin')
+        self.send_header('Content-Length', '0')
+        self.end_headers()
 
     def _send(self, body, content_type='application/json; charset=utf-8', *, status=200, filename=None):
         if not isinstance(body, bytes):
@@ -341,7 +410,10 @@ class PlatformHandler(BaseHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Referrer-Policy', 'same-origin')
-        self.send_header('Vary', 'Accept-Encoding')
+        self.send_header('Vary', 'Accept-Encoding, Origin')
+        origin = self.headers.get('Origin')
+        if origin and self._origin_allowed(origin):
+            self.send_header('Access-Control-Allow-Origin', origin)
         if encoded:
             self.send_header('Content-Encoding', 'gzip')
         if filename:
@@ -355,6 +427,8 @@ class PlatformHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             self._get()
+        except PermissionError as error:
+            self._send({'error': str(error)}, status=403)
         except (KeyError, FileNotFoundError) as error:
             self._send({'error': str(error)}, status=404)
         except (ValueError, TypeError) as error:
@@ -372,7 +446,23 @@ class PlatformHandler(BaseHTTPRequestHandler):
             self._send({'engine_available': importlib.util.find_spec('metadrive') is not None,
                         'python_version': sys.version.split()[0],
                         'engine_label': 'MetaDrive / Panda3D', 'review_label': '场景地图审阅',
-                        'source_geometry_only': True, 'planning_schema': 'simulation-planning-handoff-1.0'})
+                        'source_geometry_only': True, 'planning_schema': 'simulation-planning-handoff-1.0',
+                        'interactive_available': True, 'public_static': False,
+                        'control_key_required': self.server.control_key is not None})
+        elif path == '/api/interactive/state':
+            render = _one(query, 'render', '0')
+            if render not in {'0', '1'}:
+                raise ValueError('render must be 0 or 1')
+            state = self.server.interactive.state(render=render == '1')
+            requested = _one(query, 'session_id', None)
+            if requested is not None and (state.get('room') or {}).get('session_id') != requested:
+                raise ValueError('该房间已关闭或重建，请使用新的邀请链接。')
+            self._send(state)
+        elif path == '/api/interactive/observation':
+            self._send(self.server.interactive.observation(_one(query, 'session_id', None),
+                                                           _one(query, 'vehicle_id', 'ego')))
+        elif path == '/api/interactive/map':
+            self._send(self.server.interactive.map(_one(query, 'session_id', None)))
         elif path == '/api/engine/status':
             wait_text = _one(query, 'wait_ms', '0')
             if not wait_text.isascii() or not wait_text.isdecimal():
@@ -403,12 +493,16 @@ class PlatformHandler(BaseHTTPRequestHandler):
                            filename=f'planning-{key}-{version}-frame{step}.json')
             elif action == 'validation':
                 self._send(self.server.validation(key, version))
+            elif action == 'interactive':
+                from .simulation_interactive_scenarios import interactive_profile
+                self._send(interactive_profile(self.server.scene(key)))
             else:
                 raise KeyError('Unknown scene action')
         else:
             names = {'/': 'simulation_platform.html', '/simulation_platform.html': 'simulation_platform.html',
                      '/simulation_platform.css': 'simulation_platform.css',
                      '/simulation_platform.js': 'simulation_platform.js',
+                     '/simulation_platform_transport.js': 'simulation_platform_transport.js',
                      '/vendor/three.min.js': 'vendor/three.min.js', '/vendor/three.LICENSE': 'vendor/three.LICENSE'}
             if path == '/favicon.ico':
                 self._send(b'', 'image/x-icon', status=204)
@@ -425,17 +519,19 @@ class PlatformHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             self._post()
+        except PermissionError as error:
+            self._send({'error': str(error)}, status=403)
         except BusyError as error:
             self._send({'error': str(error)}, status=409)
         except (ValueError, KeyError, FileNotFoundError, TypeError) as error:
-            self._send({'error': str(error)}, status=400)
+            self._send({'error': str(error), 'code': getattr(error, 'code', None)}, status=getattr(error, 'status', 400))
         except Exception as error:
             self._send({'error': str(error)}, status=500)
 
     def _post(self):
         from .simulation_platform_data import scene_database
         origin = self.headers.get('Origin')
-        if (origin and urlsplit(origin).netloc != self.headers.get('Host')) or self.headers.get('Sec-Fetch-Site') == 'cross-site':
+        if (origin and not self._origin_allowed(origin)) or (not origin and self.headers.get('Sec-Fetch-Site') == 'cross-site'):
             raise ValueError('Only same-origin simulation controls are accepted')
         if self.headers.get_content_type() != 'application/json':
             raise ValueError('Simulation commands require application/json')
@@ -447,6 +543,24 @@ class PlatformHandler(BaseHTTPRequestHandler):
             raise ValueError('Simulation command must be an object')
         wait_ms = _wait_ms(body.pop('wait_ms', 0))
         path = urlsplit(self.path).path
+        if path.startswith('/api/interactive/'):
+            action = path.rsplit('/', 1)[-1]
+            if action == 'open':
+                self._admin()
+                key, version = body.get('scene_id'), _version(body.get('version', 'updated'))
+                if not isinstance(key, str):
+                    raise ValueError('scene_id is required')
+                self._send(self.server.interactive.open(key, version), status=202)
+            elif action in {'claim', 'input', 'camera', 'control'}:
+                self._send(getattr(self.server.interactive, action)(body))
+            elif action in {'heartbeat', 'release'}:
+                self._send(self.server.interactive.lease_command(action, body))
+            else:
+                raise KeyError('Unknown interactive endpoint')
+            return
+        self._admin()
+        if self.server.interactive.active:
+            raise BusyError('交互房间由服务器推进；请使用房间控制，或先由房主关闭房间。')
         if path == '/api/engine/open':
             key, version = body.get('scene_id'), _version(body.get('version', 'updated'))
             if not isinstance(key, str):

@@ -1,0 +1,4 @@
+{$SIMULATION_DOMAIN} {
+    encode gzip zstd
+    reverse_proxy simulation:8091
+}

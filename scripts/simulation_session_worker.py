@@ -27,10 +27,10 @@ def main():
             identifier = None
             message = None
             try:
-                if len(line) > 65536:
-                    raise ValueError('Session command is too large')
                 message = json.loads(line)
                 identifier = message.get('id') if isinstance(message, dict) else None
+                if len(line) > 65536:
+                    raise ValueError('Session command is too large')
                 result = session.command(message)
                 response = {'id': identifier, 'ok': True, 'result': result}
             except Exception as error:

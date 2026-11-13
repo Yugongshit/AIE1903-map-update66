@@ -2,6 +2,8 @@
 
 当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
+**公网仿真工作台：** [直接打开地图审阅](https://yugongshit.github.io/AIE1903-map-update66/simulation/)，同伴无需安装依赖。五席位玩家／AI／外部 Planning 的实时交通通过独立 MetaDrive 服务器运行。[公网与服务器部署说明](docs/public_simulation.md)。
+
 **地图更新 → 场景验证 → Planning：** 新增本地场景平台。选中场景后，在同一视图中查看道路结构与附着状态，切换原图/更新图、选择改动、旋转到车后、拖动时间轴，并导出当前帧的规划输入。[平台操作与 Planning 接口](docs/simulation_platform.md)。
 
 **已有 `aie1903-sim` 环境，直接启动：** 在你的 Mac 上执行，无需重建环境或另下地图压缩包。

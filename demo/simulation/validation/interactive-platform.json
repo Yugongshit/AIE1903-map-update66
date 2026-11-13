@@ -1,0 +1,947 @@
+{
+  "schema": "interactive-platform-validation-1.0",
+  "date": "2026-11-13",
+  "unit_tests": {
+    "simulation_suite": 274,
+    "validation_helpers": 9,
+    "passed": true
+  },
+  "native": [
+    {
+      "scope": "controls",
+      "scene": "argoverse-winter2021",
+      "source_map_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+      "checks": [
+        {
+          "name": "six native physics vehicles with no recorded moving traffic",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "initial native vehicle footprints do not intersect other cars or static objects",
+          "passed": true,
+          "details": []
+        },
+        {
+          "name": "physical static world retains all source static objects",
+          "passed": true,
+          "details": {
+            "actual": 0,
+            "source": 0
+          }
+        },
+        {
+          "name": "ai preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "all five independent AI cars actually move",
+          "passed": true,
+          "details": {
+            "ego": 0.0164163398635631,
+            "P1": 12.063215903567029,
+            "P2": 12.325396430540286,
+            "P3": 12.301805220348976,
+            "P4": 12.151751710346849,
+            "P5": 9.042349269392076
+          }
+        },
+        {
+          "name": "ego waits braked for external Planning",
+          "passed": true,
+          "details": 0.0164163398635631
+        },
+        {
+          "name": "manual preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "manual steering and throttle change actual P1 position and heading",
+          "passed": true,
+          "details": {
+            "movement_m": 2.7586273028111368,
+            "heading_change_rad": 0.2642187697809453
+          }
+        },
+        {
+          "name": "public interactive_tick brakes a manual car when its action is missing",
+          "passed": true,
+          "details": [
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "name": "missing manual action brings P1 to rest",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "external-five-car-batch preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "all five external actions execute through actual physics",
+          "passed": true,
+          "details": {
+            "ego": 0.01339926472202585,
+            "P1": 0.8927957494344226,
+            "P2": 0.9157911309361136,
+            "P3": 0.895881136190953,
+            "P4": 0.854683377645278,
+            "P5": 0.9043845315292706
+          }
+        },
+        {
+          "name": "external-test-controller preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "test external controller reads moving P1 and produces drive then brake actions",
+          "passed": true,
+          "details": {
+            "ego": 10.654452574621951,
+            "P1": 0.4221020891852173,
+            "P2": 0.05774019648351466,
+            "P3": 0.06043200778052312,
+            "P4": 0.049054205191633206,
+            "P5": 0.06378761092213453
+          }
+        },
+        {
+          "name": "test external ego stops after current headway becomes small",
+          "passed": true,
+          "details": {
+            "last_observed_gap_m": 11.600949837121387,
+            "speed_m_s": 0.002239832581860073
+          }
+        },
+        {
+          "name": "beyond-recording preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "live physics continues beyond the recording with all six cars",
+          "passed": true,
+          "details": {
+            "live_step": 592,
+            "recording_last_step": 581,
+            "sim_time_s": 59.2
+          }
+        },
+        {
+          "name": "ordinary replay still follows the source recording",
+          "passed": true,
+          "details": {
+            "actual": [
+              1093.690285328555,
+              -418.71359758262236
+            ],
+            "recorded": [
+              1093.6902852859316,
+              -418.71359755212774
+            ]
+          }
+        },
+        {
+          "name": "no unreported collision in any physical phase",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "phase_steps": {
+        "ai": {
+          "start": 0,
+          "end": 60
+        },
+        "manual": {
+          "start": 0,
+          "end": 20
+        },
+        "external-five-car-batch": {
+          "start": 0,
+          "end": 12
+        },
+        "external-test-controller": {
+          "start": 0,
+          "end": 100
+        },
+        "beyond-recording": {
+          "start": 0,
+          "end": 592
+        }
+      },
+      "unexpected_collisions": [],
+      "completed_source_cycle": null,
+      "external_controller_scope": "test_only_headway_controller_not_user_planning_module"
+    },
+    {
+      "scope": "controls",
+      "scene": "nuscenes-scene0980",
+      "source_map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+      "checks": [
+        {
+          "name": "six native physics vehicles with no recorded moving traffic",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "initial native vehicle footprints do not intersect other cars or static objects",
+          "passed": true,
+          "details": []
+        },
+        {
+          "name": "physical static world retains all source static objects",
+          "passed": true,
+          "details": {
+            "actual": 103,
+            "source": 103
+          }
+        },
+        {
+          "name": "ai preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "all five independent AI cars actually move",
+          "passed": true,
+          "details": {
+            "ego": 0.016420814993834413,
+            "P1": 12.242890934190225,
+            "P2": 12.35984866861761,
+            "P3": 12.14573141740931,
+            "P4": 12.112481691804646,
+            "P5": 12.304790810197634
+          }
+        },
+        {
+          "name": "ego waits braked for external Planning",
+          "passed": true,
+          "details": 0.016420814993834413
+        },
+        {
+          "name": "manual preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "manual steering and throttle change actual P1 position and heading",
+          "passed": true,
+          "details": {
+            "movement_m": 2.7586223933610214,
+            "heading_change_rad": 0.2642180707011583
+          }
+        },
+        {
+          "name": "public interactive_tick brakes a manual car when its action is missing",
+          "passed": true,
+          "details": [
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "name": "missing manual action brings P1 to rest",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "external-five-car-batch preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "all five external actions execute through actual physics",
+          "passed": true,
+          "details": {
+            "ego": 0.013415825219158059,
+            "P1": 0.8927980396611879,
+            "P2": 0.9157913456260405,
+            "P3": 0.8958811397624115,
+            "P4": 0.854679458383846,
+            "P5": 0.9043873313380985
+          }
+        },
+        {
+          "name": "external-test-controller preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "test external controller reads moving P1 and produces drive then brake actions",
+          "passed": true,
+          "details": {
+            "ego": 11.163668247828817,
+            "P1": 0.4231744688902576,
+            "P2": 0.05777416640033902,
+            "P3": 0.062074645123440825,
+            "P4": 0.05142078330713117,
+            "P5": 0.06356253636824098
+          }
+        },
+        {
+          "name": "test external ego stops after current headway becomes small",
+          "passed": true,
+          "details": {
+            "last_observed_gap_m": 11.53278752116899,
+            "speed_m_s": 0.0026938750187172748
+          }
+        },
+        {
+          "name": "beyond-recording preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "live physics continues beyond the recording with all six cars",
+          "passed": true,
+          "details": {
+            "live_step": 250,
+            "recording_last_step": 200,
+            "sim_time_s": 25.0
+          }
+        },
+        {
+          "name": "ordinary replay still follows the source recording",
+          "passed": true,
+          "details": {
+            "actual": [
+              439.8074654153663,
+              1256.5026309776395
+            ],
+            "recorded": [
+              439.8074654270757,
+              1256.502631084344
+            ]
+          }
+        },
+        {
+          "name": "no unreported collision in any physical phase",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "phase_steps": {
+        "ai": {
+          "start": 0,
+          "end": 60
+        },
+        "manual": {
+          "start": 0,
+          "end": 20
+        },
+        "external-five-car-batch": {
+          "start": 0,
+          "end": 12
+        },
+        "external-test-controller": {
+          "start": 0,
+          "end": 100
+        },
+        "beyond-recording": {
+          "start": 0,
+          "end": 250
+        }
+      },
+      "unexpected_collisions": [],
+      "completed_source_cycle": null,
+      "external_controller_scope": "test_only_headway_controller_not_user_planning_module"
+    },
+    {
+      "scope": "long_ai",
+      "scene": "argoverse-winter2021",
+      "source_map_sha256": "47e439039799766b0c1adb14fcf2765723e1e82f0adff117422e74c38dbaf247",
+      "checks": [
+        {
+          "name": "six native physics vehicles with no recorded moving traffic",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "initial native vehicle footprints do not intersect other cars or static objects",
+          "passed": true,
+          "details": []
+        },
+        {
+          "name": "physical static world retains all source static objects",
+          "passed": true,
+          "details": {
+            "actual": 0,
+            "source": 0
+          }
+        },
+        {
+          "name": "ai preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "all five independent AI cars actually move",
+          "passed": true,
+          "details": {
+            "ego": 0.06140405374448569,
+            "P1": 77.4016558191153,
+            "P2": 24.47947231126335,
+            "P3": 17.122650157852522,
+            "P4": 56.171788583692674,
+            "P5": 53.72027909867766
+          }
+        },
+        {
+          "name": "ego waits braked for external Planning",
+          "passed": true,
+          "details": 0.06140405374448569
+        },
+        {
+          "name": "AI world continues beyond the source recording",
+          "passed": true,
+          "details": {
+            "live_step": 592,
+            "source_last_step": 581
+          }
+        },
+        {
+          "name": "at least one AI advances to another verified source-lane goal",
+          "passed": true,
+          "details": [
+            {
+              "vehicle_id": "P1",
+              "step": 195,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            },
+            {
+              "vehicle_id": "P4",
+              "step": 195,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            },
+            {
+              "vehicle_id": "P5",
+              "step": 297,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            }
+          ]
+        },
+        {
+          "name": "long AI run has no observed collision",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "phase_steps": {
+        "ai": {
+          "start": 0,
+          "end": 592
+        }
+      },
+      "unexpected_collisions": [],
+      "completed_source_cycle": false,
+      "external_controller_scope": "test_only_headway_controller_not_user_planning_module"
+    },
+    {
+      "scope": "long_ai",
+      "scene": "nuscenes-scene0980",
+      "source_map_sha256": "c506d9b7b83d4f38fa8e4ec4faae3f8e580646018112c268e28b2660cbb21c39",
+      "checks": [
+        {
+          "name": "six native physics vehicles with no recorded moving traffic",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "initial native vehicle footprints do not intersect other cars or static objects",
+          "passed": true,
+          "details": []
+        },
+        {
+          "name": "physical static world retains all source static objects",
+          "passed": true,
+          "details": {
+            "actual": 103,
+            "source": 103
+          }
+        },
+        {
+          "name": "ai preserves the loaded map",
+          "passed": true,
+          "details": null
+        },
+        {
+          "name": "all five independent AI cars actually move",
+          "passed": true,
+          "details": {
+            "ego": 0.032294827542186426,
+            "P1": 24.898315993896276,
+            "P2": 59.3026031420005,
+            "P3": 58.643902676932974,
+            "P4": 58.04719598114409,
+            "P5": 22.43906500822894
+          }
+        },
+        {
+          "name": "ego waits braked for external Planning",
+          "passed": true,
+          "details": 0.032294827542186426
+        },
+        {
+          "name": "AI world continues beyond the source recording",
+          "passed": true,
+          "details": {
+            "live_step": 250,
+            "source_last_step": 200
+          }
+        },
+        {
+          "name": "at least one AI advances to another verified source-lane goal",
+          "passed": true,
+          "details": [
+            {
+              "vehicle_id": "P5",
+              "step": 96,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            },
+            {
+              "vehicle_id": "P3",
+              "step": 147,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            },
+            {
+              "vehicle_id": "P4",
+              "step": 171,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            },
+            {
+              "vehicle_id": "P2",
+              "step": 198,
+              "from_goal": 0,
+              "to_goal": 1,
+              "completed_source_cycle": false
+            }
+          ]
+        },
+        {
+          "name": "long AI run has no observed collision",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "phase_steps": {
+        "ai": {
+          "start": 0,
+          "end": 250
+        }
+      },
+      "unexpected_collisions": [],
+      "completed_source_cycle": false,
+      "external_controller_scope": "test_only_headway_controller_not_user_planning_module"
+    }
+  ],
+  "real_multi_browser": {
+    "live_engine": true,
+    "api_mocked": false,
+    "physics_mocked": false,
+    "checks": [
+      "host opens a real six-vehicle room",
+      "native result is physical and omits recorded moving traffic",
+      "ego starts waiting for external control",
+      "spectator is read-only",
+      "players retain independent follow cameras",
+      "an occupied vehicle rejects a second controller with HTTP 409",
+      "foreground keyboard acceleration is accepted before clock starts",
+      "three-second keyboard hold moves the physical P1 vehicle",
+      "key release brakes the physical vehicle",
+      "window blur brakes the physical vehicle",
+      "all clients show the same committed native step and pose",
+      "paused spectator GET requests never advance physics",
+      "legacy client step command cannot advance the shared room",
+      "live review uses no recorded snapshots, PNG polling or legacy commands",
+      "external observation includes current physical P1 without recorded future tracks",
+      "one external client atomically controls all five traffic vehicles",
+      "native engine applies external modes to all five actual cars",
+      "browser clients emit no JavaScript errors"
+    ],
+    "metrics": {
+      "keyboard_hold_wall_s": 3.459,
+      "keyboard_physics_steps": 17,
+      "keyboard_start": [
+        431.7007897905189,
+        1238.477442293176
+      ],
+      "keyboard_finish": [
+        430.0963033250648,
+        1234.7672906208127
+      ],
+      "keyboard_requested_action": [
+        0.0,
+        1.0
+      ],
+      "keyboard_displacement_m": 4.0422,
+      "keyboard_step": 17,
+      "keyboard_end_step": 17,
+      "synchronized_step": 40,
+      "last_step": 45,
+      "positions_city_m": {
+        "ego": [
+          440.86682567830417,
+          1258.7938167226775
+        ],
+        "P1": [
+          428.75366054094616,
+          1231.6626439380734
+        ],
+        "P2": [
+          447.77480493105236,
+          1266.752890138635
+        ],
+        "P3": [
+          430.7522262147743,
+          1260.6915716219037
+        ],
+        "P4": [
+          428.04487262285534,
+          1221.4554009723752
+        ],
+        "P5": [
+          448.79842982805553,
+          1277.1904530811398
+        ]
+      },
+      "physical_vehicle_labels": {
+        "ego": "P0",
+        "P1": "P1",
+        "P2": "P2",
+        "P3": "P3",
+        "P4": "P4",
+        "P5": "P5"
+      }
+    },
+    "ok": true
+  },
+  "public_static": {
+    "url": "http://127.0.0.1:8113/public-simulation/",
+    "checks": [
+      {
+        "name": "static site starts without a backend",
+        "passed": true
+      },
+      {
+        "name": "all three source scenes are available",
+        "passed": true
+      },
+      {
+        "name": "nuscenes-scene0980 frame 0 updated: static Planning equals verified Python export",
+        "passed": true
+      },
+      {
+        "name": "nuscenes-scene0980 frame 0: no future tracks or recorded route in export",
+        "passed": true
+      },
+      {
+        "name": "nuscenes-scene0980 frame 137 original: static Planning equals verified Python export",
+        "passed": true
+      },
+      {
+        "name": "nuscenes-scene0980 frame 137: no future tracks or recorded route in export",
+        "passed": true
+      },
+      {
+        "name": "argoverse-winter2021 frame 200 original: static Planning equals verified Python export",
+        "passed": true
+      },
+      {
+        "name": "argoverse-winter2021 frame 200: no future tracks or recorded route in export",
+        "passed": true
+      },
+      {
+        "name": "argoverse-winter2021 frame 200 updated: static Planning equals verified Python export",
+        "passed": true
+      },
+      {
+        "name": "argoverse-winter2021 frame 200: no future tracks or recorded route in export",
+        "passed": true
+      },
+      {
+        "name": "nuscenes-combined-demo frame 137 updated: static Planning equals verified Python export",
+        "passed": true
+      },
+      {
+        "name": "nuscenes-combined-demo frame 137: no future tracks or recorded route in export",
+        "passed": true
+      },
+      {
+        "name": "full-scene fixed previews persist while source clock advances",
+        "passed": true
+      },
+      {
+        "name": "source validation report is available",
+        "passed": true
+      },
+      {
+        "name": "static site does not pretend to start native simulation",
+        "passed": true
+      },
+      {
+        "name": "no request depended on a Python API",
+        "passed": true
+      },
+      {
+        "name": "no browser exceptions",
+        "passed": true
+      }
+    ],
+    "page_errors": [],
+    "api_network_requests": []
+  },
+  "deployment": {
+    "image_build": "passed",
+    "nonroot_uid": 10001,
+    "nonroot_catalog_scenes": 3,
+    "http_health": "healthy",
+    "http_engine_available": true,
+    "http_catalog_scenes": 3,
+    "allowed_origin_preflight": 204,
+    "untrusted_origin_preflight": 403,
+    "unauthenticated_engine_control": 403,
+    "compose_configuration": "passed",
+    "native_render_smoke": {
+      "passed": true,
+      "scene": "nuscenes-scene0980",
+      "vehicle_count": 6,
+      "step": 10,
+      "png_bytes": 108705,
+      "wall_time_s": 41.77,
+      "nonroot_uid": 10001,
+      "physics": true,
+      "renderer": "MetaDrive/Panda3D with Mesa software GL"
+    },
+    "public_live_hosting": "GitHub Pages deploy job succeeded (parent verified)",
+    "scope": "Local deployment container only; DNS and TLS require the user deployment server.",
+    "packaged_source_data_checks": [
+      {
+        "scene": "nuscenes-scene0980",
+        "action": "full_scene",
+        "status": 200,
+        "passed": true
+      },
+      {
+        "scene": "nuscenes-scene0980",
+        "action": "validation",
+        "status": 200,
+        "passed": true
+      },
+      {
+        "scene": "argoverse-winter2021",
+        "action": "full_scene",
+        "status": 200,
+        "passed": true
+      },
+      {
+        "scene": "argoverse-winter2021",
+        "action": "validation",
+        "status": 200,
+        "passed": true
+      }
+    ],
+    "pages_commit": "29267a9",
+    "pages_run": "43393557845"
+  },
+  "limits": [
+    "Tests are not proof of collision-free behavior for arbitrary controls.",
+    "External test controllers are protocol demonstrations, not the classmates Planning implementation.",
+    "Long AI runs advanced source-road goals but did not complete a full road cycle.",
+    "Public GitHub Pages is deployed; public realtime backend and domain/TLS have not been provisioned.",
+    "GitHub Pages deployment status was verified on github.com; direct github.io access is blocked by this execution environment network policy."
+  ],
+  "original_replay_regression": {
+    "checks": [
+      {
+        "name": "source range leaves enough frames for continuous playback",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "startup locks launch and road-version controls against duplicate requests",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "double click starts exactly one engine job",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "initial scene is paused and controls unlock after a decoded frame",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "at least six distinct advancing real images are displayed with matching timestamps",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "start-engine stays visually stable across playback frames",
+        "passed": true,
+        "details": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgb(97, 224, 204)",
+              "color": "rgb(11, 36, 35)",
+              "disabled": true,
+              "opacity": "0.45",
+              "text": null,
+              "visible": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "map-version stays visually stable across playback frames",
+        "passed": true,
+        "details": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgb(23, 39, 51)",
+              "color": "rgb(170, 170, 170)",
+              "disabled": true,
+              "opacity": "0.7",
+              "text": null,
+              "visible": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "pending-state stays visually stable across playback frames",
+        "passed": true,
+        "details": {
+          "distinct_states": 1,
+          "transitions": 0,
+          "states": [
+            {
+              "background": "rgba(14, 27, 41, 0.85)",
+              "color": "rgb(232, 206, 135)",
+              "disabled": false,
+              "opacity": "1",
+              "text": "正在回放",
+              "visible": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "pause drains the current command and unlocks launch and road-version controls",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "manual next-frame still advances exactly one source frame while paused",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "pausing an in-flight advance keeps conflicting controls locked",
+        "passed": true,
+        "details": {
+          "busy": true,
+          "playing": false,
+          "launchDisabled": true,
+          "versionDisabled": true
+        }
+      },
+      {
+        "name": "controls unlock when the paused in-flight advance finishes",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "road-version reload locks conflicting controls",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "road-version switch reloads once and keeps the displayed source frame",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "review playback does not inherit the engine playback control lock",
+        "passed": true,
+        "details": null
+      },
+      {
+        "name": "no uncaught browser errors",
+        "passed": true,
+        "details": []
+      }
+    ],
+    "errors": [],
+    "frontend_sha256": "1f619493e59b27c899838d375ed0fff5d0f365cd271fa595156a3908c1159241",
+    "control_stability": {
+      "start-engine": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgb(97, 224, 204)",
+            "color": "rgb(11, 36, 35)",
+            "disabled": true,
+            "opacity": "0.45",
+            "text": null,
+            "visible": true
+          }
+        ]
+      },
+      "map-version": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgb(23, 39, 51)",
+            "color": "rgb(170, 170, 170)",
+            "disabled": true,
+            "opacity": "0.7",
+            "text": null,
+            "visible": true
+          }
+        ]
+      },
+      "pending-state": {
+        "distinct_states": 1,
+        "transitions": 0,
+        "states": [
+          {
+            "background": "rgba(14, 27, 41, 0.85)",
+            "color": "rgb(232, 206, 135)",
+            "disabled": false,
+            "opacity": "1",
+            "text": "正在回放",
+            "visible": true
+          }
+        ]
+      }
+    },
+    "passed": true
+  }
+}

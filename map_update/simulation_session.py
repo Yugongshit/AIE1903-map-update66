@@ -42,12 +42,14 @@ def validated_camera(current, command):
         if preset not in presets:
             raise ValueError('Unknown camera preset')
         result.update(presets[preset])
+        if preset in {'follow', 'rear', 'top'} and current.get('target') in {'P1', 'P2', 'P3', 'P4', 'P5'}:
+            result['target'] = current['target']
     for name in ('yaw', 'pitch', 'distance'):
         if name in command:
             result[name] = _number(command[name], name)
     if 'target' in command:
-        if command['target'] not in {'ego', 'map', 'selection'}:
-            raise ValueError('Camera target must be ego, map or selection')
+        if command['target'] not in {'ego', 'map', 'selection', 'P1', 'P2', 'P3', 'P4', 'P5'}:
+            raise ValueError('Camera target must be ego, map, selection or P1..P5')
         result['target'] = command['target']
     if 'pan' in command:
         value = command['pan']
@@ -145,6 +147,8 @@ class SimulationSession:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.width, self.height = width, height
         self.env = None
+        self.interactive = None
+        self._interactive_source_snapshot = None
         self.resources = ExitStack()
         self.annotations = ExitStack()
         self.export = None
@@ -154,6 +158,8 @@ class SimulationSession:
         self.overview_hash = None
         self.sequence = 0
         self.frame_file = None
+        self._headless = True
+        self._rendered_step = None
         self.camera = validated_camera({}, {'preset': 'follow'})
         self.selection_center = None
         self.show_structure = self.show_states = True
@@ -162,10 +168,15 @@ class SimulationSession:
         self._state_step = None
         self._annotation_selection = None
 
-    def open(self, database_path, *, step=0):
+    def open(self, database_path, *, step=0, interactive=None):
         bound = load_bound_export(database_path)
         if type(step) is not int or step < 0:
             raise ValueError('Replay step must be a nonnegative integer')
+        if interactive is not None:
+            from .simulation_interactive import validated_missions
+            validated_missions(interactive)
+            if step != 0:
+                raise ValueError('Live interaction starts at step zero; recorded seeking is not available')
         same_scene = self.export is not None and all(
             self.export['manifest'].get(key) == bound['manifest'].get(key)
             for key in ('dataset', 'scene_id', 'map'))
@@ -208,13 +219,21 @@ class SimulationSession:
                           window_size=(self.width, self.height),
                           sensors={'main_camera': ('MainCamera', self.width, self.height)})
             config['vehicle_config']['image_source'] = 'main_camera'
+            env_class = ScenarioEnv
+            if interactive is not None:
+                from .simulation_interactive import native_environment
+                env_class, actual_observation = native_environment(ScenarioEnv)
+                config.update(agent_policy=EnvInputPolicy, manual_control=False, no_traffic=True,
+                              no_light=True, horizon=None, agent_observation=actual_observation)
+                config['vehicle_config'].update(navigation_module=None, overtake_stat=False)
             self.persistent = bound['obstacles'].get('mode') == 'persistent'
             if self.persistent:
                 from .simulation_obstacle_runtime import persistent_obstacle_adapter
                 config.update(no_traffic=False, static_traffic_object=True)
                 self.resources.enter_context(persistent_obstacle_adapter(
-                    scenario_env_module, bound['obstacles'], preload_all=True))
-            self.env = ScenarioEnv(config)
+                    scenario_env_module, bound['obstacles'], preload_all=True,
+                    no_moving_traffic=interactive is not None))
+            self.env = env_class(config)
             self.env.reset(seed=0)
             self.length = int(self.env.engine.data_manager.current_scenario_length)
             if step >= self.length:
@@ -238,12 +257,21 @@ class SimulationSession:
             if points:
                 self.map_center = [(min(float(p[i]) for p in points)+max(float(p[i]) for p in points))/2 for i in (0, 1)]
             self.camera = saved_camera or validated_camera({}, {'preset': 'follow'})
+            if interactive is None and self.camera['target'] in {'P1', 'P2', 'P3', 'P4', 'P5'}:
+                self.camera['target'] = 'ego'
             offset = metadata.get('old_origin_in_current_coordinate', [0, 0])
             self.selection_center = [saved_selection[i] + float(offset[i]) for i in (0, 1)] if saved_selection else None
             if self.camera['target'] == 'selection' and self.selection_center is None:
                 self.camera['target'] = 'ego'
             self.selected_feature_id = self.selected_event_id = None
             self._stop_native_camera()
+            if interactive is not None:
+                from .simulation_interactive import InteractiveRuntime
+                self.interactive = InteractiveRuntime(self.env, interactive, self.source_features,
+                    map_sha256=manifest['provenance']['map_features_sha256'])
+                if bound['states'] is not None:
+                    from .simulation_states import state_snapshot
+                    self._interactive_source_snapshot = state_snapshot(bound['states'], 0, source_to_runtime_offset=offset)
             with _suspended_rendering(self.env):
                 for _ in range(step):
                     self.env.step([0., 0.])
@@ -267,8 +295,7 @@ class SimulationSession:
     def _refresh_state(self):
         changed = self.current is None or self._state_step != self.env.episode_step
         if changed:
-            self.current = controller_state(self.env, source_map_features=self.source_features,
-                                            state_source=self.export['states'])
+            self.current = self._controller_state()
             self._state_step = self.env.episode_step
         if self.state_handle is not None:
             selection = self.state_handle.selected_event_id
@@ -288,6 +315,14 @@ class SimulationSession:
             if self.update_handle.legend_node is not None:
                 self.update_handle.legend_node.hide()
 
+    def _controller_state(self):
+        current = controller_state(self.env, source_map_features=self.source_features,
+                                   state_source=None if self.interactive is not None else self.export['states'])
+        if self.interactive is not None:
+            current['map_state_snapshot'] = self._interactive_source_snapshot
+            current['recorded_time_s'] = float(self.env.engine.data_manager.current_scenario['metadata']['ts'][0])
+        return current
+
     def _attach_annotations(self):
         from .simulation_environment import attach_source_environment
         from .simulation_visuals import attach_update_overlay
@@ -304,8 +339,7 @@ class SimulationSession:
             update_source=provenance.get('update_source'),
             reference_operations=manifest.get('summary', {}).get('reference_structural_operations'))
         self.annotations.callback(self.update_handle.close)
-        self.current = controller_state(self.env, source_map_features=self.source_features,
-                                        state_source=self.export['states'])
+        self.current = self._controller_state()
         self._state_step = self.env.episode_step
         self.overview = None
         if self.export['states'] is not None:
@@ -329,6 +363,18 @@ class SimulationSession:
 
     def seek(self, step):
         self._require()
+        if self.interactive is not None:
+            if type(step) is not int or step != 0:
+                raise ValueError('Live interaction supports reset to zero only; player input cannot be replay-seeked')
+            self.annotations.close()
+            self.update_handle = self.state_handle = None
+            self._state_step = self._annotation_selection = None
+            self.interactive.close()
+            self.env.reset(seed=0)
+            self._stop_native_camera()
+            self.interactive.reset()
+            self._attach_annotations()
+            return self.frame()
         if type(step) is not int or not 0 <= step < self.length:
             raise ValueError('Replay step must lie within the recorded scene')
         if step < self.env.episode_step:
@@ -350,6 +396,8 @@ class SimulationSession:
 
     def advance(self, steps=1):
         self._require()
+        if self.interactive is not None:
+            raise ValueError('Live interaction advances through interactive_tick with renewed controls')
         if type(steps) is not int or not 1 <= steps <= 20:
             raise ValueError('Advance requires 1..20 recorded steps')
         return self.seek(min(self.length-1, self.env.episode_step+steps))
@@ -359,8 +407,43 @@ class SimulationSession:
         camera = validated_camera(self.camera, command)
         if camera['target'] == 'selection' and self.selection_center is None:
             raise ValueError('Select a visible change before focusing it')
+        if camera['target'] in {'P1', 'P2', 'P3', 'P4', 'P5'} and self.interactive is None:
+            raise ValueError('Launch interactive mode before following P1..P5')
         self.camera = camera
         return self.frame()
+
+    def interactive_tick(self, controls, steps=1, *, capture=True):
+        self._require()
+        if self.interactive is None:
+            raise ValueError('Launch interactive mode before sending controls')
+        if type(steps) is not int or not 1 <= steps <= 3:
+            raise ValueError('Interactive ticks advance 1..3 physics decisions')
+        if type(capture) is not bool:
+            raise ValueError('Interactive capture must be boolean')
+        self.interactive.controls(controls)
+        # The previous PNG remains immutable in the broker cache, but must not
+        # be advertised as an image of these newly advanced physical poses.
+        self._headless = True
+        with _suspended_rendering(self.env):
+            for _ in range(steps):
+                action = self.interactive.before_step()
+                self.env.step(action)
+                self.interactive.after_step()
+        if capture:
+            return self.frame()
+        self._refresh_state()
+        return self.status()
+
+    def _camera_center(self):
+        target = self.camera['target']
+        if target in {'P1', 'P2', 'P3', 'P4', 'P5'}:
+            if self.interactive is None:
+                raise ValueError('Interactive car camera requires live interaction')
+            vehicle = self.interactive.vehicles[target]
+            return list(vehicle.position[:2]), float(vehicle.heading_theta)
+        if target == 'ego':
+            return list(self.env.agent.position[:2]), float(self.env.agent.heading_theta)
+        return (self.map_center if target == 'map' else self.selection_center), 0.
 
     def _select_feature(self, feature_id):
         items = self.update_handle.prepared['items']
@@ -406,12 +489,12 @@ class SimulationSession:
 
     def frame(self):
         self._require()
+        self._headless = True
         self._refresh_state()
-        target = self.camera['target']
-        center = (list(self.env.agent.position[:2]) if target == 'ego' else self.map_center
-                  if target == 'map' else self.selection_center)
-        position, look_at = orbit_pose(self.camera, center,
-                                      self.env.agent.heading_theta if target == 'ego' else 0.)
+        if self.interactive is not None:
+            self.interactive.refresh_visuals()
+        center, heading = self._camera_center()
+        position, look_at = orbit_pose(self.camera, center, heading)
         self.env.main_camera.camera.setPos(*position)
         self.env.main_camera.camera.lookAt(*look_at)
         self.env.engine.graphicsEngine.renderFrame()
@@ -426,6 +509,8 @@ class SimulationSession:
         self.env.capture(str(destination))
         if not destination.is_file() or destination.stat().st_size == 0:
             raise RuntimeError('MetaDrive did not produce a rendered frame')
+        self._headless = False
+        self._rendered_step = int(self.env.episode_step)
         # Keep a small immutable window for in-flight browser frame requests.
         for path in sorted(self.output_dir.glob('frame-*.png'))[:-8]:
             path.unlink()
@@ -440,11 +525,17 @@ class SimulationSession:
             from .simulation_obstacle_runtime import runtime_obstacle_report
             obstacle = runtime_obstacle_report(self.env)
         return {
-            'renderer': 'MetaDrive/Panda3D', 'live_engine': True, 'frame_file': self.frame_file,
+            'renderer': 'MetaDrive/Panda3D', 'live_engine': True,
+            'frame_file': None if self._headless else self.frame_file,
+            'image_available': not self._headless and self.frame_file is not None,
+            'rendered_step': None if self._headless else self._rendered_step,
             'sequence': self.sequence, 'step': self.env.episode_step, 'length': self.length,
-            'last_step': self.length-1, 'time_s': current['recorded_time_s'],
+            'last_step': self.length-1,
+            'time_s': current['simulation_time_s'] if self.interactive is not None else current['recorded_time_s'],
+            'recorded_step': 0 if self.interactive is not None else self.env.episode_step,
             'duration_s': float(self.env.engine.data_manager.current_scenario['metadata']['ts'][-1]),
-            'at_end': self.env.episode_step == self.length-1, 'ego_replay': True, 'manual_control': False,
+            'at_end': False if self.interactive is not None else self.env.episode_step == self.length-1,
+            'ego_replay': self.interactive is None, 'manual_control': False,
             'scene_id': current['scenario_id'], 'dataset': current['dataset'],
             'position_scenario_m': current['position_scenario_m'], 'camera': deepcopy(self.camera),
             'map_center_scenario_m': scenario_position(
@@ -470,6 +561,7 @@ class SimulationSession:
             'preview_future_objects_visible': obstacle['future_objects_visible_early'] if obstacle else False,
             'missing_expected_obstacles': obstacle['missing_expected_ids'] if obstacle else [],
             'comparison': self.update_handle.comparison,
+            'interactive': self.interactive.report() if self.interactive is not None else None,
             'export_verified': True,
         }
 
@@ -478,10 +570,19 @@ class SimulationSession:
             self.annotations.close()
         finally:
             try:
-                if self.env is not None:
-                    self.env.close()
+                try:
+                    if self.interactive is not None:
+                        self.interactive.close()
+                finally:
+                    self.interactive = None
+                    self._interactive_source_snapshot = None
+                    if self.env is not None:
+                        self.env.close()
             finally:
                 self.env = None
+                self.frame_file = None
+                self._headless = True
+                self._rendered_step = None
                 self.current = None
                 self.overview = None
                 self.overview_hash = None
@@ -494,7 +595,16 @@ class SimulationSession:
             raise ValueError('Session command must be an object')
         name = message.get('command')
         if name == 'open':
-            return self.open(message['database_path'], step=message.get('step', 0))
+            return self.open(message['database_path'], step=message.get('step', 0), interactive=message.get('interactive'))
+        if name == 'interactive_tick':
+            return self.interactive_tick(message.get('controls', {}), message.get('steps', 1),
+                                         capture=message.get('capture', True))
+        if name == 'interactive_mode':
+            self._require()
+            if self.interactive is None:
+                raise ValueError('Launch interactive mode before changing controls')
+            self.interactive.controls({message.get('vehicle_id'): {'mode': message.get('mode')}})
+            return self.frame()
         if name == 'seek':
             return self.seek(message.get('step'))
         if name == 'advance':
