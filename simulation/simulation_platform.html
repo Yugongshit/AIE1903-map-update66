@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="./simulation_public_config.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>地图更新 · 仿真工作台</title>
+  <link rel="stylesheet" href="./simulation_platform.css">
+  <script src="./vendor/three.min.js" defer></script>
+  <script src="./simulation_platform_transport.js" defer></script>
+  <script src="./simulation_platform.js" defer></script>
+</head>
+<body>
+  <svg class="icon-defs" aria-hidden="true"><defs>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 6-10 6L2 9l10-6Zm-9 11 9 5 9-5M3 18l9 5 9-5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 13 8L8 20V4Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M12 8v8M8 12h8"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></symbol>
+  </defs></svg>
+  <header class="topbar">
+    <a href="./" class="brand" aria-label="地图更新仿真工作台首页"><span class="brand-mark"><svg><use href="#i-layers"/></svg></span><span>地图更新<span class="brand-slash"> / </span>仿真工作台<small>MAP UPDATE · SIMULATION</small></span></a>
+    <div class="workflow"><span class="done">01 观测与更新</span><i></i><strong>02 场景验证</strong><i></i><span>03 Planning 接入</span></div>
+    <div class="header-actions"><span class="local-badge"><i></i><span id="platform-location-label">本地工作台</span></span><button id="export-planning" class="button outline" disabled><svg><use href="#i-download"/></svg><span id="export-planning-label">导出 Planning 数据</span></button></div>
+  </header>
+  <main class="workspace">
+    <aside class="scene-panel" aria-label="场景选择">
+      <div class="panel-heading"><span class="eyebrow">SCENE LIBRARY</span><h1>选择一个场景</h1><p>道路结构与状态事件，在同一场景中查看。</p></div>
+      <div id="scene-list" class="scene-list"><div class="skeleton"></div><div class="skeleton"></div></div>
+      <div class="source-note"><span class="tiny-label">数据来源</span><p id="source-note">正在读取本地场景…</p></div>
+      <div class="legend"><h3>变化图例</h3><div><i class="swatch new"></i>更新 / 新增道路</div><div><i class="swatch old"></i>原道路位置</div><div><i class="swatch active-state"></i>全场景变化 · 固定展示</div><small>汇总整段记录，从开场完整显示。背景交通继续按轨迹回放。</small></div>
+      <div class="scene-footer"><span class="status-dot"></span><span id="data-status">等待场景</span></div>
+    </aside>
+    <section class="stage" aria-label="三维场景与回放">
+      <div class="stage-heading"><div><div class="scene-kicker"><span id="dataset-badge" class="dataset-badge">—</span><span id="scene-kind">源地图与状态</span></div><h2 id="scene-title">载入场景</h2></div><button id="start-engine" class="button primary" disabled><svg><use href="#i-play"/></svg>启动 MetaDrive</button></div>
+      <div class="view-toolbar"><div class="segmented mode-switch"><button data-mode="review" class="active">地图审阅</button><button data-mode="engine">MetaDrive 仿真</button></div><div class="version-controls"><label for="map-version">道路版本</label><select id="map-version"><option value="updated">更新后</option><option value="original">原始道路</option><option value="compare">前后并排</option></select></div><span class="toolbar-spacer"></span><label class="check"><input id="show-structure" type="checkbox" checked><span class="cyan-dot"></span>道路变化</label><label class="check"><input id="show-states" type="checkbox" checked><span class="yellow-dot"></span>附着状态</label><label class="check compact-check"><input id="show-traffic" type="checkbox" checked>交通</label></div>
+      <details id="interactive-panel" class="interactive-panel">
+        <summary><strong>交互交通</strong><span id="interactive-summary">5 辆交通车 + ego · 多人驾驶 / 内置 AI / 外部模块</span></summary>
+        <div class="interactive-content">
+          <div class="connection-row"><label for="simulation-server">仿真服务器</label><input id="simulation-server" type="url" placeholder="https://你的仿真服务器；本地服务可留空" autocomplete="off"><input id="simulation-control-key" type="password" placeholder="房主启动密钥（如需要）" aria-label="仿真服务器房主启动密钥" autocomplete="off"><button id="connect-simulation" class="button outline">连接</button><span id="simulation-connection" role="status"></span></div>
+          <div class="room-entry"><label>玩家名称<input id="interactive-player-name" maxlength="32" placeholder="你的名字" autocomplete="nickname"></label><label>房间 ID<input id="interactive-room-id" placeholder="分享链接中的房间 ID" autocomplete="off"></label><button id="join-interactive" class="button outline">加入观看</button><button id="start-interactive" class="button primary" disabled>启动交互场景</button></div>
+          <p class="interactive-help">场景由服务器统一推进。每位玩家占用一辆车；其他车辆可使用内置 AI 或连接外部模块。ego 默认等待外部控制，尚未接入你们的 Planning 模块。</p>
+          <div id="interactive-room" hidden>
+            <div class="room-heading"><span id="interactive-room-status"></span><div><button id="share-interactive" class="button outline">复制玩家链接</button><button id="leave-interactive" class="button outline">离开房间</button></div></div>
+            <div id="interactive-host-controls" class="interactive-host-controls" hidden><span>房主控制</span><button id="interactive-play" class="button outline">开始</button><button id="interactive-reset" class="button outline">重置场景</button><button id="interactive-close" class="button outline">关闭房间</button></div>
+            <p id="interactive-drive-status" class="interactive-drive-status" role="status">观众模式 · 不会推进仿真或接管车辆</p>
+            <div id="interactive-vehicles" class="interactive-vehicles"></div>
+            <div id="interactive-touch-controls" class="interactive-touch-controls" hidden aria-label="驾驶控制"><button data-drive-key="KeyA" aria-label="向左转">← 左</button><button data-drive-key="KeyW" aria-label="加速">↑ 加速</button><button data-drive-key="KeyS" aria-label="制动">↓ 制动</button><button data-drive-key="KeyD" aria-label="向右转">右 →</button></div>
+          </div>
+        </div>
+      </details>
+      <div id="viewport" class="viewport" tabindex="0" aria-label="三维视图。左键拖动旋转，右键拖动平移，滚轮缩放。">
+        <div id="review-view" class="view-surface"></div>
+        <div id="engine-view" class="view-surface" hidden><img id="engine-frame" alt="MetaDrive 引擎实时画面" draggable="false"><div id="engine-frame-error" class="engine-frame-error" role="alert" hidden><strong id="engine-frame-error-title">画面传输中断，回放已暂停</strong><p id="engine-frame-error-text"></p><div><button id="retry-engine-frame" class="button outline">重试这帧画面</button><button id="regenerate-engine-frame" class="button outline">重新生成当前帧</button></div></div><div id="engine-placeholder" class="empty-engine"><svg><use href="#i-layers"/></svg><h3>在真实 MetaDrive 中验证</h3><p>载入当前场景、道路版本及附着状态。<br>启动后可旋转视角、暂停和定位任意帧。</p><button id="engine-launch-inline" class="button primary">启动当前场景</button></div></div>
+        <div class="viewport-top"><span id="renderer-badge" class="viewport-badge">三维源几何审阅</span><span id="source-badge" class="viewport-badge source-badge">加载中</span><span id="pending-state" class="viewport-badge pending" hidden>正在对齐状态…</span></div>
+        <div id="split-labels" class="split-labels" hidden><span>原始道路 <small>相同时间与视角</small></span><span>更新后 <small>相同时间与视角</small></span></div>
+        <div id="object-labels" class="object-labels" aria-hidden="true"></div>
+        <div id="viewport-loading" class="viewport-loading"><div class="spinner"></div><strong id="loading-text">正在加载场景数据</strong><span>地图、变化记录和源时间将一起对齐</span></div>
+        <div id="viewport-error" class="viewport-error" hidden><strong>暂时无法显示场景</strong><p id="viewport-error-text"></p><button id="retry-scene" class="button">重新载入</button></div>
+        <div class="camera-tools" aria-label="视角控制"><button data-camera="follow" class="active" title="跟随车辆">跟车</button><button data-camera="rear" title="转向车辆后方">看车后</button><button data-camera="top" title="俯视当前区域">俯视</button><button data-camera="overview" title="查看整个场景">全图</button><button id="focus-selection" title="聚焦选中的变化"><svg><use href="#i-focus"/></svg></button></div>
+        <div class="viewport-bottom"><span id="camera-hint">左键旋转 · 右键平移 · 滚轮缩放</span><span id="coordinates">XY · 米</span></div>
+      </div>
+      <div class="timeline-panel"><div class="timeline-header"><div class="time-readout"><span id="current-time">00:00.0</span><span class="time-total">/ <span id="total-time">00:00.0</span></span><span id="frame-readout">帧 0 / 0</span></div><span id="time-source">按记录轨迹回放</span><label class="speed-label">速度<select id="play-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div><div class="scrubber-wrap"><div id="time-markers" class="time-markers"></div><input id="timeline" type="range" min="0" max="0" value="0" step="1" disabled aria-label="拖动回放进度，可前进和后退"></div><div class="transport"><button id="restart" class="icon-button" title="回到第一帧" aria-label="回到第一帧"><svg viewBox="0 0 24 24"><path d="M5 5v14M19 6l-9 6 9 6V6Z"/></svg></button><button id="previous-frame" class="icon-button" title="上一帧" aria-label="上一帧">‹</button><button id="play-pause" class="play-button" disabled aria-label="播放"><svg><use href="#i-play"/></svg></button><button id="next-frame" class="icon-button" title="下一帧" aria-label="下一帧">›</button><span id="playback-note">暂停中 · 拖动进度条查看任意时刻</span><span id="timeline-key-hint" class="key-hint">空格 播放/暂停 · ← → 逐帧</span></div></div>
+    </section>
+    <aside class="inspection-panel" aria-label="变化与验证"><div class="inspection-heading"><span class="eyebrow">CHANGE INSPECTOR</span><h2>看清每一处变化</h2><p id="layer-description">道路结构与附着状态，分别记录来源。</p></div><div class="inspection-tabs" role="tablist"><button data-tab="structure" role="tab" aria-selected="true" class="active">结构 <span id="structure-count">0</span></button><button data-tab="states" role="tab" aria-selected="false">状态 <span id="state-count">0</span></button><button data-tab="validation" role="tab" aria-selected="false">验证</button></div><div id="change-search-wrap" class="change-search-wrap"><input id="change-search" type="search" placeholder="搜索要素 ID / 变化类型" aria-label="搜索变化"></div><div id="change-list" class="change-list"></div><div id="selection-details" class="selection-details" hidden></div><div id="validation-panel" class="validation-panel" hidden></div><div class="planning-note"><strong>交给 Planning 的是什么？</strong><p id="planning-description">导出当前道路图与所选时刻已观测的状态。画面中的全场景预览包含后续观测，预览信息不混入当前帧导出。</p><button id="planning-contract" class="text-button">查看接口与坐标约定 <span>↗</span></button></div></aside>
+  </main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="interactive-module-dialog"><div class="dialog-heading"><h2>连接外部控制模块</h2><button id="close-interactive-module" class="icon-button" aria-label="关闭">×</button></div><p>外部模块自行领取这辆车，并持续发送转向和油门/制动指令。这里提供接口，不代表已经实现你们的 Planning 算法。领取需要玩家链接中的加入凭证；它不会包含在地图或观测数据中。</p><pre id="interactive-module-contract"></pre><p>坐标为源城市 XY 米制。动作是 [转向, 油门/制动]，范围均为 −1 到 1。模块应按顺序发送递增 seq，并注明读取观测时的 observation_step；断开或超时后服务器制动。</p></dialog>
+  <dialog id="contract-dialog"><div class="dialog-heading"><h2>Planning 接入</h2><button id="close-contract" class="icon-button" aria-label="关闭">×</button></div><p>导出当前选中的场景、道路版本和回放时刻。固定预览汇总整段记录；导出仅使用所选时刻已知的观测。结构与状态分层，坐标保持源城市 XY 米制。</p><dl><dt>道路结构</dt><dd>车道中心线、边界、连接关系、通行属性和地图版本哈希。</dd><dt>附着状态</dt><dd>已观测对象的位置、尺寸、时间、状态和来源。未知不等于清除。</dd><dt>新路线</dt><dd>Planning 自行指定目标与控制策略；当前回放不代表规划算法的结果。</dd></dl><pre id="contract-json"></pre><button id="export-planning-dialog" class="button primary">导出当前帧 Planning JSON</button></dialog>
+</body>
+</html>
