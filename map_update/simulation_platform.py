@@ -476,6 +476,13 @@ class PlatformHandler(BaseHTTPRequestHandler):
                                                            _one(query, 'vehicle_id', 'ego')))
         elif path == '/api/interactive/map':
             self._send(self.server.interactive.map(_one(query, 'session_id', None)))
+        elif path == '/api/interactive/perception':
+            self._send(self.server.interactive.perception(_one(query, 'session_id', None), _one(query, 'vehicle_id', 'ego')))
+        elif path == '/api/interactive/planning-input':
+            self._send(self.server.interactive.planning_input(_one(query, 'session_id', None),
+                _one(query, 'vehicle_id', 'ego'), _one(query, 'map_policy', 'observed')))
+        elif path == '/api/interactive/planning-map':
+            self._send(self.server.interactive.planning_map(_one(query, 'session_id', None)))
         elif path == '/api/engine/status':
             wait_text = _one(query, 'wait_ms', '0')
             if not wait_text.isascii() or not wait_text.isdecimal():
@@ -563,7 +570,7 @@ class PlatformHandler(BaseHTTPRequestHandler):
                 key, version = body.get('scene_id'), _version(body.get('version', 'updated'))
                 if not isinstance(key, str):
                     raise ValueError('scene_id is required')
-                self._send(self.server.interactive.open(key, version), status=202)
+                self._send(self.server.interactive.open(key, version, traffic=body.get('traffic')), status=202)
             elif action in {'claim', 'input', 'camera', 'control'}:
                 self._send(getattr(self.server.interactive, action)(body))
             elif action in {'heartbeat', 'release'}:

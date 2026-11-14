@@ -22,6 +22,7 @@ class FakeBroker:
         self.pending = None
         self.counter = 0
         self.step = 0
+        self.vehicle_ids = VEHICLE_IDS
         self.camera = {"target": "ego", "yaw": 0., "pitch": 30., "distance": 24., "pan": [0., 0.]}
         self.fail_next_tick = False
         self.malformed_next_tick = False
@@ -61,6 +62,7 @@ class FakeBroker:
             return
         if kind == "open":
             self.step = 0
+            self.vehicle_ids = ("ego", *[m["vehicle_id"] for m in command["interactive"]["missions"]])
         elif kind == "interactive_tick":
             self.step += command["steps"]
         elif kind == "camera":
@@ -70,7 +72,7 @@ class FakeBroker:
                           "speed_m_s": 0., "length_m": 4.5, "width_m": 1.8,
                           "collision": {"vehicle": False, "object": False, "human": False, "building": False},
                           "mode": "external" if key == "ego" else "ai", "action": [0., -1.]}
-                    for index, key in enumerate(VEHICLE_IDS)}
+                    for index, key in enumerate(self.vehicle_ids)}
         if kind == "interactive_tick" and self.malformed_next_tick:
             self.malformed_next_tick = False
             del vehicles["P5"]
@@ -173,6 +175,74 @@ class InteractiveHttpTests(unittest.TestCase):
     def host(self, action, **extra):
         return self.post("control", {**self.public_identity(), "host_token": self.identity["host_token"],
                                      "action": action, **extra})
+
+    def test_planning_input_is_atomic_and_action_receipt_binds_version(self):
+        self.open_room();sid=self.identity['session_id']
+        status,_,bundle=self.request('/api/interactive/planning-input?session_id='+sid+'&vehicle_id=ego')
+        self.assertEqual(status,200)
+        self.assertEqual(bundle['step'],bundle['state_layer']['observed_through_step'])
+        self.assertEqual(bundle['state_layer']['events'],[])
+        version=bundle['state_layer']['state_version']
+        status,_,claim=self.post('claim',{**self.public_identity(),'host_token':self.identity['host_token'],
+            'vehicle_id':'ego','kind':'external'})
+        self.assertEqual(status,200)
+        command={**self.public_identity(),'lease_token':claim['lease_token'],'seq':1,'observation_step':bundle['step'],
+                 'actions':{'ego':[0,-1]},'planning_state_versions':{'ego':version}}
+        status,_,receipt=self.post('input',command)
+        self.assertEqual(status,200)
+        self.assertEqual(receipt['accepted_planning_versions'],{'ego':version})
+        status,_,_=self.post('input',{**command,'seq':2,'planning_state_versions':{'ego':'forged'}})
+        self.assertEqual(status,400)
+        status,_,_=self.request('/api/interactive/planning-input?session_id='+sid+'&map_policy=future')
+        self.assertEqual(status,400)
+        self.assertEqual(len(self.server.interactive.planning_receipts),1)
+
+    def test_population_is_dynamic_and_manual_driving_is_disabled_in_auto_experiment(self):
+        missions=[{'vehicle_id':f'P{i}','position_scenario_m':[float(i),0.],'heading_rad':0.} for i in range(1,9)]
+        with patch('map_update.simulation_traffic.cyclic_traffic',return_value={'missions':missions,'traffic':{'vehicle_count':8}}):
+            status,_,value=self.post('open',{'scene_id':'test-scene','version':'updated','traffic':{'vehicle_count':8}},admin=True)
+            self.assertEqual(status,202);self.identity=value['room']
+            state=self.until(lambda s:s['phase']=='paused')
+            self.assertEqual(len(state['room']['vehicles']),9)
+            status,_,_=self.post('claim',{**self.public_identity(),'host_token':self.identity['host_token'],'vehicle_id':'P8','kind':'manual'})
+            self.assertEqual(status,400)
+            status,_,_=self.post('claim',{**self.public_identity(),'host_token':self.identity['host_token'],'vehicle_id':'P8','kind':'external'})
+            self.assertEqual(status,200)
+
+    def test_reset_keeps_synthetic_profile_and_seed(self):
+        options = {'seed': 17, 'stop_duration_s': 60}
+        config = {'missions': [{'vehicle_id':f'P{i}', 'position_scenario_m':[float(i),0.], 'heading_rad':0.} for i in range(1,6)], 'traffic': options}
+        with patch('map_update.simulation_traffic.cyclic_traffic', return_value=config) as generate:
+            status, _, value = self.post('open', {'scene_id':'test-scene', 'version':'updated', 'traffic':options}, admin=True)
+            self.assertEqual(status, 202)
+            self.identity = value['room']
+            self.until(lambda state: state['phase']=='paused')
+            status, _, value = self.host('reset')
+            self.assertEqual(status, 200)
+            self.until(lambda state: state['phase']=='paused')
+            self.assertEqual(generate.call_count, 2)
+            self.assertEqual(generate.call_args.args[1], options)
+            self.assertNotEqual(value['room']['session_id'], self.identity['session_id'])
+
+    def test_perception_and_planning_map_do_not_return_debug_privileges(self):
+        self.open_room()
+        sid = self.identity['session_id']
+        # Inject internal intent into an otherwise valid completed state.
+        with self.server.interactive.lock:
+            cars = self.server.interactive.last_result['interactive']['vehicles']
+            cars['P1'].update(route={'points': [[1, 2]]}, requested_action=[1, 1], goal_scenario_m=[100, 0])
+            cars['P5']['position_city_m'] = [10000., 10000.]
+        status, _, observed = self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=ego')
+        self.assertEqual(status, 200)
+        self.assertNotIn('vehicles', observed)
+        self.assertNotIn('P5', [a['vehicle_id'] for a in observed['current_objects']])
+        for actor in [observed['own_vehicle'], *observed['current_objects']]:
+            self.assertFalse(set(actor) & {'route', 'requested_action', 'goal_scenario_m', 'action'})
+        status, _, context = self.request('/api/interactive/planning-map?session_id='+sid)
+        self.assertEqual(status, 200)
+        self.assertFalse(set(context) & {'state_prior', 'static_actors', 'source'})
+        status, _, _ = self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=unknown')
+        self.assertEqual(status, 400)
 
     def test_public_binding_requires_a_strong_control_key_before_opening_socket(self):
         for key in (None, "short"):

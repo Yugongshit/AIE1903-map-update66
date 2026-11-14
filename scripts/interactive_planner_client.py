@@ -17,7 +17,7 @@ from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 
-VEHICLES = ("ego", "P1", "P2", "P3", "P4", "P5")
+VEHICLES = ("ego", *(f"P{i}" for i in range(1, 13)))
 
 
 class APIError(RuntimeError):
@@ -28,7 +28,8 @@ def plan(observation, vehicle_id, map_context):
     """Replace this function with your local planner.
 
     observation is a current physical-state snapshot, map_context is the
-    versioned road geometry and declared static-world prior fetched once.
+    versioned road geometry; --live-map adds the current causal state layer.
+    Legacy mode includes a declared static-world prior fetched once.
     Return normalized [steering, throttle/brake], each within [-1, 1].
     No recorded future vehicle trajectory is supplied by this interface.
     """
@@ -77,7 +78,9 @@ def checked_action(action):
     return [float(value) for value in action]
 
 
-def run(client, session_id, vehicle_ids, join_token, *, duration_s=None, poll_interval_s=0.05):
+def run(client, session_id, vehicle_ids, join_token, *, duration_s=None, poll_interval_s=0.05, live_map=False, map_policy="observed"):
+    if live_map and len(vehicle_ids) != 1:
+        raise ValueError("Scoped live-map mode controls one observer vehicle per client")
     state = client.request("state").get("room")
     if not isinstance(state, dict) or state.get("session_id") != session_id:
         raise APIError("The requested session is not the current interactive room")
@@ -85,7 +88,7 @@ def run(client, session_id, vehicle_ids, join_token, *, duration_s=None, poll_in
     if type(epoch) is not int:
         raise APIError("Room state is missing its generation epoch")
     identity = {"session_id": session_id, "epoch": epoch}
-    map_context = client.request("map", query={"session_id": session_id})
+    map_context = client.request("planning-map" if live_map else "map", query={"session_id": session_id})
     claim = client.request("claim", body={**identity, "join_token": join_token,
         "vehicle_ids": vehicle_ids, "kind": "external", "client_label": "local-planner-example"})
     token = claim.get("lease_token", claim.get("token"))
@@ -101,8 +104,8 @@ def run(client, session_id, vehicle_ids, join_token, *, duration_s=None, poll_in
             if now - last_heartbeat >= 0.75:
                 client.request("heartbeat", body=credentials)
                 last_heartbeat = time.monotonic()
-            observation = client.request("observation", query={
-                "session_id": session_id, "vehicle_id": vehicle_ids[0]})
+            observation = client.request("planning-input" if live_map else "observation", query={
+                "session_id": session_id, "vehicle_id": vehicle_ids[0], **({"map_policy":map_policy} if live_map else {})})
             if observation.get("session_id") != session_id or observation.get("epoch") != epoch:
                 raise APIError("Session or epoch changed; stop and claim the new room explicitly")
             step = observation.get("step")
@@ -113,11 +116,18 @@ def run(client, session_id, vehicle_ids, join_token, *, duration_s=None, poll_in
             # A paused room returns a freshly read observation at the same
             # physical step. Keep the authorized command stream alive with a
             # new sequence; heartbeat alone does not refresh an old action.
-            actions = {identifier: checked_action(plan(observation, identifier, map_context))
+            context = map_context
+            if live_map:
+                if observation.get("road_version") != map_context["map_version"]:
+                    raise APIError("Road version changed; fetch a consistent map before planning")
+                context = {**map_context, "state_layer":observation["state_layer"],
+                           "planning_version":observation["planning_version"]}
+            actions = {identifier: checked_action(plan(observation, identifier, context))
                        for identifier in vehicle_ids}
             sequence += 1
             client.request("input", body={**credentials, "seq": sequence,
-                "observation_step": step, "actions": actions})
+                "observation_step": step, "actions": actions,
+                **({"planning_state_versions":{vehicle_ids[0]:observation["state_layer"]["state_version"]}} if live_map else {})})
             previous_step = step
             time.sleep(poll_interval_s)
     finally:
@@ -135,6 +145,8 @@ def main():
     parser.add_argument("--vehicles", nargs="+", choices=VEHICLES, default=["ego"])
     parser.add_argument("--seconds", type=float, default=None, help="Optional duration before releasing control")
     parser.add_argument("--poll-interval", type=float, default=0.05)
+    parser.add_argument("--live-map", action="store_true", help="Use scoped observations and online occupancy updates (one vehicle)")
+    parser.add_argument("--map-policy", choices=("observed","baseline"), default="observed")
     parser.add_argument("--timeout", type=float, default=2.0)
     args = parser.parse_args()
     if len(set(args.vehicles)) != len(args.vehicles):
@@ -152,7 +164,7 @@ def main():
         parser.exit(2, "A room join ticket is required.\n")
     try:
         run(RoomClient(args.url, args.timeout), args.session_id, args.vehicles, join_token,
-            duration_s=args.seconds, poll_interval_s=args.poll_interval)
+            duration_s=args.seconds, poll_interval_s=args.poll_interval, live_map=args.live_map, map_policy=args.map_policy)
     except KeyboardInterrupt:
         print("Planner client stopped; control released when the connection allowed.")
     except (APIError, ValueError) as error:

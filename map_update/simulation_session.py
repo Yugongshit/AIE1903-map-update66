@@ -26,6 +26,9 @@ def _number(value, name):
     return float(value)
 
 
+TRAFFIC_CAMERA_TARGETS = {f'P{i}' for i in range(1,13)}
+
+
 def validated_camera(current, command):
     """Validate a complete orbit camera without touching simulation state."""
     result = deepcopy(current)
@@ -42,14 +45,14 @@ def validated_camera(current, command):
         if preset not in presets:
             raise ValueError('Unknown camera preset')
         result.update(presets[preset])
-        if preset in {'follow', 'rear', 'top'} and current.get('target') in {'P1', 'P2', 'P3', 'P4', 'P5'}:
+        if preset in {'follow', 'rear', 'top'} and current.get('target') in TRAFFIC_CAMERA_TARGETS:
             result['target'] = current['target']
     for name in ('yaw', 'pitch', 'distance'):
         if name in command:
             result[name] = _number(command[name], name)
     if 'target' in command:
-        if command['target'] not in {'ego', 'map', 'selection', 'P1', 'P2', 'P3', 'P4', 'P5'}:
-            raise ValueError('Camera target must be ego, map, selection or P1..P5')
+        if command['target'] not in ({'ego', 'map', 'selection'} | TRAFFIC_CAMERA_TARGETS):
+            raise ValueError('Camera target must be ego, map, selection or P1..P12')
         result['target'] = command['target']
     if 'pan' in command:
         value = command['pan']
@@ -257,7 +260,7 @@ class SimulationSession:
             if points:
                 self.map_center = [(min(float(p[i]) for p in points)+max(float(p[i]) for p in points))/2 for i in (0, 1)]
             self.camera = saved_camera or validated_camera({}, {'preset': 'follow'})
-            if interactive is None and self.camera['target'] in {'P1', 'P2', 'P3', 'P4', 'P5'}:
+            if interactive is None and self.camera['target'] in TRAFFIC_CAMERA_TARGETS:
                 self.camera['target'] = 'ego'
             offset = metadata.get('old_origin_in_current_coordinate', [0, 0])
             self.selection_center = [saved_selection[i] + float(offset[i]) for i in (0, 1)] if saved_selection else None
@@ -269,6 +272,8 @@ class SimulationSession:
                 from .simulation_interactive import InteractiveRuntime
                 self.interactive = InteractiveRuntime(self.env, interactive, self.source_features,
                     map_sha256=manifest['provenance']['map_features_sha256'])
+                if self.camera['target'] in TRAFFIC_CAMERA_TARGETS and self.camera['target'] not in self.interactive.vehicles:
+                    self.camera['target'] = 'ego'
                 if bound['states'] is not None:
                     from .simulation_states import state_snapshot
                     self._interactive_source_snapshot = state_snapshot(bound['states'], 0, source_to_runtime_offset=offset)
@@ -407,8 +412,10 @@ class SimulationSession:
         camera = validated_camera(self.camera, command)
         if camera['target'] == 'selection' and self.selection_center is None:
             raise ValueError('Select a visible change before focusing it')
-        if camera['target'] in {'P1', 'P2', 'P3', 'P4', 'P5'} and self.interactive is None:
-            raise ValueError('Launch interactive mode before following P1..P5')
+        if camera['target'] in TRAFFIC_CAMERA_TARGETS and self.interactive is None:
+            raise ValueError('Launch interactive mode before following P1..P12')
+        if camera['target'] in TRAFFIC_CAMERA_TARGETS and camera['target'] not in self.interactive.vehicles:
+            raise ValueError('Camera vehicle is not present in this experiment')
         self.camera = camera
         return self.frame()
 
@@ -436,7 +443,7 @@ class SimulationSession:
 
     def _camera_center(self):
         target = self.camera['target']
-        if target in {'P1', 'P2', 'P3', 'P4', 'P5'}:
+        if target in TRAFFIC_CAMERA_TARGETS:
             if self.interactive is None:
                 raise ValueError('Interactive car camera requires live interaction')
             vehicle = self.interactive.vehicles[target]

@@ -23,6 +23,9 @@ class InteractiveCoordinator:
         self.error = None
         self.identity = None
         self.scene_key = self.version = None
+        self.traffic_options = None
+        self.observed_maps = {}
+        self.planning_receipts = []
         self.job = None
         self.last_engine = None
         self.last_result = None
@@ -55,7 +58,7 @@ class InteractiveCoordinator:
         self.job['identity'] = {k: self.identity[k] for k in ('session_id', 'epoch')}
         return self.job
 
-    def open(self, key, version):
+    def open(self, key, version, traffic=None):
         from .simulation_platform_data import scene_database
         from .simulation_interactive_scenarios import choose_interactive_missions
         payload = self.server.scene(key)
@@ -63,16 +66,28 @@ class InteractiveCoordinator:
         # one physical version prevents a lobby from silently changing roads.
         if version != 'updated':
             raise ValueError('交互交通使用更新后的道路；原始道路可在地图审阅中比较。')
-        missions = choose_interactive_missions(payload)
+        if traffic is not None:
+            from .simulation_traffic import cyclic_traffic
+            interactive_config = cyclic_traffic(payload, traffic)
+        else:
+            interactive_config = {'missions': choose_interactive_missions(payload)}
+        missions = interactive_config['missions']
         database = scene_database(self.server.repo, key, version)
         with self.lock:
             if self.active:
                 raise ValueError('已有交互房间，请由房主关闭后再创建。')
             if self.server.engine.status()['busy']:
                 raise ValueError('引擎仍在执行上一项操作。')
-            identity = self.room.create(key, version, missions)
+            identity = self.room.create(key, version, missions, vehicle_ids=('ego', *[m['vehicle_id'] for m in missions]))
             self.identity = {k: identity[k] for k in ('session_id', 'epoch', 'host_token', 'join_token')}
             self.scene_key, self.version = key, version
+            self.traffic_options = deepcopy(traffic)
+            from .simulation_live_map import ObservedStateMap
+            from .simulation_bridge import feature_sha256
+            roads = payload['maps'][version]
+            self.observed_maps = {identifier: ObservedStateMap(roads, feature_sha256(roads))
+                                  for identifier in ['ego', *[m['vehicle_id'] for m in missions]]}
+            self.planning_receipts = []
             self.active, self.playing, self.phase, self.error = True, False, 'starting', None
             self.last_engine = self.last_result = self.compact_result = self.pending_camera = None
             self.pending_close = False
@@ -81,7 +96,7 @@ class InteractiveCoordinator:
             try:
                 self.job = self.server.engine.submit(
                     {'command': 'open', 'database_path': str(database), 'step': 0,
-                     'interactive': {'missions': missions}}, scene_id=key, version=version)
+                     'interactive': interactive_config}, scene_id=key, version=version)
                 self.job['identity'] = {k: self.identity[k] for k in ('session_id', 'epoch')}
             except BaseException:
                 self.active, self.phase = False, 'idle'
@@ -119,6 +134,10 @@ class InteractiveCoordinator:
         # that these six vehicles are actual current physical actors.
         result = {k: v for k, v in result.items()
                   if k not in {'state_events', 'state_objects', 'persistent_obstacles_runtime'}}
+        from .simulation_traffic import vehicle_perception
+        for identifier, observed_map in self.observed_maps.items():
+            observed_map.update(result['step'], result['interactive'].get('sim_time_s', result['step']*.1),
+                                vehicle_perception(result['interactive'], identifier))
         self.last_result = result
         # The browser already has static map/state overlays. Its snapshot
         # contains each actual actor once, including stationary colliders.
@@ -208,6 +227,8 @@ class InteractiveCoordinator:
 
     def claim(self, body):
         with self.lock:
+            if self.traffic_options is not None and body.get('kind', 'manual') == 'manual':
+                raise ValueError('Automatic traffic experiment: manual driving is deferred')
             self._authorize(body)
             if self.phase in {'starting', 'error', 'closing'}:
                 raise ValueError('等待房间完成启动后再接管车辆。')
@@ -224,9 +245,22 @@ class InteractiveCoordinator:
                 actions = {body['vehicle_id']: body['action']}
             if actions is None:
                 raise ValueError('Provide actions keyed by the controlled vehicle ID')
-            return self.room.input(body.get('token', body.get('lease_token')),
+            versions = body.get('planning_state_versions')
+            if versions is not None:
+                if not isinstance(versions, dict) or set(versions) != set(actions) or type(body.get('observation_step')) is not int:
+                    raise ValueError('Planning versions must identify every submitted vehicle and observation step')
+                for identifier, version in versions.items():
+                    if identifier not in self.observed_maps or not isinstance(version, str) or not self.observed_maps[identifier].accepts_version(version, body['observation_step']):
+                        raise ValueError('Planning state version is unknown, expired or from the future')
+            receipt = self.room.input(body.get('token', body.get('lease_token')),
                 session_id=body['session_id'], epoch=body['epoch'], seq=body.get('seq'),
                 actions=actions, observation_step=body.get('observation_step'))
+            if versions is not None:
+                receipt['accepted_planning_versions'] = deepcopy(versions)
+                self.planning_receipts.append({'observation_step':body['observation_step'],
+                    'seq':body['seq'], 'state_versions':deepcopy(versions), 'scope':'accepted_not_execution_proof'})
+                self.planning_receipts = self.planning_receipts[-64:]
+            return receipt
 
     def lease_command(self, action, body):
         with self.lock:
@@ -259,6 +293,8 @@ class InteractiveCoordinator:
                 if self.phase == 'running':
                     self.phase = 'paused'
             elif action == 'mode':
+                if self.traffic_options is not None and body.get('mode') == 'manual':
+                    raise ValueError('Automatic traffic experiment: manual driving is deferred')
                 self.room.set_mode(body.get('vehicle_id'), body.get('mode'),
                     session_id=body['session_id'], epoch=body['epoch'], host_token=body['host_token'])
             elif action == 'close':
@@ -273,7 +309,7 @@ class InteractiveCoordinator:
                 self.active, self.playing = False, False
                 # Native open closes the old environment. A fresh room gets
                 # new credentials so delayed inputs cannot steer new vehicles.
-                return self.open(key, version)
+                return self.open(key, version, traffic=deepcopy(self.traffic_options))
             else:
                 raise ValueError('Unsupported room control')
             self.wake.set()
@@ -312,6 +348,28 @@ class InteractiveCoordinator:
                     'coordinate_reference': {'frame': 'source_city_xy', 'units': 'm', 'heading': 'radians', 'speed': 'm/s'},
                     'observation_scope': 'current_simulator_ground_truth_no_sensor_occlusion',
                     'recorded_future_tracks_included': False}
+
+    def perception(self, session_id, vehicle_id='ego'):
+        from .simulation_traffic import vehicle_perception
+        with self.lock:
+            observation = self.observation(session_id, vehicle_id)
+            measured = vehicle_perception(self.last_result['interactive'], vehicle_id)
+            return {**{k: observation[k] for k in ('session_id', 'epoch', 'scene_id', 'step',
+                    'sim_time_s', 'state_id', 'vehicle_id', 'coordinate_reference', 'map_version')},
+                    'schema': 'interactive-vehicle-perception-1.0', **measured}
+
+    def planning_input(self, session_id, vehicle_id='ego', policy='observed'):
+        with self.lock:
+            perception = self.perception(session_id, vehicle_id)
+            layer = self.observed_maps[vehicle_id].snapshot(policy)
+            return {**perception, 'schema':'interactive-planning-input-1.0',
+                    'road_version':layer['road_version'], 'state_layer':layer,
+                    'planning_version':layer['road_version']+':'+layer['state_version']}
+
+    def planning_map(self, session_id):
+        context = self.map(session_id)
+        return {k: context[k] for k in ('session_id', 'epoch', 'scene_id', 'map_features',
+                                       'map_version', 'coordinate_reference')}
 
     def map(self, session_id):
         from .simulation_bridge import feature_sha256

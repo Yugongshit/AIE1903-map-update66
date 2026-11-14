@@ -132,3 +132,19 @@ HTTP 动作请求成功表示服务端已接受并放入动作信箱，不表示
 nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的固定碰撞盒，质量和逆质量均为零，表达不可移动的研究场景障碍。锥筒也采用固定近似，不模拟现实中的推动、倒伏。其他车辆仍使用正常有限质量的 Bullet 车辆模型。黄色状态区域、语义足迹和变化标注本身不自动生成实体碰撞体；仅有标注不能声称它会阻挡车辆。
 
 可用 `python scripts/validate_interactive_collisions.py --out outputs/collision-check --speed 3` 复现真实源路障撞击；`--replay-only` 验证原记录轨迹、固定源物体位置和源数据未改变。撞击验证仅设置测试车辆初始位置，运行中不改坐标，也不通过碰撞后强制刹车冒充物理阻挡。
+
+## 合成交通的受限观测接口
+
+持续交通实验新增 `/perception` 与 `/planning-map`，分别提供 50 米全向理想合成测量、无静态物体先验的道路图。它们不返回其他驾驶者内部意图；旧端点继续用于兼容与调试，尚未做访问隔离。新模式、事件时间和完整边界见[合成交通阶段一](synthetic_traffic.md)。
+
+## 在线临时状态与自动交通（当前推荐）
+
+新自动模式支持 1–12 辆 P 车，默认无人驾驶，拒绝 `kind=manual`；外部租约 `kind=external` 不变。不要依赖固定 P1–P5 数量，应读取房间车辆 ID。下面仅描述受限输入，前文旧 `/map`、`/observation` 为兼容调试协议。
+
+`GET /planning-input?session_id=...&vehicle_id=P8&map_policy=observed` 原子返回当前 `/perception` 测量及 `state_layer`。`observed_through_step` 与顶层 `step` 相同；`road_version` 对应 `/planning-map` 的 `map_version`，`state_version` 标识该观察车的状态快照。事件含几何、来源、支持次数、证据时间、状态与可选车道 ID，不含生成器未来计划。`active` 是确认静止占用；`stale` 是未再确认，不能当作畅通；`cleared` 表示已观测原车驶离原足迹，不保证该区域绝无其他障碍。
+
+选择 `map_policy=baseline` 返回相同物理观测与道路图但空状态层，不修改物理世界。网页选择只影响当前查看/导出，不远程更改已运行规划器；客户端通过 `--map-policy` 显式选择。
+
+`POST /input` 可新增 `"planning_state_versions":{"P8":"STATE_VERSION"}`，键必须与 `actions` 完全一致，同时携带 `observation_step`。服务端拒绝未知、缓存过期或晚于观测步的版本；成功响应包含 `accepted_planning_versions`。每观察车保留最近 64 个变化版本，按新观测及时提交。回执表示接受请求，不证明执行或规划器确实使用数据。
+
+示例 `python scripts/interactive_planner_client.py --session-id ROOM_ID --vehicles P8 --live-map --map-policy observed` 将状态层加入 `plan()` 第三个参数并随动作声明版本；每个此类客户端只控制一辆车。`plan()` 仍返回刹车。详见[当前操作和验证边界](synthetic_traffic.md)。

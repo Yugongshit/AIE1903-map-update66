@@ -1,0 +1,149 @@
+{
+  "schema": "synthetic-traffic-stage1-evidence-1.0",
+  "date": "2026-11-14",
+  "base_commit": "b022bb96b89a9f8a9f766fc47f80ae66c674b4f0",
+  "stage": "1: fixed five-car source-lane cycle, timed stop/recovery, player handover, ideal scoped observations",
+  "native_runs": [
+    {
+      "schema": "synthetic-traffic-validation-1.0",
+      "passed": true,
+      "seed": 0,
+      "seconds": 600,
+      "handover": false,
+      "following_brake_steps": 0,
+      "off_route_steps": 0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.2500161692160687,
+      "stop_min_speed_m_s": 0.002662996222298742,
+      "recovery_max_speed_m_s": 2.4999187461258887,
+      "physical_map_sha256": "e3c1bd7cf9dd11d75fceb6af36484fecf80d3d8d8da004de7e25349d22e18ce4",
+      "physical_map_unchanged": true,
+      "completed_laps": {
+        "P1": 3,
+        "P2": 3,
+        "P3": 3,
+        "P4": 3,
+        "P5": 3
+      },
+      "trace_sha256": "5d60c4223d516c8368a6056229d26d4866e37b785e9fc624f0a75ec26990a0c9",
+      "source_hashes": {
+        "map_update/simulation_traffic.py": "6b5b90bbb326034aec702d58dd06283d9dac867e0fcfd0a8b97d4d05bf31af7e",
+        "map_update/simulation_interactive.py": "7760d41cd49d96c7a0e7652422af04cbc4f2cc919bed553c2677b462c2cbcde0"
+      },
+      "configuration": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "case": "cycle-repeat"
+    },
+    {
+      "schema": "synthetic-traffic-validation-1.0",
+      "passed": true,
+      "seed": 0,
+      "seconds": 600,
+      "handover": true,
+      "following_brake_steps": 200,
+      "off_route_steps": 0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.25000854776529186,
+      "stop_min_speed_m_s": 0.002662996222298742,
+      "recovery_max_speed_m_s": 2.4999149421755233,
+      "completed_laps": {
+        "P1": 3,
+        "P2": 3,
+        "P3": 3,
+        "P4": 3,
+        "P5": 3
+      },
+      "trace_sha256": "8a43b8cbb391b216e21523d5df7aff42ef3798198ce360ac38ad19e595f8c00d",
+      "source_hashes": {
+        "map_update/simulation_traffic.py": "0c926bdafcadffd6d4ec60f4026e42c68d2b72d26b6dea2e51bdaabeb1891d02",
+        "map_update/simulation_interactive.py": "8c668a998b2bfd79e7b98f11e8d79708f6b28392a0c950ce7a5e2d9a406432cb"
+      },
+      "configuration": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 60.0,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "case": "cycle-handover"
+    },
+    {
+      "schema": "synthetic-traffic-validation-1.0",
+      "passed": true,
+      "seed": 0,
+      "seconds": 120,
+      "handover": true,
+      "following_brake_steps": 0,
+      "off_route_steps": 0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.25000854776529186,
+      "stop_min_speed_m_s": 0.002662996222298742,
+      "recovery_max_speed_m_s": 2.4999187461258887,
+      "physical_map_sha256": "e3c1bd7cf9dd11d75fceb6af36484fecf80d3d8d8da004de7e25349d22e18ce4",
+      "physical_map_unchanged": true,
+      "completed_laps": {
+        "P1": 0,
+        "P2": 0,
+        "P3": 0,
+        "P4": 0,
+        "P5": 0
+      },
+      "trace_sha256": "55beba28f42c158e791cc35488f6d8c6087823120b2fe295a107fb8d2abbeccd",
+      "source_hashes": {
+        "map_update/simulation_traffic.py": "a6c4538a78863b0beaa0c99dc06aa22167ca2b463bf411e134a8007d40f425d3",
+        "map_update/simulation_interactive.py": "95ed7d33d0b031ae680a2a716ca2df5c37de54f96790d600104d42a6c58bb087"
+      },
+      "configuration": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "case": "cycle-final-handover"
+    }
+  ],
+  "same_seed_replay": {
+    "equal_pose_speed_trace_sha256": true,
+    "trace_sha256": "5d60c4223d516c8368a6056229d26d4866e37b785e9fc624f0a75ec26990a0c9",
+    "seconds": 600,
+    "scope": "same cloud machine, seed and actions; not a cross-platform determinism guarantee"
+  },
+  "unit_tests": {
+    "suite_ran": 603,
+    "passed": 602,
+    "skipped": 1,
+    "skip_reason": "Original scene fixture is not available",
+    "final_affected_tests_passed": 56
+  },
+  "limitations": [
+    "Five cars on one nuScenes source cycle only; density, intersections and pedestrians are later stages.",
+    "The ego remains at its source initial pose awaiting external input; no real Planning module connected.",
+    "Perception is 50m omnidirectional ideal measurement without occlusion or noise.",
+    "Debug state endpoints remain accessible; formal blind experiments require access isolation.",
+    "Collision observations do not establish safety for arbitrary actions, speeds or environments.",
+    "Native report source hashes identify the code used in each run; final short handover verifies subsequent progress-accounting changes."
+  ],
+  "browser_checks": {
+    "passed": [
+      "synthetic provenance is visible",
+      "generated cars are labelled synthetic",
+      "five native vehicles plus ego",
+      "player claims a running vehicle",
+      "released car returns to AI",
+      "export contains bounded synthetic perception",
+      "private intentions are excluded",
+      "no uncaught JavaScript errors",
+      "reset preserves synthetic mode"
+    ],
+    "browser_errors": []
+  }
+}

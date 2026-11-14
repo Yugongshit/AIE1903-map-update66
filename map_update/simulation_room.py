@@ -105,6 +105,7 @@ Heartbeats extend a lease but never refresh an old driving command.
         if lease_timeout_s <= 0 or type(external_max_lag_steps) is not int or external_max_lag_steps < 0:
             raise ValueError("Invalid lease timeout or external observation lag")
         self._clock, self._wall_clock = clock, wall_clock
+        self.vehicle_ids = VEHICLE_IDS
         self.manual_timeout_s = float(manual_timeout_s)
         self.lease_timeout_s = float(lease_timeout_s)
         self.action_release_timeout_s = float(action_release_timeout_s)
@@ -120,20 +121,24 @@ Heartbeats extend a lease but never refresh an old driving command.
         self._published_step = None
         self._objects = []
 
-    def create(self, scene, version, missions=()):
+    def create(self, scene, version, missions=(), vehicle_ids=None):
         if not isinstance(scene, str) or not scene or not isinstance(version, str) or not version:
             raise RoomError("invalid_scene", "Scene and map version are required", 400)
         if not isinstance(missions, (list, tuple)):
             raise RoomError("invalid_missions", "Missions must be an array", 400)
+        selected = tuple(vehicle_ids) if vehicle_ids is not None else VEHICLE_IDS
+        if selected != ('ego', *[f'P{i}' for i in range(1,len(selected))]) or not 2 <= len(selected) <= 13:
+            raise RoomError('invalid_missions', 'Expected ego and 1..12 consecutive traffic vehicles', 400)
         initial = {}
         for mission in missions:
             if not isinstance(mission, dict):
                 raise RoomError("invalid_missions", "Mission must be an object", 400)
             identifier = mission.get("vehicle_id")
-            if identifier not in VEHICLE_IDS or identifier in initial:
+            if identifier not in selected or identifier in initial:
                 raise RoomError("invalid_missions", "Mission vehicle ID is invalid or repeated", 400)
             initial[identifier] = _current_actor(mission)
         with self._lock:
+            self.vehicle_ids = selected
             self._epoch += 1
             self._session_id = uuid.uuid4().hex
             self._host_token, self._join_token = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
@@ -144,7 +149,7 @@ Heartbeats extend a lease but never refresh an old driving command.
                                    "action": [0.0, -1.0], "input_at": None, "received_at_s": None,
                                    "observation_step": None, "last_seq": None,
                                    "reason": "awaiting_external_controller" if key == "ego" else "default_ai",
-                                   "state": initial.get(key, {})} for key in VEHICLE_IDS}
+                                   "state": initial.get(key, {})} for key in self.vehicle_ids}
             return {"session_id": self._session_id, "epoch": self._epoch,
                     "host_token": self._host_token, "join_token": self._join_token,
                     "snapshot": self.snapshot()}
@@ -159,11 +164,10 @@ Heartbeats extend a lease but never refresh an old driving command.
         if not _token_matches(token, self._host_token):
             raise RoomError("host_required", "A valid host ticket is required", 403)
 
-    @staticmethod
-    def _ids(vehicle_id, vehicle_ids):
+    def _ids(self, vehicle_id, vehicle_ids):
         ids = vehicle_ids if vehicle_ids is not None else ([vehicle_id] if isinstance(vehicle_id, str) else vehicle_id)
-        if not isinstance(ids, (list, tuple)) or not ids or any(key not in VEHICLE_IDS for key in ids):
-            raise RoomError("invalid_vehicle", "Choose ego or P1 through P5", 400)
+        if not isinstance(ids, (list, tuple)) or not ids or any(key not in self.vehicle_ids for key in ids):
+            raise RoomError("invalid_vehicle", "Choose a vehicle present in this room", 400)
         if len(set(ids)) != len(ids):
             raise RoomError("invalid_vehicle", "A vehicle may occur only once in a batch", 400)
         return list(ids)
@@ -268,9 +272,9 @@ Heartbeats extend a lease but never refresh an old driving command.
             return {"released": True}
 
     def set_mode(self, vehicle_id, mode, *, session_id, epoch, host_token):
-        if (vehicle_id not in VEHICLE_IDS or not isinstance(mode, str)
+        if (vehicle_id not in self.vehicle_ids or not isinstance(mode, str)
                 or mode not in {"ai", "manual", "external"} or (vehicle_id == "ego" and mode == "ai")):
-            raise RoomError("invalid_mode", "ego supports manual/external; P1..P5 also support AI", 400)
+            raise RoomError("invalid_mode", "ego supports manual/external; traffic vehicles also support AI", 400)
         with self._lock:
             self._identity(session_id, epoch)
             self._host(host_token)
@@ -339,8 +343,8 @@ Heartbeats extend a lease but never refresh an old driving command.
         if frame_id is not None and not isinstance(frame_id, str):
             raise RoomError("invalid_state", "Frame ID must be a string", 400)
         actors = source.get("vehicles", {})
-        if not isinstance(actors, dict) or set(actors) != set(VEHICLE_IDS):
-            raise RoomError("invalid_state", "Native result must contain ego and all five player vehicles", 400)
+        if not isinstance(actors, dict) or set(actors) != set(self.vehicle_ids):
+            raise RoomError("invalid_state", "Native result must contain every configured vehicle", 400)
         vehicle_states = {key: _current_actor(value) for key, value in actors.items()}
         objects = source.get("objects", source.get("static_actors", []))
         if not isinstance(objects, list) or len(objects) > 10000:

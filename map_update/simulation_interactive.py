@@ -28,9 +28,9 @@ def checked_action(action):
     return [float(v) for v in action]
 
 
-def validated_controls(controls):
+def validated_controls(controls, ids=IDS):
     """Validate the entire batch before changing any car's control mode."""
-    if not isinstance(controls, dict) or set(controls) - set(IDS):
+    if not isinstance(controls, dict) or set(controls) - set(ids):
         raise ValueError('Controls must address ego or P1..P5')
     result = {}
     for identifier, row in controls.items():
@@ -58,8 +58,11 @@ def validated_missions(config):
     if not isinstance(config, dict) or not isinstance(config.get('missions'), list):
         raise ValueError('Interactive launch requires five source-lane missions')
     rows = deepcopy(config['missions'])
-    if len(rows) != 5 or {row.get('vehicle_id') for row in rows if isinstance(row, dict)} != set(IDS[1:]):
-        raise ValueError('Interactive missions must identify P1..P5 exactly once')
+    count = config.get('traffic', {}).get('vehicle_count', 5)
+    if type(count) is not int or not 1 <= count <= 12:
+        raise ValueError('Traffic count must be 1..12')
+    if len(rows) != count or {row.get('vehicle_id') for row in rows if isinstance(row, dict)} != {f'P{i}' for i in range(1,count+1)}:
+        raise ValueError('Interactive missions must identify each configured vehicle exactly once')
     for row in rows:
         for key in ('position_scenario_m', 'goal_scenario_m'):
             point = row.get(key)
@@ -214,6 +217,10 @@ class InteractiveRuntime:
     def __init__(self, env, config, source_features, *, map_sha256):
         self.env = env
         self.missions = validated_missions(config)
+        self.ids = ('ego', *[f'P{i}' for i in range(1,len(self.missions)+1)])
+        self.cyclic_path = config.get('cyclic_path')
+        from .simulation_traffic import traffic_options
+        self.traffic = traffic_options({k: v for k, v in config['traffic'].items() if k not in {'profile', 'synthetic'}}) if config.get('traffic') else None
         self.source_features, self.map_sha256 = source_features, map_sha256
         self.visual_node = None
         self.vehicles = {}
@@ -230,23 +237,23 @@ class InteractiveRuntime:
     def reset(self):
         self.vehicles = {'ego': self.env.agent}
         self.env.agent.set_velocity([0., 0.])
-        self.modes = {identifier: 'external' if identifier == 'ego' else 'ai' for identifier in IDS}
-        self.actions = {identifier: list(BRAKE) for identifier in IDS}
-        self.requested = {identifier: list(BRAKE) for identifier in IDS}
-        self.expires = {identifier: None for identifier in IDS}
-        self.reasons = {identifier: 'waiting_for_action' if identifier == 'ego' else None for identifier in IDS}
-        self.collisions = {identifier: [] for identifier in IDS}
-        self.current_contacts = {identifier: [] for identifier in IDS}
-        self.last_collision = {identifier: None for identifier in IDS}
-        self.collision_event_count = {identifier: 0 for identifier in IDS}
-        self._previous_contact_keys = {identifier: set() for identifier in IDS}
-        self._speeds_before = {identifier: 0. for identifier in IDS}
+        self.modes = {identifier: 'external' if identifier == 'ego' else 'ai' for identifier in self.ids}
+        self.actions = {identifier: list(BRAKE) for identifier in self.ids}
+        self.requested = {identifier: list(BRAKE) for identifier in self.ids}
+        self.expires = {identifier: None for identifier in self.ids}
+        self.reasons = {identifier: 'waiting_for_action' if identifier == 'ego' else None for identifier in self.ids}
+        self.collisions = {identifier: [] for identifier in self.ids}
+        self.current_contacts = {identifier: [] for identifier in self.ids}
+        self.last_collision = {identifier: None for identifier in self.ids}
+        self.collision_event_count = {identifier: 0 for identifier in self.ids}
+        self._previous_contact_keys = {identifier: set() for identifier in self.ids}
+        self._speeds_before = {identifier: 0. for identifier in self.ids}
         self.controllers, self.diagnostics, self.braking = {}, {}, {}
-        self.patrol_indices = {key: 0 for key in IDS[1:]}
-        self.completed_goals = {key: 0 for key in IDS[1:]}
-        self.goal_counted = {key: False for key in IDS[1:]}
+        self.patrol_indices = {key: 0 for key in self.ids[1:]}
+        self.completed_goals = {key: 0 for key in self.ids[1:]}
+        self.goal_counted = {key: False for key in self.ids[1:]}
         offset = self.metadata.get('old_origin_in_current_coordinate', [0., 0.])
-        for index, identifier in enumerate(IDS[1:]):
+        for index, identifier in enumerate(self.ids[1:]):
             mission = self.missions[identifier]
             cfg = deepcopy(self.env.config['vehicle_config'])
             cfg.update({'navigation_module': None, 'show_navi_mark': False, 'show_dest_mark': False,
@@ -256,7 +263,14 @@ class InteractiveRuntime:
                 name='interactive-' + identifier, random_seed=201+index, vehicle_config=cfg,
                 position=[mission['position_scenario_m'][i]+float(offset[i]) for i in (0, 1)],
                 heading=mission['heading_rad'])
-            self.controllers[identifier] = LaneGraphController(mission['cruise_speed_m_s'])
+            self.controllers[identifier] = self._controller(identifier)
+
+    def _controller(self, identifier):
+        from .simulation_traffic import CycleFollower
+        mission = self.missions[identifier]
+        if mission.get('cycle_follower'):
+            return CycleFollower(self.cyclic_path, mission['cruise_speed_m_s'])
+        return LaneGraphController(mission['cruise_speed_m_s'])
 
     def close(self):
         if self.visual_node is not None:
@@ -268,14 +282,14 @@ class InteractiveRuntime:
         self.vehicles = {}
 
     def controls(self, controls):
-        updates = validated_controls(controls)
+        updates = validated_controls(controls, self.ids)
         # Actions are leases for this tick only. The broker must renew player
         # and external-planner commands; an omitted control brakes immediately.
-        for identifier in IDS:
+        for identifier in self.ids:
             row = updates.get(identifier, {})
             mode = row.get('mode', self.modes[identifier])
             if mode != self.modes[identifier] and identifier in self.missions:
-                self.controllers[identifier] = LaneGraphController(self.missions[identifier]['cruise_speed_m_s'])
+                self.controllers[identifier] = self._controller(identifier)
                 self.diagnostics.pop(identifier, None)
             self.modes[identifier] = mode
             self.requested[identifier] = list(row.get('action', BRAKE))
@@ -293,12 +307,16 @@ class InteractiveRuntime:
                 row = actor_state(vehicle, self.metadata, aliases.get(vehicle.id))
                 if row['vehicle_id'] in definitions:
                     row['type'] = definitions[row['vehicle_id']]['type']
-                elif row['vehicle_id'] in IDS:
+                elif row['vehicle_id'] in self.ids:
                     row['type'] = 'VEHICLE'
                 result.append(row)
         return result
 
     def goal(self, identifier):
+        if self.missions[identifier].get('cycle_follower'):
+            goal = self.diagnostics.get(identifier, {}).get('goal_scenario_m')
+            if goal is not None:
+                return goal
         return self.missions[identifier]['patrol_goals_scenario_m'][self.patrol_indices[identifier]]
 
     def before_step(self):
@@ -324,6 +342,10 @@ class InteractiveRuntime:
                     'max_steering_rad': math.radians(float(vehicle.max_steering))}
                 action = checked_action(controller(state))
                 self.diagnostics[identifier] = controller.diagnostics()
+                if self.missions[identifier].get('cycle_follower'):
+                    route = self.diagnostics[identifier]
+                    self.completed_goals[identifier] = int(route['travelled_m'] / (route['length_m']/2))
+                    self.patrol_indices[identifier] = self.completed_goals[identifier] % 2
                 if self.diagnostics[identifier]['status'] == 'goal_reached':
                     if not self.goal_counted[identifier]:
                         self.completed_goals[identifier] += 1
@@ -347,6 +369,12 @@ class InteractiveRuntime:
                     self.braking[identifier] = hit
                     action = [action[0], -1.]
                     self.reasons[identifier] = 'nearby_actor_braking'
+            if self.traffic and identifier == 'P1' and self.modes[identifier] == 'ai':
+                sim_time = self.env.episode_step * self.env.config['physics_world_step_size'] * self.env.config['decision_repeat']
+                start = self.traffic['stop_start_s']
+                if start <= sim_time < start + self.traffic['stop_duration_s']:
+                    action = [action[0], -1.]
+                    self.reasons[identifier] = 'synthetic_scheduled_stop'
             self.actions[identifier] = action
             if identifier != 'ego':
                 vehicle.before_step(action)
@@ -407,7 +435,7 @@ class InteractiveRuntime:
                 last_collision=deepcopy(self.last_collision[identifier]),
                 collision_event_count=self.collision_event_count[identifier],
                 motion_source='metadrive_bullet_physics', uses_recorded_trajectory=False,
-                color=list(COLORS[identifier]),
+                color=list(COLORS.get(identifier, COLORS['P1'])),
                 route=deepcopy(self.diagnostics.get(identifier)) if self.modes[identifier] == 'ai' else None,
                 route_scope=('controller_plan_not_prediction' if self.modes[identifier] == 'ai'
                              and self.diagnostics.get(identifier) else 'unavailable'),
@@ -422,7 +450,8 @@ class InteractiveRuntime:
                        heading=row['heading_rad'], length=row['length_m'], width=row['width_m'],
                        height=row['height_m'], static=True, source_scope='full_scene_offline_prior')
                   for row in actors if row['native_object_id'] not in native_ids]
-        return {'enabled': True, 'step': step, 'recorded_step': 0, 'sim_time_s': float(sim_time), 'vehicles': vehicles,
+        return {'traffic_profile': 'synthetic_cycle_v1' if self.traffic else 'source_presets',
+                'synthetic_traffic': bool(self.traffic), 'enabled': True, 'step': step, 'recorded_step': 0, 'sim_time_s': float(sim_time), 'vehicles': vehicles,
                 'static_actors': static,
                 'map_features_sha256': self.map_sha256, 'coordinate_frame': 'source_city_xy_m',
                 'recorded_moving_traffic': False, 'recorded_ego_policy': False,
@@ -447,7 +476,7 @@ class InteractiveRuntime:
         self.visual_node.setShaderOff(10)
         for identifier, vehicle in self.vehicles.items():
             x, y = map(float, vehicle.position[:2])
-            color = COLORS[identifier]
+            color = COLORS.get(identifier, COLORS['P1'])
             text = TextNode('interactive-label-'+identifier)
             text.setText(('P0' if identifier == 'ego' else identifier)+'  '+self.modes[identifier])
             text.setTextColor(*color)
