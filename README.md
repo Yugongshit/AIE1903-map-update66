@@ -47,7 +47,7 @@ python scripts/check_composite_map.py outputs/material-site
 
 成员原始资料在 `AIE1903 原始资料/`；Planning 在其中的 `Planning_M4_scene0980_handoff/`。集成算法在 `map_update/`，运行、构建与浏览器检查在 `scripts/`。这些原型使用已交付观测，不能描述为重新训练了感知网络或已经完成实车闭环规划。
 
-**持续交通与在线地图：** 工作台右侧“交通实验”支持 nuScenes 1–12 辆自动背景车，默认在回放起点附近源道路运行；支持 IDM 跟车、固定种子的驾驶风格、停车与随机多处施工、独立清障事件，以及每车观测产生的临时占道状态；固定人工驾驶席位已隐藏。状态可通过版本化接口交给 Planning，真实同学算法尚未接入。[操作与阶段边界](docs/synthetic_traffic.md) · [交通模型与研究路线](docs/traffic_model_research.md)。
+**持续交通与在线地图：** 工作台新增阶段二混合交通：nuScenes 三条相连源道路路线、1–12 辆背景车、IDM 与路口让行、源横道行人、临时失能/碰撞停驶，以及运行中安全生成和清除的施工点。单闭环对照保留；观测产生的临时占道状态可交给 Planning，真实同学算法尚未接入。所有新增参与者明确标注仿真来源，模型尚未训练或校准。[阶段二操作与物理边界](docs/stage2_continuous_traffic.md) · [单闭环对照](docs/synthetic_traffic.md) · [生成器研究路线](docs/traffic_generation_roadmap.md)。
 
 ## 历史版本说明
 

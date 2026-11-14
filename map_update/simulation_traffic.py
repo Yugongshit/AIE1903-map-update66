@@ -10,9 +10,9 @@ from .simulation_planner import _length, _point_at, _project, _angle
 
 
 def traffic_options(value):
-    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'construction_count_min', 'construction_count_max', 'stop_enabled'}:
+    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'construction_count_min', 'construction_count_max', 'stop_enabled', 'route_mode', 'pedestrians', 'pedestrian_count', 'incidents', 'recurring_construction'}:
         raise ValueError('Invalid cyclic traffic options')
-    options = dict(seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
+    options = dict(route_mode='single', pedestrians=False, pedestrian_count=3, incidents=False, recurring_construction=False, seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
                    area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_min_s=45., construction_max_s=120., construction_count_min=2, construction_count_max=5, stop_enabled=True)
     options.update(value)
     if 'construction_duration_s' in value:
@@ -30,10 +30,12 @@ def traffic_options(value):
             raise ValueError('Construction counts must be integers in 1..8')
     if options['construction_count_min'] > options['construction_count_max']:
         raise ValueError('Construction count requires minimum <= maximum')
-    for key in ('construction','stop_enabled'):
+    if type(options['pedestrian_count']) is not int or not 1<=options['pedestrian_count']<=4:
+        raise ValueError('Pedestrian count must be 1..4')
+    for key in ('construction','stop_enabled','pedestrians','incidents','recurring_construction'):
         if type(options[key]) is not bool:
             raise ValueError('Traffic flag must be boolean: '+key)
-    for key, allowed in [('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
+    for key, allowed in [('route_mode',('single','network')), ('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
                          ('driver_style', ('normal','cautious','assertive','mixed'))]:
         if options[key] not in allowed:
             raise ValueError('Invalid traffic option: '+key)
@@ -51,6 +53,9 @@ def cyclic_traffic(payload, options):
     options = traffic_options(options)
     if payload['key'] != 'nuscenes-scene0980':
         raise ValueError('Synthetic cyclic traffic currently supports nuScenes scene-0980 only')
+    if options['route_mode']=='network':
+        from .simulation_network import network_traffic
+        return network_traffic(payload,options)
     points, graph = _graph(payload['maps']['updated'])
     ego = payload['tracks'][payload['ego_track_id']]
     occupied = [vehicle_footprint(ego['position'][0], ego['heading'][0])]

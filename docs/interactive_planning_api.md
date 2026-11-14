@@ -165,3 +165,6 @@ nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的
 
 
 多点施工配置增加 `construction_count_min` / `construction_count_max`，默认 2 / 5，要求整数 1 ≤ min ≤ max ≤ 8；设为 1 / 1 可固定单点对照。独立种子流分别决定数量、受安全约束的位置和每个事件清障时间。`/state` 的 `synthetic_events` 返回多个唯一编号的当前事件，`construction_generation` 返回请求/实生成数量及容量受限标记。以上生成配置和全局列表均不进入 `/perception` 或 `/planning-input`；局部观测只包含当前可见物体，每处地图占用分别根据观测确认和清除。
+
+
+阶段二可设置 `route_mode=network`、`pedestrians=true`、`pedestrian_count=3`、`incidents=true`、`recurring_construction=true`。API 缺省仍为单闭环及关闭新事件。`/state` 增加观众 `population`、`junction_control`，事件列表区分施工、行人与车辆失能；未来时间和目标仍不进入受限观测。启用 `incidents` 后，实际物理碰撞可引发抽象执行器停驶，期间车辆即使收到外部动作也保持制动，修复后恢复原模式。随机故障不夺取外部控制车辆。详见 [阶段二物理和接口边界](stage2_continuous_traffic.md)。

@@ -219,9 +219,14 @@ class InteractiveRuntime:
         self.missions = validated_missions(config)
         self.ids = ('ego', *[f'P{i}' for i in range(1,len(self.missions)+1)])
         self.cyclic_path = config.get('cyclic_path')
+        from .simulation_network import route_path
+        self.route_paths = {f'route-{i+1}':route_path(r,source_features) for i,r in enumerate(config.get('routes',[]))}
         self.construction_specs = deepcopy(config.get('constructions', [config['construction']] if config.get('construction') else []))
         self.construction_generation = deepcopy(config.get('construction_generation'))
         self.construction_events = []
+        self.population = None
+        self.junctions = deepcopy(config.get('junctions',[]))
+        self.junction_coordinator = None
         self.traffic_area = deepcopy(config.get('traffic_area'))
         from .simulation_traffic import traffic_options
         self.traffic = traffic_options({k: v for k, v in config['traffic'].items() if k not in {'profile', 'synthetic'}}) if config.get('traffic') else None
@@ -243,7 +248,12 @@ class InteractiveRuntime:
     def metadata(self):
         return self.env.engine.data_manager.current_scenario['metadata']
 
+    def path_for(self, identifier):
+        return self.route_paths.get(self.missions[identifier].get('route_id'),self.cyclic_path)
+
     def reset(self):
+        from .simulation_network import JunctionCoordinator
+        self.junction_coordinator = JunctionCoordinator(self.junctions)
         self.vehicles = {'ego': self.env.agent}
         self.env.agent.set_velocity([0., 0.])
         self.modes = {identifier: 'external' if identifier == 'ego' else 'ai' for identifier in self.ids}
@@ -278,15 +288,21 @@ class InteractiveRuntime:
         for spec in self.construction_specs:
             self.construction_events.append(ConstructionEvent(self.env.engine,self.metadata,spec,
                 sample_clearance_time(self.traffic, spec.get('event_id','construction-1'))))
+        if self.traffic and any(self.traffic[k] for k in ('pedestrians','incidents','recurring_construction')):
+            from .simulation_population import TrafficPopulation
+            self.population = TrafficPopulation(self)
 
     def _controller(self, identifier):
         from .simulation_traffic import CycleFollower
         mission = self.missions[identifier]
         if mission.get('cycle_follower'):
-            return CycleFollower(self.cyclic_path, mission['cruise_speed_m_s'])
+            return CycleFollower(self.path_for(identifier), mission['cruise_speed_m_s'])
         return LaneGraphController(mission['cruise_speed_m_s'])
 
     def close(self):
+        if self.population is not None:
+            self.population.close()
+            self.population = None
         for event in self.construction_events:
             event.close()
         self.construction_events = []
@@ -319,6 +335,7 @@ class InteractiveRuntime:
         definitions = getattr(manager, 'persistence_definitions', {})
         aliases.update({value: key for key, value in getattr(manager, '_scenario_id_to_obj_id', {}).items()})
         events = {event.native_id: event for event in self.construction_events}
+        walkers = {w.native_id:w for w in self.population.walkers} if self.population else {}
         result = []
         for vehicle in self.env.engine.get_objects().values():
             if hasattr(vehicle, 'LENGTH') and hasattr(vehicle, 'WIDTH') and hasattr(vehicle, 'position'):
@@ -326,6 +343,8 @@ class InteractiveRuntime:
                 if vehicle.id in events:
                     row.update(vehicle_id=events[vehicle.id].spec['object_id'],type='TRAFFIC_BARRIER',
                         synthetic=True,source_scope='synthetic_construction_event')
+                elif vehicle.id in walkers:
+                    row.update(vehicle_id=walkers[vehicle.id].identifier,type='PEDESTRIAN',synthetic=True,source_scope='synthetic_pedestrian')
                 elif row['vehicle_id'] in definitions:
                     row['type'] = definitions[row['vehicle_id']]['type']
                 elif row['vehicle_id'] in self.ids:
@@ -341,13 +360,22 @@ class InteractiveRuntime:
         return self.missions[identifier]['patrol_goals_scenario_m'][self.patrol_indices[identifier]]
 
     def before_step(self):
+        sim_time = self.env.episode_step*self.env.config['physics_world_step_size']*self.env.config['decision_repeat']
         for event in self.construction_events:
-            event.advance(self.env.episode_step*self.env.config['physics_world_step_size']*self.env.config['decision_repeat'])
+            was_active=event.obj is not None
+            event.advance(sim_time)
+            if was_active and event.obj is None and self.population:
+                self.population.clearances+=1
         actors = self.actors()
+        if self.population:
+            self.population.advance(sim_time, actors)
+            actors = self.actors()
+        paths={k:self.path_for(k) for k in self.ids[1:] if self.modes[k]=='ai' and self.path_for(k)}
+        yielding=self.junction_coordinator.update(actors,paths,sim_time) if self.junctions else {}
         use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
         if use_idm:
             from .simulation_following import project_actors, current_leader, idm_acceleration, acceleration_action
-            projections = project_actors(self.cyclic_path, [a for a in actors if a.get('type') == 'VEHICLE'])
+            projections = {id(path):project_actors(path,[a for a in actors if a.get('type')=='VEHICLE']) for path in {id(p):p for p in paths.values()}.values()}
         for identifier, vehicle in self.vehicles.items():
             own = actor_state(vehicle, self.metadata, identifier)
             self._speeds_before[identifier] = own['speed_m_s']
@@ -393,7 +421,8 @@ class InteractiveRuntime:
                     self.reasons[identifier] = 'goal_reached'
                 if use_idm and self.missions[identifier].get('cycle_follower') and self.diagnostics[identifier]['status'] == 'tracking':
                     parameters = self.missions[identifier]['driver_parameters']
-                    leader = current_leader(own, actors, self.cyclic_path, projections)
+                    path = self.path_for(identifier)
+                    leader = current_leader(own, actors, path, projections[id(path)])
                     acceleration = idm_acceleration(own['speed_m_s'],
                         self.diagnostics[identifier]['target_speed_m_s'], leader, parameters)
                     action = [action[0], acceleration_action(acceleration, vehicle)]
@@ -407,6 +436,13 @@ class InteractiveRuntime:
                     self.reasons[identifier] = 'nearby_actor_braking'
                     if 'following' in self.diagnostics[identifier]:
                         self.diagnostics[identifier]['following']['emergency_override'] = True
+            if identifier in yielding and self.modes[identifier]=='ai':
+                action=[action[0],-1.]
+                self.reasons[identifier]='junction_yield'
+                self.diagnostics[identifier]['junction_yield']=yielding[identifier]
+            if self.population and identifier in self.population.incidents.active:
+                action=[action[0],-1.]
+                self.reasons[identifier]='synthetic_incident_disabled'
             if self.traffic and self.traffic['stop_enabled'] and identifier == 'P1' and self.modes[identifier] == 'ai':
                 sim_time = self.env.episode_step * self.env.config['physics_world_step_size'] * self.env.config['decision_repeat']
                 start = self.traffic['stop_start_s']
@@ -427,6 +463,8 @@ class InteractiveRuntime:
             manager = getattr(self.env.engine, 'traffic_manager', None)
             definitions = getattr(manager, 'persistence_definitions', {})
             aliases.update({value: key for key, value in getattr(manager, '_scenario_id_to_obj_id', {}).items()})
+            if self.population:
+                aliases.update({w.native_id:w.identifier for w in self.population.walkers})
             for event in self.construction_events:
                 aliases[event.native_id] = event.spec['object_id']
             actors = {obj.body: {'object_id': str(aliases.get(obj.id, obj.id)),
@@ -459,6 +497,8 @@ class InteractiveRuntime:
                     'speed_before_m_s': self._speeds_before[identifier], 'speed_after_m_s': float(vehicle.speed),
                     'contacts': deepcopy(contacts), 'native_collision_flags': flags}
             self._previous_contact_keys[identifier] = keys
+        if self.population:
+            self.population.after_step(self.env.episode_step*self.env.config['physics_world_step_size']*self.env.config['decision_repeat'])
 
     def report(self):
         actors = self.actors()
@@ -466,7 +506,7 @@ class InteractiveRuntime:
         vehicles = {}
         for identifier, vehicle in self.vehicles.items():
             row = actor_state(vehicle, self.metadata, identifier)
-            row.update(label='P0' if identifier == 'ego' else identifier, mode=self.modes[identifier],
+            row.update(synthetic=identifier!='ego',source_scope='synthetic_background_vehicle' if identifier!='ego' else 'source_initialized_ego',label='P0' if identifier == 'ego' else identifier, mode=self.modes[identifier],
                 action=list(self.actions[identifier]), requested_action=list(self.requested[identifier]),
                 expires_at_monotonic=self.expires[identifier],
                 stopped_reason=self.reasons[identifier], braking=self.braking.get(identifier),
@@ -490,11 +530,13 @@ class InteractiveRuntime:
         sim_time = step * self.env.config['physics_world_step_size'] * self.env.config['decision_repeat']
         static = [dict(row, id=row['vehicle_id'], position=row['position_city_m'],
                        heading=row['heading_rad'], length=row['length_m'], width=row['width_m'],
-                       height=row['height_m'], static=True, source_scope=row.get('source_scope','full_scene_offline_prior'))
+                       height=row['height_m'], static=row.get('type')!='PEDESTRIAN', source_scope=row.get('source_scope','full_scene_offline_prior'))
                   for row in actors if row['native_object_id'] not in native_ids]
-        return {'traffic_profile': 'synthetic_cycle_v1' if self.traffic else 'source_presets',
+        return {'traffic_profile': ('synthetic_network_v1' if self.traffic['route_mode']=='network' else 'synthetic_cycle_v1') if self.traffic else 'source_presets',
+                'population': self.population.report() if self.population else None,
+                'junction_control': dict(zone_count=len(self.junctions),passes=self.junction_coordinator.passes,yield_ticks=self.junction_coordinator.yield_ticks,rule='synthetic_unsignalised_reservation_not_real_signals'),
                 'traffic_area': deepcopy(self.traffic_area),
-                'synthetic_events': [event.report() for event in self.construction_events],
+                'synthetic_events': [event.report() for event in self.construction_events]+([w.report() for w in self.population.walkers]+self.population.incidents.report() if self.population else []),
                 'construction_generation': deepcopy(self.construction_generation),
                 'following_model': self.traffic['following_model'] if self.traffic else 'legacy',
                 'synthetic_traffic': bool(self.traffic), 'enabled': True, 'step': step, 'recorded_step': 0, 'sim_time_s': float(sim_time), 'vehicles': vehicles,

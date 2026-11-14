@@ -69,9 +69,11 @@ def construction_specs(path, missions, occupied, options):
 
 class ConstructionEvent:
     def __init__(self, engine, metadata, spec, duration_s):
+        # Legacy argument name: this is the absolute simulation clearance time.
         from .simulation_obstacle_runtime import _measured_classes
         self.engine, self.spec, self.duration_s = engine, deepcopy(spec), duration_s
         self.removed_at_s = None
+        self.started_at_s = 0.
         offset = metadata.get('old_origin_in_current_coordinate', [0.,0.])
         self.obj = engine.spawn_object(_measured_classes()['TRAFFIC_BARRIER'],
             name=spec['object_id'], random_seed=0,
@@ -94,5 +96,5 @@ class ConstructionEvent:
     def report(self):
         return dict(event_id=self.spec.get('event_id', 'construction-1'), kind='synthetic_construction',
             status='active' if self.obj is not None else 'removed', object_id=self.spec['object_id'],
-            started_at_s=0., removed_at_s=self.removed_at_s, synthetic=True,
+            started_at_s=self.started_at_s, removed_at_s=self.removed_at_s, synthetic=True,
             execution_model='initial_fixed_box_then_discrete_clearance_no_worker_animation')
