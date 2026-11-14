@@ -56,7 +56,7 @@ class DistrictTests(unittest.TestCase):
         for start in starts:
             trip=n.trip(start,random.Random(start),distance_range=(70,250))
             self.assertTrue(n.allowed.covers(LineString([n.points[i] for i in trip])))
-        with self.assertRaises(ValueError):traffic_options({'vehicle_count':33})
+        with self.assertRaises(ValueError):traffic_options({'vehicle_count':65})
         with self.assertRaises(ValueError):traffic_options({'pedestrian_count':33})
         with self.assertRaises(ValueError):traffic_options({'construction_count_max':17})
 

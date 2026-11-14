@@ -24,6 +24,34 @@ def coverage(routes, points):
                 bounds_city_m=list(geometry.bounds),source_lane_count=len(lanes))
 
 
+def density_spawns(routes, points, occupied, junctions, count, seed):
+    """Allocate by unique lane length; pack stopped cars with a checked 3 m gap.
+
+    Long lanes receive several cars. Overlapping cycles never add capacity.
+    No silent underfill: reject a request if the actual safe area is exhausted.
+    """
+    rng=random.Random(f'{seed}:lane-density:spawns');lanes={};geometries={}
+    route_geometries=[PathGeometry(r['path']) for r in routes]
+    for i,route in enumerate(routes):
+        for key in route['lanes']:
+            if key in lanes:continue
+            geom=PathGeometry(points[key]);geometries[key]=geom
+            candidates=list(range(3,int(geom.length)-3,2));rng.shuffle(candidates)
+            lanes[key]=dict(route=i,remaining=candidates,count=0)
+    placements=[]
+    while len(placements)<count:
+        available=[k for k,v in lanes.items() if v['remaining']]
+        if not available:raise ValueError('Requested lane density exceeds safe spawn capacity; lower density')
+        key=min(available,key=lambda k:((lanes[k]['count']+1)/geometries[k].length,k))
+        row=lanes[key];geom=geometries[key];s=row['remaining'].pop()
+        pos=list(geom.point_at(s));heading=geom.project(pos)[3];shape=vehicle_footprint(pos,heading)
+        if any(math.dist(pos,j['position_city_m'])<j['radius_m']+8 for j in junctions):continue
+        if any(shape.distance(o)<3. for o in occupied):continue
+        occupied.append(shape);row['count']+=1
+        placements.append((row['route'],route_geometries[row['route']].project(pos)[1],pos,heading))
+    return placements,{k:v['count'] for k,v in lanes.items() if v['count']}
+
+
 def distributed_construction(routes, occupied, options, junctions, features):
     """Sample count once, then spread actual fixed bodies across all selected roads."""
     requested=random.Random(f"{options['seed']}:construction:count").randint(options['construction_count_min'],options['construction_count_max'])

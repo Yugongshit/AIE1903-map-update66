@@ -83,7 +83,7 @@ class ObservedStateMap:
                     status='active', geometry_city_m=footprint(actor),
                     lane_id=self._lane(actor), lane_closed=False, restriction='footprint_occupancy_only',
                     first_observed_stationary_s=first, last_observed_s=time_s, evidence_step=step,
-                    supporting_samples=hits, source='ideal_simulated_vehicle_observations',
+                    supporting_samples=hits, source=('ideal_simulated_vehicle_observations' if not perception.get('noise_modelled') else 'degraded_simulated_vehicle_observations'),
                     object_type=actor['type'], object_origin=actor.get('source_scope','synthetic_traffic'),
                     confidence_kind='rule_threshold_not_calibrated_probability', synthetic=True)
             elif event and event['status'] != 'cleared' and actor['speed_m_s'] >= .75:

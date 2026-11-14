@@ -24,6 +24,7 @@ class FakeBroker:
         self.step = 0
         self.vehicle_ids = VEHICLE_IDS
         self.camera = {"target": "ego", "yaw": 0., "pitch": 30., "distance": 24., "pan": [0., 0.]}
+        self.transform_result = None
         self.fail_next_tick = False
         self.malformed_next_tick = False
         self.state = {"busy": False, "ready": False, "job_id": None, "last_result": None,
@@ -86,6 +87,7 @@ class FakeBroker:
                               'actors': [*deepcopy(list(vehicles.values())), {'id': 'barrier', 'position': [20., 10.]}]}
         if capture:
             result["frame_id"] = "fake-frame-"+str(self.counter)
+        if self.transform_result:self.transform_result(result)
         self.state.update(last_result=result, ready=True)
 
     def status(self, **kwargs):
@@ -225,13 +227,15 @@ class InteractiveHttpTests(unittest.TestCase):
             self.assertNotEqual(value['room']['session_id'], self.identity['session_id'])
 
     def test_perception_and_planning_map_do_not_return_debug_privileges(self):
-        self.open_room()
-        sid = self.identity['session_id']
-        # Inject internal intent into an otherwise valid completed state.
-        with self.server.interactive.lock:
-            cars = self.server.interactive.last_result['interactive']['vehicles']
+        # Inject before frame publication; perception is now frozen with the
+        # same frame used by the observed map, rather than sampled on polling.
+        def transform(result):
+            cars=result['interactive']['vehicles']
             cars['P1'].update(route={'points': [[1, 2]]}, requested_action=[1, 1], goal_scenario_m=[100, 0])
             cars['P5']['position_city_m'] = [10000., 10000.]
+        self.broker.transform_result=transform
+        self.open_room()
+        sid = self.identity['session_id']
         status, _, observed = self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=ego')
         self.assertEqual(status, 200)
         self.assertNotIn('vehicles', observed)
@@ -243,6 +247,27 @@ class InteractiveHttpTests(unittest.TestCase):
         self.assertFalse(set(context) & {'state_prior', 'static_actors', 'source'})
         status, _, _ = self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=unknown')
         self.assertEqual(status, 400)
+
+    def test_degraded_perception_is_frozen_and_shared_with_map_without_ticking_world(self):
+        options={'seed':7,'perception_profile':'occlusion_noise_v1'}
+        config={'missions':[{'vehicle_id':f'P{i}','position_scenario_m':[float(i),0.], 'heading_rad':0.} for i in range(1,6)],'traffic':options}
+        def geometry(result):
+            result['interactive']['static_actors'][0].update(type='TRAFFIC_BARRIER',heading_rad=0.,speed_m_s=0.,length_m=1.,width_m=2.,height_m=1.)
+        self.broker.transform_result=geometry
+        with patch('map_update.simulation_traffic.cyclic_traffic',return_value=config):
+            status,_,value=self.post('open',{'scene_id':'test-scene','version':'updated','traffic':options},admin=True)
+            self.assertEqual(status,202);self.identity=value['room']
+            self.until(lambda state:state['phase']=='paused')
+        sid=self.identity['session_id'];command_count=len(self.broker.commands)
+        _,_,a=self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=ego')
+        _,_,b=self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=ego')
+        _,_,planning=self.request('/api/interactive/planning-input?session_id='+sid+'&vehicle_id=ego')
+        self.assertEqual(a,b);self.assertTrue(a['noise_modelled']);self.assertFalse(a['sensor_model']['calibrated'])
+        self.assertEqual(a['current_objects'],planning['current_objects'])
+        self.assertEqual(a['current_objects'],self.server.interactive.current_perceptions['ego']['current_objects'])
+        self.assertEqual(len(self.broker.commands),command_count)
+        self.assertEqual(self.server.interactive.observed_maps['ego'].step,a['step'])
+        self.assertEqual(a['free_space_checks'],[])
 
     def test_public_binding_requires_a_strong_control_key_before_opening_socket(self):
         for key in (None, "short"):

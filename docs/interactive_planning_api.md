@@ -172,3 +172,10 @@ nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的
 行人出行修正：`pedestrians=true` 时允许 `vehicle_count=0`（其余情况仍为 1–32）；空背景任务对应仅 `ego` 的房间。网页“仅行人出行”发送此配置，混合场景仍发送选定车数。行人沿原始步道和横道选择连续出行目的地；`population` 新增 `completed_walking_trips`、`pedestrian_travelled_m`、`distinct_crosswalks`。行人观众事件还有 `reroutes` / `changed_destinations`，后者不计为完成出行。这些统计以及私有目标/路径/停留时刻不进入 Planning 输入。
 
 扩展规模接口：`route_mode="network"`、`network_extent="district"` 选用更多源车道闭环；`background_activity=true` 启用内置 AI 的随机巡航速度与错峰短停，外部控制车不受其指令影响。上限更新为 32 辆背景车、32 位行人、16 处施工（实际生成仍受安全容量限制）。`traffic_area` 提供 `unique_lane_length_m` / `bounds_city_m`；`population` 提供 `brief_stops_started` / `brief_stops_completed` / `brief_stops_active` / `pedestrian_occupied_cells`。这些是观众统计，不是规划器预测。详见[扩展街区](district_traffic.md)。
+
+
+## 阶段三观测实验准备（2026-11-14）
+
+建房 `traffic.perception_profile` 支持 `ideal`（默认）与 `occlusion_noise_v1`。后者只降质观察结果：当前对象盒遮挡、5%独立漏检、位置σ=0.15米；不是真实传感器模型。`/perception` 与 `/planning-input` 使用服务器为同一物理帧冻结的同一份观测，重复请求不重新抽样。导出 `sensor_model`、`noise_modelled`、`occlusion_modelled` 明确参数及未校准状态。地图更新也消费这份观测，仍不接收事件时间表、路线和其他车未来动作。
+
+降质模式暂不输出空闲覆盖证明，已知障碍消失只能变陈旧，不能据漏检清障。实验、边界和后续评估见 [阶段二/三接口](lane_traffic_and_stage3.md)。背景车辆上限64，密度参数 `density_veh_km` 只用于扩展街区，按去重车道长度生成；Planning 客户端必须从当前房间枚举车辆，不能写死P1–P5。

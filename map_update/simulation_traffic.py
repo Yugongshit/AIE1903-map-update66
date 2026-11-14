@@ -10,9 +10,9 @@ from .simulation_planner import _length, _point_at, _project, _angle
 
 
 def traffic_options(value):
-    if not isinstance(value, dict) or set(value) - {'network_extent', 'background_activity', 'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'construction_count_min', 'construction_count_max', 'stop_enabled', 'route_mode', 'pedestrians', 'pedestrian_count', 'incidents', 'recurring_construction'}:
+    if not isinstance(value, dict) or set(value) - {'perception_profile', 'lane_changes', 'density_veh_km', 'network_extent', 'background_activity', 'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'construction_count_min', 'construction_count_max', 'stop_enabled', 'route_mode', 'pedestrians', 'pedestrian_count', 'incidents', 'recurring_construction'}:
         raise ValueError('Invalid cyclic traffic options')
-    options = dict(network_extent='local', background_activity=False, route_mode='single', pedestrians=False, pedestrian_count=3, incidents=False, recurring_construction=False, seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
+    options = dict(perception_profile='ideal', lane_changes=False, density_veh_km=0., network_extent='local', background_activity=False, route_mode='single', pedestrians=False, pedestrian_count=3, incidents=False, recurring_construction=False, seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
                    area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_min_s=45., construction_max_s=120., construction_count_min=2, construction_count_max=5, stop_enabled=True)
     options.update(value)
     if 'construction_duration_s' in value:
@@ -23,8 +23,8 @@ def traffic_options(value):
         options.update(construction_min_s=max(5.,legacy*.75),construction_max_s=legacy*2.)
     if type(options['seed']) is not int or not 0 <= options['seed'] < 2**32:
         raise ValueError('Traffic seed must be a uint32')
-    if type(options['vehicle_count']) is not int or not (0 if options['pedestrians'] is True else 1) <= options['vehicle_count'] <= 32:
-        raise ValueError('Background vehicle count must be 1..32, or 0 with pedestrians')
+    if type(options['vehicle_count']) is not int or not (0 if options['pedestrians'] is True else 1) <= options['vehicle_count'] <= 64:
+        raise ValueError('Background vehicle count must be 1..64, or 0 with pedestrians')
     for key in ('construction_count_min','construction_count_max'):
         if type(options[key]) is not int or not 1 <= options[key] <= 16:
             raise ValueError('Construction counts must be integers in 1..16')
@@ -32,19 +32,23 @@ def traffic_options(value):
         raise ValueError('Construction count requires minimum <= maximum')
     if type(options['pedestrian_count']) is not int or not 1<=options['pedestrian_count']<=32:
         raise ValueError('Pedestrian count must be 1..32')
-    for key in ('background_activity','construction','stop_enabled','pedestrians','incidents','recurring_construction'):
+    for key in ('lane_changes','background_activity','construction','stop_enabled','pedestrians','incidents','recurring_construction'):
         if type(options[key]) is not bool:
             raise ValueError('Traffic flag must be boolean: '+key)
-    for key, allowed in [('network_extent',('local','district')), ('route_mode',('single','network')), ('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
+    for key, allowed in [('perception_profile',('ideal','occlusion_noise_v1')), ('network_extent',('local','district')), ('route_mode',('single','network')), ('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
                          ('driver_style', ('normal','cautious','assertive','mixed'))]:
         if options[key] not in allowed:
             raise ValueError('Invalid traffic option: '+key)
-    for key, low, high in [('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5), ('construction_min_s', 5., 3600.), ('construction_max_s', 5., 3600.)]:
+    for key, low, high in [('density_veh_km', 0., 32.), ('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5), ('construction_min_s', 5., 3600.), ('construction_max_s', 5., 3600.)]:
         v = options[key]
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or not low <= v <= high:
             raise ValueError('Invalid traffic option: ' + key)
     if options['construction_min_s'] >= options['construction_max_s']:
         raise ValueError('Construction clearance requires minimum < maximum')
+    if options['density_veh_km'] and (options['route_mode']!='network' or options['network_extent']!='district' or options['vehicle_count']==0):
+        raise ValueError('Lane density requires district vehicles; use zero density for pedestrian-only traffic')
+    if options['lane_changes'] and (options['route_mode']!='network' or options['following_model']!='idm'):
+        raise ValueError('Lane changes require source network routes and IDM')
     return options
 
 

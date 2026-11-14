@@ -25,6 +25,7 @@ class InteractiveCoordinator:
         self.scene_key = self.version = None
         self.traffic_options = None
         self.observed_maps = {}
+        self.current_perceptions = {}
         self.planning_receipts = []
         self.job = None
         self.last_engine = None
@@ -134,10 +135,14 @@ class InteractiveCoordinator:
         # that these six vehicles are actual current physical actors.
         result = {k: v for k, v in result.items()
                   if k not in {'state_events', 'state_objects', 'persistent_obstacles_runtime'}}
-        from .simulation_traffic import vehicle_perception
-        for identifier, observed_map in self.observed_maps.items():
-            observed_map.update(result['step'], result['interactive'].get('sim_time_s', result['step']*.1),
-                                vehicle_perception(result['interactive'], identifier, clearance_queries=observed_map.clearance_queries()))
+        # Camera/render jobs at an unchanged physics step reuse the frozen
+        # observations, including clearance evidence consumed by the map.
+        if self.last_result is None or result['step']!=self.last_result['step']:
+            self.current_perceptions={}
+            for identifier, observed_map in self.observed_maps.items():
+                measured=self._measure(result,identifier,observed_map.clearance_queries())
+                self.current_perceptions[identifier]=measured
+                observed_map.update(result['step'], result['interactive'].get('sim_time_s', result['step']*.1),measured)
         self.last_result = result
         # The browser already has static map/state overlays. Its snapshot
         # contains each actual actor once, including stationary colliders.
@@ -349,12 +354,17 @@ class InteractiveCoordinator:
                     'observation_scope': 'current_simulator_ground_truth_no_sensor_occlusion',
                     'recorded_future_tracks_included': False}
 
-    def perception(self, session_id, vehicle_id='ego'):
+    def _measure(self, result, vehicle_id, queries):
         from .simulation_traffic import vehicle_perception
+        from .simulation_perception import degrade_observation
+        options=self.traffic_options or {}
+        return degrade_observation(vehicle_perception(result['interactive'],vehicle_id,clearance_queries=queries),
+            profile=options.get('perception_profile','ideal'),seed=options.get('seed',0),step=result['step'],vehicle_id=vehicle_id)
+
+    def perception(self, session_id, vehicle_id='ego'):
         with self.lock:
             observation = self.observation(session_id, vehicle_id)
-            measured = vehicle_perception(self.last_result['interactive'], vehicle_id,
-                clearance_queries=self.observed_maps[vehicle_id].clearance_queries())
+            measured = deepcopy(self.current_perceptions[vehicle_id])
             return {**{k: observation[k] for k in ('session_id', 'epoch', 'scene_id', 'step',
                     'sim_time_s', 'state_id', 'vehicle_id', 'coordinate_reference', 'map_version')},
                     'schema': 'interactive-vehicle-perception-1.0', **measured}

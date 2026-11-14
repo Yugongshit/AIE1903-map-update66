@@ -88,25 +88,38 @@ def network_traffic(payload, options):
         routes=select_routes(candidates)
     if len(routes)<2:raise ValueError('Multi-route traffic requires at least two connected safe source cycles')
     junctions=junction_sites(routes,points,graph)
-    rng=random.Random(f"{options['seed']}:network:spawns")
+    from .simulation_district import density_spawns, coverage
+    area=coverage(routes,points)
+    requested=(max(1,min(64,round(options['density_veh_km']*area['unique_lane_length_m']/1000)))
+               if options.get('density_veh_km') else options['vehicle_count'])
+    # Counts passed to the native worker are the actual validated mission count.
+    options=dict(options,vehicle_count=requested)
+    if options.get('density_veh_km'):
+        placements,lane_counts=density_spawns(routes,points,occupied,junctions,requested,options['seed'])
+    else:
+        placements=[];lane_counts={};legacy_speeds=[]
+        rng=random.Random(f"{options['seed']}:network:spawns")
+        for index in range(requested):
+            route_index=index%len(routes);route=routes[route_index];path=route['path']
+            starts=[s*3. for s in range(int(route['length']/3))];rng.shuffle(starts)
+            for progress in starts:
+                pos=list(_point_at(path,progress));heading=_project(pos,path)[3]
+                shape=vehicle_footprint(pos,heading)
+                if any(shape.distance(o)<7. for o in occupied):continue
+                if any(math.dist(pos,j['position_city_m'])<j['radius_m']+8. for j in junctions):continue
+                break
+            else:raise ValueError('Not enough safe multi-route spawn space; lower vehicle count or use district lane density')
+            occupied.append(shape);placements.append((route_index,progress,pos,heading))
+            legacy_speeds.append(max(.5,min(3.,options['speed_m_s']*(1+rng.uniform(-options['speed_spread'],options['speed_spread'])))))
+    rng=random.Random(f"{options['seed']}:network:speeds")
     missions=[]
-    for index in range(options['vehicle_count']):
-        route_index=index%len(routes)
-        route=routes[route_index];path=route['path']
-        starts=[s*3. for s in range(int(route['length']/3))];rng.shuffle(starts)
-        for progress in starts:
-            pos=list(_point_at(path,progress));heading=_project(pos,path)[3]
-            shape=vehicle_footprint(pos,heading)
-            if any(shape.distance(o)<7. for o in occupied):continue
-            if any(math.dist(pos,j['position_city_m'])<j['radius_m']+8. for j in junctions):continue
-            break
-        else:raise ValueError('Not enough safe multi-route spawn space; lower vehicle count')
-        occupied.append(shape)
-        identifier=f'P{index+1}'
-        goal=list(_point_at(path,(progress+route['length']/2)%route['length']))
+    for index,(route_index,progress,pos,heading) in enumerate(placements):
+        route=routes[route_index];identifier=f'P{index+1}'
+        goal=list(_point_at(route['path'],(progress+route['length']/2)%route['length']))
         missions.append(dict(vehicle_id=identifier,position_scenario_m=pos,heading_rad=heading,
             goal_scenario_m=goal,patrol_goals_scenario_m=[goal,pos],patrol_loop=True,
-            cruise_speed_m_s=max(.5,min(3.,options['speed_m_s']*(1+rng.uniform(-options['speed_spread'],options['speed_spread'])))),
+            cruise_speed_m_s=(max(.5,min(3.,options['speed_m_s']*(1+rng.uniform(-options['speed_spread'],options['speed_spread']))))
+                              if options.get('density_veh_km') else legacy_speeds[index]),
             cycle_follower=True,route_id=f'route-{route_index+1}',
             source_route_length_m=route['length'],synthetic_actor=True,
             initial_clearance_checked=True,mission_origin='synthetic_multi_source_cycles',uses_recorded_trajectory=False,
@@ -119,7 +132,7 @@ def network_traffic(payload, options):
     return dict(missions=missions,cyclic_path=None if expanded else routes[0]['path'],routes=[{k:v for k,v in r.items() if k!='path'} for r in routes],junctions=junctions,
         constructions=specs,construction=deepcopy(specs[0]) if specs else None,construction_generation=generation,
         traffic=dict(options,profile='synthetic_network_v1',synthetic=True),
-        traffic_area=dict(**coverage(routes,points), network_extent=options.get('network_extent','local'),selection='source_network',source_ego_unchanged=True,route_count=len(routes),
+        traffic_area=dict(**area, requested_density_veh_km=options.get('density_veh_km',0), actual_density_veh_km=requested*1000/area['unique_lane_length_m'], initial_lane_counts=lane_counts, spawned_vehicle_count=requested, network_extent=options.get('network_extent','local'),selection='source_network',source_ego_unchanged=True,route_count=len(routes),
             route_length_m=sum(r['length'] for r in routes),route_distance_to_recorded_ego_m=routes[0]['distance'],
             route_lengths_m=[r['length'] for r in routes],source_scope='connected_source_cycles_not_arbitrary_city_OD'))
 

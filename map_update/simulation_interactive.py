@@ -59,8 +59,8 @@ def validated_missions(config):
         raise ValueError('Interactive launch requires configured source-lane missions')
     rows = deepcopy(config['missions'])
     count = config.get('traffic', {}).get('vehicle_count', 5)
-    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 32:
-        raise ValueError('Traffic count must be 1..32, or 0 with pedestrians')
+    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 64:
+        raise ValueError('Traffic count must be 1..64, or 0 with pedestrians')
     if len(rows) != count or {row.get('vehicle_id') for row in rows if isinstance(row, dict)} != {f'P{i}' for i in range(1,count+1)}:
         raise ValueError('Interactive missions must identify each configured vehicle exactly once')
     for row in rows:
@@ -253,11 +253,14 @@ class InteractiveRuntime:
         return self.env.engine.data_manager.current_scenario['metadata']
 
     def path_for(self, identifier):
-        return self.route_paths.get(self.missions[identifier].get('route_id'),self.cyclic_path)
+        return self.path_overrides.get(identifier,self.route_paths.get(self.missions[identifier].get('route_id'),self.cyclic_path))
 
     def reset(self):
         from .simulation_network import JunctionCoordinator
         self.junction_coordinator = JunctionCoordinator(self.junctions)
+        self.path_overrides={}
+        from .simulation_lane_changes import LaneChanges
+        self.lane_changes=LaneChanges(self.source_features,self.route_paths,self.missions,bool(self.traffic and self.traffic['lane_changes']))
         self.vehicles = {'ego': self.env.agent}
         self.env.agent.set_velocity([0., 0.])
         self.modes = {identifier: 'external' if identifier == 'ego' else 'ai' for identifier in self.ids}
@@ -326,6 +329,7 @@ class InteractiveRuntime:
             row = updates.get(identifier, {})
             mode = row.get('mode', self.modes[identifier])
             if mode != self.modes[identifier] and identifier in self.missions:
+                if mode!='ai':self.lane_changes.cancel(self,identifier)
                 self.controllers[identifier] = self._controller(identifier)
                 self.diagnostics.pop(identifier, None)
             self.modes[identifier] = mode
@@ -374,6 +378,7 @@ class InteractiveRuntime:
         if self.population:
             self.population.advance(sim_time, actors)
             actors = self.actors()
+        self.lane_changes.update(self,actors,sim_time)
         paths={k:self.path_for(k) for k in self.ids[1:] if self.modes[k]=='ai' and self.path_for(k)}
         yielding=self.junction_coordinator.update(actors,paths,sim_time) if self.junctions else {}
         use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
@@ -405,7 +410,7 @@ class InteractiveRuntime:
                 self.diagnostics[identifier] = controller.diagnostics()
                 if self.missions[identifier].get('cycle_follower'):
                     route = self.diagnostics[identifier]
-                    self.completed_goals[identifier] = int(route['travelled_m'] / (route['length_m']/2))
+                    self.completed_goals[identifier] = int(route['travelled_m'] / (self.missions[identifier].get('source_route_length_m',route['length_m'])/2))
                     self.patrol_indices[identifier] = self.completed_goals[identifier] % 2
                 if self.diagnostics[identifier]['status'] == 'goal_reached':
                     if not self.goal_counted[identifier]:
@@ -442,6 +447,8 @@ class InteractiveRuntime:
                     self.reasons[identifier] = 'nearby_actor_braking'
                     if 'following' in self.diagnostics[identifier]:
                         self.diagnostics[identifier]['following']['emergency_override'] = True
+            if identifier in self.lane_changes.yielding and self.modes[identifier]=='ai':
+                action=[action[0],-1.];self.reasons[identifier]='lane_change_merge_yield'
             if identifier in yielding and self.modes[identifier]=='ai':
                 action=[action[0],-1.]
                 self.reasons[identifier]='junction_yield'
@@ -544,8 +551,10 @@ class InteractiveRuntime:
                 'population': self.population.report() if self.population else None,
                 'junction_control': dict(zone_count=len(self.junctions),passes=self.junction_coordinator.passes,yield_ticks=self.junction_coordinator.yield_ticks,rule='synthetic_unsignalised_reservation_not_real_signals'),
                 'traffic_area': deepcopy(self.traffic_area),
+                'lane_changes':self.lane_changes.report(),
                 'synthetic_events': [event.report() for event in self.construction_events]+([w.report() for w in self.population.walkers]+self.population.incidents.report() if self.population else []),
                 'construction_generation': deepcopy(self.construction_generation),
+                'perception_profile': self.traffic['perception_profile'] if self.traffic else 'ideal',
                 'following_model': self.traffic['following_model'] if self.traffic else 'legacy',
                 'synthetic_traffic': bool(self.traffic), 'enabled': True, 'step': step, 'recorded_step': 0, 'sim_time_s': float(sim_time), 'vehicles': vehicles,
                 'static_actors': static,
