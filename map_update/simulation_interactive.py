@@ -219,6 +219,7 @@ class InteractiveRuntime:
         self.missions = validated_missions(config)
         self.ids = ('ego', *[f'P{i}' for i in range(1,len(self.missions)+1)])
         self.cyclic_path = config.get('cyclic_path')
+        self.traffic_area = deepcopy(config.get('traffic_area'))
         from .simulation_traffic import traffic_options
         self.traffic = traffic_options({k: v for k, v in config['traffic'].items() if k not in {'profile', 'synthetic'}}) if config.get('traffic') else None
         self.source_features, self.map_sha256 = source_features, map_sha256
@@ -321,6 +322,10 @@ class InteractiveRuntime:
 
     def before_step(self):
         actors = self.actors()
+        use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
+        if use_idm:
+            from .simulation_following import project_actors, current_leader, idm_acceleration, acceleration_action
+            projections = project_actors(self.cyclic_path, [a for a in actors if a.get('type') == 'VEHICLE'])
         for identifier, vehicle in self.vehicles.items():
             own = actor_state(vehicle, self.metadata, identifier)
             self._speeds_before[identifier] = own['speed_m_s']
@@ -364,17 +369,30 @@ class InteractiveRuntime:
                     if self.diagnostics[identifier]['status'] not in {'tracking', 'planned'} else None)
                 if self.diagnostics[identifier]['status'] == 'goal_reached':
                     self.reasons[identifier] = 'goal_reached'
+                if use_idm and self.missions[identifier].get('cycle_follower') and self.diagnostics[identifier]['status'] == 'tracking':
+                    parameters = self.missions[identifier]['driver_parameters']
+                    leader = current_leader(own, actors, self.cyclic_path, projections)
+                    acceleration = idm_acceleration(own['speed_m_s'],
+                        self.diagnostics[identifier]['target_speed_m_s'], leader, parameters)
+                    action = [action[0], acceleration_action(acceleration, vehicle)]
+                    self.diagnostics[identifier]['following'] = dict(model='idm', leader=leader,
+                        desired_acceleration_m_s2=acceleration, parameters=deepcopy(parameters),
+                        observation_range_m=50., emergency_override=False)
                 hit = braking_actor(own, actors, self.diagnostics[identifier].get('points', []))
                 if hit:
                     self.braking[identifier] = hit
                     action = [action[0], -1.]
                     self.reasons[identifier] = 'nearby_actor_braking'
+                    if 'following' in self.diagnostics[identifier]:
+                        self.diagnostics[identifier]['following']['emergency_override'] = True
             if self.traffic and identifier == 'P1' and self.modes[identifier] == 'ai':
                 sim_time = self.env.episode_step * self.env.config['physics_world_step_size'] * self.env.config['decision_repeat']
                 start = self.traffic['stop_start_s']
                 if start <= sim_time < start + self.traffic['stop_duration_s']:
                     action = [action[0], -1.]
                     self.reasons[identifier] = 'synthetic_scheduled_stop'
+                    if 'following' in self.diagnostics.get(identifier, {}):
+                        self.diagnostics[identifier]['following']['scheduled_stop_override'] = True
             self.actions[identifier] = action
             if identifier != 'ego':
                 vehicle.before_step(action)
@@ -451,6 +469,8 @@ class InteractiveRuntime:
                        height=row['height_m'], static=True, source_scope='full_scene_offline_prior')
                   for row in actors if row['native_object_id'] not in native_ids]
         return {'traffic_profile': 'synthetic_cycle_v1' if self.traffic else 'source_presets',
+                'traffic_area': deepcopy(self.traffic_area),
+                'following_model': self.traffic['following_model'] if self.traffic else 'legacy',
                 'synthetic_traffic': bool(self.traffic), 'enabled': True, 'step': step, 'recorded_step': 0, 'sim_time_s': float(sim_time), 'vehicles': vehicles,
                 'static_actors': static,
                 'map_features_sha256': self.map_sha256, 'coordinate_frame': 'source_city_xy_m',
@@ -462,7 +482,9 @@ class InteractiveRuntime:
                 'collision_sampling': 'end_of_decision_bullet_manifolds_with_native_flags_for_transient_impacts',
                 'collision_contact_scope': 'controlled_cars_and_source_static_objects',
                 'vehicle_damage_modelled': False,
-                'ai_scope': 'independent_source_lane_following_and_nearby_actor_braking',
+                'ai_scope': ('source_cycle_pure_pursuit_idm_with_emergency_guard'
+                    if self.traffic and self.traffic['following_model']=='idm'
+                    else 'independent_source_lane_following_and_nearby_actor_braking'),
                 'ai_is_user_planning_module': False, 'traffic_signal_compliance': False,
                 'reset_supported': True, 'seek_supported': False,
                 'action_scope': 'one_tick_lease_brake_if_missing', 'ego_label': 'P0'}

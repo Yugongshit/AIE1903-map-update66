@@ -3,21 +3,26 @@ from copy import deepcopy
 import math
 import random
 
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 
 from .simulation_interactive_scenarios import _graph, _cycle, vehicle_footprint
 from .simulation_planner import _length, _point_at, _project, _angle
 
 
 def traffic_options(value):
-    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread'}:
+    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style'}:
         raise ValueError('Invalid cyclic traffic options')
-    options = dict(seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.)
+    options = dict(seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
+                   area='isolated', following_model='legacy', driver_style='normal')
     options.update(value)
     if type(options['seed']) is not int or not 0 <= options['seed'] < 2**32:
         raise ValueError('Traffic seed must be a uint32')
     if type(options['vehicle_count']) is not int or not 1 <= options['vehicle_count'] <= 12:
         raise ValueError('Background vehicle count must be 1..12')
+    for key, allowed in [('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
+                         ('driver_style', ('normal','cautious','assertive','mixed'))]:
+        if options[key] not in allowed:
+            raise ValueError('Invalid traffic option: '+key)
     for key, low, high in [('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5)]:
         v = options[key]
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or not low <= v <= high:
@@ -26,7 +31,7 @@ def traffic_options(value):
 
 
 def cyclic_traffic(payload, options):
-    """Select a simple directed ring with clearance, then sample five safe starts."""
+    """Select a safe source ring; preserve source ego and map in either area."""
     options = traffic_options(options)
     if payload['key'] != 'nuscenes-scene0980':
         raise ValueError('Synthetic cyclic traffic currently supports nuScenes scene-0980 only')
@@ -57,13 +62,19 @@ def cyclic_traffic(payload, options):
             candidates.append((clearance, -line.length, cycle[:-1], path))
     if not candidates:
         raise ValueError('No safe source-lane cycle; do not invent connecting roads')
-    _, _, lanes, path = max(candidates)
+    if options['area'] == 'near_recording':
+        selected = min(candidates, key=lambda c: (LineString(c[3]).distance(Point(ego['position'][0][:2])), -c[0], -c[1]))
+    else:
+        selected = max(candidates)
+    clearance, _, lanes, path = selected
     length = _length(path)
     rng = random.Random(options['seed'])
     count = options['vehicle_count']
     if length/count < 15.:
         raise ValueError('Requested density exceeds the safe initial spacing')
     phase = rng.uniform(0., length/count)
+    if options['area'] == 'near_recording':
+        phase = (_project(ego['position'][0][:2], path)[1] + phase/2-length/count/4) % length
     missions = []
     for i in range(count):
         start_s = (phase+i*length/count) % length
@@ -79,7 +90,13 @@ def cyclic_traffic(payload, options):
             cruise_speed_m_s=max(.5, min(3., options['speed_m_s']*(1+rng.uniform(-options['speed_spread'],options['speed_spread'])))), cycle_follower=True, source_lane_ids=lanes,
             source_route_length_m=length, synthetic_actor=True, initial_clearance_checked=True,
             mission_origin='synthetic_source_lane_cycle', uses_recorded_trajectory=False))
-    return dict(missions=missions, cyclic_path=path, traffic=dict(options, profile='synthetic_cycle_v1', synthetic=True))
+    from .simulation_following import driver_parameters
+    for mission in missions:
+        mission['driver_parameters'] = driver_parameters(options['seed'], mission['vehicle_id'], options['driver_style'])
+    return dict(missions=missions, cyclic_path=path, traffic=dict(options, profile='synthetic_cycle_v1', synthetic=True),
+        traffic_area=dict(selection=options['area'], source_ego_unchanged=True, route_length_m=length,
+            route_distance_to_recorded_ego_m=LineString(path).distance(Point(ego['position'][0][:2])),
+            minimum_source_actor_clearance_m=clearance))
 
 
 class CycleFollower:

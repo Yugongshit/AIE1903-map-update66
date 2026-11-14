@@ -42,9 +42,35 @@ class TrafficGenerationTests(unittest.TestCase):
 
     def test_invalid_options_fail_closed(self):
         for options in ({'seed': True}, {'seed': -1}, {'speed_m_s': float('nan')},
-                        {'stop_duration_s': 0}, {'unknown': 1}):
+                        {'stop_duration_s': 0}, {'unknown': 1}, {'area':'invented'},
+                        {'following_model':'trained'}, {'driver_style':'teleport'}):
             with self.assertRaises(ValueError):
                 traffic_options(options)
+
+    def test_near_recording_region_preserves_ego_roads_and_spawn_clearance(self):
+        from map_update.simulation_interactive_scenarios import vehicle_footprint
+        before=deepcopy(self.payload)
+        near=cyclic_traffic(self.payload,dict(area='near_recording',vehicle_count=8,following_model='idm',driver_style='mixed'))
+        far=cyclic_traffic(self.payload,{})
+        self.assertLess(near['traffic_area']['route_distance_to_recorded_ego_m'],15.)
+        self.assertGreater(far['traffic_area']['route_distance_to_recorded_ego_m'],100.)
+        self.assertEqual(self.payload,before)
+        ego=self.payload['tracks'][self.payload['ego_track_id']]
+        occupied=[vehicle_footprint(ego['position'][0],ego['heading'][0])]
+        occupied.extend(vehicle_footprint(a['position'],a['heading'],a['length'],a['width'],margin=0.)
+            for a in self.payload['static_overview_actors'])
+        for mission in near['missions']:
+            shape=vehicle_footprint(mission['position_scenario_m'],mission['heading_rad'])
+            self.assertFalse(any(shape.intersects(o) for o in occupied))
+            occupied.append(shape)
+
+    def test_behaviour_ablation_does_not_change_spawns_or_desired_speeds(self):
+        base=dict(area='near_recording',vehicle_count=8,speed_spread=.3,seed=0)
+        a=cyclic_traffic(self.payload,dict(base,following_model='legacy',driver_style='normal'))
+        b=cyclic_traffic(self.payload,dict(base,following_model='idm',driver_style='mixed'))
+        for x,y in zip(a['missions'],b['missions']):
+            for key in ('position_scenario_m','heading_rad','cruise_speed_m_s','source_lane_ids'):
+                self.assertEqual(x[key],y[key])
 
 
 class PerceptionTests(unittest.TestCase):
@@ -85,6 +111,26 @@ class EventTests(unittest.TestCase):
         native = patch("map_update.simulation_interactive._vehicle_class", return_value=Vehicle)
         native.start()
         self.addCleanup(native.stop)
+
+    def test_idm_diagnostics_are_background_only_and_external_actions_stay_untouched(self):
+        from map_update.simulation_following import driver_parameters
+        features, config = scene()
+        config['cyclic_path']=[[100.,200.],[180.,200.],[180.,280.],[100.,280.],[100.,200.]]
+        config['traffic']=dict(following_model='idm')
+        config['missions'][0].update(cycle_follower=True,driver_parameters=driver_parameters(0,'P1','normal'))
+        env=Env();runtime=InteractiveRuntime(env,config,features,map_sha256='source')
+        self.addCleanup(runtime.close)
+        runtime.controls({});runtime.before_step()
+        self.assertEqual(runtime.diagnostics['P1']['following']['model'],'idm')
+        measured=vehicle_perception(runtime.report(),'P1')
+        self.assertNotIn('following',str(measured))
+        self.assertNotIn('driver_parameters',str(measured))
+        runtime.controls({'P1':{'mode':'external','action':[.1,.2]}});runtime.before_step()
+        self.assertEqual(runtime.actions['P1'],[.1,.2])
+        self.assertIsNone(runtime.report()['vehicles']['P1']['route'])
+        runtime.controls({'P1':{'mode':'ai'}});runtime.before_step()
+        self.assertEqual(runtime.diagnostics['P1']['following']['parameters']['style'],'normal')
+
     def test_stop_is_simulation_timed_and_never_overrides_player(self):
         features, config = scene()
         config['traffic'] = dict(seed=0,stop_start_s=5.,stop_duration_s=2.)

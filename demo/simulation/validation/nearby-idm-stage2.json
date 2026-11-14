@@ -1,0 +1,228 @@
+{
+  "schema": "nearby-traffic-idm-validation-1.0",
+  "base_commit": "24f51dc",
+  "date": "2026-11-14",
+  "stage": "Stage 2: nearby source cycle and uncalibrated IDM background following; not full network traffic",
+  "python": "3.11.18",
+  "configuration": {
+    "seed": 0,
+    "speed_m_s": 2.5,
+    "stop_start_s": 30.0,
+    "stop_duration_s": 60.0,
+    "vehicle_count": 8,
+    "speed_spread": 0.3,
+    "area": "near_recording",
+    "following_model": "idm",
+    "driver_style": "mixed",
+    "profile": "synthetic_cycle_v1",
+    "synthetic": true
+  },
+  "matched_initial_missions_and_physical_map": true,
+  "native_runs": {
+    "idm": {
+      "schema": "synthetic-traffic-validation-1.0",
+      "passed": true,
+      "seed": 0,
+      "seconds": 600,
+      "handover": false,
+      "following_brake_steps": 53,
+      "off_route_steps": 0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.290710953186034,
+      "stop_min_speed_m_s": 0.0030868757978294494,
+      "recovery_max_speed_m_s": 2.886903836759187,
+      "ego_visible_traffic_steps": 5335,
+      "idm_leader_steps": 30425,
+      "emergency_override_steps": 53,
+      "minimum_leader_gap_m": 2.012154701625591,
+      "maximum_absolute_jerk_m_s3": 165.8066334364104,
+      "ego_max_speed_m_s": 0.06978127771876183,
+      "traffic_area": {
+        "selection": "near_recording",
+        "source_ego_unchanged": true,
+        "route_length_m": 395.4978512706879,
+        "route_distance_to_recorded_ego_m": 9.15478867227798,
+        "minimum_source_actor_clearance_m": 4.6905967418261225
+      },
+      "physical_map_sha256": "e3c1bd7cf9dd11d75fceb6af36484fecf80d3d8d8da004de7e25349d22e18ce4",
+      "ego_initialization_error_m": 0.0,
+      "ego_initial_pose_preserved": true,
+      "physical_map_unchanged": true,
+      "completed_laps": {
+        "P1": 3,
+        "P2": 2,
+        "P3": 2,
+        "P4": 3,
+        "P5": 3,
+        "P6": 3,
+        "P7": 2,
+        "P8": 3
+      },
+      "trace_sha256": "fb5ee6dfbfb110b2f5dbd8aaabfbc5e53108bdfb1ccec342354e800e87a2bbc4",
+      "mean_absolute_jerk_m_s3": 0.5028442438952866,
+      "jerk_scope": "finite differences of actual Bullet speed at 0.1s, including scheduled stop and safety interventions",
+      "ego_displacement_m": 0.5143869892686294,
+      "ego_position_scope": "Source initialization preserved; dynamic Bullet body is not artificially frozen",
+      "source_hashes": {
+        "map_update/simulation_traffic.py": "09d0f10e4e5e3303e4e4275681e9f2c02c3454a256fd9045b0ff26f43a9f1c2a",
+        "map_update/simulation_interactive.py": "188bda686b50062c40484048da4bc88bb8cc02c113c4752656ff6f17047021eb",
+        "map_update/simulation_following.py": "c3b5e13ef73e868fc287d4166897c39f7338272ac16e42c51a0560870171b6e5"
+      }
+    },
+    "legacy": {
+      "schema": "synthetic-traffic-validation-1.0",
+      "passed": true,
+      "seed": 0,
+      "seconds": 600,
+      "handover": false,
+      "following_brake_steps": 726,
+      "off_route_steps": 0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.29256468092516447,
+      "stop_min_speed_m_s": 0.0030193514307660756,
+      "recovery_max_speed_m_s": 2.8868237318764165,
+      "ego_visible_traffic_steps": 5126,
+      "idm_leader_steps": 0,
+      "emergency_override_steps": 0,
+      "minimum_leader_gap_m": null,
+      "maximum_absolute_jerk_m_s3": 173.33301925928689,
+      "ego_max_speed_m_s": 0.06978127771876183,
+      "traffic_area": {
+        "selection": "near_recording",
+        "source_ego_unchanged": true,
+        "route_length_m": 395.4978512706879,
+        "route_distance_to_recorded_ego_m": 9.15478867227798,
+        "minimum_source_actor_clearance_m": 4.6905967418261225
+      },
+      "physical_map_sha256": "e3c1bd7cf9dd11d75fceb6af36484fecf80d3d8d8da004de7e25349d22e18ce4",
+      "ego_initialization_error_m": 0.0,
+      "ego_initial_pose_preserved": true,
+      "physical_map_unchanged": true,
+      "completed_laps": {
+        "P1": 3,
+        "P2": 2,
+        "P3": 2,
+        "P4": 3,
+        "P5": 3,
+        "P6": 3,
+        "P7": 2,
+        "P8": 3
+      },
+      "trace_sha256": "7ae7e4053be8fbfb42e14f26aab2ec3da485ecae0b256cb7644681fc9857e09d",
+      "mean_absolute_jerk_m_s3": 3.8514463110060713,
+      "jerk_scope": "finite differences of actual Bullet speed at 0.1s, including scheduled stop and safety interventions",
+      "ego_displacement_m": 0.5143869892686294,
+      "ego_position_scope": "Source initialization preserved; dynamic Bullet body is not artificially frozen",
+      "source_hashes": {
+        "map_update/simulation_traffic.py": "09d0f10e4e5e3303e4e4275681e9f2c02c3454a256fd9045b0ff26f43a9f1c2a",
+        "map_update/simulation_interactive.py": "188bda686b50062c40484048da4bc88bb8cc02c113c4752656ff6f17047021eb",
+        "map_update/simulation_following.py": "c3b5e13ef73e868fc287d4166897c39f7338272ac16e42c51a0560870171b6e5"
+      }
+    },
+    "density_12": {
+      "schema": "synthetic-traffic-validation-1.0",
+      "passed": true,
+      "seed": 7,
+      "seconds": 180,
+      "handover": false,
+      "following_brake_steps": 149,
+      "off_route_steps": 0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.2640111326255515,
+      "stop_min_speed_m_s": 0.002813764318159358,
+      "recovery_max_speed_m_s": 1.969865514428942,
+      "ego_visible_traffic_steps": 1800,
+      "idm_leader_steps": 16914,
+      "emergency_override_steps": 149,
+      "minimum_leader_gap_m": 1.6454752809503228,
+      "maximum_absolute_jerk_m_s3": 164.08905997710676,
+      "ego_max_speed_m_s": 0.06978127771876183,
+      "traffic_area": {
+        "selection": "near_recording",
+        "source_ego_unchanged": true,
+        "route_length_m": 395.4978512706879,
+        "route_distance_to_recorded_ego_m": 9.15478867227798,
+        "minimum_source_actor_clearance_m": 4.6905967418261225
+      },
+      "physical_map_sha256": "e3c1bd7cf9dd11d75fceb6af36484fecf80d3d8d8da004de7e25349d22e18ce4",
+      "ego_initialization_error_m": 0.0,
+      "ego_initial_pose_preserved": true,
+      "physical_map_unchanged": true,
+      "completed_laps": {
+        "P1": 0,
+        "P2": 0,
+        "P3": 0,
+        "P4": 0,
+        "P5": 0,
+        "P6": 0,
+        "P7": 0,
+        "P8": 0,
+        "P9": 0,
+        "P10": 0,
+        "P11": 0,
+        "P12": 0
+      },
+      "trace_sha256": "506011056ffaf6d7a614968953fa79b1a78dcd7a5d19b2354b19fdecc85f75db",
+      "mean_absolute_jerk_m_s3": 0.7966022421225198,
+      "jerk_scope": "finite differences of actual Bullet speed at 0.1s, including scheduled stop and safety interventions",
+      "ego_displacement_m": 0.16226914787794075,
+      "ego_position_scope": "Source initialization preserved; dynamic Bullet body is not artificially frozen",
+      "source_hashes": {
+        "map_update/simulation_traffic.py": "09d0f10e4e5e3303e4e4275681e9f2c02c3454a256fd9045b0ff26f43a9f1c2a",
+        "map_update/simulation_interactive.py": "188bda686b50062c40484048da4bc88bb8cc02c113c4752656ff6f17047021eb",
+        "map_update/simulation_following.py": "c3b5e13ef73e868fc287d4166897c39f7338272ac16e42c51a0560870171b6e5"
+      }
+    }
+  },
+  "comparison": {
+    "scope": "one paired seed/configuration, background behaviour only; not real-data realism or Planning effectiveness",
+    "mean_absolute_jerk_m_s3": {
+      "legacy": 3.8514463110060713,
+      "idm": 0.5028442438952866
+    },
+    "emergency_guard_vehicle_steps": {
+      "legacy": 726,
+      "idm": 53
+    },
+    "denominator_vehicle_steps": 48000
+  },
+  "unit_tests": {
+    "total": 626,
+    "passed": 625,
+    "skipped": 1,
+    "skip_reason": "Original scene fixture is not available"
+  },
+  "browser": {
+    "passed": [
+      "synthetic provenance is visible",
+      "generated cars are labelled synthetic",
+      "eight native vehicles plus ego",
+      "nearby source route is selected",
+      "route distance is visible",
+      "ego can observe nearby generated traffic",
+      "manual driver seats are hidden",
+      "IDM driver feedback is shown",
+      "eighth vehicle can observe its own online map",
+      "baseline input can be selected without resetting the world",
+      "export contains bounded synthetic perception",
+      "private intentions are excluded",
+      "map layer and observation are atomic",
+      "no structural edits are claimed",
+      "no uncaught JavaScript errors",
+      "reset preserves synthetic population",
+      "reset preserves area and IDM model"
+    ],
+    "browser_errors": []
+  },
+  "limitations": [
+    "IDM parameters are not calibrated or trained",
+    "No pedestrian/construction/accident entity generation or arbitrary OD/junction priority",
+    "50m ideal full-circle observations without occlusion/noise",
+    "No actual classmate Planning connected",
+    "No vehicle damage model",
+    "Source ego initialization preserved; physics body can creep slightly while braking"
+  ],
+  "validation_correction": "Initial harness incorrectly required ego displacement below 5cm over the whole run. Final runs check source initial pose, actual max speed <0.1m/s, continuous movement and collision evidence; actual displacement is retained. No runtime poses are frozen or overwritten.",
+  "same_seed_repeat_trace_equal": true,
+  "repeat_scope": "Same environment, fixed physics step, configuration and inputs; not cross-machine bitwise reproducibility"
+}

@@ -456,7 +456,7 @@ class InteractiveHttpTests(unittest.TestCase):
         self.host("play")
         state = self.until(lambda value: value["phase"] == "error")
         self.assertFalse(state["playing"])
-        self.assertIn("all five", state["error"])
+        self.assertIn("every configured vehicle", state["error"])
         self.assertEqual(state["room"]["step"], 0)
         self.assertEqual(self.broker.step, 1)
         query = "/api/interactive/observation?session_id="+self.identity["session_id"]+"&vehicle_id=ego"

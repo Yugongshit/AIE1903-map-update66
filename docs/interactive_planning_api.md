@@ -148,3 +148,9 @@ nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的
 `POST /input` 可新增 `"planning_state_versions":{"P8":"STATE_VERSION"}`，键必须与 `actions` 完全一致，同时携带 `observation_step`。服务端拒绝未知、缓存过期或晚于观测步的版本；成功响应包含 `accepted_planning_versions`。每观察车保留最近 64 个变化版本，按新观测及时提交。回执表示接受请求，不证明执行或规划器确实使用数据。
 
 示例 `python scripts/interactive_planner_client.py --session-id ROOM_ID --vehicles P8 --live-map --map-policy observed` 将状态层加入 `plan()` 第三个参数并随动作声明版本；每个此类客户端只控制一辆车。`plan()` 仍返回刹车。详见[当前操作和验证边界](synthetic_traffic.md)。
+
+### 近场交通与 IDM
+
+创建房间可在 `traffic` 中设置 `area=near_recording`、`following_model=idm`、`driver_style=mixed`。它们只影响实验生成/背景驾驶行为，不赋予 ego 内置规划。源 ego 保持位置并等待外部控制。网页默认使用这组配置；省略参数的旧客户端沿用独立街区和旧近场制动基线。
+
+`/state` 的 `interactive.traffic_area` 提供所选区域与起点距离；背景车 `route.following` 包含 IDM 参数、当前前车间距、期望加速度和保护介入，供观众诊断。上述驾驶风格、内部路线和控制诊断不进入 `/perception` 或 `/planning-input`，规划器只能自行从当前观测推断运动。背景行为模型与 Planning 地图输入策略是两个不同实验因素，研究地图效果时不要同时更换跟车模型。
