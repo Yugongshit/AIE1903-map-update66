@@ -137,7 +137,7 @@ class InteractiveCoordinator:
         from .simulation_traffic import vehicle_perception
         for identifier, observed_map in self.observed_maps.items():
             observed_map.update(result['step'], result['interactive'].get('sim_time_s', result['step']*.1),
-                                vehicle_perception(result['interactive'], identifier))
+                                vehicle_perception(result['interactive'], identifier, clearance_queries=observed_map.clearance_queries()))
         self.last_result = result
         # The browser already has static map/state overlays. Its snapshot
         # contains each actual actor once, including stationary colliders.
@@ -353,7 +353,8 @@ class InteractiveCoordinator:
         from .simulation_traffic import vehicle_perception
         with self.lock:
             observation = self.observation(session_id, vehicle_id)
-            measured = vehicle_perception(self.last_result['interactive'], vehicle_id)
+            measured = vehicle_perception(self.last_result['interactive'], vehicle_id,
+                clearance_queries=self.observed_maps[vehicle_id].clearance_queries())
             return {**{k: observation[k] for k in ('session_id', 'epoch', 'scene_id', 'step',
                     'sim_time_s', 'state_id', 'vehicle_id', 'coordinate_reference', 'map_version')},
                     'schema': 'interactive-vehicle-perception-1.0', **measured}

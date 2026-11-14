@@ -1,0 +1,503 @@
+{
+  "schema": "construction-event-validation-1.0",
+  "date": "2026-11-14",
+  "base_commit": "857ed22",
+  "stage": "Stage 2 third increment: initial construction collider and observed clearance",
+  "runs": {
+    "eight_cars": {
+      "passed": true,
+      "config": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 8,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_duration_s": 60.0,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "collision_probe": false,
+      "transitions": [
+        {
+          "observer": "ego",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "stale",
+          "time_s": 12.9,
+          "reason": null
+        },
+        {
+          "observer": "P7",
+          "status": "active",
+          "time_s": 21.7,
+          "reason": null
+        },
+        {
+          "observer": "P6",
+          "status": "active",
+          "time_s": 37.2,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P6",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P7",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "cleared",
+          "time_s": 65.60000000000001,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P1",
+          "status": "cleared",
+          "time_s": 65.60000000000001,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P6",
+          "status": "cleared",
+          "time_s": 65.60000000000001,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P7",
+          "status": "cleared",
+          "time_s": 65.60000000000001,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P8",
+          "status": "cleared",
+          "time_s": 65.60000000000001,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P2",
+          "status": "cleared",
+          "time_s": 138.6,
+          "reason": "repeated_observed_free_previous_footprint"
+        }
+      ],
+      "barrier_mass": 0.0,
+      "removed_at_s": 60.099999999999994,
+      "barrier_drift_m": 0.0,
+      "first_active": {
+        "ego": 2.1,
+        "P1": 2.1,
+        "P2": 2.1,
+        "P8": 2.1,
+        "P7": 21.7,
+        "P6": 37.2
+      },
+      "first_cleared": {
+        "ego": 65.60000000000001,
+        "P1": 65.60000000000001,
+        "P6": 65.60000000000001,
+        "P7": 65.60000000000001,
+        "P8": 65.60000000000001,
+        "P2": 138.6
+      },
+      "braking_vehicles": [
+        "P1"
+      ],
+      "recovered_vehicles": [
+        "P1"
+      ],
+      "physical_contact_observed": false,
+      "collision_events": 0,
+      "max_step_distance_m": 0.290710953186034,
+      "physical_map_unchanged": true,
+      "trace_sha256": "6020ecd322515efb541b8c6758e7081cedef0dc44dd6ac5ba24b08c4ae90572b",
+      "scope": "Native background traffic and causal state baseline; no classmate Planning algorithm",
+      "final_event": {
+        "event_id": "construction-1",
+        "kind": "synthetic_construction",
+        "status": "removed",
+        "object_id": "construction-C1",
+        "started_at_s": 0.0,
+        "removed_at_s": 60.0,
+        "synthetic": true,
+        "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+      }
+    },
+    "twelve_cars": {
+      "passed": true,
+      "config": {
+        "seed": 7,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 12,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_duration_s": 60.0,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "collision_probe": false,
+      "transitions": [
+        {
+          "observer": "ego",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P3",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P12",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P3",
+          "status": "stale",
+          "time_s": 5.300000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P11",
+          "status": "active",
+          "time_s": 14.5,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "stale",
+          "time_s": 18.700000000000003,
+          "reason": null
+        },
+        {
+          "observer": "P10",
+          "status": "active",
+          "time_s": 32.7,
+          "reason": null
+        },
+        {
+          "observer": "P9",
+          "status": "active",
+          "time_s": 43.0,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P9",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P10",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P11",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P12",
+          "status": "stale",
+          "time_s": 63.10000000000001,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "cleared",
+          "time_s": 73.8,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P1",
+          "status": "cleared",
+          "time_s": 73.8,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P9",
+          "status": "cleared",
+          "time_s": 73.8,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P10",
+          "status": "cleared",
+          "time_s": 73.8,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P11",
+          "status": "cleared",
+          "time_s": 73.8,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P12",
+          "status": "cleared",
+          "time_s": 73.8,
+          "reason": "repeated_observed_free_previous_footprint"
+        }
+      ],
+      "barrier_mass": 0.0,
+      "removed_at_s": 60.099999999999994,
+      "barrier_drift_m": 0.0,
+      "first_active": {
+        "ego": 2.1,
+        "P1": 2.1,
+        "P2": 2.1,
+        "P3": 2.1,
+        "P12": 2.1,
+        "P11": 14.5,
+        "P10": 32.7,
+        "P9": 43.0
+      },
+      "first_cleared": {
+        "ego": 73.8,
+        "P1": 73.8,
+        "P9": 73.8,
+        "P10": 73.8,
+        "P11": 73.8,
+        "P12": 73.8
+      },
+      "braking_vehicles": [
+        "P1"
+      ],
+      "recovered_vehicles": [
+        "P1"
+      ],
+      "physical_contact_observed": false,
+      "passed_through_barrier": false,
+      "first_contact_s": null,
+      "final_time_s": 150.0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.2640111326255515,
+      "physical_map_unchanged": true,
+      "trace_sha256": "7cdf769aa61d01ad828840e0dcd3bc0d943b9faac2a0f680c1f4c1e5e4dc1534",
+      "scope": "Native background traffic and causal state baseline; no classmate Planning algorithm",
+      "final_event": {
+        "event_id": "construction-1",
+        "kind": "synthetic_construction",
+        "status": "removed",
+        "object_id": "construction-C1",
+        "started_at_s": 0.0,
+        "removed_at_s": 60.0,
+        "synthetic": true,
+        "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+      }
+    },
+    "collision_hold": {
+      "passed": true,
+      "config": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 8,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_duration_s": 60.0,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "collision_probe": true,
+      "transitions": [
+        {
+          "observer": "ego",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        }
+      ],
+      "barrier_mass": 0.0,
+      "removed_at_s": null,
+      "barrier_drift_m": 0.0,
+      "first_active": {
+        "ego": 2.1,
+        "P1": 2.1,
+        "P2": 2.1,
+        "P8": 2.1
+      },
+      "first_cleared": {},
+      "braking_vehicles": [],
+      "recovered_vehicles": [],
+      "physical_contact_observed": true,
+      "passed_through_barrier": false,
+      "first_contact_s": 5.5,
+      "final_time_s": 10.5,
+      "collision_events": 2,
+      "max_step_distance_m": 0.6255570924992729,
+      "physical_map_unchanged": true,
+      "trace_sha256": "fd0dcbb72a30a3833bf75409da007f85265d5f4f1f98fd5e8a4491ca2e0cbb6e",
+      "scope": "Native background traffic and causal state baseline; no classmate Planning algorithm",
+      "final_event": {
+        "event_id": "construction-1",
+        "kind": "synthetic_construction",
+        "status": "active",
+        "object_id": "construction-C1",
+        "started_at_s": 0.0,
+        "removed_at_s": null,
+        "synthetic": true,
+        "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+      }
+    }
+  },
+  "browser": {
+    "passed": [
+      "construction duration minimum is reflected in the input",
+      "synthetic provenance is visible",
+      "generated cars are labelled synthetic",
+      "eight native vehicles plus ego",
+      "nearby source route is selected",
+      "route distance is visible",
+      "ego can observe nearby generated traffic",
+      "manual driver seats are hidden",
+      "construction physical actor is visible and labelled synthetic",
+      "construction can be focused without changing the observation vehicle",
+      "IDM driver feedback is shown",
+      "HTTP planning input receives observed construction occupancy",
+      "HTTP map clearance follows observed empty footprint",
+      "cleared obstacle is removed from physical snapshot",
+      "eighth vehicle can observe its own online map",
+      "baseline input can be selected without resetting the world",
+      "export contains bounded synthetic perception",
+      "private intentions are excluded",
+      "map layer and observation are atomic",
+      "no structural edits are claimed",
+      "no uncaught JavaScript errors",
+      "reset preserves synthetic population",
+      "reset preserves area and IDM model",
+      "reset reconstructs initial construction actor"
+    ],
+    "browser_errors": []
+  },
+  "unit_tests": {
+    "total": 636,
+    "passed": 635,
+    "skipped": 1,
+    "skip_reason": "Original scene fixture is not available"
+  },
+  "final_affected_tests": {
+    "interactive": 52,
+    "traffic": 10
+  },
+  "limitations": [
+    "One initial static barrier with discrete simulated clearance, no worker animation",
+    "Ideal 50m full-circle geometry observations, no noise/occlusion",
+    "No permanent road structure writes",
+    "No classmate Planning algorithm connected",
+    "No vehicle damage model; collision probe is deliberately driven by test actions",
+    "Public debug endpoints remain unisolated; formal blind evaluation still requires access controls"
+  ]
+}

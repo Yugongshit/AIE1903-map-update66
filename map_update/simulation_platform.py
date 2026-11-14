@@ -330,7 +330,8 @@ class PlatformServer(ThreadingHTTPServer):
                                'pitch_rad', 'roll_rad', 'collision_active', 'current_contacts',
                                'last_collision', 'collision_event_count', 'collision')
             actors = [{'id': row.get('vehicle_id', row.get('native_object_id')), 'type': row['type'],
-                       'is_ego': False, 'persistent': True, 'position': list(row['position_scenario_m']),
+                       'is_ego': False, 'persistent': True, 'synthetic':row.get('synthetic',False),
+                       'source_scope':row.get('source_scope','full_scene_offline_prior'), 'position': list(row['position_scenario_m']),
                        'heading': row['heading_rad'], 'length': row['length_m'],
                        'width': row['width_m'], 'height': row.get('height_m', 1.),
                        **{name: deepcopy(row[name]) for name in physical_fields if name in row}}
@@ -353,6 +354,7 @@ class PlatformServer(ThreadingHTTPServer):
                     'actors': actors, 'ego': next(row for row in actors if row.get('is_ego')),
                     'states': {'events': [], 'objects': [], 'scope': 'interactive_current_physics'},
                     'structure': [], 'offline_static_prior': True,
+                    'synthetic_events_present': any(a.get('source_scope')=='synthetic_construction_event' for a in actors),
                     'recorded_future_tracks_included': False}
         cache_key = (key, version, result.get('step'))
         with self.cache_lock:

@@ -1,7 +1,8 @@
 """Causal per-vehicle occupancy evidence, independent of generator event plans.
 
-This baseline publishes observed stopped-vehicle footprints, never road closures
-or permanent structure edits. Missing evidence becomes stale, not cleared.
+This baseline publishes observed stopped vehicles and obstacle footprints, never
+road closures or permanent edits. Missing evidence becomes stale; only explicit
+current free-space scans can clear a disappeared obstacle.
 """
 from copy import deepcopy
 import hashlib
@@ -32,6 +33,7 @@ class ObservedStateMap:
                       and len(v.get('polyline', [])) >= 2}
         self.stationary_s, self.stale_s = stationary_s, stale_s
         self.tracks, self.events, self.lane_cache = {}, {}, {}
+        self.free_tracks = {}
         self.step, self.time_s, self.revision = -1, 0., 0
         self.version = digest([road_version, []])
         self.known_versions = {self.version: -1}
@@ -58,8 +60,9 @@ class ObservedStateMap:
         self.step, self.time_s = step, time_s
         before = deepcopy(self.events)
         for actor in perception['current_objects']:
-            if actor.get('type') != 'VEHICLE':
+            if actor.get('type') not in {'VEHICLE','TRAFFIC_BARRIER','TRAFFIC_CONE'}:
                 continue
+            obstacle = actor['type'] != 'VEHICLE'
             identifier = actor['vehicle_id']
             previous = self.tracks.get(identifier)
             stable = (previous is not None and previous['hits']>0 and time_s-previous['seen'] <= .5
@@ -76,16 +79,36 @@ class ObservedStateMap:
                 # A stationary observation is evidence of occupancy, not of
                 # an accident, intention, permanent change or an impassable lane.
                 self.events[identifier] = dict(event_id='observed-stop:'+identifier, actor_id=identifier,
-                    kind='stationary_vehicle_occupancy', status='active', geometry_city_m=footprint(actor),
+                    kind='stationary_obstacle_occupancy' if obstacle else 'stationary_vehicle_occupancy',
+                    status='active', geometry_city_m=footprint(actor),
                     lane_id=self._lane(actor), lane_closed=False, restriction='footprint_occupancy_only',
                     first_observed_stationary_s=first, last_observed_s=time_s, evidence_step=step,
                     supporting_samples=hits, source='ideal_simulated_vehicle_observations',
+                    object_type=actor['type'], object_origin=actor.get('source_scope','synthetic_traffic'),
                     confidence_kind='rule_threshold_not_calibrated_probability', synthetic=True)
             elif event and event['status'] != 'cleared' and actor['speed_m_s'] >= .75:
                 if Polygon(footprint(actor)).disjoint(Polygon(event['geometry_city_m'])):
                     self.events[identifier] = dict(event,status='cleared',evidence_step=step,
                         last_observed_s=time_s,clear_reason='observed_actor_moving_outside_previous_footprint')
+        free_checks={q['actor_id']:q for q in perception.get('free_space_checks', [])}
+        visible={a['vehicle_id'] for a in perception['current_objects']}
         for identifier, event in self.events.items():
+            check=free_checks.get(identifier)
+            if (event['kind']=='stationary_obstacle_occupancy' and event['status']!='cleared'
+                    and identifier not in visible and check and check.get('observed_free') is True
+                    and check.get('geometry_city_m')==event['geometry_city_m']
+                    and check.get('source')=='ideal_current_geometry_scan'):
+                previous=self.free_tracks.get(identifier)
+                continuous=previous and time_s-previous['seen']<=.5
+                track=dict(first=previous['first'] if continuous else time_s,
+                    hits=previous['hits']+1 if continuous else 1,seen=time_s)
+                self.free_tracks[identifier]=track
+                if track['hits']>=5 and time_s-track['first']>=self.stationary_s:
+                    event.update(status='cleared',evidence_step=step,last_observed_s=time_s,
+                        clear_reason='repeated_observed_free_previous_footprint',
+                        clearance_supporting_samples=track['hits'])
+            else:
+                self.free_tracks.pop(identifier,None)
             if event['status']=='active' and time_s-event['last_observed_s']>self.stale_s:
                 event.update(status='stale',evidence_step=step)
         # Unconfirmed, departed tracks are not permanent history. Published
@@ -97,6 +120,10 @@ class ObservedStateMap:
             self.known_versions[self.version] = step
             while len(self.known_versions)>64:
                 del self.known_versions[next(iter(self.known_versions))]
+
+    def clearance_queries(self):
+        return [dict(actor_id=e['actor_id'],geometry_city_m=deepcopy(e['geometry_city_m']))
+                for e in self.events.values() if e['kind']=='stationary_obstacle_occupancy' and e['status']!='cleared']
 
     def snapshot(self, policy='observed'):
         if policy not in {'observed','baseline'}:

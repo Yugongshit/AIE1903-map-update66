@@ -10,20 +10,23 @@ from .simulation_planner import _length, _point_at, _project, _angle
 
 
 def traffic_options(value):
-    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style'}:
+    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'stop_enabled'}:
         raise ValueError('Invalid cyclic traffic options')
     options = dict(seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
-                   area='isolated', following_model='legacy', driver_style='normal')
+                   area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_duration_s=60., stop_enabled=True)
     options.update(value)
     if type(options['seed']) is not int or not 0 <= options['seed'] < 2**32:
         raise ValueError('Traffic seed must be a uint32')
     if type(options['vehicle_count']) is not int or not 1 <= options['vehicle_count'] <= 12:
         raise ValueError('Background vehicle count must be 1..12')
+    for key in ('construction','stop_enabled'):
+        if type(options[key]) is not bool:
+            raise ValueError('Traffic flag must be boolean: '+key)
     for key, allowed in [('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
                          ('driver_style', ('normal','cautious','assertive','mixed'))]:
         if options[key] not in allowed:
             raise ValueError('Invalid traffic option: '+key)
-    for key, low, high in [('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5)]:
+    for key, low, high in [('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5), ('construction_duration_s', 5., 120.)]:
         v = options[key]
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or not low <= v <= high:
             raise ValueError('Invalid traffic option: ' + key)
@@ -93,7 +96,9 @@ def cyclic_traffic(payload, options):
     from .simulation_following import driver_parameters
     for mission in missions:
         mission['driver_parameters'] = driver_parameters(options['seed'], mission['vehicle_id'], options['driver_style'])
-    return dict(missions=missions, cyclic_path=path, traffic=dict(options, profile='synthetic_cycle_v1', synthetic=True),
+    from .simulation_events import construction_spec
+    construction = construction_spec(path, missions, occupied) if options['construction'] else None
+    return dict(missions=missions, cyclic_path=path, construction=construction, traffic=dict(options, profile='synthetic_cycle_v1', synthetic=True),
         traffic_area=dict(selection=options['area'], source_ego_unchanged=True, route_length_m=length,
             route_distance_to_recorded_ego_m=LineString(path).distance(Point(ego['position'][0][:2])),
             minimum_source_actor_clearance_m=clearance))
@@ -150,10 +155,10 @@ class CycleFollower:
 # Deliberate allowlist: other drivers' controls, routes, goals, events and seeds
 # are not measurements, even when stored beside a current pose in engine state.
 _MEASURED = ('vehicle_id', 'type', 'position_city_m', 'heading_rad', 'velocity_m_s',
-             'speed_m_s', 'length_m', 'width_m', 'height_m')
+             'speed_m_s', 'length_m', 'width_m', 'height_m', 'synthetic', 'source_scope')
 
 
-def vehicle_perception(interactive, vehicle_id, radius=50.):
+def vehicle_perception(interactive, vehicle_id, radius=50., clearance_queries=()):
     own = interactive['vehicles'][vehicle_id]
     def measure(actor):
         result = {k: deepcopy(actor[k]) for k in _MEASURED if k in actor}
@@ -163,7 +168,35 @@ def vehicle_perception(interactive, vehicle_id, radius=50.):
     objects = list(interactive['vehicles'].values()) + interactive.get('static_actors', [])
     visible = [measure(a) for a in objects if a.get('vehicle_id') != vehicle_id
                and math.dist(own['position_city_m'][:2], a['position_city_m'][:2]) <= radius]
-    return dict(own_vehicle=measure(own), current_objects=visible,
+    # Query only previously observed footprints. A complete ideal geometric
+    # scan can confirm emptiness; absence from the object list alone cannot.
+    from .simulation_live_map import footprint
+    from shapely.geometry import Polygon
+    checks=[]
+    visible_ids={a['vehicle_id'] for a in visible}
+    for query in clearance_queries:
+        if query['actor_id'] in visible_ids:
+            continue
+        region=query['geometry_city_m']
+        if not all(math.dist(own['position_city_m'][:2],p[:2]) <= radius for p in region):
+            continue
+        polygon=Polygon(region)
+        occupied=False
+        for actor in objects:
+            # Includes the observer itself, and objects whose centres are
+            # outside range but whose bodies intersect the queried region.
+            if not all(k in actor for k in ('length_m','width_m','heading_rad')):
+                occupied=True  # Missing geometry cannot certify free space.
+                break
+            reach=(actor['length_m']**2+actor['width_m']**2)**.5/2
+            if polygon.distance(Point(actor['position_city_m'][:2])) > reach:
+                continue
+            if polygon.intersects(Polygon(footprint(actor))):
+                occupied=True
+                break
+        checks.append(dict(actor_id=query['actor_id'],geometry_city_m=deepcopy(region),
+            observed_free=not occupied, source='ideal_current_geometry_scan'))
+    return dict(own_vehicle=measure(own), current_objects=visible, free_space_checks=checks,
         observation_scope='synthetic_ideal_range_limited_360deg', range_m=radius,
         occlusion_modelled=False, noise_modelled=False, synthetic=True,
         future_intentions_included=False)

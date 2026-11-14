@@ -154,3 +154,7 @@ nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的
 创建房间可在 `traffic` 中设置 `area=near_recording`、`following_model=idm`、`driver_style=mixed`。它们只影响实验生成/背景驾驶行为，不赋予 ego 内置规划。源 ego 保持位置并等待外部控制。网页默认使用这组配置；省略参数的旧客户端沿用独立街区和旧近场制动基线。
 
 `/state` 的 `interactive.traffic_area` 提供所选区域与起点距离；背景车 `route.following` 包含 IDM 参数、当前前车间距、期望加速度和保护介入，供观众诊断。上述驾驶风格、内部路线和控制诊断不进入 `/perception` 或 `/planning-input`，规划器只能自行从当前观测推断运动。背景行为模型与 Planning 地图输入策略是两个不同实验因素，研究地图效果时不要同时更换跟车模型。
+
+### 障碍物占用与空闲证据
+
+`/planning-input` 状态层现支持 `stationary_obstacle_occupancy`。完整旧足迹经过连续至少 2 秒理想空闲扫描后才清除，原因是 `repeated_observed_free_previous_footprint`；目标消失且缺少覆盖证据仍为 `stale`。`free_space_checks` 是本车过去确认区域的当前几何扫描结果，不能当作普遍的无遮挡感知保证。路障清除安排只属于生成器，受限输入不输出施工时刻计划。静态源物体与生成物体按 `object_origin` / `source_scope` 区分，均不构成永久道路写入。配置、物理近似与验证见[施工事件说明](construction_events.md)。

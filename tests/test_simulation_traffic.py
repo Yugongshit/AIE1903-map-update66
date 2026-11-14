@@ -140,6 +140,10 @@ class EventTests(unittest.TestCase):
         runtime.controls({}); runtime.before_step()
         self.assertEqual(runtime.actions['P1'][1],-1.)
         self.assertEqual(runtime.reasons['P1'],'synthetic_scheduled_stop')
+        runtime.traffic['stop_enabled']=False
+        runtime.before_step()
+        self.assertGreater(runtime.actions['P1'][1],0.)
+        runtime.traffic['stop_enabled']=True
         env.episode_step=70
         runtime.before_step()
         self.assertGreater(runtime.actions['P1'][1],0.)
