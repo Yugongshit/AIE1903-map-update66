@@ -15,7 +15,7 @@ def main():
             assert value,name
             checks.append(name);print('PASS '+name,flush=True)
         page.goto(args.url);page.wait_for_function('window.MAP_PLATFORM?.state.snapshot',timeout=60000)
-        page.locator('#driving-tab').click();page.locator('#traffic-count').fill('7')
+        page.locator('#driving-tab').click();page.locator('#traffic-profile').select_option('network');page.locator('#traffic-count').fill('7')
         page.locator('#traffic-event').select_option('pedestrians')
         check('pedestrian-only disables background count at zero',page.locator('#traffic-count').is_disabled() and page.locator('#traffic-count').input_value()=='0')
         page.locator('#traffic-event').select_option('mixed')

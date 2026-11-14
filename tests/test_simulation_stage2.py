@@ -52,7 +52,7 @@ class Stage2GenerationTests(unittest.TestCase):
 
     def test_new_options_validate_flags_counts_and_mode(self):
         for options in ({'route_mode':'invented'},{'pedestrians':1},{'incidents':'yes'},
-                        {'recurring_construction':1},{'pedestrian_count':0},{'pedestrian_count':5},{'pedestrian_count':True}):
+                        {'recurring_construction':1},{'pedestrian_count':0},{'pedestrian_count':33},{'pedestrian_count':True}):
             with self.assertRaises(ValueError):traffic_options(options)
 
     def test_walkers_use_source_crosswalk_polygons_and_report_absent_capacity(self):

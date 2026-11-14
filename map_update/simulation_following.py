@@ -23,7 +23,9 @@ def driver_parameters(seed, vehicle_id, style):
     return dict(style=style, **DRIVER_PARAMETERS[style], calibrated=False)
 
 
-def project_actors(path, actors):
+def project_actors(path, actors, geometry=None):
+    if geometry is not None:
+        return dict(zip((a['vehicle_id'] for a in actors),geometry.project_many([a['position_city_m'] for a in actors])))
     return {a['vehicle_id']: _project(a['position_city_m'], path) for a in actors}
 
 

@@ -22,7 +22,7 @@ def route_path(route, features):
     return path
 
 
-def source_cycles(payload):
+def source_cycles(payload, expanded=False):
     points, graph = _graph(payload['maps']['updated'])
     ego = payload['tracks'][payload['ego_track_id']]
     occupied = [vehicle_footprint(ego['position'][0], ego['heading'][0])]
@@ -40,7 +40,7 @@ def source_cycles(payload):
                 if not path or p!=path[-1]:path.append(p)
         if path[-1]!=path[0]:path.append(path[0])
         line=LineString(path)
-        if 200<=line.length<=800 and line.is_simple and min(line.distance(o) for o in occupied)>=4.:
+        if 200<=line.length<=(1400 if expanded else 800) and line.is_simple and min(line.distance(o) for o in occupied)>=(2.1 if expanded else 4.):
             candidates.append(dict(lanes=cycle[:-1],path=path,length=line.length,
                 distance=line.distance(Point(ego['position'][0][:2]))))
     return sorted(candidates,key=lambda c:(c['distance'],c['length'],c['lanes'])),occupied,points,graph
@@ -75,13 +75,17 @@ def junction_sites(routes, points, graph):
 def network_traffic(payload, options):
     from .simulation_following import driver_parameters
     from .simulation_events import construction_specs
-    candidates,occupied,points,graph=source_cycles(payload)
+    expanded=options.get('network_extent')=='district'
+    candidates,occupied,points,graph=source_cycles(payload,expanded)
     if not candidates:raise ValueError('No safe source road routes')
     routes=[candidates[0]]
     for candidate in candidates[1:]:
         if any(set(candidate['lanes'])&set(r['lanes']) for r in routes):
             routes.append(candidate)
         if len(routes)>=3:break
+    if expanded:
+        from .simulation_district import select_routes
+        routes=select_routes(candidates)
     if len(routes)<2:raise ValueError('Multi-route traffic requires at least two connected safe source cycles')
     junctions=junction_sites(routes,points,graph)
     rng=random.Random(f"{options['seed']}:network:spawns")
@@ -104,14 +108,18 @@ def network_traffic(payload, options):
             goal_scenario_m=goal,patrol_goals_scenario_m=[goal,pos],patrol_loop=True,
             cruise_speed_m_s=max(.5,min(3.,options['speed_m_s']*(1+rng.uniform(-options['speed_spread'],options['speed_spread'])))),
             cycle_follower=True,route_id=f'route-{route_index+1}',
-            source_lane_ids=list(route['lanes']),source_route_length_m=route['length'],synthetic_actor=True,
+            source_route_length_m=route['length'],synthetic_actor=True,
             initial_clearance_checked=True,mission_origin='synthetic_multi_source_cycles',uses_recorded_trajectory=False,
             driver_parameters=driver_parameters(options['seed'],identifier,options['driver_style'])))
-    specs,generation=construction_specs(routes[0]['path'],missions,occupied,options) if options['construction'] else ([],None)
-    return dict(missions=missions,cyclic_path=routes[0]['path'],routes=[{k:v for k,v in r.items() if k!='path'} for r in routes],junctions=junctions,
+    specs,generation=construction_specs(routes[0]['path'],missions,occupied,options) if options['construction'] and not expanded else ([],None)
+    if expanded and options['construction']:
+        from .simulation_district import distributed_construction
+        specs,generation=distributed_construction(routes,occupied,options,junctions,payload['maps']['updated'])
+    from .simulation_district import coverage
+    return dict(missions=missions,cyclic_path=None if expanded else routes[0]['path'],routes=[{k:v for k,v in r.items() if k!='path'} for r in routes],junctions=junctions,
         constructions=specs,construction=deepcopy(specs[0]) if specs else None,construction_generation=generation,
         traffic=dict(options,profile='synthetic_network_v1',synthetic=True),
-        traffic_area=dict(selection='source_network',source_ego_unchanged=True,route_count=len(routes),
+        traffic_area=dict(**coverage(routes,points), network_extent=options.get('network_extent','local'),selection='source_network',source_ego_unchanged=True,route_count=len(routes),
             route_length_m=sum(r['length'] for r in routes),route_distance_to_recorded_ego_m=routes[0]['distance'],
             route_lengths_m=[r['length'] for r in routes],source_scope='connected_source_cycles_not_arbitrary_city_OD'))
 
@@ -162,17 +170,21 @@ class JunctionCoordinator:
         projections={}
         def project(identifier,path):
             key=(identifier,id(path))
-            if key not in projections:projections[key]=_project(cars[identifier]['position_city_m'],path)
+            if key not in projections:projections[key]=self._path_geometry[id(path)][2].project(cars[identifier]['position_city_m'])
             return projections[key]
         for path in paths.values():
             if id(path) not in self._path_geometry:
-                self._path_geometry[id(path)]=(_length(path),{z['junction_id']:_project(z['position_city_m'],path) for z in self.sites})
+                from .simulation_path_geometry import PathGeometry
+                geom=PathGeometry(path)
+                self._path_geometry[id(path)]=(geom.length,{z['junction_id']:geom.project(z['position_city_m']) for z in self.sites},geom)
         for zone in self.sites:
             key=zone['junction_id'];center=zone['position_city_m'];radius=zone['radius_m']
             inside={k for k,a in cars.items() if math.dist(a['position_city_m'],center)<radius+a['length_m']/2+.5}
             approaches={}
             for identifier,path in paths.items():
-                own=cars[identifier];length,targets=self._path_geometry[id(path)];lat,target,_,_=targets[key]
+                own=cars[identifier]
+                if math.dist(own['position_city_m'],center)>=radius+24.:continue
+                length,targets,_=self._path_geometry[id(path)];lat,target,_,_=targets[key]
                 _,progress,_,_=project(identifier,path)
                 ahead=(target-progress)%length
                 if lat<=radius and ahead<radius+20. and math.dist(own['position_city_m'],center)<radius+24.:

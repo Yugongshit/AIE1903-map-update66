@@ -7,6 +7,7 @@ not a damage or tow-truck simulation.
 import math
 import random
 from shapely.geometry import LineString, Point
+from shapely.ops import unary_union
 from .simulation_walking import WalkingNetwork
 from .simulation_interactive_scenarios import vehicle_footprint
 from .simulation_planner import _length, _point_at, _project, _angle
@@ -19,12 +20,19 @@ class Walker:
         self.runtime, self.network, self.identifier = runtime, network, identifier
         self.rng = random.Random(f"{runtime.traffic['seed']}:{identifier}:walk")
         self.speed = self.rng.uniform(.8, 1.4)
+        self.walk_style='baseline';self.trip_range=(35,180);self.rest_range=(2,12)
+        if runtime.traffic.get('network_extent')=='district':
+            self.walk_style=random.Random(f"{runtime.traffic['seed']}:{identifier}:style").choice(('commuter','stroller','errands'))
+            speed_range,self.trip_range,self.rest_range={'commuter':((1.1,1.6),(70,250),(1,5)),
+                'stroller':((.65,1.),(25,100),(8,25)),'errands':((.85,1.3),(35,140),(3,12))}[self.walk_style]
+            self.speed=self.rng.uniform(*speed_range)
         self.wait_until = self.rng.uniform(0., 4.)
         self.phase = 'resting'; self.crossings = 0; self.trips = 0; self.distance = 0.
         self.recent = [node]; self.visited_crosswalks = set(); self.crossing = None
         self.crossing_distance = 0.; self.approved_crossing = None
-        self.route = network.trip(node, self.rng); self.target = 1; self.detour = []
+        self.route = network.trip(node, self.rng, distance_range=self.trip_range); self.target = 1; self.detour = []
         self.blocked_since = None; self.reroutes = 0; self.changed_destinations = 0
+        self.stalled_for=0.;self.physics_replans=0;self.local_blockages=[]
         a = network.points[node]; b = network.points[self.route[1]]
         self.previous = list(a); self.corridor = Point(a).buffer(.8)
         offset = runtime.metadata.get('old_origin_in_current_coordinate', [0, 0])
@@ -42,7 +50,9 @@ class Walker:
         x0, y0, x1, y1 = corridor.bounds
         duration = math.hypot(x1-x0, y1-y0)/self.speed
         for actor in actors:
-            if actor['vehicle_id'] == self.identifier: continue
+            if actor['vehicle_id'] == self.identifier or actor.get('type')=='PEDESTRIAN': continue
+            # Pedestrians use the local body-avoidance stage; reserving an entire
+            # crosswalk for each person deadlocks opposite curb approaches.
             shape = vehicle_footprint(actor['position_city_m'], actor['heading_rad'], actor['length_m'], actor['width_m'], margin=.3)
             if corridor.intersects(shape): return False
             if actor.get('type') == 'VEHICLE':
@@ -56,6 +66,7 @@ class Walker:
     def advance(self, time_s, actors):
         pos = self.position(); moved = math.dist(pos, self.previous)
         self.distance += moved; self.previous = pos
+        self.stalled_for=(getattr(self,'stalled_for',0.)+.1) if self.phase in ('walking','crossing','passing') and moved<.005 else 0.
         crossing = self.network.crossing_at(pos)
         if crossing != self.crossing:
             if self.crossing and self.crossing_distance > 2.:
@@ -71,11 +82,28 @@ class Walker:
             self.target += 1
             if self.target == len(self.route):
                 self.trips += 1; node = self.route[-1]
-                self.route = self.network.trip(node, self.rng, self.recent)
+                self.route = self.network.trip(node, self.rng, self.recent, self.trip_range)
+                if self.local_blockages:
+                    safe_route=self.network.reroute(pos,self.route[-1],self.rng,unary_union(self.local_blockages),self.recent)
+                    if safe_route:self.route=safe_route
                 self.recent = (self.recent+[node])[-4:]; self.target = 1
-                self.phase = 'resting'; self.wait_until = time_s+self.rng.uniform(2., 12.)
+                self.phase = 'resting'; self.wait_until = time_s+self.rng.uniform(*self.rest_range)
                 self.obj.set_velocity([0., 0.]); return
             target = self.network.points[self.route[self.target]]
+        if self.stalled_for>=3.:
+            # A source-map path can meet an engine collider (for example a curb).
+            # Use failed current motion as local blockage evidence; turn away
+            # along walkable space, never disable collision or move the body.
+            delta=[target[i]-pos[i] for i in (0,1)];size=max(math.hypot(*delta),1e-6)
+            direction=[v/size for v in delta]
+            blocked=Point([pos[i]+1.2*direction[i] for i in (0,1)]).buffer(.8)
+            self.local_blockages=(self.local_blockages+[blocked])[-32:]
+            route=self.network.reroute(pos,self.route[-1],self.rng,unary_union(self.local_blockages),self.recent,avoid_direction=direction)
+            if route:
+                self.changed_destinations+=int(route[-1]!=self.route[-1]);self.route=route;self.target=0;self.detour=[]
+                self.physics_replans+=1;self.phase='replanning_physical_blockage'
+            else:self.phase='blocked_by_physics'
+            self.stalled_for=0.;self.obj.set_velocity([0.,0.]);return
         upcoming = crossing or self.network.crossing_at(target)
         self.corridor = self.network.crosswalks[upcoming].buffer(.8) if upcoming else LineString([pos, target]).buffer(.8)
         if upcoming and self.approved_crossing != upcoming:
@@ -96,7 +124,7 @@ class Walker:
                     # A narrow sidewalk may have no room to pass. Replan around
                     # the current body, or abandon this destination and walk
                     # toward a different reachable place; never count arrival.
-                    obstacle = Point(actor['position_city_m']).buffer(.95)
+                    obstacle = unary_union([Point(actor['position_city_m']).buffer(.95),*self.local_blockages])
                     route = self.network.reroute(pos, self.route[-1], self.rng, obstacle, self.recent)
                     if route:
                         self.changed_destinations += int(route[-1] != self.route[-1])
@@ -126,7 +154,7 @@ class Walker:
     def report(self):
         return dict(event_id=self.identifier, kind='synthetic_pedestrian', object_id=self.identifier,
             status=self.phase, completed_crossings=self.crossings, completed_trips=self.trips,
-            travelled_m=round(self.distance, 2), reroutes=self.reroutes, changed_destinations=self.changed_destinations, distinct_crosswalks=len(self.visited_crosswalks), synthetic=True,
+            physics_blockage_replans=self.physics_replans, walk_style=self.walk_style, travelled_m=round(self.distance, 2), reroutes=self.reroutes, changed_destinations=self.changed_destinations, distinct_crosswalks=len(self.visited_crosswalks), synthetic=True,
             execution_model='source_walkway_trips_rigid_body_velocity_servo_no_biomechanics')
 
 
@@ -164,6 +192,8 @@ class IncidentScheduler:
 class TrafficPopulation:
     def __init__(self, runtime):
         self.runtime=runtime;self.walkers=[];self.incidents=IncidentScheduler(runtime.traffic['seed'])
+        from .simulation_district import BackgroundActivity
+        self.activity=BackgroundActivity(runtime.traffic['seed'],runtime.ids[1:]) if runtime.traffic.get('background_activity') else None
         self.rng=random.Random(f"{runtime.traffic['seed']}:recurring:sites")
         self.next_spawn=self.rng.uniform(45.,70.);self.serial=len(runtime.construction_events)
         self.spawned=0;self.deferred=0;self.clearances=0;self.collision_counts={key:0 for key in runtime.ids}
@@ -174,7 +204,7 @@ class TrafficPopulation:
             actors=runtime.actors()
             occupied=[vehicle_footprint(a['position_city_m'],a['heading_rad'],a['length_m'],a['width_m'],margin=.5) for a in actors]
             static=[vehicle_footprint(a['position_city_m'],a['heading_rad'],a['length_m'],a['width_m']) for a in actors if a.get('type') not in ('VEHICLE','PEDESTRIAN')]
-            self.walking_network=WalkingNetwork(runtime.source_features,paths,static)
+            self.walking_network=WalkingNetwork(runtime.source_features,paths,static,expanded=runtime.traffic.get('network_extent')=='district')
             nodes=self.walking_network.spawn_nodes(runtime.traffic['pedestrian_count'],random.Random(f"{runtime.traffic['seed']}:pedestrian:spawn"),occupied)
             for i,node in enumerate(nodes):
                 self.walkers.append(Walker(runtime,self.walking_network,node,f'walker-{i+1}'))
@@ -184,6 +214,9 @@ class TrafficPopulation:
         rt=self.runtime
         for walker in self.walkers:walker.advance(time_s,actors)
         cars={a['vehicle_id']:a for a in actors if a['vehicle_id'] in rt.ids}
+        if self.activity:
+            crossings=list(self.walking_network.crosswalks.values()) if hasattr(self,'walking_network') else []
+            self.activity.advance(time_s,cars,rt.modes,rt.junctions,crossings)
         if rt.traffic['incidents']:
             self.incidents.advance(time_s,cars,rt.modes,rt.junctions,[w.corridor for w in self.walkers])
         if rt.traffic['recurring_construction'] and time_s>=self.next_spawn:
@@ -229,7 +262,11 @@ class TrafficPopulation:
             self.collision_counts[key]=count
 
     def report(self):
-        return dict(pedestrian_requested=self.requested_walkers,pedestrian_spawned=len(self.walkers),
+        return dict(brief_stops_started=self.activity.started if self.activity else 0,
+            brief_stops_completed=self.activity.completed if self.activity else 0,
+            brief_stops_active=sum(self.activity.stopping(k) for k in self.activity.rows) if self.activity else 0,
+            pedestrian_occupied_cells=len({(int(w.position()[0]//80),int(w.position()[1]//80)) for w in self.walkers}),
+            pedestrian_requested=self.requested_walkers,pedestrian_spawned=len(self.walkers),
             pedestrian_capacity_limited=len(self.walkers)<self.requested_walkers,
             completed_crossings=sum(w.crossings for w in self.walkers),
             completed_walking_trips=sum(w.trips for w in self.walkers),

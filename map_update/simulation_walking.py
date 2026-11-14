@@ -4,6 +4,7 @@ The 1 m navigation lattice is eroded for a 0.6 m square body. A bounded
 0.8 m crosswalk curb tolerance bridges sub-metre gaps in the source annotation.
 No links are invented between disconnected sidewalks. Goals remain private.
 """
+from functools import lru_cache
 import heapq
 import json
 import math
@@ -15,21 +16,48 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 
+@lru_cache(maxsize=4)
+def _source_geometry(source_file):
+    raw=json.loads(Path(source_file).read_text())
+    nodes={n['token']:(n['x'],n['y']) for n in raw['node']}
+    polygons={p['token']:Polygon([nodes[n] for n in p['exterior_node_tokens']],
+        [[nodes[n] for n in h['node_tokens']] for h in p.get('holes',[])]) for p in raw['polygon']}
+    return ([polygons[r['polygon_token']] for r in raw['walkway']],
+            {r['token']:polygons[r['polygon_token']] for r in raw['ped_crossing']})
+
+
+def walkway_display(features, source_file):
+    """Original-map surface overlay, excluded from structural writes and planner exports."""
+    walkways,crossings=_source_geometry(str(source_file))
+    scene_crossings={k:Polygon(v['polygon']) for k,v in features.items() if v.get('type')=='CROSSWALK'}
+    if not scene_crossings or any(k not in crossings or p.hausdorff_distance(crossings[k])>.01 for k,p in scene_crossings.items()):return []
+    roads=[LineString(f['polyline']) for f in features.values() if f.get('type','').startswith('LANE') and len(f.get('polyline',[]))>1]
+    if not roads:return []
+    x0,y0,x1,y1=unary_union(roads).bounds;region=box(x0-45,y0-45,x1+45,y1+45)
+    rows=[]
+    for poly in walkways:
+        if not poly.intersects(region):continue
+        clipped=poly.intersection(region)
+        for part in ([clipped] if clipped.geom_type=='Polygon' else getattr(clipped,'geoms',[])):
+            if part.geom_type!='Polygon':continue
+            rows.append(dict(polygon=[list(p) for p in part.exterior.coords],holes=[[list(p) for p in ring.coords] for ring in part.interiors]))
+    return rows
+
+
 class WalkingNetwork:
-    def __init__(self, features, paths, obstacles=(), source_file=None):
+    def __init__(self, features, paths, obstacles=(), source_file=None, expanded=False):
         source_file = source_file or Path(__file__).resolve().parents[1] / 'AIE1903 原始资料/maps/expansion/singapore-onenorth.json'
-        raw = json.loads(Path(source_file).read_text())
-        nodes = {n['token']: (n['x'], n['y']) for n in raw['node']}
-        polygons = {p['token']: Polygon([nodes[n] for n in p['exterior_node_tokens']],
-                    [[nodes[n] for n in h['node_tokens']] for h in p.get('holes', [])]) for p in raw['polygon']}
+        source_walkways,source_crossings=_source_geometry(str(source_file))
         self.crosswalks = {k: Polygon(v['polygon']) for k, v in features.items() if v.get('type') == 'CROSSWALK'}
-        source_crossings = {r['token']: polygons[r['polygon_token']] for r in raw['ped_crossing']}
         if not self.crosswalks or any(k not in source_crossings or p.hausdorff_distance(source_crossings[k]) > .01 for k, p in self.crosswalks.items()):
             raise ValueError('Pedestrian source map does not match scene crosswalk coordinates')
+        self.expanded=expanded
+        if expanded:
+            paths=[f['polyline'] for f in features.values() if f.get('type','').startswith('LANE') and len(f.get('polyline',[]))>1]
         roads = unary_union([LineString(p) for p in paths])
         x0, y0, x1, y1 = roads.bounds
         region = box(x0-45, y0-45, x1+45, y1+45)
-        walkways = [polygons[r['polygon_token']] for r in raw['walkway'] if polygons[r['polygon_token']].intersects(region)]
+        walkways = [poly for poly in source_walkways if poly.intersects(region)]
         self.sidewalk = unary_union(walkways).intersection(region)
         self.crosswalks = {k: p for k, p in self.crosswalks.items() if p.intersects(region)}
         self.surface = unary_union([self.sidewalk, *[p.buffer(.8) for p in self.crosswalks.values()]]).intersection(region)
@@ -77,25 +105,32 @@ class WalkingNetwork:
             pts = shapely.points(self.points[self.components[i]])
             count = sum(bool(shapely.intersects(poly, pts).any()) for poly in self.crosswalks.values())
             if count >= 2: connected[i] = ns
-        if connected: self.destinations = connected
+        if connected and not expanded: self.destinations = connected
         self.crossing_ids = list(self.crosswalks)
         self.crossing_shapes = list(self.crosswalks.values())
         self.crossing_buffers = {k: p.buffer(.65) for k, p in self.crosswalks.items()}
 
     def spawn_nodes(self, count, rng, occupied):
         candidates = [n for group in self.destinations.values() for n in group]
-        rng.shuffle(candidates); chosen = []
+        rng.shuffle(candidates)
+        if self.expanded:
+            groups={}
+            for n in candidates:
+                x,y=self.points[n];groups.setdefault((int(x//80),int(y//80)),[]).append(n)
+            keys=sorted(groups);rng.shuffle(keys)
+            candidates=[groups[k][i] for i in range(max(map(len,groups.values()),default=0)) for k in keys if i<len(groups[k])]
+        chosen = []
         for node in candidates:
             p = Point(self.points[node])
             if any(p.distance(o) < 1. for o in occupied): continue
-            if any(math.dist(self.points[node], self.points[other]) < 12. for other in chosen): continue
+            if any(math.dist(self.points[node], self.points[other]) < (8. if self.expanded else 12.) for other in chosen): continue
             chosen.append(node)
             if len(chosen) == count: break
         return chosen
 
-    def trip(self, start, rng, recent=()):
+    def trip(self, start, rng, recent=(), distance_range=(35,180)):
         candidates = [n for n in self.destinations[self.component[start]]
-                      if 35 <= math.dist(self.points[start], self.points[n]) <= 180
+                      if distance_range[0] <= math.dist(self.points[start], self.points[n]) <= distance_range[1]
                       and all(math.dist(self.points[n], self.points[old]) > 20 for old in recent[-3:])]
         if not candidates:
             candidates = [n for n in self.destinations[self.component[start]] if math.dist(self.points[start], self.points[n]) >= 20]
@@ -128,7 +163,7 @@ class WalkingNetwork:
         point = Point(position)
         return next((k for k, p in self.crossing_buffers.items() if p.covers(point)), None)
 
-    def reroute(self, position, goal, rng, blocked, recent=()):
+    def reroute(self, position, goal, rng, blocked, recent=(), avoid_direction=None):
         """Reconnect to the lattice without crossing a current blocked footprint.
 
         Keep the destination if reachable; otherwise select a new reachable
@@ -147,9 +182,12 @@ class WalkingNetwork:
                 candidate = cost+length
                 if candidate < costs.get(other, math.inf):
                     parents[other] = node; costs[other] = candidate; heapq.heappush(queue, (candidate, other))
-        if goal not in costs:
+        if goal not in costs or avoid_direction is not None:
             choices = [n for n in self.destinations.get(self.component[start], []) if n in costs
                        and costs[n] >= 25 and all(math.dist(self.points[n], self.points[old]) > 15 for old in recent[-2:])]
+            if avoid_direction is not None:
+                choices=[n for n in self.destinations.get(self.component[start],[]) if n in costs and costs[n]>=25
+                         and sum((self.points[n][i]-position[i])*avoid_direction[i] for i in (0,1)) < -10]
             if not choices: return None
             goal = rng.choice(choices)
         route = [goal]

@@ -36,7 +36,7 @@ class ConstructionTests(unittest.TestCase):
                        {'construction_duration_s':float('nan')}, {'construction_min_s':120},
                        {'construction_max_s':4}, {'construction_min_s':float('nan')},
                        {'construction_duration_s':60,'construction_min_s':45},
-                       {'construction_count_min':0}, {'construction_count_max':9},
+                       {'construction_count_min':0}, {'construction_count_max':17},
                        {'construction_count_min':True}, {'construction_count_max':2.5},
                        {'construction_count_min':6,'construction_count_max':2}):
             with self.assertRaises(ValueError):traffic_options(config)

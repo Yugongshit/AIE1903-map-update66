@@ -361,6 +361,11 @@ def load_scene(repo_root, scene_key):
         patch['source_kind'] = entry['kind']
     identity = {key: manifest[key] for key in ('dataset', 'scene_id', 'map', 'coordinate', 'units')}
     display_polygons, supplements = _display_polygons(repo_root, manifest, maps, patches)
+    display_walkways=[]
+    raw_walkway_map=Path(repo_root)/'AIE1903 原始资料/maps/expansion'/(manifest['map']+'.json')
+    if manifest['dataset']=='nuscenes' and raw_walkway_map.is_file():
+        from .simulation_walking import walkway_display
+        display_walkways=walkway_display(maps['updated'],raw_walkway_map)
     overview = state_overview(source) if source is not None else _empty_overview(identity)
     static_overview = _static_overview_actors(tracks, obstacles, overview, timeline)
     contract = {'coordinates': 'source_city_XY_metres', 'viewer_origin_is_display_only': True,
@@ -384,7 +389,7 @@ def load_scene(repo_root, scene_key):
                                              'exported_scenario_sha256': version_manifests[name]['exported_scenario_sha256'],
                                              'provenance': deepcopy(version_manifests[name]['provenance'])}
                                        for name, features in maps.items()},
-            'display_polygons': display_polygons, 'source_polygon_supplement': supplements,
+            'display_walkways':display_walkways,'display_polygons': display_polygons, 'source_polygon_supplement': supplements,
             'changes': patches, 'tracks': tracks, 'ego_track_id': ego_id,
             'state_source': source, 'obstacle_manifest': obstacles,
             'state_overview': overview, 'static_overview_actors': static_overview,

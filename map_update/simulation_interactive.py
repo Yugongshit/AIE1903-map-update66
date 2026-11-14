@@ -59,8 +59,8 @@ def validated_missions(config):
         raise ValueError('Interactive launch requires configured source-lane missions')
     rows = deepcopy(config['missions'])
     count = config.get('traffic', {}).get('vehicle_count', 5)
-    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 12:
-        raise ValueError('Traffic count must be 1..12, or 0 with pedestrians')
+    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 32:
+        raise ValueError('Traffic count must be 1..32, or 0 with pedestrians')
     if len(rows) != count or {row.get('vehicle_id') for row in rows if isinstance(row, dict)} != {f'P{i}' for i in range(1,count+1)}:
         raise ValueError('Interactive missions must identify each configured vehicle exactly once')
     for row in rows:
@@ -221,6 +221,10 @@ class InteractiveRuntime:
         self.cyclic_path = config.get('cyclic_path')
         from .simulation_network import route_path
         self.route_paths = {f'route-{i+1}':route_path(r,source_features) for i,r in enumerate(config.get('routes',[]))}
+        if not self.cyclic_path and self.route_paths:self.cyclic_path=next(iter(self.route_paths.values()))
+        from .simulation_path_geometry import PathGeometry
+        self.path_geometries={id(p):PathGeometry(p) for p in self.route_paths.values()}
+        if self.cyclic_path and id(self.cyclic_path) not in self.path_geometries:self.path_geometries[id(self.cyclic_path)]=PathGeometry(self.cyclic_path)
         self.construction_specs = deepcopy(config.get('constructions', [config['construction']] if config.get('construction') else []))
         self.construction_generation = deepcopy(config.get('construction_generation'))
         self.construction_events = []
@@ -288,7 +292,7 @@ class InteractiveRuntime:
         for spec in self.construction_specs:
             self.construction_events.append(ConstructionEvent(self.env.engine,self.metadata,spec,
                 sample_clearance_time(self.traffic, spec.get('event_id','construction-1'))))
-        if self.traffic and any(self.traffic[k] for k in ('pedestrians','incidents','recurring_construction')):
+        if self.traffic and any(self.traffic[k] for k in ('pedestrians','incidents','recurring_construction','background_activity')):
             from .simulation_population import TrafficPopulation
             self.population = TrafficPopulation(self)
 
@@ -375,7 +379,7 @@ class InteractiveRuntime:
         use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
         if use_idm:
             from .simulation_following import project_actors, current_leader, idm_acceleration, acceleration_action
-            projections = {id(path):project_actors(path,[a for a in actors if a.get('type')=='VEHICLE']) for path in {id(p):p for p in paths.values()}.values()}
+            projections = {id(path):project_actors(path,[a for a in actors if a.get('type')=='VEHICLE'],self.path_geometries[id(path)]) for path in {id(p):p for p in paths.values()}.values()}
         for identifier, vehicle in self.vehicles.items():
             own = actor_state(vehicle, self.metadata, identifier)
             self._speeds_before[identifier] = own['speed_m_s']
@@ -387,6 +391,8 @@ class InteractiveRuntime:
                 self.reasons[identifier] = 'action_expired'
             if self.modes[identifier] == 'ai':
                 controller = self.controllers[identifier]
+                if self.population and self.population.activity and self.missions[identifier].get('cycle_follower'):
+                    controller.speed=min(3.,self.missions[identifier]['cruise_speed_m_s']*self.population.activity.factor(identifier))
                 state = {'step': int(self.env.episode_step), 'position_runtime_m': own['position_city_m'],
                     'heading_rad': own['heading_rad'], 'speed_m_s': own['speed_m_s'],
                     'map_features_runtime': self.source_features, 'map_version': self.map_sha256,
@@ -440,6 +446,8 @@ class InteractiveRuntime:
                 action=[action[0],-1.]
                 self.reasons[identifier]='junction_yield'
                 self.diagnostics[identifier]['junction_yield']=yielding[identifier]
+            if self.population and self.population.activity and self.population.activity.stopping(identifier) and self.modes[identifier]=='ai':
+                action=[action[0],-1.];self.reasons[identifier]='synthetic_brief_stop'
             if self.population and identifier in self.population.incidents.active:
                 action=[action[0],-1.]
                 self.reasons[identifier]='synthetic_incident_disabled'

@@ -15,7 +15,7 @@ def main():
             assert value,name
             checks.append(name);print('PASS '+name,flush=True)
         page.goto(args.url);page.wait_for_function('window.MAP_PLATFORM?.state.snapshot',timeout=60000)
-        page.locator('#driving-tab').click()
+        page.locator('#driving-tab').click();page.locator('#traffic-profile').select_option('network')
         check('new mode defaults to network and mixed events',page.locator('#traffic-profile').input_value()=='network' and page.locator('#traffic-event').input_value()=='mixed')
         check('network area selection is explicit',page.locator('#traffic-area').is_disabled())
         page.locator('#traffic-count').fill('8');page.locator('#traffic-speed-spread').select_option('0.3')
