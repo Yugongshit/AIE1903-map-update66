@@ -269,9 +269,9 @@ class InteractiveRuntime:
             self.controllers[identifier] = self._controller(identifier)
 
         if self.construction_spec:
-            from .simulation_events import ConstructionEvent
+            from .simulation_events import ConstructionEvent, sample_clearance_time
             self.construction_event = ConstructionEvent(self.env.engine,self.metadata,self.construction_spec,
-                self.traffic['construction_duration_s'])
+                sample_clearance_time(self.traffic))
 
     def _controller(self, identifier):
         from .simulation_traffic import CycleFollower

@@ -158,3 +158,7 @@ nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的
 ### 障碍物占用与空闲证据
 
 `/planning-input` 状态层现支持 `stationary_obstacle_occupancy`。完整旧足迹经过连续至少 2 秒理想空闲扫描后才清除，原因是 `repeated_observed_free_previous_footprint`；目标消失且缺少覆盖证据仍为 `stale`。`free_space_checks` 是本车过去确认区域的当前几何扫描结果，不能当作普遍的无遮挡感知保证。路障清除安排只属于生成器，受限输入不输出施工时刻计划。静态源物体与生成物体按 `object_origin` / `source_scope` 区分，均不构成永久道路写入。配置、物理近似与验证见[施工事件说明](construction_events.md)。
+
+### 随机清障区间
+
+施工参数改为 `construction_min_s` / `construction_max_s`（默认 45 / 120），约束 5 ≤ min < max ≤ 3600。按独立的事件随机流抽取一次三角分布时长，峰值为 min+(max-min)/3；按仿真步执行，最多有一个物理步的时间量化误差。相同 seed 复现，换 seed 才生成新实验。旧 `construction_duration_s` 迁移为随机区间，不再保留固定清障语义。禁止同时提交旧字段和新区间字段。抽中的期限不出现在 `/perception`、`/planning-input` 或当前事件状态中；事后评价报告可记录真值。

@@ -10,11 +10,17 @@ from .simulation_planner import _length, _point_at, _project, _angle
 
 
 def traffic_options(value):
-    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'stop_enabled'}:
+    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'stop_enabled'}:
         raise ValueError('Invalid cyclic traffic options')
     options = dict(seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
-                   area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_duration_s=60., stop_enabled=True)
+                   area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_min_s=45., construction_max_s=120., stop_enabled=True)
     options.update(value)
+    if 'construction_duration_s' in value:
+        legacy=options.pop('construction_duration_s')
+        if (type(legacy) not in (int,float) or not math.isfinite(legacy) or not 5 <= legacy <= 120
+                or 'construction_min_s' in value or 'construction_max_s' in value):
+            raise ValueError('Use construction_min_s/max_s; do not mix legacy duration with a range')
+        options.update(construction_min_s=max(5.,legacy*.75),construction_max_s=legacy*2.)
     if type(options['seed']) is not int or not 0 <= options['seed'] < 2**32:
         raise ValueError('Traffic seed must be a uint32')
     if type(options['vehicle_count']) is not int or not 1 <= options['vehicle_count'] <= 12:
@@ -26,10 +32,12 @@ def traffic_options(value):
                          ('driver_style', ('normal','cautious','assertive','mixed'))]:
         if options[key] not in allowed:
             raise ValueError('Invalid traffic option: '+key)
-    for key, low, high in [('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5), ('construction_duration_s', 5., 120.)]:
+    for key, low, high in [('speed_m_s', .5, 3.), ('stop_start_s', 5., 3600.), ('stop_duration_s', 1., 120.), ('speed_spread', 0., .5), ('construction_min_s', 5., 3600.), ('construction_max_s', 5., 3600.)]:
         v = options[key]
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or not low <= v <= high:
             raise ValueError('Invalid traffic option: ' + key)
+    if options['construction_min_s'] >= options['construction_max_s']:
+        raise ValueError('Construction clearance requires minimum < maximum')
     return options
 
 

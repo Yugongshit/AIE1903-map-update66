@@ -13,6 +13,7 @@ from map_update.simulation_session import SimulationSession
 from map_update.simulation_traffic import cyclic_traffic, vehicle_perception
 from map_update.simulation_live_map import ObservedStateMap
 from map_update.simulation_bridge import feature_sha256
+from map_update.simulation_events import sample_clearance_time
 from map_update.simulation_planner import _project, _length
 
 
@@ -26,9 +27,11 @@ def main():
     args.out.mkdir(parents=True,exist_ok=False)
     key='nuscenes-scene0980';payload=load_scene(ROOT,key)
     config=cyclic_traffic(payload,dict(area='near_recording',following_model='idm',driver_style='mixed',
-        speed_spread=.3,vehicle_count=args.count,seed=args.seed,construction=True,construction_duration_s=60.,stop_enabled=False))
+        speed_spread=.3,vehicle_count=args.count,seed=args.seed,construction=True,construction_min_s=45.,construction_max_s=120.,stop_enabled=False))
     session=SimulationSession(args.out/'frames',width=480,height=320)
-    report=dict(passed=False,config=config['traffic'],collision_probe=args.collision_probe,transitions=[])
+    sampled=sample_clearance_time(config['traffic'])
+    report=dict(passed=False,config=config['traffic'],collision_probe=args.collision_probe,transitions=[],
+        sampled_clearance_s=sampled, sampling_scope='evaluation_only_not_planning_input')
     trace=hashlib.sha256()
     try:
         session.open(scene_database(ROOT,key,'updated'),interactive=config)
@@ -89,7 +92,7 @@ def main():
             physical_map_unchanged=initial_map==feature_sha256(session.source_features),trace_sha256=trace.hexdigest(),
             scope='Native background traffic and causal state baseline; no classmate Planning algorithm',
             final_event=event.report())
-        report['passed']=bool(report['barrier_mass']==0 and barrier_drift<1e-6 and report['physical_map_unchanged'] and max_step<1.
+        report['passed']=bool(report['barrier_mass']==0 and (args.collision_probe or (sampled<=removed<=sampled+.100001)) and barrier_drift<1e-6 and report['physical_map_unchanged'] and max_step<1.
             and ((contact and not passed_barrier and t-first_contact>=5.) if args.collision_probe else (first_active and first_cleared and braking and recovered
                 and report['collision_events']==0 and all(t>=removed+1.9 for t in first_cleared.values()))))
     finally:

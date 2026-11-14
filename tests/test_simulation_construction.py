@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 import unittest
 
-from map_update.simulation_events import ConstructionEvent
+from map_update.simulation_events import ConstructionEvent, sample_clearance_time
 from map_update.simulation_traffic import cyclic_traffic, traffic_options, vehicle_perception
 from map_update.simulation_live_map import ObservedStateMap, footprint
 from map_update.simulation_platform_data import load_scene
@@ -33,8 +33,39 @@ class ConstructionTests(unittest.TestCase):
 
     def test_invalid_flags_and_duration_rejected(self):
         for config in ({'construction':1},{'stop_enabled':'false'},{'construction_duration_s':0},
-                       {'construction_duration_s':float('nan')}):
+                       {'construction_duration_s':float('nan')}, {'construction_min_s':120},
+                       {'construction_max_s':4}, {'construction_min_s':float('nan')},
+                       {'construction_duration_s':60,'construction_min_s':45}):
             with self.assertRaises(ValueError):traffic_options(config)
+
+    def test_clearance_is_seeded_bounded_and_not_one_fixed_deadline(self):
+        values=[]
+        for seed in range(200):
+            options=traffic_options({'seed':seed})
+            t=sample_clearance_time(options)
+            self.assertEqual(t,sample_clearance_time(options))
+            self.assertGreaterEqual(t,45.);self.assertLessEqual(t,120.)
+            values.append(t)
+        self.assertGreater(len(set(values)),100)
+        self.assertGreater(max(values)-min(values),50.)
+
+    def test_legacy_duration_migrates_to_random_range_and_normalization_is_idempotent(self):
+        options=traffic_options({'construction_duration_s':60})
+        self.assertEqual((options['construction_min_s'],options['construction_max_s']),(45.,120.))
+        self.assertNotIn('construction_duration_s',options)
+        self.assertEqual(options,traffic_options(options))
+
+    def test_clearance_stream_is_independent_of_population_and_driver_choices(self):
+        first=traffic_options({'seed':7})
+        second=traffic_options({'seed':7,'vehicle_count':12,'driver_style':'mixed','speed_spread':.3})
+        self.assertEqual(sample_clearance_time(first),sample_clearance_time(second))
+
+    def test_changing_clearance_range_does_not_move_initial_world(self):
+        payload=load_scene(Path(__file__).resolve().parents[1],'nuscenes-scene0980')
+        first=cyclic_traffic(payload,{'seed':7,'construction':True})
+        second=cyclic_traffic(payload,{'seed':7,'construction':True,'construction_min_s':120,'construction_max_s':240})
+        for key in ('missions','construction','cyclic_path'):
+            self.assertEqual(first[key],second[key])
 
     def test_clearance_uses_simulation_time_and_cleanup_is_idempotent(self):
         class Engine:

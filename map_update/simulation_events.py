@@ -4,9 +4,23 @@ Only a fixed collision box is modelled; no workers, deployment animation or
 vehicle damage are claimed. Event schedules belong to the generator, not sensors.
 """
 from copy import deepcopy
+import math
+import random
 
 from .simulation_interactive_scenarios import vehicle_footprint
 from .simulation_planner import _length, _point_at, _project
+
+
+def sample_clearance_time(options):
+    """Independent reproducible event stream; timing is not a sensor field.
+
+    Triangular simulation prior: shorter temporary blockages are more frequent.
+    These bounds are demo assumptions, not calibrated real construction times.
+    """
+    low, high = options['construction_min_s'], options['construction_max_s']
+    rng = random.Random(f"{options['seed']}:construction-1:clearance")
+    value = rng.triangular(low, high, low+(high-low)/3)
+    return min(high, math.ceil(value*10)/10)
 
 
 def construction_spec(path, missions, occupied):

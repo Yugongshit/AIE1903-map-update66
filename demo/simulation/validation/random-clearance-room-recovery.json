@@ -1,0 +1,463 @@
+{
+  "schema": "random-clearance-room-recovery-validation-1.0",
+  "date": "2026-11-14",
+  "base_commit": "35f0e39",
+  "stage": "Stage 2 random event timing and room recovery fix; unified automatic scenario generation is design only",
+  "runs": {
+    "seed_0": {
+      "passed": true,
+      "config": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 8,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_min_s": 45.0,
+        "construction_max_s": 120.0,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "collision_probe": false,
+      "transitions": [
+        {
+          "observer": "ego",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "stale",
+          "time_s": 12.9,
+          "reason": null
+        },
+        {
+          "observer": "P7",
+          "status": "active",
+          "time_s": 21.7,
+          "reason": null
+        },
+        {
+          "observer": "P6",
+          "status": "active",
+          "time_s": 37.2,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "stale",
+          "time_s": 69.7,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "stale",
+          "time_s": 69.7,
+          "reason": null
+        },
+        {
+          "observer": "P6",
+          "status": "stale",
+          "time_s": 69.7,
+          "reason": null
+        },
+        {
+          "observer": "P7",
+          "status": "stale",
+          "time_s": 69.7,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "stale",
+          "time_s": 69.7,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "cleared",
+          "time_s": 72.7,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P1",
+          "status": "cleared",
+          "time_s": 72.7,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P6",
+          "status": "cleared",
+          "time_s": 72.7,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P7",
+          "status": "cleared",
+          "time_s": 72.7,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P8",
+          "status": "cleared",
+          "time_s": 72.7,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P2",
+          "status": "cleared",
+          "time_s": 138.6,
+          "reason": "repeated_observed_free_previous_footprint"
+        }
+      ],
+      "sampled_clearance_s": 66.6,
+      "sampling_scope": "evaluation_only_not_planning_input",
+      "barrier_mass": 0.0,
+      "removed_at_s": 66.7,
+      "barrier_drift_m": 0.0,
+      "first_active": {
+        "ego": 2.1,
+        "P1": 2.1,
+        "P2": 2.1,
+        "P8": 2.1,
+        "P7": 21.7,
+        "P6": 37.2
+      },
+      "first_cleared": {
+        "ego": 72.7,
+        "P1": 72.7,
+        "P6": 72.7,
+        "P7": 72.7,
+        "P8": 72.7,
+        "P2": 138.6
+      },
+      "braking_vehicles": [
+        "P1"
+      ],
+      "recovered_vehicles": [
+        "P1"
+      ],
+      "physical_contact_observed": false,
+      "passed_through_barrier": false,
+      "first_contact_s": null,
+      "final_time_s": 150.0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.290710953186034,
+      "physical_map_unchanged": true,
+      "trace_sha256": "1d8d6466d8707dc8ef0990cceffdc51929bce4e944a6f421dd4aef2ec708e831",
+      "scope": "Native background traffic and causal state baseline; no classmate Planning algorithm",
+      "final_event": {
+        "event_id": "construction-1",
+        "kind": "synthetic_construction",
+        "status": "removed",
+        "object_id": "construction-C1",
+        "started_at_s": 0.0,
+        "removed_at_s": 66.6,
+        "synthetic": true,
+        "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+      }
+    },
+    "seed_1": {
+      "passed": true,
+      "config": {
+        "seed": 1,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 8,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_min_s": 45.0,
+        "construction_max_s": 120.0,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "collision_probe": false,
+      "transitions": [
+        {
+          "observer": "ego",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "active",
+          "time_s": 2.1,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "active",
+          "time_s": 9.9,
+          "reason": null
+        },
+        {
+          "observer": "P2",
+          "status": "stale",
+          "time_s": 11.400000000000002,
+          "reason": null
+        },
+        {
+          "observer": "P7",
+          "status": "active",
+          "time_s": 25.2,
+          "reason": null
+        },
+        {
+          "observer": "P6",
+          "status": "active",
+          "time_s": 47.1,
+          "reason": null
+        },
+        {
+          "observer": "P5",
+          "status": "active",
+          "time_s": 77.7,
+          "reason": null
+        },
+        {
+          "observer": "P4",
+          "status": "active",
+          "time_s": 97.9,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P1",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P4",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P5",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P6",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P7",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "P8",
+          "status": "stale",
+          "time_s": 110.60000000000001,
+          "reason": null
+        },
+        {
+          "observer": "ego",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P1",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P4",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P5",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P6",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P7",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P8",
+          "status": "cleared",
+          "time_s": 115.3,
+          "reason": "repeated_observed_free_previous_footprint"
+        },
+        {
+          "observer": "P2",
+          "status": "cleared",
+          "time_s": 144.70000000000002,
+          "reason": "repeated_observed_free_previous_footprint"
+        }
+      ],
+      "sampled_clearance_s": 107.5,
+      "sampling_scope": "evaluation_only_not_planning_input",
+      "barrier_mass": 0.0,
+      "removed_at_s": 107.6,
+      "barrier_drift_m": 0.0,
+      "first_active": {
+        "ego": 2.1,
+        "P1": 2.1,
+        "P2": 2.1,
+        "P8": 9.9,
+        "P7": 25.2,
+        "P6": 47.1,
+        "P5": 77.7,
+        "P4": 97.9
+      },
+      "first_cleared": {
+        "ego": 115.3,
+        "P1": 115.3,
+        "P4": 115.3,
+        "P5": 115.3,
+        "P6": 115.3,
+        "P7": 115.3,
+        "P8": 115.3,
+        "P2": 144.70000000000002
+      },
+      "braking_vehicles": [
+        "P1"
+      ],
+      "recovered_vehicles": [
+        "P1"
+      ],
+      "physical_contact_observed": false,
+      "passed_through_barrier": false,
+      "first_contact_s": null,
+      "final_time_s": 150.0,
+      "collision_events": 0,
+      "max_step_distance_m": 0.2999869131850156,
+      "physical_map_unchanged": true,
+      "trace_sha256": "c7d59d312604d258fec5a6109123d632bd4c065282754462deee8fc34b629a35",
+      "scope": "Native background traffic and causal state baseline; no classmate Planning algorithm",
+      "final_event": {
+        "event_id": "construction-1",
+        "kind": "synthetic_construction",
+        "status": "removed",
+        "object_id": "construction-C1",
+        "started_at_s": 0.0,
+        "removed_at_s": 107.5,
+        "synthetic": true,
+        "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+      }
+    }
+  },
+  "browser": {
+    "passed": [
+      "construction uses a visible random interval",
+      "new seed button changes the seed",
+      "start after leaving restores the same room and host",
+      "recovery preserves the existing world and explains unapplied settings",
+      "opening root URL restores saved host session",
+      "a browser without saved credentials can only observe the existing room",
+      "synthetic provenance is visible",
+      "generated cars are labelled synthetic",
+      "eight native vehicles plus ego",
+      "nearby source route is selected",
+      "route distance is visible",
+      "ego can observe nearby generated traffic",
+      "manual driver seats are hidden",
+      "construction physical actor is visible and labelled synthetic",
+      "construction can be focused without changing the observation vehicle",
+      "IDM driver feedback is shown",
+      "HTTP planning input receives observed construction occupancy",
+      "sampled deadline and generator range are not in Planning input",
+      "HTTP map clearance follows observed empty footprint",
+      "actual clearance is within configured random bounds",
+      "cleared obstacle is removed from physical snapshot",
+      "eighth vehicle can observe its own online map",
+      "baseline input can be selected without resetting the world",
+      "export contains bounded synthetic perception",
+      "private intentions are excluded",
+      "map layer and observation are atomic",
+      "no structural edits are claimed",
+      "no uncaught JavaScript errors",
+      "reset preserves synthetic population",
+      "reset preserves area and IDM model",
+      "reset reconstructs initial construction actor"
+    ],
+    "browser_errors": []
+  },
+  "additional_browser_check": "inactive construction range does not break a stopping-vehicle scenario",
+  "unit_tests": {
+    "total": 640,
+    "passed": 639,
+    "skipped": 1,
+    "skip_reason": "Original scene fixture is not available"
+  },
+  "random_contract": {
+    "default_bounds_s": [
+      45,
+      120
+    ],
+    "distribution": "triangular",
+    "mode_s": 70,
+    "independent_stream": "seed:construction-1:clearance",
+    "same_seed_reproducible": true,
+    "realism_scope": "temporary-blockage demo prior, not calibrated real construction durations"
+  },
+  "limitations": [
+    "No actual classmate Planning algorithm connected",
+    "Room restoration requires locally saved credentials for host control; unknown browsers remain viewers",
+    "No full AI generation of region, mode, density or event mixtures in this change",
+    "Ideal range-limited observations without occlusion/noise",
+    "Formal blind testing still requires debug endpoint isolation"
+  ]
+}
