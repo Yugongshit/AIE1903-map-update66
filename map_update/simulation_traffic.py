@@ -23,8 +23,8 @@ def traffic_options(value):
         options.update(construction_min_s=max(5.,legacy*.75),construction_max_s=legacy*2.)
     if type(options['seed']) is not int or not 0 <= options['seed'] < 2**32:
         raise ValueError('Traffic seed must be a uint32')
-    if type(options['vehicle_count']) is not int or not 1 <= options['vehicle_count'] <= 12:
-        raise ValueError('Background vehicle count must be 1..12')
+    if type(options['vehicle_count']) is not int or not (0 if options['pedestrians'] is True else 1) <= options['vehicle_count'] <= 12:
+        raise ValueError('Background vehicle count must be 1..12, or 0 with pedestrians')
     for key in ('construction_count_min','construction_count_max'):
         if type(options[key]) is not int or not 1 <= options[key] <= 8:
             raise ValueError('Construction counts must be integers in 1..8')
@@ -91,11 +91,12 @@ def cyclic_traffic(payload, options):
     length = _length(path)
     rng = random.Random(options['seed'])
     count = options['vehicle_count']
-    if length/count < 15.:
+    if count and length/count < 15.:
         raise ValueError('Requested density exceeds the safe initial spacing')
-    phase = rng.uniform(0., length/count)
+    spacing = length/max(count, 1)
+    phase = rng.uniform(0., spacing)
     if options['area'] == 'near_recording':
-        phase = (_project(ego['position'][0][:2], path)[1] + phase/2-length/count/4) % length
+        phase = (_project(ego['position'][0][:2], path)[1] + phase/2-spacing/4) % length
     missions = []
     for i in range(count):
         start_s = (phase+i*length/count) % length

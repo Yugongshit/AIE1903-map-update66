@@ -56,11 +56,11 @@ def validated_controls(controls, ids=IDS):
 
 def validated_missions(config):
     if not isinstance(config, dict) or not isinstance(config.get('missions'), list):
-        raise ValueError('Interactive launch requires five source-lane missions')
+        raise ValueError('Interactive launch requires configured source-lane missions')
     rows = deepcopy(config['missions'])
     count = config.get('traffic', {}).get('vehicle_count', 5)
-    if type(count) is not int or not 1 <= count <= 12:
-        raise ValueError('Traffic count must be 1..12')
+    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 12:
+        raise ValueError('Traffic count must be 1..12, or 0 with pedestrians')
     if len(rows) != count or {row.get('vehicle_id') for row in rows if isinstance(row, dict)} != {f'P{i}' for i in range(1,count+1)}:
         raise ValueError('Interactive missions must identify each configured vehicle exactly once')
     for row in rows:

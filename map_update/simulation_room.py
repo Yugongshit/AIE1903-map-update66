@@ -127,8 +127,8 @@ Heartbeats extend a lease but never refresh an old driving command.
         if not isinstance(missions, (list, tuple)):
             raise RoomError("invalid_missions", "Missions must be an array", 400)
         selected = tuple(vehicle_ids) if vehicle_ids is not None else VEHICLE_IDS
-        if selected != ('ego', *[f'P{i}' for i in range(1,len(selected))]) or not 2 <= len(selected) <= 13:
-            raise RoomError('invalid_missions', 'Expected ego and 1..12 consecutive traffic vehicles', 400)
+        if selected != ('ego', *[f'P{i}' for i in range(1,len(selected))]) or not 1 <= len(selected) <= 13:
+            raise RoomError('invalid_missions', 'Expected ego and 0..12 consecutive traffic vehicles', 400)
         initial = {}
         for mission in missions:
             if not isinstance(mission, dict):

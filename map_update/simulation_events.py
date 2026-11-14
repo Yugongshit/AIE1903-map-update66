@@ -33,7 +33,7 @@ def construction_specs(path, missions, occupied, options):
     requested = count_rng.randint(options['construction_count_min'], options['construction_count_max'])
     rng = random.Random(f"{options['seed']}:construction:positions")
     length = _length(path)
-    first = _project(missions[0]['position_scenario_m'], path)[1]
+    first = _project(missions[0]['position_scenario_m'], path)[1] if missions else 0.
     nearby = [(first+d) % length for d in range(10, 21, 2)]
     candidates = [i*2. for i in range(math.ceil(length/2))]
     rng.shuffle(nearby)

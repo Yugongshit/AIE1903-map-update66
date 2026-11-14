@@ -1,0 +1,1799 @@
+{
+  "description": "Stage-two source-walkway trips and pedestrian-only semantics; rule-based simulation, not trained behavior",
+  "pure_pedestrians": {
+    "passed": true,
+    "config": {
+      "route_mode": "network",
+      "pedestrians": true,
+      "pedestrian_count": 3,
+      "incidents": false,
+      "recurring_construction": false,
+      "seed": 0,
+      "speed_m_s": 2.5,
+      "stop_start_s": 30.0,
+      "stop_duration_s": 15.0,
+      "vehicle_count": 0,
+      "speed_spread": 0.3,
+      "area": "isolated",
+      "following_model": "idm",
+      "driver_style": "mixed",
+      "construction": false,
+      "construction_min_s": 45.0,
+      "construction_max_s": 120.0,
+      "construction_count_min": 2,
+      "construction_count_max": 5,
+      "stop_enabled": false,
+      "profile": "synthetic_network_v1",
+      "synthetic": true
+    },
+    "trace": [
+      {
+        "time_s": 30.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 17.35,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              489.01382670915905,
+              1328.8333115863888
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "crossing",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 32.97,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              514.3046592286903,
+              1369.3046555805295
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 22.89,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              457.0199798158485,
+              1270.1339240360348
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 60.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 37.36,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              480.0046866945106,
+              1312.4218240070431
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 0,
+            "travelled_m": 65.83,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              513.6617682985145,
+              1353.9930711078732
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 46.1,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              466.48512874162975,
+              1289.4832063007443
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 90.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 51.15,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              484.6764548829872,
+              1320.668303041467
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 94.07,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              540.7752631715614,
+              1352.7798447895138
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 69.31,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              475.2149947694618,
+              1309.1922517109006
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 120.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 71.16,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              494.6379416993934,
+              1336.6325135517209
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 127.3,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              570.6227057985145,
+              1348.3865037250607
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 92.49,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              488.1085837892372,
+              1327.094473390588
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 150.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 91.14,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              505.1277030519325,
+              1351.1403641986935
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 160.45,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              566.8439582399208,
+              1317.8603654193967
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 115.68,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              496.9868186525184,
+              1346.6813264179318
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 180.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 111.15,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              523.1788199952919,
+              1352.0186906147092
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 193.65,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              560.0065558961708,
+              1287.450451402673
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "crossing",
+            "completed_crossings": 1,
+            "completed_trips": 0,
+            "travelled_m": 138.79,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              477.0175040773231,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 210.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 131.16,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              542.7840446046669,
+              1352.9855790424435
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 218.98,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              542.9099067262489,
+              1278.0000195789426
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 3,
+            "completed_trips": 0,
+            "travelled_m": 161.91,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              454.68987498796764,
+              1349.0193391132443
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 240.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 151.17,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              562.3877738527137,
+              1353.994215517053
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 252.25,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              563.9875129274208,
+              1295.546045808801
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "resting",
+            "completed_crossings": 3,
+            "completed_trips": 1,
+            "travelled_m": 181.66,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              435.0164593271095,
+              1349.0000214862912
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 270.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 171.15,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              571.9952186158973,
+              1340.0806107807248
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 285.49,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              566.9994758180458,
+              1327.5714173603146
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 3,
+            "completed_trips": 1,
+            "travelled_m": 200.72,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              454.15905604875866,
+              1349.0000214862912
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 300.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 186.36,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              571.9999793580848,
+              1345.574080019006
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "passing",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 307.93,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              572.8819831422645,
+              1343.6613221454709
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "crossing",
+            "completed_crossings": 4,
+            "completed_trips": 1,
+            "travelled_m": 223.9,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              476.52499232805553,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 330.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 206.36,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              556.8892921022255,
+              1353.9999833393185
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "passing",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 335.77,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              558.7580131105262,
+              1354.2369141864865
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 247.0,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              499.62496791399303,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 360.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 226.37,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              537.2826942018348,
+              1353.0000138568967
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "yielding",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 358.54,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              539.0223868898231,
+              1353.6234803485959
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 270.24,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              520.8621848634559,
+              1352.0263886737912
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 390.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 246.37,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              517.6829627565223,
+              1352.0000138568967
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "passing",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 382.17,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              519.2769645265419,
+              1353.4712281513303
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 293.47,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              543.6923240236122,
+              1352.983847169885
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 420.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 266.37,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              501.0102942994911,
+              1348.5520158100217
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 409.39,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              497.21422038591686,
+              1353.0003724384396
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 316.7,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              566.3661521486122,
+              1353.617147951135
+            ]
+          }
+        ]
+      }
+    ],
+    "max_step_m": 0.11147230833521767,
+    "outside_walkable_steps": 0,
+    "collisions": 0,
+    "vehicles": [
+      "ego"
+    ],
+    "population": {
+      "pedestrian_requested": 3,
+      "pedestrian_spawned": 3,
+      "pedestrian_capacity_limited": false,
+      "completed_crossings": 7,
+      "completed_walking_trips": 4,
+      "pedestrian_travelled_m": 992.47,
+      "distinct_crosswalks": 4,
+      "incident_started": 0,
+      "incident_completed": 0,
+      "collision_disables": 0,
+      "construction_cleared": 0,
+      "recurring_spawned": 0,
+      "recurring_deferred": 0,
+      "recurring_spawn_rule": "outside_all_controlled_vehicle_55m_with_clear_footprint",
+      "synthetic": true
+    },
+    "last_60s_walked_m": {
+      "walker-1": 40.0,
+      "walker-2": 50.85,
+      "walker-3": 46.46
+    }
+  },
+  "browser": {
+    "passed": [
+      "pedestrian-only disables background count at zero",
+      "mixed mode restores chosen count",
+      "native room contains ego and zero background cars",
+      "three synthetic pedestrian bodies are rendered",
+      "only ego observation card exists",
+      "pedestrian can be located",
+      "walking distances advance and appear in UI",
+      "Planning export excludes private walking goals and schedules",
+      "reset reproduces pedestrian spawn positions",
+      "no browser exceptions"
+    ],
+    "browser_errors": []
+  },
+  "mixed_8_vehicles": {
+    "passed": true,
+    "config": {
+      "route_mode": "network",
+      "pedestrians": true,
+      "pedestrian_count": 3,
+      "incidents": false,
+      "recurring_construction": false,
+      "seed": 0,
+      "speed_m_s": 2.5,
+      "stop_start_s": 30.0,
+      "stop_duration_s": 15.0,
+      "vehicle_count": 8,
+      "speed_spread": 0.3,
+      "area": "isolated",
+      "following_model": "idm",
+      "driver_style": "mixed",
+      "construction": false,
+      "construction_min_s": 45.0,
+      "construction_max_s": 120.0,
+      "construction_count_min": 2,
+      "construction_count_max": 5,
+      "stop_enabled": false,
+      "profile": "synthetic_network_v1",
+      "synthetic": true
+    },
+    "trace": [
+      {
+        "time_s": 30.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 17.35,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              489.01382670915905,
+              1328.8333115863888
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "crossing",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 32.97,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              514.3046592286903,
+              1369.3046555805295
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 22.89,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              457.0199798158485,
+              1270.1339240360348
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 60.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 37.36,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              480.0046866945106,
+              1312.4218240070431
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 0,
+            "travelled_m": 65.83,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              513.6617682985145,
+              1353.9930711078732
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 46.1,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              466.48512874162975,
+              1289.4832063007443
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 90.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 51.15,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              484.6764548829872,
+              1320.668303041467
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 94.07,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              540.7752631715614,
+              1352.7798447895138
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 69.31,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              475.2149947694618,
+              1309.1922517109006
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 120.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 71.16,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              494.6379416993934,
+              1336.6325135517209
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 127.3,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              570.6227057985145,
+              1348.3865037250607
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 92.49,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              488.1085837892372,
+              1327.094473390588
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 150.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 91.14,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              505.1277030519325,
+              1351.1403641986935
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 160.45,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              566.8439582399208,
+              1317.8603654193967
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 115.68,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              496.9868186525184,
+              1346.6813264179318
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 180.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 111.15,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              523.1788199952919,
+              1352.0186906147092
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 1,
+            "travelled_m": 193.65,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              560.0065558961708,
+              1287.450451402673
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "crossing",
+            "completed_crossings": 0,
+            "completed_trips": 0,
+            "travelled_m": 129.24,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              486.5525077394325,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 210.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 131.16,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              542.7840446046669,
+              1352.9855790424435
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 218.98,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              542.9099067262489,
+              1278.0000195789426
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "crossing",
+            "completed_crossings": 2,
+            "completed_trips": 0,
+            "travelled_m": 152.32,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 2,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              463.47500834978405,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 240.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 151.17,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              562.3877738527137,
+              1353.994215517053
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 252.25,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              563.9875129274208,
+              1295.546045808801
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 3,
+            "completed_trips": 0,
+            "travelled_m": 175.55,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              441.0498347393352,
+              1349.0059418964474
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 270.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 171.15,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              571.9952186158973,
+              1340.0806107807248
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 285.49,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              566.9994758180458,
+              1327.5714173603146
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 3,
+            "completed_trips": 1,
+            "travelled_m": 191.11,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              444.54902992761913,
+              1349.0000214862912
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 300.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 186.36,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              571.9999793580848,
+              1345.574080019006
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "passing",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 307.93,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              572.8819831422645,
+              1343.6613221454709
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "crossing",
+            "completed_crossings": 3,
+            "completed_trips": 1,
+            "travelled_m": 214.36,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              466.982260089286,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 330.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 206.36,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              556.8892921022255,
+              1353.9999833393185
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "passing",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 335.77,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              558.7580131105262,
+              1354.2369141864865
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "crossing",
+            "completed_crossings": 5,
+            "completed_trips": 1,
+            "travelled_m": 232.36,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              484.98249660051647,
+              1350.999990968713
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 360.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 226.37,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              537.2826942018348,
+              1353.0000138568967
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "yielding",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 358.54,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              539.0223868898231,
+              1353.6234803485959
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 255.52,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              507.53286967790905,
+              1352.5420747089474
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 390.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "yielding",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 241.97,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              523.0170386842567,
+              1352.8993058490842
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "yielding",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 376.31,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              524.4549125245887,
+              1352.8884949970334
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "yielding",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 271.86,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              522.4124778322059,
+              1352.0242524433224
+            ]
+          }
+        ]
+      },
+      {
+        "time_s": 420.0,
+        "walkers": [
+          {
+            "event_id": "walker-1",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-1",
+            "status": "walking",
+            "completed_crossings": 0,
+            "completed_trips": 1,
+            "travelled_m": 261.3,
+            "reroutes": 2,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 0,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              504.64039073503795,
+              1352.6401505756467
+            ]
+          },
+          {
+            "event_id": "walker-2",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-2",
+            "status": "walking",
+            "completed_crossings": 1,
+            "completed_trips": 2,
+            "travelled_m": 396.46,
+            "reroutes": 1,
+            "changed_destinations": 1,
+            "distinct_crosswalks": 1,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              542.7557242921669,
+              1352.9999146747678
+            ]
+          },
+          {
+            "event_id": "walker-3",
+            "kind": "synthetic_pedestrian",
+            "object_id": "walker-3",
+            "status": "walking",
+            "completed_crossings": 6,
+            "completed_trips": 1,
+            "travelled_m": 285.2,
+            "reroutes": 0,
+            "changed_destinations": 0,
+            "distinct_crosswalks": 3,
+            "synthetic": true,
+            "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics",
+            "position": [
+              535.8225120118934,
+              1352.0057587909787
+            ]
+          }
+        ]
+      }
+    ],
+    "max_step_m": 0.11147230833521767,
+    "outside_walkable_steps": 0,
+    "collisions": 0,
+    "minimum_pedestrian_separation_m": 0.9541558343104327,
+    "vehicles": [
+      "ego",
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "population": {
+      "pedestrian_requested": 3,
+      "pedestrian_spawned": 3,
+      "pedestrian_capacity_limited": false,
+      "completed_crossings": 7,
+      "completed_walking_trips": 4,
+      "pedestrian_travelled_m": 942.96,
+      "distinct_crosswalks": 4,
+      "incident_started": 0,
+      "incident_completed": 0,
+      "collision_disables": 0,
+      "construction_cleared": 0,
+      "recurring_spawned": 0,
+      "recurring_deferred": 0,
+      "recurring_spawn_rule": "outside_all_controlled_vehicle_55m_with_clear_footprint",
+      "synthetic": true
+    },
+    "last_60s_walked_m": {
+      "walker-1": 34.93,
+      "walker-2": 37.92,
+      "walker-3": 29.68
+    }
+  },
+  "regression": {
+    "total": 661,
+    "passed": 660,
+    "skipped": 1,
+    "skip_reason": "existing original fixture unavailable"
+  }
+}
