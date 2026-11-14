@@ -24,19 +24,21 @@ def coverage(routes, points):
                 bounds_city_m=list(geometry.bounds),source_lane_count=len(lanes))
 
 
-def density_spawns(routes, points, occupied, junctions, count, seed):
-    """Allocate by unique lane length; pack stopped cars with a checked 3 m gap.
+def density_spawns(routes, points, occupied, junctions, count, seed, *, parallel_clearance=False, end_clearance=None):
+    """Allocate by unique lane length with checked longitudinal and lateral gaps.
 
     Long lanes receive several cars. Overlapping cycles never add capacity.
+    Default clearance is 3 m; open-road parallel lanes permit 0.6 m lateral gap.
     No silent underfill: reject a request if the actual safe area is exhausted.
     """
     rng=random.Random(f'{seed}:lane-density:spawns');lanes={};geometries={}
+    fixed_count=len(occupied)
     route_geometries=[PathGeometry(r['path']) for r in routes]
     for i,route in enumerate(routes):
         for key in route['lanes']:
             if key in lanes:continue
             geom=PathGeometry(points[key]);geometries[key]=geom
-            candidates=list(range(3,int(geom.length)-3,2));rng.shuffle(candidates)
+            candidates=list(range(3,int(geom.length)-(end_clearance or {}).get(key,3),2));rng.shuffle(candidates)
             lanes[key]=dict(route=i,remaining=candidates,count=0)
     placements=[]
     while len(placements)<count:
@@ -46,7 +48,16 @@ def density_spawns(routes, points, occupied, junctions, count, seed):
         row=lanes[key];geom=geometries[key];s=row['remaining'].pop()
         pos=list(geom.point_at(s));heading=geom.project(pos)[3];shape=vehicle_footprint(pos,heading)
         if any(math.dist(pos,j['position_city_m'])<j['radius_m']+8 for j in junctions):continue
-        if any(shape.distance(o)<3. for o in occupied):continue
+        clear=True
+        for i,other in enumerate(occupied):
+            gap=shape.distance(other)
+            if gap>=3.:continue
+            if parallel_clearance and i>=fixed_count and gap>=.6:
+                coords=list(other.exterior.coords);other_heading=math.atan2(coords[1][1]-coords[0][1],coords[1][0]-coords[0][0])
+                dx=other.centroid.x-pos[0];dy=other.centroid.y-pos[1]
+                if abs(math.sin(other_heading-heading))<.15 and abs(-dx*math.sin(heading)+dy*math.cos(heading))>2.8:continue
+            clear=False;break
+        if not clear:continue
         occupied.append(shape);row['count']+=1
         placements.append((row['route'],route_geometries[row['route']].project(pos)[1],pos,heading))
     return placements,{k:v['count'] for k,v in lanes.items() if v['count']}

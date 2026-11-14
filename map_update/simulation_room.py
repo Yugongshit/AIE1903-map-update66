@@ -54,7 +54,7 @@ def _current_actor(actor):
     if not isinstance(actor, dict):
         raise RoomError("invalid_state", "Current actor state must be an object", 400)
     result = {}
-    for key in ("vehicle_id", "id", "native_object_id", "type", "motion_source", "label", "mode", "stopped_reason"):
+    for key in ("vehicle_id", "id", "native_object_id", "type", "motion_source", "label", "mode", "stopped_reason", "actor_instance_id"):
         if key in actor:
             if actor[key] is None and key == "stopped_reason":
                 result[key] = None
@@ -127,8 +127,8 @@ Heartbeats extend a lease but never refresh an old driving command.
         if not isinstance(missions, (list, tuple)):
             raise RoomError("invalid_missions", "Missions must be an array", 400)
         selected = tuple(vehicle_ids) if vehicle_ids is not None else VEHICLE_IDS
-        if selected != ('ego', *[f'P{i}' for i in range(1,len(selected))]) or not 1 <= len(selected) <= 65:
-            raise RoomError('invalid_missions', 'Expected ego and 0..64 consecutive traffic vehicles', 400)
+        if selected != ('ego', *[f'P{i}' for i in range(1,len(selected))]) or not 1 <= len(selected) <= 129:
+            raise RoomError('invalid_missions', 'Expected ego and 0..128 consecutive traffic vehicles', 400)
         initial = {}
         for mission in missions:
             if not isinstance(mission, dict):

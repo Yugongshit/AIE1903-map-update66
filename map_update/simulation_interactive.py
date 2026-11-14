@@ -59,8 +59,8 @@ def validated_missions(config):
         raise ValueError('Interactive launch requires configured source-lane missions')
     rows = deepcopy(config['missions'])
     count = config.get('traffic', {}).get('vehicle_count', 5)
-    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 64:
-        raise ValueError('Traffic count must be 1..64, or 0 with pedestrians')
+    if type(count) is not int or not (0 if config.get('traffic', {}).get('pedestrians') is True else 1) <= count <= 128:
+        raise ValueError('Traffic count must be 1..128, or 0 with pedestrians')
     if len(rows) != count or {row.get('vehicle_id') for row in rows if isinstance(row, dict)} != {f'P{i}' for i in range(1,count+1)}:
         raise ValueError('Interactive missions must identify each configured vehicle exactly once')
     for row in rows:
@@ -235,6 +235,18 @@ class InteractiveRuntime:
         from .simulation_traffic import traffic_options
         self.traffic = traffic_options({k: v for k, v in config['traffic'].items() if k not in {'profile', 'synthetic'}}) if config.get('traffic') else None
         self.source_features, self.map_sha256 = source_features, map_sha256
+        self.journey_network=None
+        if self.traffic and self.traffic['route_mode']=='journeys':
+            from .simulation_journeys import JourneyNetwork
+            from .simulation_following import driver_parameters
+            self.journey_network=JourneyNetwork(source_features,blocked_lanes=config.get('journey_blocked_lanes',[]))
+            self.route_paths={k:p for k,p in self.journey_network.points.items()}
+            self.cyclic_path=next(iter(self.route_paths.values()))
+            self.path_geometries={id(p):PathGeometry(p) for p in self.route_paths.values()}
+            self.junctions=self.journey_network.junctions
+            for key,mission in self.missions.items():
+                if mission.get('journey_lane') not in self.journey_network.graph:raise ValueError('Invalid journey spawn lane')
+                mission.update(journey_follower=True,cycle_follower=True,driver_parameters=driver_parameters(self.traffic['seed'],key,self.traffic['driver_style']))
         self.visual_node = None
         self.vehicles = {}
         try:
@@ -253,12 +265,12 @@ class InteractiveRuntime:
         return self.env.engine.data_manager.current_scenario['metadata']
 
     def path_for(self, identifier):
-        return self.path_overrides.get(identifier,self.route_paths.get(self.missions[identifier].get('route_id'),self.cyclic_path))
+        return self.path_overrides.get(identifier,self.journey_paths.get(identifier,self.route_paths.get(self.missions[identifier].get('route_id'),self.cyclic_path)))
 
     def reset(self):
         from .simulation_network import JunctionCoordinator
         self.junction_coordinator = JunctionCoordinator(self.junctions)
-        self.path_overrides={}
+        self.path_overrides={};self.journey_paths={};self.journeys=None
         from .simulation_lane_changes import LaneChanges
         self.lane_changes=LaneChanges(self.source_features,self.route_paths,self.missions,bool(self.traffic and self.traffic['lane_changes']))
         self.vehicles = {'ego': self.env.agent}
@@ -291,6 +303,13 @@ class InteractiveRuntime:
                 heading=mission['heading_rad'])
             self.controllers[identifier] = self._controller(identifier)
 
+        if self.journey_network:
+            from .simulation_journeys import Journeys
+            self.journeys=Journeys(self,self.journey_network)
+            for key in self.ids[1:]:
+                lane=self.missions[key]['journey_lane']
+                self.journeys.assign(key,lane,self.journey_network.geometries[lane].project(self.missions[key]['position_scenario_m'])[1],self.actors())
+
         from .simulation_events import ConstructionEvent, sample_clearance_time
         for spec in self.construction_specs:
             self.construction_events.append(ConstructionEvent(self.env.engine,self.metadata,spec,
@@ -302,9 +321,26 @@ class InteractiveRuntime:
     def _controller(self, identifier):
         from .simulation_traffic import CycleFollower
         mission = self.missions[identifier]
+        if mission.get('journey_follower'):
+            path=self.journey_paths.get(identifier,self.journey_network.points[mission['journey_lane']])
+            return CycleFollower(path,mission['cruise_speed_m_s'],closed=False)
         if mission.get('cycle_follower'):
             return CycleFollower(self.path_for(identifier), mission['cruise_speed_m_s'])
         return LaneGraphController(mission['cruise_speed_m_s'])
+
+    def replace_background_vehicle(self, identifier, position, heading, generation):
+        """Retire a boundary-exiting actor and allocate a distinct new physical body."""
+        if identifier=='ego' or self.modes[identifier]!='ai':raise ValueError('Only background AI slots can receive new actors')
+        old=self.vehicles[identifier];cfg=deepcopy(old.config)
+        self.env.engine.clear_objects([old.id],force_destroy=True)
+        offset=self.metadata.get('old_origin_in_current_coordinate',[0.,0.])
+        self.vehicles[identifier]=self.env.engine.spawn_object(_vehicle_class(),
+            name=f'interactive-{identifier}-g{generation}',random_seed=201+int(identifier[1:])+generation,
+            vehicle_config=cfg,position=[position[i]+float(offset[i]) for i in (0,1)],heading=heading)
+        self.current_contacts[identifier]=[];self._previous_contact_keys[identifier]=set()
+        self.actions[identifier]=list(BRAKE);self.requested[identifier]=list(BRAKE)
+        if self.population and self.population.activity:
+            self.population.activity.rows[identifier]['until']=None
 
     def close(self):
         if self.population is not None:
@@ -378,15 +414,21 @@ class InteractiveRuntime:
         if self.population:
             self.population.advance(sim_time, actors)
             actors = self.actors()
+        if self.journeys and self.journeys.update(actors,sim_time):actors=self.actors()
         self.lane_changes.update(self,actors,sim_time)
         paths={k:self.path_for(k) for k in self.ids[1:] if self.modes[k]=='ai' and self.path_for(k)}
         yielding=self.junction_coordinator.update(actors,paths,sim_time) if self.junctions else {}
         use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
         if use_idm:
             from .simulation_following import project_actors, current_leader, idm_acceleration, acceleration_action
-            projections = {id(path):project_actors(path,[a for a in actors if a.get('type')=='VEHICLE'],self.path_geometries[id(path)]) for path in {id(p):p for p in paths.values()}.values()}
+            if self.journeys:
+                cars={a['vehicle_id']:a for a in actors if a.get('type')=='VEHICLE'}
+                projections={id(path):project_actors(path,[a for a in cars.values() if math.dist(a['position_city_m'],cars[key]['position_city_m'])<=50.],self.path_geometries[id(path)]) for key,path in paths.items()}
+            else:
+                projections = {id(path):project_actors(path,[a for a in actors if a.get('type')=='VEHICLE'],self.path_geometries[id(path)]) for path in {id(p):p for p in paths.values()}.values()}
+        current_actors={a['vehicle_id']:a for a in actors}
         for identifier, vehicle in self.vehicles.items():
-            own = actor_state(vehicle, self.metadata, identifier)
+            own = current_actors[identifier] if self.journeys else actor_state(vehicle, self.metadata, identifier)
             self._speeds_before[identifier] = own['speed_m_s']
             action = list(self.requested[identifier])
             self.braking[identifier] = None
@@ -407,8 +449,10 @@ class InteractiveRuntime:
                     'wheelbase_m': float(vehicle.FRONT_WHEELBASE+vehicle.REAR_WHEELBASE),
                     'max_steering_rad': math.radians(float(vehicle.max_steering))}
                 action = checked_action(controller(state))
-                self.diagnostics[identifier] = controller.diagnostics()
-                if self.missions[identifier].get('cycle_follower'):
+                self.diagnostics[identifier] = dict(controller._diagnostics) if self.journeys else controller.diagnostics()
+                if self.missions[identifier].get('journey_follower'):
+                    self.completed_goals[identifier]=self.journeys.rows[identifier]['goals']
+                elif self.missions[identifier].get('cycle_follower'):
                     route = self.diagnostics[identifier]
                     self.completed_goals[identifier] = int(route['travelled_m'] / (self.missions[identifier].get('source_route_length_m',route['length_m'])/2))
                     self.patrol_indices[identifier] = self.completed_goals[identifier] % 2
@@ -540,6 +584,7 @@ class InteractiveRuntime:
                 goal_scenario_m=self.goal(identifier) if self.modes[identifier] == 'ai' else None,
                 patrol_goal_index=self.patrol_indices.get(identifier) if self.modes[identifier] == 'ai' else None,
                 completed_patrol_goals=self.completed_goals.get(identifier, 0))
+            if self.journeys and identifier!='ego':row.update(actor_instance_id=self.journeys.instance_id(identifier),journey_generation=self.journeys.rows[identifier]['generation'])
             vehicles[identifier] = row
         step = int(self.env.episode_step)
         sim_time = step * self.env.config['physics_world_step_size'] * self.env.config['decision_repeat']
@@ -547,7 +592,8 @@ class InteractiveRuntime:
                        heading=row['heading_rad'], length=row['length_m'], width=row['width_m'],
                        height=row['height_m'], static=row.get('type')!='PEDESTRIAN', source_scope=row.get('source_scope','full_scene_offline_prior'))
                   for row in actors if row['native_object_id'] not in native_ids]
-        return {'traffic_profile': ('synthetic_network_v1' if self.traffic['route_mode']=='network' else 'synthetic_cycle_v1') if self.traffic else 'source_presets',
+        return {'journeys':self.journeys.report() if self.journeys else None,
+                'traffic_profile': 'synthetic_journeys_v1' if self.journeys else ('synthetic_network_v1' if self.traffic['route_mode']=='network' else 'synthetic_cycle_v1') if self.traffic else 'source_presets',
                 'population': self.population.report() if self.population else None,
                 'junction_control': dict(zone_count=len(self.junctions),passes=self.junction_coordinator.passes,yield_ticks=self.junction_coordinator.yield_ticks,rule='synthetic_unsignalised_reservation_not_real_signals'),
                 'traffic_area': deepcopy(self.traffic_area),

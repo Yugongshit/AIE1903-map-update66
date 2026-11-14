@@ -198,6 +198,7 @@ class TrafficPopulation:
         self.next_spawn=self.rng.uniform(45.,70.);self.serial=len(runtime.construction_events)
         self.spawned=0;self.deferred=0;self.clearances=0;self.collision_counts={key:0 for key in runtime.ids}
         paths=list({str(runtime.path_for(k)):runtime.path_for(k) for k in runtime.ids[1:]}.values())
+        if getattr(runtime,'journeys',None):paths=list(runtime.route_paths.values())
         if not paths: paths=list(runtime.route_paths.values()) or [runtime.cyclic_path]
         self.paths=paths
         if runtime.traffic['pedestrians']:

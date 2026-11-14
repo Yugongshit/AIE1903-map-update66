@@ -328,7 +328,7 @@ class PlatformServer(ThreadingHTTPServer):
             interactive = result['interactive']
             physical_fields = ('chassis_center_city_m', 'orientation_basis_city', 'position_3d_city_m',
                                'pitch_rad', 'roll_rad', 'collision_active', 'current_contacts',
-                               'last_collision', 'collision_event_count', 'collision')
+                               'last_collision', 'collision_event_count', 'collision', 'actor_instance_id')
             actors = [{'id': row.get('vehicle_id', row.get('native_object_id')), 'type': row['type'],
                        'is_ego': False, 'persistent': True, 'synthetic':row.get('synthetic',False),
                        'source_scope':row.get('source_scope','full_scene_offline_prior'), 'position': list(row['position_scenario_m']),

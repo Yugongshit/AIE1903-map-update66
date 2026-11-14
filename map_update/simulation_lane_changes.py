@@ -60,7 +60,7 @@ def source_neighbours(features, source_file=None):
     return result
 
 
-def passing_path(neighbour, start_s, base_path):
+def passing_path(neighbour, start_s, base_path, *, closed=True):
     """Two quintic lane changes with a 10–26 m target-lane segment; body stays on road."""
     src=neighbour['source_geometry'];dst=neighbour['target_geometry']
     distance=min(60.,src.length-6-start_s);change=17.
@@ -79,10 +79,11 @@ def passing_path(neighbour, start_s, base_path):
         body=vehicle_footprint(p,geometry.project(p)[3],margin=.1)
         if not neighbour['surface'].buffer(.05).covers(body):return None
     base=PathGeometry(base_path);s0=base.project(path[0])[1];s1=base.project(path[-1])[1]
-    remain=(s0-s1)%base.length
-    # Retain the rest of the directed cycle after the completed pass.
-    path += [list(base.point_at((s1+d)%base.length)) for d in range(1,int(remain)+1)]
-    path.append(path[0])
+    if not closed and (s1<=s0 or base.project(path[-1])[0]>.1):return None
+    remain=(s0-s1)%base.length if closed else base.length-s1
+    # Retain the remaining route; an open trip must never wrap at its endpoint.
+    path += [list(base.point_at((s1+d)%base.length if closed else min(base.length,s1+d))) for d in range(1,int(remain)+1)]
+    path.append(path[0] if closed else list(base_path[-1]))
     return path,geometry.length,distance-change,math.ceil(distance*2)+1
 
 
@@ -161,7 +162,7 @@ class LaneChanges:
             for neighbour in self.neighbours:
                 src=neighbour['source_geometry'];lat,s,_,h=src.project(own['position_city_m'])
                 if lat>.6 or abs(_angle(own['heading_rad']-h))>.2:continue
-                built=passing_path(neighbour,s,base)
+                built=passing_path(neighbour,s,base,closed=not mission.get('journey_follower'))
                 if not built:continue
                 path,end,merge_start,point_count=built
                 # Reserve overlapping maneuvers, re-evaluate current merge gaps.
@@ -169,7 +170,7 @@ class LaneChanges:
                 if any(corridor.intersects(a['corridor']) for a in self.active.values()):continue
                 if not target_gap_safe(own,actors,neighbour['target_geometry']):self.gap_rejections+=1;continue
                 from .simulation_traffic import CycleFollower
-                controller=CycleFollower(path,desired);controller.distance=runtime.controllers[key].distance
+                controller=CycleFollower(path,desired,closed=not mission.get('journey_follower'));controller.distance=runtime.controllers[key].distance
                 runtime.path_overrides[key]=path;runtime.path_geometries[id(path)]=controller.geometry;runtime.controllers[key]=controller
                 self.active[key]=dict(path=path,end=end,corridor=corridor,target=neighbour['target'],source_geometry=src,merge_start=merge_start,surface=neighbour['surface']);self.started+=1
                 break

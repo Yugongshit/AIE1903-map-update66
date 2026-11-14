@@ -23,8 +23,8 @@ def traffic_options(value):
         options.update(construction_min_s=max(5.,legacy*.75),construction_max_s=legacy*2.)
     if type(options['seed']) is not int or not 0 <= options['seed'] < 2**32:
         raise ValueError('Traffic seed must be a uint32')
-    if type(options['vehicle_count']) is not int or not (0 if options['pedestrians'] is True else 1) <= options['vehicle_count'] <= 64:
-        raise ValueError('Background vehicle count must be 1..64, or 0 with pedestrians')
+    if type(options['vehicle_count']) is not int or not (0 if options['pedestrians'] is True else 1) <= options['vehicle_count'] <= 128:
+        raise ValueError('Background vehicle count must be 1..128, or 0 with pedestrians')
     for key in ('construction_count_min','construction_count_max'):
         if type(options[key]) is not int or not 1 <= options[key] <= 16:
             raise ValueError('Construction counts must be integers in 1..16')
@@ -35,7 +35,7 @@ def traffic_options(value):
     for key in ('lane_changes','background_activity','construction','stop_enabled','pedestrians','incidents','recurring_construction'):
         if type(options[key]) is not bool:
             raise ValueError('Traffic flag must be boolean: '+key)
-    for key, allowed in [('perception_profile',('ideal','occlusion_noise_v1')), ('network_extent',('local','district')), ('route_mode',('single','network')), ('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
+    for key, allowed in [('perception_profile',('ideal','occlusion_noise_v1')), ('network_extent',('local','district')), ('route_mode',('single','network','journeys')), ('area', ('isolated','near_recording')), ('following_model', ('legacy','idm')),
                          ('driver_style', ('normal','cautious','assertive','mixed'))]:
         if options[key] not in allowed:
             raise ValueError('Invalid traffic option: '+key)
@@ -45,9 +45,9 @@ def traffic_options(value):
             raise ValueError('Invalid traffic option: ' + key)
     if options['construction_min_s'] >= options['construction_max_s']:
         raise ValueError('Construction clearance requires minimum < maximum')
-    if options['density_veh_km'] and (options['route_mode']!='network' or options['network_extent']!='district' or options['vehicle_count']==0):
+    if options['density_veh_km'] and (options['route_mode'] not in ('network','journeys') or options['network_extent']!='district' or options['vehicle_count']==0):
         raise ValueError('Lane density requires district vehicles; use zero density for pedestrian-only traffic')
-    if options['lane_changes'] and (options['route_mode']!='network' or options['following_model']!='idm'):
+    if options['lane_changes'] and (options['route_mode'] not in ('network','journeys') or options['following_model']!='idm'):
         raise ValueError('Lane changes require source network routes and IDM')
     return options
 
@@ -57,6 +57,9 @@ def cyclic_traffic(payload, options):
     options = traffic_options(options)
     if payload['key'] != 'nuscenes-scene0980':
         raise ValueError('Synthetic cyclic traffic currently supports nuScenes scene-0980 only')
+    if options['route_mode']=='journeys':
+        from .simulation_journeys import journey_traffic
+        return journey_traffic(payload,options)
     if options['route_mode']=='network':
         from .simulation_network import network_traffic
         return network_traffic(payload,options)
@@ -134,10 +137,11 @@ class CycleFollower:
     On re-entry match the actual pose, never restore a saved pose. Off-route or
     reverse-facing cars stop and report the problem instead of snapping back.
     """
-    def __init__(self, path, speed):
+    def __init__(self, path, speed, *, closed=True):
         from .simulation_path_geometry import PathGeometry
         self.geometry=PathGeometry(path)
         self.path, self.length, self.speed = path, self.geometry.length, speed
+        self.closed=closed
         self.last_s = None
         self.start_s = None
         self.distance = 0.
@@ -147,12 +151,13 @@ class CycleFollower:
         return deepcopy(self._diagnostics)
 
     def __call__(self, state):
+        at=lambda s: self.geometry.point_at(s%self.length if self.closed else min(self.length,max(0.,s)))
         position = state['position_runtime_m']
         lateral, progress, _, tangent = self.geometry.project(position)
         heading = state['heading_rad']
         valid = lateral <= 2.5 and abs(_angle(heading-tangent)) < math.pi/2
         if self.last_s is not None:
-            delta = (progress-self.last_s+self.length/2) % self.length-self.length/2
+            delta = ((progress-self.last_s+self.length/2) % self.length-self.length/2) if self.closed else progress-self.last_s
             if abs(delta) > max(3., state['speed_m_s']*.3+1):
                 valid = False
             elif valid:
@@ -160,20 +165,22 @@ class CycleFollower:
         if self.start_s is None:
             self.start_s = progress
         self.last_s = progress
-        upcoming = [list(self.geometry.point_at( (progress+d) % self.length)) for d in range(0, 41, 2)]
+        upcoming = [list(at(progress+d)) for d in range(0, 41, 2)]
         self._diagnostics = dict(status='tracking' if valid else 'stopped',
             reason=None if valid else 'cycle_reentry_requires_forward_lane_pose', points=upcoming,
             lateral_error_m=lateral, progress_m=progress, travelled_m=self.distance,
-            completed_laps=int(self.distance/self.length), length_m=self.length,
+            completed_laps=int(self.distance/self.length) if self.closed else 0, length_m=self.length,
             goal_scenario_m=list(self.geometry.point_at( (self.start_s +
                 (int(self.distance/(self.length/2))+1)*self.length/2) % self.length)))
+        if not self.closed:self._diagnostics['goal_scenario_m']=list(self.path[-1])
         if not valid:
             return [0., -1.]
         lookahead = max(3., state['speed_m_s']*1.2)
-        target = self.geometry.point_at( (progress+lookahead) % self.length)
+        target = at(progress+lookahead)
         alpha = _angle(math.atan2(target[1]-position[1], target[0]-position[0])-heading)
         steering = math.atan2(2*state['wheelbase_m']*math.sin(alpha), max(.1, math.dist(position,target))) / state['max_steering_rad']
         speed = self.speed/(1+2*abs(steering))
+        if not self.closed:speed=min(speed,math.sqrt(2*1.5*max(0.,self.length-progress-.3)))
         self._diagnostics['target_speed_m_s'] = speed
         return [max(-1.,min(1.,steering)), max(-1.,min(.5,.4*(speed-state['speed_m_s'])))]
 
@@ -181,7 +188,7 @@ class CycleFollower:
 # Deliberate allowlist: other drivers' controls, routes, goals, events and seeds
 # are not measurements, even when stored beside a current pose in engine state.
 _MEASURED = ('vehicle_id', 'type', 'position_city_m', 'heading_rad', 'velocity_m_s',
-             'speed_m_s', 'length_m', 'width_m', 'height_m', 'synthetic', 'source_scope')
+             'speed_m_s', 'length_m', 'width_m', 'height_m', 'synthetic', 'source_scope', 'actor_instance_id')
 
 
 def vehicle_perception(interactive, vehicle_id, radius=50., clearance_queries=()):
@@ -190,6 +197,8 @@ def vehicle_perception(interactive, vehicle_id, radius=50., clearance_queries=()
         result = {k: deepcopy(actor[k]) for k in _MEASURED if k in actor}
         if actor.get('vehicle_id') in interactive['vehicles']:
             result['type'] = 'VEHICLE'
+        if actor.get('vehicle_id')!=vehicle_id and actor.get('actor_instance_id'):
+            result['vehicle_id']=actor['actor_instance_id']
         return result
     objects = list(interactive['vehicles'].values()) + interactive.get('static_actors', [])
     visible = [measure(a) for a in objects if a.get('vehicle_id') != vehicle_id

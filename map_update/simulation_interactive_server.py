@@ -139,7 +139,14 @@ class InteractiveCoordinator:
         # observations, including clearance evidence consumed by the map.
         if self.last_result is None or result['step']!=self.last_result['step']:
             self.current_perceptions={}
-            for identifier, observed_map in self.observed_maps.items():
+            for identifier, observed_map in list(self.observed_maps.items()):
+                current=result['interactive']['vehicles'][identifier].get('actor_instance_id')
+                previous=(self.last_result or {}).get('interactive',{}).get('vehicles',{}).get(identifier,{}).get('actor_instance_id')
+                if previous is not None and current!=previous:
+                    from .simulation_live_map import ObservedStateMap
+                    roads=self.server.scene(self.scene_key)['maps'][self.version]
+                    observed_map=ObservedStateMap(roads,observed_map.road_version)
+                    self.observed_maps[identifier]=observed_map
                 measured=self._measure(result,identifier,observed_map.clearance_queries())
                 self.current_perceptions[identifier]=measured
                 observed_map.update(result['step'], result['interactive'].get('sim_time_s', result['step']*.1),measured)

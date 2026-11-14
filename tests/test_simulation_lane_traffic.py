@@ -46,7 +46,7 @@ class LaneTrafficTests(unittest.TestCase):
         self.assertLess(len(wire),65536)
         room=InteractiveRoom();room.create('s','updated',missions=c['missions'],vehicle_ids=('ego',*[f'P{i}' for i in range(1,65)]))
         self.assertEqual(len(room.vehicle_ids),65)
-        for invalid in ({'vehicle_count':65},{'density_veh_km':33},{'lane_changes':True},dict(self.options,vehicle_count=0,pedestrians=True)):
+        for invalid in ({'vehicle_count':129},{'density_veh_km':33},{'lane_changes':True},dict(self.options,vehicle_count=0,pedestrians=True)):
             with self.assertRaises(ValueError):traffic_options(invalid)
 
     def test_only_verified_long_dashed_sections_allow_continuous_on_road_pass(self):

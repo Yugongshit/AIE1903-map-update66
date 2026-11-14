@@ -269,6 +269,24 @@ class InteractiveHttpTests(unittest.TestCase):
         self.assertEqual(self.server.interactive.observed_maps['ego'].step,a['step'])
         self.assertEqual(a['free_space_checks'],[])
 
+    def test_new_boundary_actor_does_not_inherit_observer_history(self):
+        generation=[1]
+        def identities(result):
+            result['interactive']['vehicles']['P1']['actor_instance_id']=f'traffic-P1-g{generation[0]}'
+        self.broker.transform_result=identities
+        self.open_room();coordinator=self.server.interactive
+        old=coordinator.observed_maps['P1'];ego=coordinator.observed_maps['ego']
+        old.tracks['retired-observer-marker']={'seen':0}
+        generation[0]=2
+        self.host('play');self.until(lambda value:value['room']['step']>=1);self.host('pause')
+        self.until(lambda value:value['phase']=='paused')
+        self.assertIsNot(coordinator.observed_maps['P1'],old)
+        self.assertIs(coordinator.observed_maps['ego'],ego)
+        self.assertNotIn('retired-observer-marker',coordinator.observed_maps['P1'].tracks)
+        sid=self.identity['session_id']
+        _,_,data=self.request('/api/interactive/perception?session_id='+sid+'&vehicle_id=P1')
+        self.assertEqual(data['own_vehicle']['actor_instance_id'],'traffic-P1-g2')
+
     def test_public_binding_requires_a_strong_control_key_before_opening_socket(self):
         for key in (None, "short"):
             with self.assertRaisesRegex(ValueError, "control key"):

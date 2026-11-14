@@ -199,8 +199,9 @@ class JunctionCoordinator:
                 if math.dist(own['position_city_m'],center)>=radius+24.:continue
                 length,targets,_=self._path_geometry[id(path)];lat,target,_,_=targets[key]
                 _,progress,_,_=project(identifier,path)
-                ahead=(target-progress)%length
-                if lat<=radius and ahead<radius+20. and math.dist(own['position_city_m'],center)<radius+24.:
+                ahead=target-progress
+                if math.dist(path[0],path[-1])<.01:ahead%=length
+                if lat<=radius and -radius<ahead<radius+20. and math.dist(own['position_city_m'],center)<radius+24.:
                     approaches[identifier]=ahead
                     self.waiting.setdefault((key,identifier),time_s)
             holder=self.holders.get(key)
@@ -219,7 +220,8 @@ class JunctionCoordinator:
                 for other in approaches:
                     if other==identifier:continue
                     lat,s,_,heading=project(other,path)
-                    delta=(s-progress)%length
+                    delta=s-progress
+                    if math.dist(path[0],path[-1])<.01:delta%=length
                     if lat<1.5 and abs(_angle(cars[other]['heading_rad']-heading))<.6 and 0<delta<ahead:
                         blocked=True;break
                 if not blocked:heads.append(identifier)

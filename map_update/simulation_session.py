@@ -26,7 +26,7 @@ def _number(value, name):
     return float(value)
 
 
-TRAFFIC_CAMERA_TARGETS = {f'P{i}' for i in range(1,13)}
+TRAFFIC_CAMERA_TARGETS = {f'P{i}' for i in range(1,129)}
 
 
 def validated_camera(current, command):
@@ -52,7 +52,7 @@ def validated_camera(current, command):
             result[name] = _number(command[name], name)
     if 'target' in command:
         if command['target'] not in ({'ego', 'map', 'selection'} | TRAFFIC_CAMERA_TARGETS):
-            raise ValueError('Camera target must be ego, map, selection or P1..P12')
+            raise ValueError('Camera target must be ego, map, selection or P1..P128')
         result['target'] = command['target']
     if 'pan' in command:
         value = command['pan']
@@ -413,7 +413,7 @@ class SimulationSession:
         if camera['target'] == 'selection' and self.selection_center is None:
             raise ValueError('Select a visible change before focusing it')
         if camera['target'] in TRAFFIC_CAMERA_TARGETS and self.interactive is None:
-            raise ValueError('Launch interactive mode before following P1..P12')
+            raise ValueError('Launch interactive mode before following P1..P128')
         if camera['target'] in TRAFFIC_CAMERA_TARGETS and camera['target'] not in self.interactive.vehicles:
             raise ValueError('Camera vehicle is not present in this experiment')
         self.camera = camera

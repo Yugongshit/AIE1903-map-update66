@@ -46,7 +46,8 @@ def current_leader(own, actors, path, projections=None, radius=50.):
         lateral, progress, _, tangent = projections[other['vehicle_id']]
         if lateral > 1.5 or abs(_angle(other['heading_rad']-tangent)) > math.pi/3:
             continue
-        ahead = (progress-own_projection[1]) % length
+        ahead = progress-own_projection[1]
+        if math.dist(path[0],path[-1])<.01:ahead %= length
         if not 0 < ahead <= radius:
             continue
         gap = ahead - (own['length_m']+other['length_m'])/2
