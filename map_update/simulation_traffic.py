@@ -10,10 +10,10 @@ from .simulation_planner import _length, _point_at, _project, _angle
 
 
 def traffic_options(value):
-    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'stop_enabled'}:
+    if not isinstance(value, dict) or set(value) - {'seed', 'speed_m_s', 'stop_start_s', 'stop_duration_s', 'vehicle_count', 'speed_spread', 'area', 'following_model', 'driver_style', 'construction', 'construction_duration_s', 'construction_min_s', 'construction_max_s', 'construction_count_min', 'construction_count_max', 'stop_enabled'}:
         raise ValueError('Invalid cyclic traffic options')
     options = dict(seed=0, speed_m_s=2.5, stop_start_s=30., stop_duration_s=15., vehicle_count=5, speed_spread=0.,
-                   area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_min_s=45., construction_max_s=120., stop_enabled=True)
+                   area='isolated', following_model='legacy', driver_style='normal', construction=False, construction_min_s=45., construction_max_s=120., construction_count_min=2, construction_count_max=5, stop_enabled=True)
     options.update(value)
     if 'construction_duration_s' in value:
         legacy=options.pop('construction_duration_s')
@@ -25,6 +25,11 @@ def traffic_options(value):
         raise ValueError('Traffic seed must be a uint32')
     if type(options['vehicle_count']) is not int or not 1 <= options['vehicle_count'] <= 12:
         raise ValueError('Background vehicle count must be 1..12')
+    for key in ('construction_count_min','construction_count_max'):
+        if type(options[key]) is not int or not 1 <= options[key] <= 8:
+            raise ValueError('Construction counts must be integers in 1..8')
+    if options['construction_count_min'] > options['construction_count_max']:
+        raise ValueError('Construction count requires minimum <= maximum')
     for key in ('construction','stop_enabled'):
         if type(options[key]) is not bool:
             raise ValueError('Traffic flag must be boolean: '+key)
@@ -104,9 +109,10 @@ def cyclic_traffic(payload, options):
     from .simulation_following import driver_parameters
     for mission in missions:
         mission['driver_parameters'] = driver_parameters(options['seed'], mission['vehicle_id'], options['driver_style'])
-    from .simulation_events import construction_spec
-    construction = construction_spec(path, missions, occupied) if options['construction'] else None
-    return dict(missions=missions, cyclic_path=path, construction=construction, traffic=dict(options, profile='synthetic_cycle_v1', synthetic=True),
+    from .simulation_events import construction_specs
+    constructions, generation = construction_specs(path, missions, occupied, options) if options['construction'] else ([], None)
+    return dict(missions=missions, cyclic_path=path, constructions=constructions, construction_generation=generation,
+        construction=deepcopy(constructions[0]) if constructions else None, traffic=dict(options, profile='synthetic_cycle_v1', synthetic=True),
         traffic_area=dict(selection=options['area'], source_ego_unchanged=True, route_length_m=length,
             route_distance_to_recorded_ego_m=LineString(path).distance(Point(ego['position'][0][:2])),
             minimum_source_actor_clearance_m=clearance))

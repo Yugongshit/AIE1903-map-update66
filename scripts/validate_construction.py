@@ -27,7 +27,7 @@ def main():
     args.out.mkdir(parents=True,exist_ok=False)
     key='nuscenes-scene0980';payload=load_scene(ROOT,key)
     config=cyclic_traffic(payload,dict(area='near_recording',following_model='idm',driver_style='mixed',
-        speed_spread=.3,vehicle_count=args.count,seed=args.seed,construction=True,construction_min_s=45.,construction_max_s=120.,stop_enabled=False))
+        speed_spread=.3,vehicle_count=args.count,seed=args.seed,construction=True,construction_count_min=1,construction_count_max=1,construction_min_s=45.,construction_max_s=120.,stop_enabled=False))
     session=SimulationSession(args.out/'frames',width=480,height=320)
     sampled=sample_clearance_time(config['traffic'])
     report=dict(passed=False,config=config['traffic'],collision_probe=args.collision_probe,transitions=[],

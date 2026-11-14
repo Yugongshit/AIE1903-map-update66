@@ -219,8 +219,9 @@ class InteractiveRuntime:
         self.missions = validated_missions(config)
         self.ids = ('ego', *[f'P{i}' for i in range(1,len(self.missions)+1)])
         self.cyclic_path = config.get('cyclic_path')
-        self.construction_spec = deepcopy(config.get('construction'))
-        self.construction_event = None
+        self.construction_specs = deepcopy(config.get('constructions', [config['construction']] if config.get('construction') else []))
+        self.construction_generation = deepcopy(config.get('construction_generation'))
+        self.construction_events = []
         self.traffic_area = deepcopy(config.get('traffic_area'))
         from .simulation_traffic import traffic_options
         self.traffic = traffic_options({k: v for k, v in config['traffic'].items() if k not in {'profile', 'synthetic'}}) if config.get('traffic') else None
@@ -232,6 +233,11 @@ class InteractiveRuntime:
         except BaseException:
             self.close()
             raise
+
+    @property
+    def construction_event(self):
+        """Compatibility accessor for single-event validation tools."""
+        return self.construction_events[0] if self.construction_events else None
 
     @property
     def metadata(self):
@@ -268,10 +274,10 @@ class InteractiveRuntime:
                 heading=mission['heading_rad'])
             self.controllers[identifier] = self._controller(identifier)
 
-        if self.construction_spec:
-            from .simulation_events import ConstructionEvent, sample_clearance_time
-            self.construction_event = ConstructionEvent(self.env.engine,self.metadata,self.construction_spec,
-                sample_clearance_time(self.traffic))
+        from .simulation_events import ConstructionEvent, sample_clearance_time
+        for spec in self.construction_specs:
+            self.construction_events.append(ConstructionEvent(self.env.engine,self.metadata,spec,
+                sample_clearance_time(self.traffic, spec.get('event_id','construction-1'))))
 
     def _controller(self, identifier):
         from .simulation_traffic import CycleFollower
@@ -281,9 +287,9 @@ class InteractiveRuntime:
         return LaneGraphController(mission['cruise_speed_m_s'])
 
     def close(self):
-        if self.construction_event is not None:
-            self.construction_event.close()
-            self.construction_event = None
+        for event in self.construction_events:
+            event.close()
+        self.construction_events = []
         if self.visual_node is not None:
             self.visual_node.removeNode()
             self.visual_node = None
@@ -312,12 +318,13 @@ class InteractiveRuntime:
         manager = getattr(self.env.engine, 'traffic_manager', None)
         definitions = getattr(manager, 'persistence_definitions', {})
         aliases.update({value: key for key, value in getattr(manager, '_scenario_id_to_obj_id', {}).items()})
+        events = {event.native_id: event for event in self.construction_events}
         result = []
         for vehicle in self.env.engine.get_objects().values():
             if hasattr(vehicle, 'LENGTH') and hasattr(vehicle, 'WIDTH') and hasattr(vehicle, 'position'):
                 row = actor_state(vehicle, self.metadata, aliases.get(vehicle.id))
-                if self.construction_event and vehicle.id == self.construction_event.native_id:
-                    row.update(vehicle_id=self.construction_event.spec['object_id'],type='TRAFFIC_BARRIER',
+                if vehicle.id in events:
+                    row.update(vehicle_id=events[vehicle.id].spec['object_id'],type='TRAFFIC_BARRIER',
                         synthetic=True,source_scope='synthetic_construction_event')
                 elif row['vehicle_id'] in definitions:
                     row['type'] = definitions[row['vehicle_id']]['type']
@@ -334,8 +341,8 @@ class InteractiveRuntime:
         return self.missions[identifier]['patrol_goals_scenario_m'][self.patrol_indices[identifier]]
 
     def before_step(self):
-        if self.construction_event is not None:
-            self.construction_event.advance(self.env.episode_step*self.env.config['physics_world_step_size']*self.env.config['decision_repeat'])
+        for event in self.construction_events:
+            event.advance(self.env.episode_step*self.env.config['physics_world_step_size']*self.env.config['decision_repeat'])
         actors = self.actors()
         use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
         if use_idm:
@@ -420,8 +427,8 @@ class InteractiveRuntime:
             manager = getattr(self.env.engine, 'traffic_manager', None)
             definitions = getattr(manager, 'persistence_definitions', {})
             aliases.update({value: key for key, value in getattr(manager, '_scenario_id_to_obj_id', {}).items()})
-            if self.construction_event:
-                aliases[self.construction_event.native_id] = self.construction_event.spec['object_id']
+            for event in self.construction_events:
+                aliases[event.native_id] = event.spec['object_id']
             actors = {obj.body: {'object_id': str(aliases.get(obj.id, obj.id)),
                       'native_object_id': str(obj.id),
                       'type': definitions.get(aliases.get(obj.id), {}).get('type', type(obj).__name__)}
@@ -487,7 +494,8 @@ class InteractiveRuntime:
                   for row in actors if row['native_object_id'] not in native_ids]
         return {'traffic_profile': 'synthetic_cycle_v1' if self.traffic else 'source_presets',
                 'traffic_area': deepcopy(self.traffic_area),
-                'synthetic_events': [self.construction_event.report()] if self.construction_event else [],
+                'synthetic_events': [event.report() for event in self.construction_events],
+                'construction_generation': deepcopy(self.construction_generation),
                 'following_model': self.traffic['following_model'] if self.traffic else 'legacy',
                 'synthetic_traffic': bool(self.traffic), 'enabled': True, 'step': step, 'recorded_step': 0, 'sim_time_s': float(sim_time), 'vehicles': vehicles,
                 'static_actors': static,
@@ -495,10 +503,10 @@ class InteractiveRuntime:
                 'recorded_moving_traffic': False, 'recorded_ego_policy': False,
                 'source_recording_is_planning_input': False,
                 'observation_source': 'current_simulator_actor_states', 'occlusion_modelled': False,
-                'static_environment_scope': 'fixed_source_prior_and_synthetic_events' if self.construction_event else 'fixed_full_scene_offline_prior',
+                'static_environment_scope': 'fixed_source_prior_and_synthetic_events' if self.construction_events else 'fixed_full_scene_offline_prior',
                 'static_collision_model': 'fixed_source_dimensioned_boxes_including_cones',
                 'collision_sampling': 'end_of_decision_bullet_manifolds_with_native_flags_for_transient_impacts',
-                'collision_contact_scope': 'controlled_cars_source_objects_and_synthetic_events' if self.construction_event else 'controlled_cars_and_source_static_objects',
+                'collision_contact_scope': 'controlled_cars_source_objects_and_synthetic_events' if self.construction_events else 'controlled_cars_and_source_static_objects',
                 'vehicle_damage_modelled': False,
                 'ai_scope': ('source_cycle_pure_pursuit_idm_with_emergency_guard'
                     if self.traffic and self.traffic['following_model']=='idm'

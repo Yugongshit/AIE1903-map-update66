@@ -162,3 +162,6 @@ nuScenes 场景中来源明确的 61 个路障和 42 个锥筒采用源尺寸的
 ### 随机清障区间
 
 施工参数改为 `construction_min_s` / `construction_max_s`（默认 45 / 120），约束 5 ≤ min < max ≤ 3600。按独立的事件随机流抽取一次三角分布时长，峰值为 min+(max-min)/3；按仿真步执行，最多有一个物理步的时间量化误差。相同 seed 复现，换 seed 才生成新实验。旧 `construction_duration_s` 迁移为随机区间，不再保留固定清障语义。禁止同时提交旧字段和新区间字段。抽中的期限不出现在 `/perception`、`/planning-input` 或当前事件状态中；事后评价报告可记录真值。
+
+
+多点施工配置增加 `construction_count_min` / `construction_count_max`，默认 2 / 5，要求整数 1 ≤ min ≤ max ≤ 8；设为 1 / 1 可固定单点对照。独立种子流分别决定数量、受安全约束的位置和每个事件清障时间。`/state` 的 `synthetic_events` 返回多个唯一编号的当前事件，`construction_generation` 返回请求/实生成数量及容量受限标记。以上生成配置和全局列表均不进入 `/perception` 或 `/planning-input`；局部观测只包含当前可见物体，每处地图占用分别根据观测确认和清除。

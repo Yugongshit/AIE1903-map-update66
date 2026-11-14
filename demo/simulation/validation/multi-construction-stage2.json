@@ -1,0 +1,547 @@
+{
+  "schema": "multi-construction-validation-1.0",
+  "date": "2026-11-14",
+  "base_commit": "4b495d9",
+  "stage": "Stage 2 initial multi-site construction and observation-based clearance",
+  "runs": {
+    "multi-construction-seed0": {
+      "passed": true,
+      "config": {
+        "seed": 0,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 8,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_min_s": 45.0,
+        "construction_max_s": 120.0,
+        "construction_count_min": 2,
+        "construction_count_max": 5,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "generation": {
+        "requested_count": 2,
+        "placed_count": 2,
+        "capacity_limited": false,
+        "candidate_scope": "existing_source_cycle",
+        "reason": null,
+        "synthetic": true
+      },
+      "sites": [
+        {
+          "object_id": "construction-C1",
+          "event_id": "construction-1",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            470.85934135174864,
+            1257.5583910174169
+          ],
+          "heading_rad": 0.211583133630065,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C2",
+          "event_id": "construction-2",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            570.5804606139443,
+            1287.9577339446635
+          ],
+          "heading_rad": 1.5542486466402292,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        }
+      ],
+      "scope": "evaluation_truth_not_planning_input",
+      "masses": {
+        "construction-C1": 0.0,
+        "construction-C2": 0.0
+      },
+      "max_barrier_drift_m": 0.0,
+      "max_step_distance_m": 0.290710953186034,
+      "sampled_clearance_s": {
+        "construction-C1": 66.6,
+        "construction-C2": 103.0
+      },
+      "first_absent_physics_frame_s": {
+        "construction-C1": 66.7,
+        "construction-C2": 103.10000000000001
+      },
+      "final_events": [
+        {
+          "event_id": "construction-1",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C1",
+          "started_at_s": 0.0,
+          "removed_at_s": 66.6,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-2",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C2",
+          "started_at_s": 0.0,
+          "removed_at_s": 103.0,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        }
+      ],
+      "first_observed": {
+        "construction-C1": {
+          "observer": "ego",
+          "time_s": 2.1
+        },
+        "construction-C2": {
+          "observer": "P3",
+          "time_s": 2.1
+        }
+      },
+      "first_cleared": {
+        "construction-C1": {
+          "observer": "ego",
+          "time_s": 72.7
+        },
+        "construction-C2": {
+          "observer": "P1",
+          "time_s": 105.19999999999999
+        }
+      },
+      "braking_vehicles": [
+        "P1",
+        "P3"
+      ],
+      "recovered_vehicles": [
+        "P1",
+        "P3"
+      ],
+      "final_time_s": 240.0,
+      "collision_events": 0,
+      "physical_map_unchanged": true,
+      "trace_sha256": "86ffafeaedfb7414bf66dc3933a067d2520cdd9ddf18096c808d9e2fdadd6b5f"
+    },
+    "multi-construction-stress8": {
+      "passed": true,
+      "config": {
+        "seed": 7,
+        "speed_m_s": 2.5,
+        "stop_start_s": 30.0,
+        "stop_duration_s": 15.0,
+        "vehicle_count": 12,
+        "speed_spread": 0.3,
+        "area": "near_recording",
+        "following_model": "idm",
+        "driver_style": "mixed",
+        "construction": true,
+        "construction_min_s": 45.0,
+        "construction_max_s": 120.0,
+        "construction_count_min": 8,
+        "construction_count_max": 8,
+        "stop_enabled": false,
+        "profile": "synthetic_cycle_v1",
+        "synthetic": true
+      },
+      "generation": {
+        "requested_count": 8,
+        "placed_count": 8,
+        "capacity_limited": false,
+        "candidate_scope": "existing_source_cycle",
+        "reason": null,
+        "synthetic": true
+      },
+      "sites": [
+        {
+          "object_id": "construction-C1",
+          "event_id": "construction-1",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            463.60803114238433,
+            1256.0008252855393
+          ],
+          "heading_rad": 0.21158211747162456,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C2",
+          "event_id": "construction-2",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            553.1067378534408,
+            1274.164467641153
+          ],
+          "heading_rad": 0.17778933949436557,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C3",
+          "event_id": "construction-3",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            575.2739745071011,
+            1325.593620363417
+          ],
+          "heading_rad": 1.3579336526810093,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C4",
+          "event_id": "construction-4",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            483.79523233757726,
+            1337.0403765061794
+          ],
+          "heading_rad": -2.0871744564622516,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C5",
+          "event_id": "construction-5",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            457.2587618095637,
+            1287.7447694013483
+          ],
+          "heading_rad": -2.0164889201638276,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C6",
+          "event_id": "construction-6",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            542.0470683230157,
+            1361.916501693197
+          ],
+          "heading_rad": -3.096292387125439,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C7",
+          "event_id": "construction-7",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            521.6111327964351,
+            1268.5052395965597
+          ],
+          "heading_rad": 0.17778589552582405,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        },
+        {
+          "object_id": "construction-C8",
+          "event_id": "construction-8",
+          "type": "TRAFFIC_BARRIER",
+          "position_city_m": [
+            577.8735454393484,
+            1356.6658853107658
+          ],
+          "heading_rad": 2.1238131739919246,
+          "length_m": 1.0,
+          "width_m": 2.5,
+          "height_m": 1.0,
+          "synthetic": true
+        }
+      ],
+      "scope": "evaluation_truth_not_planning_input",
+      "masses": {
+        "construction-C1": 0.0,
+        "construction-C2": 0.0,
+        "construction-C3": 0.0,
+        "construction-C4": 0.0,
+        "construction-C5": 0.0,
+        "construction-C6": 0.0,
+        "construction-C7": 0.0,
+        "construction-C8": 0.0
+      },
+      "max_barrier_drift_m": 0.0,
+      "max_step_distance_m": 0.25962743758761614,
+      "sampled_clearance_s": {
+        "construction-C1": 70.2,
+        "construction-C2": 71.0,
+        "construction-C3": 72.6,
+        "construction-C4": 76.4,
+        "construction-C5": 69.9,
+        "construction-C6": 58.9,
+        "construction-C7": 89.9,
+        "construction-C8": 98.6
+      },
+      "first_absent_physics_frame_s": {
+        "construction-C6": 59.0,
+        "construction-C5": 70.0,
+        "construction-C1": 70.3,
+        "construction-C2": 71.10000000000001,
+        "construction-C3": 72.7,
+        "construction-C4": 76.5,
+        "construction-C7": 90.0,
+        "construction-C8": 98.70000000000002
+      },
+      "final_events": [
+        {
+          "event_id": "construction-1",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C1",
+          "started_at_s": 0.0,
+          "removed_at_s": 70.2,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-2",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C2",
+          "started_at_s": 0.0,
+          "removed_at_s": 71.0,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-3",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C3",
+          "started_at_s": 0.0,
+          "removed_at_s": 72.6,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-4",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C4",
+          "started_at_s": 0.0,
+          "removed_at_s": 76.4,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-5",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C5",
+          "started_at_s": 0.0,
+          "removed_at_s": 69.9,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-6",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C6",
+          "started_at_s": 0.0,
+          "removed_at_s": 58.9,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-7",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C7",
+          "started_at_s": 0.0,
+          "removed_at_s": 89.9,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        },
+        {
+          "event_id": "construction-8",
+          "kind": "synthetic_construction",
+          "status": "removed",
+          "object_id": "construction-C8",
+          "started_at_s": 0.0,
+          "removed_at_s": 98.6,
+          "synthetic": true,
+          "execution_model": "initial_fixed_box_then_discrete_clearance_no_worker_animation"
+        }
+      ],
+      "first_observed": {
+        "construction-C1": {
+          "observer": "ego",
+          "time_s": 2.1
+        },
+        "construction-C5": {
+          "observer": "ego",
+          "time_s": 2.1
+        },
+        "construction-C7": {
+          "observer": "P2",
+          "time_s": 2.1
+        },
+        "construction-C2": {
+          "observer": "P3",
+          "time_s": 2.1
+        },
+        "construction-C3": {
+          "observer": "P5",
+          "time_s": 2.1
+        },
+        "construction-C8": {
+          "observer": "P6",
+          "time_s": 2.1
+        },
+        "construction-C6": {
+          "observer": "P7",
+          "time_s": 2.1
+        },
+        "construction-C4": {
+          "observer": "P9",
+          "time_s": 2.1
+        }
+      },
+      "first_cleared": {
+        "construction-C6": {
+          "observer": "P7",
+          "time_s": 61.00000000000001
+        },
+        "construction-C5": {
+          "observer": "ego",
+          "time_s": 76.10000000000001
+        },
+        "construction-C2": {
+          "observer": "P2",
+          "time_s": 77.5
+        },
+        "construction-C1": {
+          "observer": "ego",
+          "time_s": 77.9
+        },
+        "construction-C3": {
+          "observer": "P5",
+          "time_s": 79.4
+        },
+        "construction-C4": {
+          "observer": "P8",
+          "time_s": 83.3
+        },
+        "construction-C7": {
+          "observer": "P1",
+          "time_s": 92.00000000000001
+        },
+        "construction-C8": {
+          "observer": "P4",
+          "time_s": 106.6
+        }
+      },
+      "braking_vehicles": [
+        "P1",
+        "P10",
+        "P12",
+        "P3",
+        "P4",
+        "P6",
+        "P7",
+        "P8"
+      ],
+      "recovered_vehicles": [
+        "P1",
+        "P10",
+        "P12",
+        "P3",
+        "P4",
+        "P6",
+        "P7",
+        "P8"
+      ],
+      "final_time_s": 240.0,
+      "collision_events": 0,
+      "physical_map_unchanged": true,
+      "trace_sha256": "49379fca03ad763690445dd84ff4dbf4119058e11c76af8b5ca90f1ded05b885"
+    }
+  },
+  "browser": {
+    "passed": [
+      "construction count range is visible",
+      "construction uses a visible random interval",
+      "new seed button changes the seed",
+      "start after leaving restores the same room and host",
+      "recovery preserves the existing world and explains unapplied settings",
+      "opening root URL restores saved host session",
+      "a browser without saved credentials can only observe the existing room",
+      "synthetic provenance is visible",
+      "generated cars are labelled synthetic",
+      "eight native vehicles plus ego",
+      "nearby source route is selected",
+      "route distance is visible",
+      "ego can observe nearby generated traffic",
+      "manual driver seats are hidden",
+      "construction physical actor is visible and labelled synthetic",
+      "multiple physical sites have individual labels",
+      "generated and active counts are visible",
+      "focus cycles across different construction sites",
+      "construction can be focused without changing the observation vehicle",
+      "IDM driver feedback is shown",
+      "HTTP planning input receives observed construction occupancy",
+      "sampled deadline and generator range are not in Planning input",
+      "HTTP map clearance follows observed empty footprint",
+      "actual clearance is within configured random bounds",
+      "all sites clear independently inside the interval",
+      "all cleared actors leave the physical snapshot",
+      "cleared obstacle is removed from physical snapshot",
+      "eighth vehicle can observe its own online map",
+      "baseline input can be selected without resetting the world",
+      "export contains bounded synthetic perception",
+      "private intentions are excluded",
+      "map layer and observation are atomic",
+      "no structural edits are claimed",
+      "no uncaught JavaScript errors",
+      "reset preserves synthetic population",
+      "reset preserves area and IDM model",
+      "reset reproduces every site and position",
+      "reset reconstructs initial construction actor"
+    ],
+    "browser_errors": []
+  },
+  "additional_browser_check": "Eight labelled construction sites visible together using the existing overview camera",
+  "screenshot": "multi-construction-eight-sites.png",
+  "unit_tests": {
+    "total": 644,
+    "passed": 643,
+    "skipped": 1,
+    "skip_reason": "Original scene fixture unavailable"
+  },
+  "limitations": [
+    "Initial batch only; no recurring runtime event injection",
+    "Low-speed existing source cycle; no general multi-route junction traffic",
+    "Synthetic ideal range observations without occlusion/noise",
+    "No trained scenario generation model or real classmate Planning integration",
+    "Default count and times are stress-test priors, not calibrated real construction frequency",
+    "Formal blind Planning evaluation still requires debug endpoint isolation"
+  ]
+}

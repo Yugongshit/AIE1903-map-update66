@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 import unittest
 
-from map_update.simulation_events import ConstructionEvent, sample_clearance_time
+from map_update.simulation_events import ConstructionEvent, sample_clearance_time, construction_specs
 from map_update.simulation_traffic import cyclic_traffic, traffic_options, vehicle_perception
 from map_update.simulation_live_map import ObservedStateMap, footprint
 from map_update.simulation_platform_data import load_scene
@@ -35,7 +35,10 @@ class ConstructionTests(unittest.TestCase):
         for config in ({'construction':1},{'stop_enabled':'false'},{'construction_duration_s':0},
                        {'construction_duration_s':float('nan')}, {'construction_min_s':120},
                        {'construction_max_s':4}, {'construction_min_s':float('nan')},
-                       {'construction_duration_s':60,'construction_min_s':45}):
+                       {'construction_duration_s':60,'construction_min_s':45},
+                       {'construction_count_min':0}, {'construction_count_max':9},
+                       {'construction_count_min':True}, {'construction_count_max':2.5},
+                       {'construction_count_min':6,'construction_count_max':2}):
             with self.assertRaises(ValueError):traffic_options(config)
 
     def test_clearance_is_seeded_bounded_and_not_one_fixed_deadline(self):
@@ -64,8 +67,44 @@ class ConstructionTests(unittest.TestCase):
         payload=load_scene(Path(__file__).resolve().parents[1],'nuscenes-scene0980')
         first=cyclic_traffic(payload,{'seed':7,'construction':True})
         second=cyclic_traffic(payload,{'seed':7,'construction':True,'construction_min_s':120,'construction_max_s':240})
-        for key in ('missions','construction','cyclic_path'):
+        for key in ('missions','constructions','construction_generation','cyclic_path'):
             self.assertEqual(first[key],second[key])
+
+    def test_multiple_sites_have_unique_ids_safe_spacing_and_variable_count(self):
+        payload=load_scene(Path(__file__).resolve().parents[1],'nuscenes-scene0980')
+        counts, layouts = set(), set()
+        for seed in range(12):
+            config=cyclic_traffic(payload,dict(seed=seed,construction=True,area='near_recording',vehicle_count=12))
+            specs=config['constructions']
+            self.assertGreaterEqual(len(specs),2)
+            self.assertLessEqual(len(specs),5)
+            self.assertEqual(len({s['object_id'] for s in specs}),len(specs))
+            counts.add(len(specs));layouts.add(str([s['position_city_m'] for s in specs]))
+            boxes=[vehicle_footprint(s['position_city_m'],s['heading_rad'],1.,2.5,margin=.5) for s in specs]
+            for i,box in enumerate(boxes):
+                for other in boxes[i+1:]:self.assertGreaterEqual(box.distance(other),20.)
+                for m in config['missions']:
+                    self.assertGreaterEqual(box.distance(vehicle_footprint(m['position_scenario_m'],m['heading_rad'])),4.)
+        self.assertGreater(len(counts),1)
+        self.assertGreater(len(layouts),1)
+
+    def test_each_event_has_independent_deadline_and_adding_events_preserves_first(self):
+        options=traffic_options({'seed':7})
+        times=[sample_clearance_time(options,f'construction-{i}') for i in range(1,9)]
+        self.assertGreater(len(set(times)),1)
+        self.assertTrue(all(45<=t<=120 for t in times))
+        payload=load_scene(Path(__file__).resolve().parents[1],'nuscenes-scene0980')
+        configs=[cyclic_traffic(payload,dict(seed=7,construction=True,construction_count_min=n,construction_count_max=n)) for n in (1,5)]
+        self.assertEqual(configs[0]['constructions'],configs[1]['constructions'][:1])
+        self.assertEqual(configs[0]['missions'],configs[1]['missions'])
+
+    def test_full_road_reports_capacity_instead_of_overlapping(self):
+        from shapely.geometry import box
+        specs, generation=construction_specs([[0,0],[100,0],[100,100],[0,100],[0,0]],
+            [{'position_scenario_m':[0,0]}],[box(-10,-10,110,110)],traffic_options({}))
+        self.assertEqual(specs,[])
+        self.assertTrue(generation['capacity_limited'])
+        self.assertEqual(generation['placed_count'],0)
 
     def test_clearance_uses_simulation_time_and_cleanup_is_idempotent(self):
         class Engine:
@@ -134,6 +173,14 @@ class ObstacleEvidenceTests(unittest.TestCase):
             'ego',clearance_queries=[query])
         self.assertEqual(p['current_objects'],[])
         self.assertFalse(p['free_space_checks'][0]['observed_free'])
+
+    def test_multiple_obstacles_clear_independently_without_future_answers(self):
+        second=actor('construction-C2',30.,'TRAFFIC_BARRIER',length=1.)
+        for step in range(25,50):self.observe(step,[self.barrier,second])
+        for step in range(50,80):self.observe(step,[second])
+        statuses={e['actor_id']:e['status'] for e in self.map.snapshot()['events']}
+        self.assertEqual(statuses['construction-C1'],'cleared')
+        self.assertEqual(statuses['construction-C2'],'active')
 
     def test_gap_in_free_evidence_restarts_confirmation(self):
         for step in range(25,40):self.observe(step,[])
