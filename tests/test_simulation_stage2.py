@@ -96,6 +96,14 @@ class JunctionTests(unittest.TestCase):
         self.assertTrue(region.covers(Point(5.,0.).buffer(5.9)))
         self.assertFalse(region.covers(Point(0.,9.)))
 
+    def test_nearly_touching_merge_reserves_finite_width_before_the_node(self):
+        from map_update.simulation_network import junction_sites,merge_junction_regions
+        from shapely.geometry import Polygon,Point
+        points={'a':[[-20.,-1.],[0.,0.],[20.,0.]],'b':[[-20.,1.],[0.,1e-12],[20.,1e-12]]}
+        zones=merge_junction_regions(junction_sites([{'lanes':list(points)}],points,
+            {k:[] for k in points},geometric_conflicts=True))
+        self.assertTrue(any(Polygon(z['boundary_city_m']).covers(Point(-12.,0.)) for z in zones))
+
     def test_overlapping_reservations_merge_without_a_second_stop_line_inside(self):
         from map_update.simulation_network import merge_junction_regions
         zones=merge_junction_regions([self.zone, dict(junction_id='next', position_city_m=[15.,0.], radius_m=6.)])

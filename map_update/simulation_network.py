@@ -56,26 +56,39 @@ def junction_sites(routes, points, graph, *, geometric_conflicts=False):
     for lane in sorted(used):
         if len(incoming[lane])>1:positions.append(points[lane][0])
         if len([t for t in graph[lane] if t in used])>1:positions.append(points[lane][-1])
+    geometry_regions=[]
     if geometric_conflicts:
         # Crossing connectors need a shared reservation even when their graph
         # nodes are distinct. Topological split/merge points alone leave the
         # middle of a large junction unprotected (opposing turns can deadlock).
         import shapely
+        from shapely.ops import nearest_points
         keys = sorted(used)
         lines = [LineString(points[k]) for k in keys]
+        bands = [line.buffer(1.15) for line in lines]
         tree = shapely.STRtree(lines)
         for i, line in enumerate(lines):
-            for j in sorted(tree.query(line, predicate='intersects')):
+            for j in sorted(tree.query(line.buffer(.25), predicate='intersects')):
                 if j <= i:
                     continue
                 overlap = line.intersection(lines[j])
                 hits = [overlap] if overlap.geom_type == 'Point' else list(overlap.geoms) if overlap.geom_type == 'MultiPoint' else []
+                if not hits:hits=[nearest_points(line,lines[j])[0]]
+                protect=False
                 for hit in hits:
                     p = list(hit.coords[0])
                     # An ordinary end-to-start connection is not a conflict.
-                    if all(min(math.dist(p, points[key][end]) for end in (0, -1)) < .25 for key in (keys[i], keys[j])):
+                    connected=keys[j] in graph[keys[i]] or keys[i] in graph[keys[j]]
+                    if connected and all(min(math.dist(p, points[key][end]) for end in (0, -1)) < .25 for key in (keys[i], keys[j])):
                         continue
                     positions.append(p)
+                    protect=True
+                if protect:
+                    # Vehicle widths can conflict well before centreline merge
+                    # points. This also handles sub-millimetre source seams
+                    # that an exact line-intersection predicate misses.
+                    region=bands[i].intersection(bands[j]).buffer(2.5)
+                    geometry_regions.extend([region] if region.geom_type=='Polygon' else list(region.geoms))
     # Overlapping approach envelopes are one conservative reservation zone.
     groups=[]
     for p in positions:
@@ -90,6 +103,13 @@ def junction_sites(routes, points, graph, *, geometric_conflicts=False):
         result.append(dict(junction_id=f'junction-{len(result)+1}',position_city_m=center,radius_m=radius,
                            rule='synthetic_unsignalised_exclusive_reservation'))
         if geometric_conflicts:result[-1]['boundary_city_m']=[list(p) for p in shapely.MultiPoint(group).convex_hull.buffer(6.).exterior.coords]
+    envelopes=[Polygon(z['boundary_city_m']) for z in result if z.get('boundary_city_m')]
+    for region in geometry_regions:
+        if region.is_empty or any(envelope.covers(region) for envelope in envelopes):continue
+        center=list(region.centroid.coords[0])
+        result.append(dict(junction_id=f'junction-{len(result)+1}',position_city_m=center,
+            radius_m=max(math.dist(center,p) for p in region.exterior.coords),
+            boundary_city_m=[list(p) for p in region.exterior.coords],rule='synthetic_finite_width_conflict_reservation'))
     return result
 
 
