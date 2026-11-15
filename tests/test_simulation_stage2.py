@@ -74,7 +74,7 @@ class JunctionTests(unittest.TestCase):
         self.control=JunctionCoordinator([self.zone])
 
     def test_only_one_approach_is_granted_and_occupied_external_car_blocks(self):
-        actors=[actor('a',-20),actor('b',0,-20,math.pi/2)]
+        actors=[actor('a',-10),actor('b',0,-10,math.pi/2)]
         yields=self.control.update(actors,self.paths,0.)
         self.assertEqual(len(yields),1)
         holder=self.control.holders['j']['vehicle_id']
@@ -89,8 +89,18 @@ class JunctionTests(unittest.TestCase):
         self.control.update([actor('a',-23),actor('b',-15)],paths,0.)
         self.assertEqual(self.control.holders['j']['vehicle_id'],'b')
 
+    def test_downstream_reservation_does_not_stop_car_inside_previous_junction(self):
+        zones = [self.zone, dict(junction_id='next', position_city_m=[25., 0.], radius_m=6.)]
+        control = JunctionCoordinator(zones)
+        paths = {'a': [[-50., 0.], [80., 0.]]}
+        actors = [actor('a', 0), actor('ego', 25)]
+        self.assertNotIn('a', control.update(actors, paths, 0.))
+        actors[0] = actor('a', 16)
+        self.assertEqual(control.update(actors, paths, 1.)['a'], 'next')
+        self.assertEqual(control.blockers['a']['waiting_for'], ['ego'])
+
     def test_zone_releases_after_holder_exits_and_waiting_car_proceeds(self):
-        self.control.update([actor('a',-20),actor('b',0,-20,math.pi/2)],self.paths,0.)
+        self.control.update([actor('a',-10),actor('b',0,-10,math.pi/2)],self.paths,0.)
         self.control.update([actor('a',0),actor('b',0,-20,math.pi/2)],self.paths,1.)
         self.control.update([actor('a',15),actor('b',0,-20,math.pi/2)],self.paths,2.)
         self.assertEqual(self.control.passes,1)

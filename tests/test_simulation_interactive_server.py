@@ -178,6 +178,20 @@ class InteractiveHttpTests(unittest.TestCase):
         return self.post("control", {**self.public_identity(), "host_token": self.identity["host_token"],
                                      "action": action, **extra})
 
+    def test_clock_diagnostic_distinguishes_paused_and_pending_physics(self):
+        self.open_room()
+        self.assertEqual(self.state()['clock_diagnostic']['phase'], 'paused')
+        coordinator = self.server.interactive
+        with coordinator.lock:
+            coordinator.last_physics_wall = time.monotonic()-5
+        self.assertGreaterEqual(self.state()['clock_diagnostic']['seconds_since_physics_step'], 5)
+        self.server.engine.delay = .15
+        self.assertEqual(self.host('play')[0], 200)
+        state = self.until(lambda s: s['clock_diagnostic']['engine_busy'])
+        self.assertEqual(state['clock_diagnostic']['phase'], 'running')
+        self.until(lambda s: s['room']['observation_step'] > 0)
+        self.assertLess(self.state()['clock_diagnostic']['seconds_since_physics_step'], 1)
+
     def test_planning_input_is_atomic_and_action_receipt_binds_version(self):
         self.open_room();sid=self.identity['session_id']
         status,_,bundle=self.request('/api/interactive/planning-input?session_id='+sid+'&vehicle_id=ego')

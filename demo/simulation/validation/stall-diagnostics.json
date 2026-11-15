@@ -1,0 +1,2679 @@
+{
+  "scope": "synthetic_background_traffic_rule_comparison_not_map_input_paired_evaluation",
+  "baseline_commit": "aa1fed2c9829ef7ec442f5d6e156cfbb2e851333",
+  "cars": 96,
+  "pedestrians": 16,
+  "seed": 0,
+  "seconds": 180,
+  "mixed": true,
+  "timing_is_not_controlled_benchmark": true,
+  "baseline": {
+    "existing_checks_passed": true,
+    "trace": [
+      {
+        "time_s": 0.1,
+        "moving": 0,
+        "completed_trips": 0,
+        "boundary_exits": 0,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 0
+      },
+      {
+        "time_s": 30.0,
+        "moving": 53,
+        "completed_trips": 18,
+        "boundary_exits": 17,
+        "collisions": 0,
+        "cycle_groups": [
+          [
+            "P22",
+            "P24"
+          ],
+          [
+            "P63",
+            "P76"
+          ]
+        ],
+        "stopped_over_30s": 0
+      },
+      {
+        "time_s": 60.0,
+        "moving": 43,
+        "completed_trips": 31,
+        "boundary_exits": 30,
+        "collisions": 0,
+        "cycle_groups": [
+          [
+            "P12",
+            "P21",
+            "P22",
+            "P24",
+            "P41",
+            "P45"
+          ],
+          [
+            "P49",
+            "P58"
+          ],
+          [
+            "P63",
+            "P76"
+          ]
+        ],
+        "stopped_over_30s": 18
+      },
+      {
+        "time_s": 90.0,
+        "moving": 31,
+        "completed_trips": 39,
+        "boundary_exits": 36,
+        "collisions": 0,
+        "cycle_groups": [
+          [
+            "P21",
+            "P22",
+            "P24",
+            "P41",
+            "P45"
+          ],
+          [
+            "P3",
+            "P81"
+          ],
+          [
+            "P32",
+            "P47"
+          ],
+          [
+            "P49",
+            "P58"
+          ],
+          [
+            "P63",
+            "P76"
+          ]
+        ],
+        "stopped_over_30s": 30
+      },
+      {
+        "time_s": 120.0,
+        "moving": 23,
+        "completed_trips": 41,
+        "boundary_exits": 38,
+        "collisions": 0,
+        "cycle_groups": [
+          [
+            "P21",
+            "P22",
+            "P24",
+            "P41",
+            "P45"
+          ],
+          [
+            "P3",
+            "P81"
+          ],
+          [
+            "P32",
+            "P47"
+          ],
+          [
+            "P49",
+            "P58"
+          ],
+          [
+            "P63",
+            "P76"
+          ]
+        ],
+        "stopped_over_30s": 48
+      },
+      {
+        "time_s": 150.0,
+        "moving": 20,
+        "completed_trips": 44,
+        "boundary_exits": 39,
+        "collisions": 0,
+        "cycle_groups": [
+          [
+            "P21",
+            "P22",
+            "P24",
+            "P41",
+            "P45"
+          ],
+          [
+            "P3",
+            "P81"
+          ],
+          [
+            "P32",
+            "P47"
+          ],
+          [
+            "P49",
+            "P58"
+          ],
+          [
+            "P63",
+            "P76"
+          ]
+        ],
+        "stopped_over_30s": 51
+      },
+      {
+        "time_s": 180.0,
+        "moving": 10,
+        "completed_trips": 47,
+        "boundary_exits": 41,
+        "collisions": 0,
+        "cycle_groups": [
+          [
+            "P21",
+            "P22",
+            "P24",
+            "P41",
+            "P45"
+          ],
+          [
+            "P3",
+            "P81"
+          ],
+          [
+            "P32",
+            "P47"
+          ],
+          [
+            "P49",
+            "P58"
+          ],
+          [
+            "P63",
+            "P76"
+          ]
+        ],
+        "stopped_over_30s": 66
+      }
+    ],
+    "final_waits": {
+      "ego": {
+        "reason": "waiting_for_action",
+        "stopped": true,
+        "stopped_for_s": 180.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "046a5c3e-44c2-4aba-b072-7a43b98e4e06",
+        "synthetic_diagnostic": true
+      },
+      "P1": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P1-g2",
+        "synthetic_diagnostic": true
+      },
+      "P2": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 27.1,
+        "waiting_for": [
+          "P14"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P2-g1",
+        "synthetic_diagnostic": true
+      },
+      "P3": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 100.7,
+        "waiting_for": [
+          "P81"
+        ],
+        "junction_id": "junction-23",
+        "actor_instance_id": "traffic-P3-g1",
+        "synthetic_diagnostic": true
+      },
+      "P4": {
+        "reason": "cycle_reentry_requires_forward_lane_pose",
+        "stopped": true,
+        "stopped_for_s": 89.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P4-g2",
+        "synthetic_diagnostic": true
+      },
+      "P5": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 26.2,
+        "waiting_for": [
+          "P46"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P5-g2",
+        "synthetic_diagnostic": true
+      },
+      "P6": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 154.3,
+        "waiting_for": [
+          "P21"
+        ],
+        "junction_id": "junction-41",
+        "actor_instance_id": "traffic-P6-g1",
+        "synthetic_diagnostic": true
+      },
+      "P7": {
+        "reason": "nearby_actor_braking",
+        "stopped": true,
+        "stopped_for_s": 0.2,
+        "waiting_for": [
+          "P4"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P7-g2",
+        "synthetic_diagnostic": true
+      },
+      "P8": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 157.8,
+        "waiting_for": [
+          "P33"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P8-g1",
+        "synthetic_diagnostic": true
+      },
+      "P9": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 34.2,
+        "waiting_for": [
+          "P23"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P9-g1",
+        "synthetic_diagnostic": true
+      },
+      "P10": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 42.0,
+        "waiting_for": [
+          "P95"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P10-g2",
+        "synthetic_diagnostic": true
+      },
+      "P11": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 67.9,
+        "waiting_for": [
+          "P78"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P11-g2",
+        "synthetic_diagnostic": true
+      },
+      "P12": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 144.4,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P12-g1",
+        "synthetic_diagnostic": true
+      },
+      "P13": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 120.9,
+        "waiting_for": [
+          "P82"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P13-g1",
+        "synthetic_diagnostic": true
+      },
+      "P14": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 31.1,
+        "waiting_for": [
+          "P83"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P14-g1",
+        "synthetic_diagnostic": true
+      },
+      "P15": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 92.4,
+        "waiting_for": [
+          "P89"
+        ],
+        "junction_id": "junction-12",
+        "actor_instance_id": "traffic-P15-g2",
+        "synthetic_diagnostic": true
+      },
+      "P16": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 110.3,
+        "waiting_for": [
+          "P74"
+        ],
+        "junction_id": "junction-39",
+        "actor_instance_id": "traffic-P16-g1",
+        "synthetic_diagnostic": true
+      },
+      "P17": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 9.3,
+        "waiting_for": [
+          "P70"
+        ],
+        "junction_id": "junction-34",
+        "actor_instance_id": "traffic-P17-g1",
+        "synthetic_diagnostic": true
+      },
+      "P18": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 21.8,
+        "waiting_for": [
+          "P48"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P18-g2",
+        "synthetic_diagnostic": true
+      },
+      "P19": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 17.4,
+        "waiting_for": [
+          "P85"
+        ],
+        "junction_id": "junction-3",
+        "actor_instance_id": "traffic-P19-g1",
+        "synthetic_diagnostic": true
+      },
+      "P20": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 100.6,
+        "waiting_for": [
+          "P52"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P20-g2",
+        "synthetic_diagnostic": true
+      },
+      "P21": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 149.0,
+        "waiting_for": [
+          "P12",
+          "P45"
+        ],
+        "junction_id": "junction-31",
+        "actor_instance_id": "traffic-P21-g1",
+        "synthetic_diagnostic": true
+      },
+      "P22": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 158.6,
+        "waiting_for": [
+          "P24"
+        ],
+        "junction_id": "junction-24",
+        "actor_instance_id": "traffic-P22-g1",
+        "synthetic_diagnostic": true
+      },
+      "P23": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 36.4,
+        "waiting_for": [
+          "P87"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P23-g1",
+        "synthetic_diagnostic": true
+      },
+      "P24": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 165.9,
+        "waiting_for": [
+          "P22",
+          "P41"
+        ],
+        "junction_id": "junction-36",
+        "actor_instance_id": "traffic-P24-g1",
+        "synthetic_diagnostic": true
+      },
+      "P25": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 173.4,
+        "waiting_for": [
+          "P63"
+        ],
+        "junction_id": "junction-30",
+        "actor_instance_id": "traffic-P25-g1",
+        "synthetic_diagnostic": true
+      },
+      "P26": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 21.6,
+        "waiting_for": [
+          "P18"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P26-g2",
+        "synthetic_diagnostic": true
+      },
+      "P27": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 130.1,
+        "waiting_for": [
+          "P44"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P27-g1",
+        "synthetic_diagnostic": true
+      },
+      "P28": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P28-g3",
+        "synthetic_diagnostic": true
+      },
+      "P29": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 52.9,
+        "waiting_for": [
+          "P27"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P29-g2",
+        "synthetic_diagnostic": true
+      },
+      "P30": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 71.7,
+        "waiting_for": [
+          "P81"
+        ],
+        "junction_id": "junction-23",
+        "actor_instance_id": "traffic-P30-g1",
+        "synthetic_diagnostic": true
+      },
+      "P31": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P31-g1",
+        "synthetic_diagnostic": true
+      },
+      "P32": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 103.4,
+        "waiting_for": [
+          "P47"
+        ],
+        "junction_id": "junction-32",
+        "actor_instance_id": "traffic-P32-g1",
+        "synthetic_diagnostic": true
+      },
+      "P33": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 172.0,
+        "waiting_for": [
+          "P63"
+        ],
+        "junction_id": "junction-30",
+        "actor_instance_id": "traffic-P33-g1",
+        "synthetic_diagnostic": true
+      },
+      "P34": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 72.3,
+        "waiting_for": [
+          "P3"
+        ],
+        "junction_id": "junction-20",
+        "actor_instance_id": "traffic-P34-g1",
+        "synthetic_diagnostic": true
+      },
+      "P35": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 97.8,
+        "waiting_for": [
+          "P15"
+        ],
+        "junction_id": "junction-15",
+        "actor_instance_id": "traffic-P35-g2",
+        "synthetic_diagnostic": true
+      },
+      "P36": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 32.6,
+        "waiting_for": [
+          "P9"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P36-g1",
+        "synthetic_diagnostic": true
+      },
+      "P37": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 63.7,
+        "waiting_for": [
+          "P50"
+        ],
+        "junction_id": "junction-33",
+        "actor_instance_id": "traffic-P37-g4",
+        "synthetic_diagnostic": true
+      },
+      "P38": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 94.5,
+        "waiting_for": [
+          "P35"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P38-g2",
+        "synthetic_diagnostic": true
+      },
+      "P39": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 8.8,
+        "waiting_for": [
+          "P70"
+        ],
+        "junction_id": "junction-34",
+        "actor_instance_id": "traffic-P39-g1",
+        "synthetic_diagnostic": true
+      },
+      "P40": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 5.8,
+        "waiting_for": [
+          "P73"
+        ],
+        "junction_id": "junction-2",
+        "actor_instance_id": "traffic-P40-g1",
+        "synthetic_diagnostic": true
+      },
+      "P41": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 151.6,
+        "waiting_for": [
+          "P21"
+        ],
+        "junction_id": "junction-41",
+        "actor_instance_id": "traffic-P41-g1",
+        "synthetic_diagnostic": true
+      },
+      "P42": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 166.2,
+        "waiting_for": [
+          "P76"
+        ],
+        "junction_id": "junction-29",
+        "actor_instance_id": "traffic-P42-g1",
+        "synthetic_diagnostic": true
+      },
+      "P43": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 51.0,
+        "waiting_for": [
+          "P56"
+        ],
+        "junction_id": "junction-6",
+        "actor_instance_id": "traffic-P43-g1",
+        "synthetic_diagnostic": true
+      },
+      "P44": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 137.1,
+        "waiting_for": [
+          "P16"
+        ],
+        "junction_id": "junction-35",
+        "actor_instance_id": "traffic-P44-g1",
+        "synthetic_diagnostic": true
+      },
+      "P45": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 150.7,
+        "waiting_for": [
+          "P24"
+        ],
+        "junction_id": "junction-24",
+        "actor_instance_id": "traffic-P45-g1",
+        "synthetic_diagnostic": true
+      },
+      "P46": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 28.4,
+        "waiting_for": [
+          "P75"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P46-g2",
+        "synthetic_diagnostic": true
+      },
+      "P47": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 110.6,
+        "waiting_for": [
+          "P32"
+        ],
+        "junction_id": "junction-27",
+        "actor_instance_id": "traffic-P47-g1",
+        "synthetic_diagnostic": true
+      },
+      "P48": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 25.6,
+        "waiting_for": [
+          "P57"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P48-g1",
+        "synthetic_diagnostic": true
+      },
+      "P49": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 145.1,
+        "waiting_for": [
+          "P58"
+        ],
+        "junction_id": "junction-26",
+        "actor_instance_id": "traffic-P49-g1",
+        "synthetic_diagnostic": true
+      },
+      "P50": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 14.1,
+        "waiting_for": [
+          "P93"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P50-g2",
+        "synthetic_diagnostic": true
+      },
+      "P51": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P51-g2",
+        "synthetic_diagnostic": true
+      },
+      "P52": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 127.1,
+        "waiting_for": [
+          "P76"
+        ],
+        "junction_id": "junction-29",
+        "actor_instance_id": "traffic-P52-g2",
+        "synthetic_diagnostic": true
+      },
+      "P53": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 40.4,
+        "waiting_for": [
+          "P66"
+        ],
+        "junction_id": "junction-17",
+        "actor_instance_id": "traffic-P53-g1",
+        "synthetic_diagnostic": true
+      },
+      "P54": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 112.3,
+        "waiting_for": [
+          "P16",
+          "P90"
+        ],
+        "junction_id": "junction-35",
+        "actor_instance_id": "traffic-P54-g1",
+        "synthetic_diagnostic": true
+      },
+      "P55": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 48.1,
+        "waiting_for": [
+          "P4",
+          "P7"
+        ],
+        "junction_id": "junction-40",
+        "actor_instance_id": "traffic-P55-g1",
+        "synthetic_diagnostic": true
+      },
+      "P56": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 60.4,
+        "waiting_for": [
+          "P89"
+        ],
+        "junction_id": "junction-12",
+        "actor_instance_id": "traffic-P56-g1",
+        "synthetic_diagnostic": true
+      },
+      "P57": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 26.6,
+        "waiting_for": [
+          "P2"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P57-g2",
+        "synthetic_diagnostic": true
+      },
+      "P58": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 147.5,
+        "waiting_for": [
+          "P49"
+        ],
+        "junction_id": "junction-25",
+        "actor_instance_id": "traffic-P58-g1",
+        "synthetic_diagnostic": true
+      },
+      "P59": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 147.8,
+        "waiting_for": [
+          "P69"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P59-g2",
+        "synthetic_diagnostic": true
+      },
+      "P60": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 2.0,
+        "waiting_for": [
+          "P40"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P60-g1",
+        "synthetic_diagnostic": true
+      },
+      "P61": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 25.5,
+        "waiting_for": [
+          "P88"
+        ],
+        "junction_id": "junction-44",
+        "actor_instance_id": "traffic-P61-g1",
+        "synthetic_diagnostic": true
+      },
+      "P62": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 68.1,
+        "waiting_for": [
+          "P20"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P62-g3",
+        "synthetic_diagnostic": true
+      },
+      "P63": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 168.7,
+        "waiting_for": [
+          "P76"
+        ],
+        "junction_id": "junction-29",
+        "actor_instance_id": "traffic-P63-g1",
+        "synthetic_diagnostic": true
+      },
+      "P64": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P64-g1",
+        "synthetic_diagnostic": true
+      },
+      "P65": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P65-g2",
+        "synthetic_diagnostic": true
+      },
+      "P66": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P66-g2",
+        "synthetic_diagnostic": true
+      },
+      "P67": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 12.3,
+        "waiting_for": [
+          "P53"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P67-g1",
+        "synthetic_diagnostic": true
+      },
+      "P68": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 109.9,
+        "waiting_for": [
+          "P70"
+        ],
+        "junction_id": "junction-34",
+        "actor_instance_id": "traffic-P68-g1",
+        "synthetic_diagnostic": true
+      },
+      "P69": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 152.4,
+        "waiting_for": [
+          "P25"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P69-g1",
+        "synthetic_diagnostic": true
+      },
+      "P70": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P70-g1",
+        "synthetic_diagnostic": true
+      },
+      "P71": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 119.0,
+        "waiting_for": [
+          "P59"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P71-g2",
+        "synthetic_diagnostic": true
+      },
+      "P72": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 14.9,
+        "waiting_for": [
+          "P54"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P72-g1",
+        "synthetic_diagnostic": true
+      },
+      "P73": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P73-g1",
+        "synthetic_diagnostic": true
+      },
+      "P74": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 141.3,
+        "waiting_for": [
+          "P24"
+        ],
+        "junction_id": "junction-24",
+        "actor_instance_id": "traffic-P74-g1",
+        "synthetic_diagnostic": true
+      },
+      "P75": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 30.1,
+        "waiting_for": [
+          "P36"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P75-g2",
+        "synthetic_diagnostic": true
+      },
+      "P76": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 160.0,
+        "waiting_for": [
+          "P63"
+        ],
+        "junction_id": "junction-30",
+        "actor_instance_id": "traffic-P76-g1",
+        "synthetic_diagnostic": true
+      },
+      "P77": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P77-g3",
+        "synthetic_diagnostic": true
+      },
+      "P78": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 73.6,
+        "waiting_for": [
+          "P86"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P78-g2",
+        "synthetic_diagnostic": true
+      },
+      "P79": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 115.7,
+        "waiting_for": [
+          "P12"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P79-g1",
+        "synthetic_diagnostic": true
+      },
+      "P80": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 107.5,
+        "waiting_for": [
+          "P71"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P80-g2",
+        "synthetic_diagnostic": true
+      },
+      "P81": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 94.5,
+        "waiting_for": [
+          "P3"
+        ],
+        "junction_id": "junction-20",
+        "actor_instance_id": "traffic-P81-g1",
+        "synthetic_diagnostic": true
+      },
+      "P82": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 134.7,
+        "waiting_for": [
+          "P47"
+        ],
+        "junction_id": "junction-32",
+        "actor_instance_id": "traffic-P82-g1",
+        "synthetic_diagnostic": true
+      },
+      "P83": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 34.9,
+        "waiting_for": [
+          "P67",
+          "P94"
+        ],
+        "junction_id": "junction-10",
+        "actor_instance_id": "traffic-P83-g1",
+        "synthetic_diagnostic": true
+      },
+      "P84": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 80.5,
+        "waiting_for": [
+          "P70"
+        ],
+        "junction_id": "junction-34",
+        "actor_instance_id": "traffic-P84-g2",
+        "synthetic_diagnostic": true
+      },
+      "P85": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 97.5,
+        "waiting_for": [
+          "P49"
+        ],
+        "junction_id": "junction-25",
+        "actor_instance_id": "traffic-P85-g1",
+        "synthetic_diagnostic": true
+      },
+      "P86": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 85.9,
+        "waiting_for": [
+          "P4",
+          "P7"
+        ],
+        "junction_id": "junction-42",
+        "actor_instance_id": "traffic-P86-g2",
+        "synthetic_diagnostic": true
+      },
+      "P87": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 42.2,
+        "waiting_for": [
+          "P67"
+        ],
+        "junction_id": "junction-10",
+        "actor_instance_id": "traffic-P87-g1",
+        "synthetic_diagnostic": true
+      },
+      "P88": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 24.8,
+        "waiting_for": [
+          "P43"
+        ],
+        "junction_id": "junction-7",
+        "actor_instance_id": "traffic-P88-g1",
+        "synthetic_diagnostic": true
+      },
+      "P89": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 58.0,
+        "waiting_for": [
+          "P30"
+        ],
+        "junction_id": "junction-8",
+        "actor_instance_id": "traffic-P89-g1",
+        "synthetic_diagnostic": true
+      },
+      "P90": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 141.6,
+        "waiting_for": [
+          "P22",
+          "P41"
+        ],
+        "junction_id": "junction-36",
+        "actor_instance_id": "traffic-P90-g1",
+        "synthetic_diagnostic": true
+      },
+      "P91": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 41.7,
+        "waiting_for": [
+          "P34"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P91-g1",
+        "synthetic_diagnostic": true
+      },
+      "P92": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 32.4,
+        "waiting_for": [
+          "P55"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P92-g2",
+        "synthetic_diagnostic": true
+      },
+      "P93": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 54.5,
+        "waiting_for": [
+          "P11"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P93-g4",
+        "synthetic_diagnostic": true
+      },
+      "P94": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 24.3,
+        "waiting_for": [
+          "P66"
+        ],
+        "junction_id": "junction-17",
+        "actor_instance_id": "traffic-P94-g1",
+        "synthetic_diagnostic": true
+      },
+      "P95": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 46.1,
+        "waiting_for": [
+          "P92"
+        ],
+        "junction_id": "junction-43",
+        "actor_instance_id": "traffic-P95-g2",
+        "synthetic_diagnostic": true
+      },
+      "P96": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 0.3,
+        "waiting_for": [
+          "P61"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P96-g1",
+        "synthetic_diagnostic": true
+      }
+    },
+    "final_pedestrians": null,
+    "max_same_instance_step_m": 0.30000933960753706,
+    "world_map_unchanged": true,
+    "all_actors_have_unique_identity": true,
+    "last_30s_same_instances": 94,
+    "last_30s_net_displacement_under_1m": 68
+  },
+  "approach_fix": {
+    "existing_checks_passed": true,
+    "trace": [
+      {
+        "time_s": 0.1,
+        "moving": 0,
+        "completed_trips": 0,
+        "boundary_exits": 0,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 0
+      },
+      {
+        "time_s": 30.0,
+        "moving": 71,
+        "completed_trips": 18,
+        "boundary_exits": 17,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 0
+      },
+      {
+        "time_s": 60.0,
+        "moving": 62,
+        "completed_trips": 29,
+        "boundary_exits": 28,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 4
+      },
+      {
+        "time_s": 90.0,
+        "moving": 49,
+        "completed_trips": 38,
+        "boundary_exits": 34,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 10
+      },
+      {
+        "time_s": 120.0,
+        "moving": 41,
+        "completed_trips": 47,
+        "boundary_exits": 39,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 19
+      },
+      {
+        "time_s": 150.0,
+        "moving": 33,
+        "completed_trips": 55,
+        "boundary_exits": 45,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 30
+      },
+      {
+        "time_s": 180.0,
+        "moving": 28,
+        "completed_trips": 58,
+        "boundary_exits": 47,
+        "collisions": 0,
+        "cycle_groups": [],
+        "stopped_over_30s": 37
+      }
+    ],
+    "final_waits": {
+      "ego": {
+        "reason": "waiting_for_action",
+        "stopped": true,
+        "stopped_for_s": 180.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "dbc7e08d-84e7-4ed0-b993-15154cc0d699",
+        "synthetic_diagnostic": true
+      },
+      "P1": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P1-g2",
+        "synthetic_diagnostic": true
+      },
+      "P2": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P2-g1",
+        "synthetic_diagnostic": true
+      },
+      "P3": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 2.0,
+        "waiting_for": [
+          "P38"
+        ],
+        "junction_id": "junction-12",
+        "actor_instance_id": "traffic-P3-g1",
+        "synthetic_diagnostic": true
+      },
+      "P4": {
+        "reason": "cycle_reentry_requires_forward_lane_pose",
+        "stopped": true,
+        "stopped_for_s": 89.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P4-g2",
+        "synthetic_diagnostic": true
+      },
+      "P5": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P5-g3",
+        "synthetic_diagnostic": true
+      },
+      "P6": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 140.4,
+        "waiting_for": [
+          "P21"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P6-g1",
+        "synthetic_diagnostic": true
+      },
+      "P7": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 61.1,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P7-g2",
+        "synthetic_diagnostic": true
+      },
+      "P8": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 19.6,
+        "waiting_for": [
+          "P56"
+        ],
+        "junction_id": "junction-6",
+        "actor_instance_id": "traffic-P8-g2",
+        "synthetic_diagnostic": true
+      },
+      "P9": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P9-g1",
+        "synthetic_diagnostic": true
+      },
+      "P10": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P10-g2",
+        "synthetic_diagnostic": true
+      },
+      "P11": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P11-g2",
+        "synthetic_diagnostic": true
+      },
+      "P12": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 153.9,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P12-g1",
+        "synthetic_diagnostic": true
+      },
+      "P13": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 0.9,
+        "waiting_for": [
+          "P47"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P13-g1",
+        "synthetic_diagnostic": true
+      },
+      "P14": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 2.0,
+        "waiting_for": [
+          "P83"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P14-g1",
+        "synthetic_diagnostic": true
+      },
+      "P15": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 0.8,
+        "waiting_for": [
+          "P30"
+        ],
+        "junction_id": "junction-23",
+        "actor_instance_id": "traffic-P15-g2",
+        "synthetic_diagnostic": true
+      },
+      "P16": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 0.5,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P16-g1",
+        "synthetic_diagnostic": true
+      },
+      "P17": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 90.9,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P17-g1",
+        "synthetic_diagnostic": true
+      },
+      "P18": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P18-g2",
+        "synthetic_diagnostic": true
+      },
+      "P19": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 51.8,
+        "waiting_for": [
+          "P85"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P19-g1",
+        "synthetic_diagnostic": true
+      },
+      "P20": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 66.9,
+        "waiting_for": [
+          "P59"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P20-g2",
+        "synthetic_diagnostic": true
+      },
+      "P21": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 18.9,
+        "waiting_for": [
+          "P45"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P21-g1",
+        "synthetic_diagnostic": true
+      },
+      "P22": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 60.3,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P22-g1",
+        "synthetic_diagnostic": true
+      },
+      "P23": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 0.1,
+        "waiting_for": [
+          "P87"
+        ],
+        "junction_id": "junction-17",
+        "actor_instance_id": "traffic-P23-g1",
+        "synthetic_diagnostic": true
+      },
+      "P24": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 0.1,
+        "waiting_for": [
+          "P48",
+          "P57"
+        ],
+        "junction_id": "junction-11",
+        "actor_instance_id": "traffic-P24-g1",
+        "synthetic_diagnostic": true
+      },
+      "P25": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 117.0,
+        "waiting_for": [
+          "P6"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P25-g1",
+        "synthetic_diagnostic": true
+      },
+      "P26": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 113.6,
+        "waiting_for": [
+          "P93"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P26-g2",
+        "synthetic_diagnostic": true
+      },
+      "P27": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P27-g1",
+        "synthetic_diagnostic": true
+      },
+      "P28": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P28-g3",
+        "synthetic_diagnostic": true
+      },
+      "P29": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P29-g2",
+        "synthetic_diagnostic": true
+      },
+      "P30": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 64.9,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P30-g1",
+        "synthetic_diagnostic": true
+      },
+      "P31": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P31-g1",
+        "synthetic_diagnostic": true
+      },
+      "P32": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P32-g1",
+        "synthetic_diagnostic": true
+      },
+      "P33": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 12.3,
+        "waiting_for": [
+          "P87"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P33-g2",
+        "synthetic_diagnostic": true
+      },
+      "P34": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 59.0,
+        "waiting_for": [
+          "P47"
+        ],
+        "junction_id": "junction-16",
+        "actor_instance_id": "traffic-P34-g1",
+        "synthetic_diagnostic": true
+      },
+      "P35": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 0.9,
+        "waiting_for": [
+          "P89"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P35-g2",
+        "synthetic_diagnostic": true
+      },
+      "P36": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 0.2,
+        "waiting_for": [
+          "P23"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P36-g1",
+        "synthetic_diagnostic": true
+      },
+      "P37": {
+        "reason": "nearby_actor_braking",
+        "stopped": true,
+        "stopped_for_s": 1.7,
+        "waiting_for": [
+          "P18"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P37-g1",
+        "synthetic_diagnostic": true
+      },
+      "P38": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 9.8,
+        "waiting_for": [
+          "P35"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P38-g2",
+        "synthetic_diagnostic": true
+      },
+      "P39": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 26.8,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P39-g1",
+        "synthetic_diagnostic": true
+      },
+      "P40": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P40-g1",
+        "synthetic_diagnostic": true
+      },
+      "P41": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 1.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P41-g1",
+        "synthetic_diagnostic": true
+      },
+      "P42": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 24.5,
+        "waiting_for": [
+          "P66"
+        ],
+        "junction_id": "junction-43",
+        "actor_instance_id": "traffic-P42-g2",
+        "synthetic_diagnostic": true
+      },
+      "P43": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 0.3,
+        "waiting_for": [
+          "P56"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P43-g1",
+        "synthetic_diagnostic": true
+      },
+      "P44": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 116.3,
+        "waiting_for": [
+          "P79"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P44-g1",
+        "synthetic_diagnostic": true
+      },
+      "P45": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 3.6,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P45-g1",
+        "synthetic_diagnostic": true
+      },
+      "P46": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 8.5,
+        "waiting_for": [
+          "P63"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P46-g3",
+        "synthetic_diagnostic": true
+      },
+      "P47": {
+        "reason": "cycle_reentry_requires_forward_lane_pose",
+        "stopped": true,
+        "stopped_for_s": 96.3,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P47-g1",
+        "synthetic_diagnostic": true
+      },
+      "P48": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 10.8,
+        "waiting_for": [
+          "P57"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P48-g1",
+        "synthetic_diagnostic": true
+      },
+      "P49": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 0.8,
+        "waiting_for": [
+          "P58"
+        ],
+        "junction_id": "junction-26",
+        "actor_instance_id": "traffic-P49-g1",
+        "synthetic_diagnostic": true
+      },
+      "P50": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 5.8,
+        "waiting_for": [
+          "P46"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P50-g3",
+        "synthetic_diagnostic": true
+      },
+      "P51": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P51-g2",
+        "synthetic_diagnostic": true
+      },
+      "P52": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 141.9,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P52-g2",
+        "synthetic_diagnostic": true
+      },
+      "P53": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P53-g1",
+        "synthetic_diagnostic": true
+      },
+      "P54": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P54-g1",
+        "synthetic_diagnostic": true
+      },
+      "P55": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 77.1,
+        "waiting_for": [
+          "P4"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P55-g1",
+        "synthetic_diagnostic": true
+      },
+      "P56": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 56.2,
+        "waiting_for": [
+          "P38"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P56-g1",
+        "synthetic_diagnostic": true
+      },
+      "P57": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P57-g2",
+        "synthetic_diagnostic": true
+      },
+      "P58": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 134.8,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P58-g1",
+        "synthetic_diagnostic": true
+      },
+      "P59": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 71.8,
+        "waiting_for": [
+          "P69"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P59-g2",
+        "synthetic_diagnostic": true
+      },
+      "P60": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 25.9,
+        "waiting_for": [
+          "P24"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P60-g1",
+        "synthetic_diagnostic": true
+      },
+      "P61": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 45.4,
+        "waiting_for": [
+          "P19"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P61-g1",
+        "synthetic_diagnostic": true
+      },
+      "P62": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P62-g2",
+        "synthetic_diagnostic": true
+      },
+      "P63": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 36.5,
+        "waiting_for": [
+          "P92"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P63-g2",
+        "synthetic_diagnostic": true
+      },
+      "P64": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P64-g1",
+        "synthetic_diagnostic": true
+      },
+      "P65": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P65-g2",
+        "synthetic_diagnostic": true
+      },
+      "P66": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 39.4,
+        "waiting_for": [
+          "P77"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P66-g2",
+        "synthetic_diagnostic": true
+      },
+      "P67": {
+        "reason": "synthetic_brief_stop",
+        "stopped": true,
+        "stopped_for_s": 2.2,
+        "waiting_for": [
+          "P53"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P67-g1",
+        "synthetic_diagnostic": true
+      },
+      "P68": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 110.5,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P68-g1",
+        "synthetic_diagnostic": true
+      },
+      "P69": {
+        "reason": "nearby_actor_braking",
+        "stopped": true,
+        "stopped_for_s": 76.7,
+        "waiting_for": [
+          "P76"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P69-g1",
+        "synthetic_diagnostic": true
+      },
+      "P70": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P70-g2",
+        "synthetic_diagnostic": true
+      },
+      "P71": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 9.4,
+        "waiting_for": [
+          "P48"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P71-g2",
+        "synthetic_diagnostic": true
+      },
+      "P72": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 146.6,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P72-g1",
+        "synthetic_diagnostic": true
+      },
+      "P73": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 22.9,
+        "waiting_for": [
+          "P88"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P73-g1",
+        "synthetic_diagnostic": true
+      },
+      "P74": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 130.7,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P74-g1",
+        "synthetic_diagnostic": true
+      },
+      "P75": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P75-g2",
+        "synthetic_diagnostic": true
+      },
+      "P76": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 92.9,
+        "waiting_for": [
+          "P25"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P76-g1",
+        "synthetic_diagnostic": true
+      },
+      "P77": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 72.6,
+        "waiting_for": [
+          "P55"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P77-g3",
+        "synthetic_diagnostic": true
+      },
+      "P78": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P78-g3",
+        "synthetic_diagnostic": true
+      },
+      "P79": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 133.2,
+        "waiting_for": [
+          "P12"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P79-g1",
+        "synthetic_diagnostic": true
+      },
+      "P80": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 110.7,
+        "waiting_for": [
+          "P52"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P80-g2",
+        "synthetic_diagnostic": true
+      },
+      "P81": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 33.5,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P81-g1",
+        "synthetic_diagnostic": true
+      },
+      "P82": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 56.2,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P82-g1",
+        "synthetic_diagnostic": true
+      },
+      "P83": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 1.3,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P83-g1",
+        "synthetic_diagnostic": true
+      },
+      "P84": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P84-g2",
+        "synthetic_diagnostic": true
+      },
+      "P85": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 1.2,
+        "waiting_for": [
+          "P49"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P85-g1",
+        "synthetic_diagnostic": true
+      },
+      "P86": {
+        "reason": "junction_yield",
+        "stopped": true,
+        "stopped_for_s": 2.2,
+        "waiting_for": [
+          "P93"
+        ],
+        "junction_id": "junction-33",
+        "actor_instance_id": "traffic-P86-g2",
+        "synthetic_diagnostic": true
+      },
+      "P87": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P87-g1",
+        "synthetic_diagnostic": true
+      },
+      "P88": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 33.7,
+        "waiting_for": [
+          "P43"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P88-g1",
+        "synthetic_diagnostic": true
+      },
+      "P89": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 13.9,
+        "waiting_for": [
+          "P15"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P89-g1",
+        "synthetic_diagnostic": true
+      },
+      "P90": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P90-g1",
+        "synthetic_diagnostic": true
+      },
+      "P91": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 48.9,
+        "waiting_for": [
+          "P34"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P91-g1",
+        "synthetic_diagnostic": true
+      },
+      "P92": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 41.5,
+        "waiting_for": [
+          "P20"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P92-g2",
+        "synthetic_diagnostic": true
+      },
+      "P93": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 139.2,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P93-g3",
+        "synthetic_diagnostic": true
+      },
+      "P94": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P94-g1",
+        "synthetic_diagnostic": true
+      },
+      "P95": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 80.4,
+        "waiting_for": [
+          "P26"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P95-g4",
+        "synthetic_diagnostic": true
+      },
+      "P96": {
+        "reason": null,
+        "stopped": false,
+        "stopped_for_s": 0.0,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P96-g1",
+        "synthetic_diagnostic": true
+      }
+    },
+    "final_pedestrians": [
+      {
+        "event_id": "walker-1",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-1",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "commuter",
+        "travelled_m": 215.91,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-2",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-2",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "commuter",
+        "travelled_m": 153.79,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-3",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-3",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "errands",
+        "travelled_m": 110.49,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-4",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-4",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "errands",
+        "travelled_m": 110.69,
+        "reroutes": 1,
+        "changed_destinations": 1,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-5",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-5",
+        "status": "walking",
+        "stationary_for_s": 140.1,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 0,
+        "physics_blockage_replans": 47,
+        "walk_style": "stroller",
+        "travelled_m": 18.23,
+        "reroutes": 0,
+        "changed_destinations": 46,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-6",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-6",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 1,
+        "physics_blockage_replans": 0,
+        "walk_style": "stroller",
+        "travelled_m": 113.56,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-7",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-7",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "errands",
+        "travelled_m": 136.37,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-8",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-8",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 3,
+        "completed_trips": 1,
+        "physics_blockage_replans": 0,
+        "walk_style": "commuter",
+        "travelled_m": 108.68,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 3,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-9",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-9",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 3,
+        "completed_trips": 1,
+        "physics_blockage_replans": 0,
+        "walk_style": "errands",
+        "travelled_m": 122.45,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 3,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-10",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-10",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "errands",
+        "travelled_m": 117.04,
+        "reroutes": 1,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-11",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-11",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 1,
+        "physics_blockage_replans": 0,
+        "walk_style": "commuter",
+        "travelled_m": 192.82,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-12",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-12",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 1,
+        "physics_blockage_replans": 0,
+        "walk_style": "commuter",
+        "travelled_m": 192.18,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-13",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-13",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 3,
+        "physics_blockage_replans": 0,
+        "walk_style": "commuter",
+        "travelled_m": 164.87,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-14",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-14",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 1,
+        "physics_blockage_replans": 0,
+        "walk_style": "stroller",
+        "travelled_m": 89.47,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-15",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-15",
+        "status": "walking",
+        "stationary_for_s": 0.0,
+        "waiting_for": [],
+        "completed_crossings": 0,
+        "completed_trips": 2,
+        "physics_blockage_replans": 0,
+        "walk_style": "stroller",
+        "travelled_m": 109.75,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 0,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      },
+      {
+        "event_id": "walker-16",
+        "kind": "synthetic_pedestrian",
+        "object_id": "walker-16",
+        "status": "waiting_gap",
+        "stationary_for_s": 142.5,
+        "waiting_for": [
+          "P2"
+        ],
+        "completed_crossings": 2,
+        "completed_trips": 0,
+        "physics_blockage_replans": 0,
+        "walk_style": "stroller",
+        "travelled_m": 23.05,
+        "reroutes": 0,
+        "changed_destinations": 0,
+        "distinct_crosswalks": 2,
+        "synthetic": true,
+        "execution_model": "source_walkway_trips_rigid_body_velocity_servo_no_biomechanics"
+      }
+    ],
+    "max_same_instance_step_m": 0.30000789658406396,
+    "world_map_unchanged": true,
+    "all_actors_have_unique_identity": true,
+    "last_30s_same_instances": 94,
+    "last_30s_net_displacement_under_1m": 52
+  },
+  "validation": {
+    "full_unittest_run": 689,
+    "passed": 688,
+    "skipped": 1,
+    "skip_reason": "Original scene fixture is not available",
+    "wait_diagnostic_targeted_tests": 3,
+    "browser_checks": {
+      "passed": [
+        "paused clock is explicit",
+        "physical actors have wait diagnostics",
+        "running clock and traffic are distinguished",
+        "stationary ego shows elapsed stop time",
+        "Planning excludes debugging waits and generator futures",
+        "pause status is visible",
+        "no browser exceptions"
+      ],
+      "browser_errors": []
+    }
+  },
+  "final_source_sha256": {
+    "map_update/simulation_network.py": "4186f2e552b9dc574c04871dfc100177d6ad31fab948141f959e6ccb5ad932ae",
+    "map_update/simulation_waits.py": "facbea078132d75b5db1805141dc9a64e7c04a1b1204e84a13b9598c4e114fa2"
+  },
+  "followup_60s_diagnostics": {
+    "passed": true,
+    "time_s": 60,
+    "waits": {
+      "P12": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 33.9,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P12-g1",
+        "synthetic_diagnostic": true,
+        "controller_status": "tracking",
+        "controller_reason": null,
+        "lateral_error_m": 0.22834148841318752,
+        "target_speed_m_s": 1.501591399562671
+      },
+      "P22": {
+        "reason": "stopped_unclassified",
+        "stopped": true,
+        "stopped_for_s": 35.1,
+        "waiting_for": [],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P22-g1",
+        "synthetic_diagnostic": true,
+        "controller_status": "tracking",
+        "controller_reason": null,
+        "lateral_error_m": 0.1484031196635673,
+        "target_speed_m_s": 1.8418696509330224
+      },
+      "P60": {
+        "reason": "nearby_actor_braking",
+        "stopped": true,
+        "stopped_for_s": 50.2,
+        "waiting_for": [
+          "construction-C1"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P60-g1",
+        "synthetic_diagnostic": true,
+        "controller_status": "tracking",
+        "controller_reason": null,
+        "lateral_error_m": 4.310982832142432e-05,
+        "target_speed_m_s": 2.8913694296812618
+      },
+      "P68": {
+        "reason": "following_queue",
+        "stopped": true,
+        "stopped_for_s": 40.8,
+        "waiting_for": [
+          "P10"
+        ],
+        "junction_id": null,
+        "actor_instance_id": "traffic-P68-g1",
+        "synthetic_diagnostic": true,
+        "controller_status": "tracking",
+        "controller_reason": null,
+        "lateral_error_m": 0.024706691312335948,
+        "target_speed_m_s": 2.176041895401595
+      }
+    }
+  },
+  "diagnostic_schema_note": "180s runs preceded the additional controller scalar fields and tracking_without_progress label; 60s followup records controller fields. Physical rule is identical in both fixed runs."
+}

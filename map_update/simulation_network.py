@@ -176,10 +176,12 @@ class JunctionCoordinator:
     def __init__(self, sites):
         self.sites=sites;self.holders={};self.waiting={};self.passes=0;self.yield_ticks=0
         self._path_geometry={}
+        self.blockers={}
 
     def update(self, actors, paths, time_s):
         cars={a['vehicle_id']:a for a in actors if a.get('type')=='VEHICLE'}
         stopped={}
+        self.blockers={}
         projections={}
         def project(identifier,path):
             key=(identifier,id(path))
@@ -229,8 +231,15 @@ class JunctionCoordinator:
                 identifier=min(heads,key=lambda k:(self.waiting[(key,k)],approaches[k],k))
                 holder=dict(vehicle_id=identifier,since=time_s,entered=False);self.holders[key]=holder
             for identifier,ahead in approaches.items():
-                if identifier not in inside and (not holder or holder['vehicle_id']!=identifier):
+                # Reserve early, but brake at a speed-dependent approach line.
+                # Braking all applicants 20 m early can trap a vehicle inside
+                # the previous junction while it waits for the next one.
+                own = cars[identifier]
+                speed = max(0., own.get('speed_m_s', 0.))
+                stop_distance = radius + own['length_m']/2 + 2. + speed + speed*speed/(2*1.4)
+                if identifier not in inside and ahead <= stop_distance and (not holder or holder['vehicle_id']!=identifier):
                     stopped[identifier]=key;self.yield_ticks+=1
+                    self.blockers[identifier]=dict(junction_id=key, waiting_for=sorted(inside | ({holder['vehicle_id']} if holder else set())))
             for pair in list(self.waiting):
                 if pair[0]==key and pair[1] not in approaches:self.waiting.pop(pair)
         return stopped

@@ -34,6 +34,9 @@ class InteractiveCoordinator:
         self.pending_camera = None
         self.pending_close = False
         self.camera_since_tick = False
+        self.last_physics_wall = None
+        self.last_physics_step = None
+        self.real_time_factor = None
         self.next_tick = 0.
         self.render_until = 0.
         self.thread = threading.Thread(target=self._run, name='interactive-physics-clock', daemon=True)
@@ -89,6 +92,7 @@ class InteractiveCoordinator:
             self.observed_maps = {identifier: ObservedStateMap(roads, feature_sha256(roads))
                                   for identifier in ['ego', *[m['vehicle_id'] for m in missions]]}
             self.planning_receipts = []
+            self.last_physics_wall = self.last_physics_step = self.real_time_factor = None
             self.active, self.playing, self.phase, self.error = True, False, 'starting', None
             self.last_engine = self.last_result = self.compact_result = self.pending_camera = None
             self.pending_close = False
@@ -150,6 +154,11 @@ class InteractiveCoordinator:
                 measured=self._measure(result,identifier,observed_map.clearance_queries())
                 self.current_perceptions[identifier]=measured
                 observed_map.update(result['step'], result['interactive'].get('sim_time_s', result['step']*.1),measured)
+        if self.last_physics_step != result['step']:
+            now = time.monotonic()
+            if self.last_physics_wall is not None and self.last_physics_step is not None and result['step'] > self.last_physics_step:
+                self.real_time_factor = (result['step']-self.last_physics_step)*.1/max(.001, now-self.last_physics_wall)
+            self.last_physics_wall, self.last_physics_step = now, result['step']
         self.last_result = result
         # The browser already has static map/state overlays. Its snapshot
         # contains each actual actor once, including stationary colliders.
@@ -233,6 +242,9 @@ class InteractiveCoordinator:
             return {'active': self.active, 'playing': self.playing, 'phase': self.phase,
                     'error': self.error, 'scene_id': self.scene_key, 'version': self.version,
                     'state_unchanged': unchanged,
+                    'clock_diagnostic': dict(phase=self.phase, engine_busy=bool(self.job),
+                        seconds_since_physics_step=None if self.last_physics_wall is None else round(time.monotonic()-self.last_physics_wall, 2),
+                        recent_real_time_factor=self.real_time_factor),
                     'room': self.room.snapshot(include_objects=not compact,
                                                include_vehicle_state=not compact) if self.identity else None,
                     'engine': engine}
@@ -299,6 +311,9 @@ class InteractiveCoordinator:
             if action == 'play':
                 if self.phase not in {'paused', 'running'}:
                     raise ValueError('等待引擎就绪后再开始。')
+                if not self.playing:
+                    self.last_physics_wall = time.monotonic()
+                    self.real_time_factor = None
                 self.playing, self.phase, self.next_tick = True, 'running', 0.
             elif action == 'pause':
                 self.playing = False

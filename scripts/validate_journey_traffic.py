@@ -35,11 +35,14 @@ def main():
                     collisions=sum(v['collision_event_count'] for v in state['vehicles'].values()),occupied_80m_cells=len({(int(x//80),int(y//80)) for x,y in pos}),
                     outside_old_ring=sum(not(395.85<=x<=611.91 and 1073.32<=y<=1463.36) for x,y in pos),
                     moving=sum(v['speed_m_s']>.3 for v in vehicles),
+                    traffic_diagnostics=state.get('traffic_diagnostics'),
+                    pedestrian_diagnostics=[e for e in state.get('synthetic_events',[]) if e.get('kind')=='synthetic_pedestrian'],
+                    waits={k:v.get('wait_diagnostic') for k,v in state['vehicles'].items()},
                     stopped={k:v['stopped_reason'] for k,v in state['vehicles'].items() if k!='ego' and v['stopped_reason']})
-                trace.append(row);samples.append(dict(time_s=row['time_s'],vehicles=[dict(slot=v['vehicle_id'],instance=v.get('actor_instance_id'),position=v['position_city_m'],speed=v['speed_m_s']) for v in vehicles]))
-                print(json.dumps({k:v for k,v in row.items() if k not in ('stopped','journeys')}|{'trips':row['journeys']['completed_trips'],'exits':row['journeys']['boundary_exits']}),flush=True)
+                trace.append(row);(args.out/'progress.json').write_text(json.dumps(row,ensure_ascii=False,indent=2)+'\n');samples.append(dict(time_s=row['time_s'],vehicles=[dict(slot=v['vehicle_id'],instance=v.get('actor_instance_id'),position=v['position_city_m'],speed=v['speed_m_s']) for v in vehicles]))
+                print(json.dumps({k:v for k,v in row.items() if k not in ('stopped','journeys','waits','pedestrian_diagnostics')}|{'trips':row['journeys']['completed_trips'],'exits':row['journeys']['boundary_exits']}),flush=True)
                 encoded=json.dumps(vehicle_perception(state,'ego'))
-                assert all(k not in encoded for k in ('exit_lane','entry_lane','recent','lifecycle','journey_lane','patrol_goals'))
+                assert all(k not in encoded for k in ('exit_lane','entry_lane','recent','lifecycle','journey_lane','patrol_goals','wait_diagnostic','waiting_cycles','waiting_for'))
         report.update(trace=trace,position_samples=samples,max_same_instance_step_m=max_step,slot_instance_changes=instance_changes,
             world_map_unchanged=original==feature_sha256(session.source_features),wire_bytes=len(json.dumps(cfg).encode()),
             all_actors_have_unique_identity=len({v.get('actor_instance_id',k) for k,v in state['vehicles'].items()})==len(state['vehicles']))

@@ -31,6 +31,7 @@ class Walker:
         self.recent = [node]; self.visited_crosswalks = set(); self.crossing = None
         self.crossing_distance = 0.; self.approved_crossing = None
         self.route = network.trip(node, self.rng, distance_range=self.trip_range); self.target = 1; self.detour = []
+        self.waiting_for=[]; self.stationary_since=0.; self.current_time_s=0.
         self.blocked_since = None; self.reroutes = 0; self.changed_destinations = 0
         self.stalled_for=0.;self.physics_replans=0;self.local_blockages=[]
         a = network.points[node]; b = network.points[self.route[1]]
@@ -54,17 +55,21 @@ class Walker:
             # Pedestrians use the local body-avoidance stage; reserving an entire
             # crosswalk for each person deadlocks opposite curb approaches.
             shape = vehicle_footprint(actor['position_city_m'], actor['heading_rad'], actor['length_m'], actor['width_m'], margin=.3)
-            if corridor.intersects(shape): return False
+            if corridor.intersects(shape):
+                self.waiting_for=[actor['vehicle_id']]; return False
             if actor.get('type') == 'VEHICLE':
                 reach = actor['speed_m_s']*(duration+2.)+2.
                 if shape.distance(corridor) < reach:
                     heading = [math.cos(actor['heading_rad']), math.sin(actor['heading_rad'])]
                     sweep = LineString([actor['position_city_m'], [actor['position_city_m'][i]+heading[i]*reach for i in (0, 1)]]).buffer(actor['width_m']/2+.5)
-                    if sweep.intersects(corridor): return False
+                    if sweep.intersects(corridor):
+                        self.waiting_for=[actor['vehicle_id']]; return False
         return True
 
     def advance(self, time_s, actors):
+        self.current_time_s=time_s; self.waiting_for=[]
         pos = self.position(); moved = math.dist(pos, self.previous)
+        if moved >= .005:self.stationary_since=time_s
         self.distance += moved; self.previous = pos
         self.stalled_for=(getattr(self,'stalled_for',0.)+.1) if self.phase in ('walking','crossing','passing') and moved<.005 else 0.
         crossing = self.network.crossing_at(pos)
@@ -119,6 +124,7 @@ class Walker:
             if math.dist(pos, actor['position_city_m']) > 8: continue
             shape = vehicle_footprint(actor['position_city_m'], actor['heading_rad'], actor['length_m'], actor['width_m'], margin=.15)
             if swept.intersects(shape):
+                self.waiting_for=[actor['vehicle_id']]
                 if self.blocked_since is None: self.blocked_since = time_s
                 if actor.get('type') == 'PEDESTRIAN' and time_s-self.blocked_since > 4+int(self.identifier.split('-')[-1])*3:
                     # A narrow sidewalk may have no room to pass. Replan around
@@ -153,7 +159,8 @@ class Walker:
 
     def report(self):
         return dict(event_id=self.identifier, kind='synthetic_pedestrian', object_id=self.identifier,
-            status=self.phase, completed_crossings=self.crossings, completed_trips=self.trips,
+            status=self.phase, stationary_for_s=round(max(0.,self.current_time_s-self.stationary_since),2),
+            waiting_for=list(self.waiting_for), completed_crossings=self.crossings, completed_trips=self.trips,
             physics_blockage_replans=self.physics_replans, walk_style=self.walk_style, travelled_m=round(self.distance, 2), reroutes=self.reroutes, changed_destinations=self.changed_destinations, distinct_crosswalks=len(self.visited_crosswalks), synthetic=True,
             execution_model='source_walkway_trips_rigid_body_velocity_servo_no_biomechanics')
 

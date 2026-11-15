@@ -270,6 +270,8 @@ class InteractiveRuntime:
     def reset(self):
         from .simulation_network import JunctionCoordinator
         self.junction_coordinator = JunctionCoordinator(self.junctions)
+        from .simulation_waits import TrafficWaits
+        self.traffic_waits = TrafficWaits()
         self.path_overrides={};self.journey_paths={};self.journeys=None
         from .simulation_lane_changes import LaneChanges
         self.lane_changes=LaneChanges(self.source_features,self.route_paths,self.missions,bool(self.traffic and self.traffic['lane_changes']))
@@ -563,12 +565,20 @@ class InteractiveRuntime:
         actors = self.actors()
         native_ids = {vehicle.id for vehicle in self.vehicles.values()}
         vehicles = {}
+        time_s = self.env.episode_step*self.env.config['physics_world_step_size']*self.env.config['decision_repeat']
+        identities = {k: self.journeys.instance_id(k) if self.journeys and k in self.journeys.rows else str(v.id) for k,v in self.vehicles.items()}
+        diagnostic_reasons = dict(self.reasons)
+        if self.journeys:
+            for key in self.journeys.waiting_entries:
+                diagnostic_reasons[key] = 'boundary_waiting_for_safe_entry'
+        waits = self.traffic_waits.update(actors, diagnostic_reasons, self.diagnostics, self.braking,
+            self.junction_coordinator.blockers, time_s, identities)
         for identifier, vehicle in self.vehicles.items():
             row = actor_state(vehicle, self.metadata, identifier)
             row.update(synthetic=identifier!='ego',source_scope='synthetic_background_vehicle' if identifier!='ego' else 'source_initialized_ego',label='P0' if identifier == 'ego' else identifier, mode=self.modes[identifier],
                 action=list(self.actions[identifier]), requested_action=list(self.requested[identifier]),
                 expires_at_monotonic=self.expires[identifier],
-                stopped_reason=self.reasons[identifier], braking=self.braking.get(identifier),
+                wait_diagnostic=waits[identifier], stopped_reason=self.reasons[identifier], braking=self.braking.get(identifier),
                 collision={kind: bool(getattr(vehicle, 'crash_'+kind, False)) for kind in ('vehicle', 'object', 'human', 'building')},
                 collision_contact_steps=list(self.collisions[identifier][-100:]),
                 collision_active=bool(self.current_contacts[identifier]),
@@ -592,7 +602,7 @@ class InteractiveRuntime:
                        heading=row['heading_rad'], length=row['length_m'], width=row['width_m'],
                        height=row['height_m'], static=row.get('type')!='PEDESTRIAN', source_scope=row.get('source_scope','full_scene_offline_prior'))
                   for row in actors if row['native_object_id'] not in native_ids]
-        return {'journeys':self.journeys.report() if self.journeys else None,
+        return {'traffic_diagnostics': self.traffic_waits.report(), 'journeys':self.journeys.report() if self.journeys else None,
                 'traffic_profile': 'synthetic_journeys_v1' if self.journeys else ('synthetic_network_v1' if self.traffic['route_mode']=='network' else 'synthetic_cycle_v1') if self.traffic else 'source_presets',
                 'population': self.population.report() if self.population else None,
                 'junction_control': dict(zone_count=len(self.junctions),passes=self.junction_coordinator.passes,yield_ticks=self.junction_coordinator.yield_ticks,rule='synthetic_unsignalised_reservation_not_real_signals'),
