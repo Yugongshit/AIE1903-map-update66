@@ -146,6 +146,29 @@ class WalkingTests(unittest.TestCase):
         self.assertFalse(line.intersects(blocked))
         self.assertGreater(line.length,25)
 
+    def test_local_car_yield_retreats_then_requires_a_new_crossing_gap(self):
+        w=Walker.__new__(Walker);w.identifier='walker-8'
+        position=[0.,0.];commands=[]
+        w.position=lambda:list(position);w.previous=list(position)
+        w.obj=SimpleNamespace(set_velocity=lambda direction,speed=0:commands.append((direction,speed)),
+            set_heading_theta=lambda h:None,body=SimpleNamespace(setActive=lambda active:None))
+        w.network=SimpleNamespace(points=[[0.,0.],[10.,0.],[0.,2.]],
+            crosswalks={'cross':box(-1.,-3.,12.,3.)},motion_area=box(-1.,-3.,12.,3.),crossing_at=lambda p:'cross')
+        w.route=[0,1];w.target=1;w.detour=[];w.wait_until=0.;w.speed=1.
+        w.distance=0.;w.crossing='cross';w.crossing_distance=0.;w.approved_crossing='cross'
+        w.phase='yielding';w.stationary_since=0.;w.blocked_since=None;w.crossings=0;w.visited_crosswalks=set()
+        car=dict(vehicle_id='car',type='VEHICLE',position_city_m=[1.8,0.],heading_rad=0.,length_m=2.,width_m=1.,speed_m_s=0.)
+        w.advance(10.,[car])
+        self.assertEqual(w.detour,[[0.,2.]])
+        self.assertIsNone(w.approved_crossing)
+        w.advance(10.1,[car])
+        self.assertGreater(commands[-1][1],0.)
+        self.assertGreater(commands[-1][0][1],0.)
+        position[:]=[0.,2.]
+        w.advance(10.2,[car])
+        self.assertEqual(w.phase,'waiting_gap')
+        self.assertEqual(commands[-1][1],0.)
+
     def test_pedestrian_intentions_are_not_observations(self):
         import json
         car=dict(vehicle_id='ego',position_city_m=[0.,0.],heading_rad=0.,speed_m_s=0.,length_m=4.,width_m=2.)

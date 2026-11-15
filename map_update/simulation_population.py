@@ -98,6 +98,7 @@ class Walker:
             candidates.append((distance,list(point)))
         if not candidates:return False
         self.detour=[min(candidates,key=lambda row:row[0])[1]]
+        self.approved_crossing=None
         self.vehicle_retreat=True;self.vehicle_retreats=getattr(self,'vehicle_retreats',0)+1
         return True
 
@@ -170,6 +171,11 @@ class Walker:
                 if retreat_clear and not LineString([pos,ahead]).buffer(.3).intersects(shape):continue
                 self.waiting_for=[actor['vehicle_id']]
                 if self.blocked_since is None: self.blocked_since = time_s
+                if actor.get('type') == 'VEHICLE' and time_s-self.stationary_since >= 4.:
+                    # Local body yielding can also be a mutual car/walker wait,
+                    # including after an earlier crossing approval. Retreat must
+                    # revoke that approval so the walker waits for a fresh gap.
+                    self.retreat_from_stopped_vehicle(pos,actors)
                 if actor.get('type') == 'PEDESTRIAN' and time_s-self.blocked_since > 4+int(self.identifier.split('-')[-1])*3:
                     # A narrow sidewalk may have no room to pass. Replan around
                     # the current body, or abandon this destination and walk
