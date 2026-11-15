@@ -349,6 +349,11 @@ class JunctionCoordinator:
                 if identifier in inside:holder['entered']=True
                 if identifier not in cars or (holder['entered'] and identifier not in inside) or (not holder['entered'] and time_s-holder['since']>20.):
                     self.passes+=int(holder['entered']);reservations.pop(identifier)
+            for identifier in sorted(inside & approaches.keys()):
+                # An actor born/replanned inside a region still owns physical
+                # occupancy; make its current movement visible to new grants.
+                holder=reservations.setdefault(identifier,dict(vehicle_id=identifier,since=time_s,entered=True))
+                holder.update(corridor=corridors[identifier],movement=movements[identifier])
             def same_stream(identifier, holder):
                 # Same entry/exit stream can follow under IDM; independent
                 # streams can proceed only when their swept regions are disjoint.

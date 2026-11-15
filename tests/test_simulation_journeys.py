@@ -110,6 +110,24 @@ class JourneyTests(unittest.TestCase):
         self.assertNotIn('private',json.dumps(second));self.assertNotIn('goal_scenario_m',json.dumps(second))
         self.assertEqual(vehicle_perception(state,'P1')['own_vehicle']['vehicle_id'],'P1')
 
+    def test_boundary_birth_cannot_bypass_an_occupied_junction(self):
+        from collections import Counter
+        from types import SimpleNamespace
+        from shapely.geometry import box
+        from map_update.simulation_journeys import Journeys
+        from map_update.simulation_path_geometry import PathGeometry
+        j=Journeys.__new__(Journeys);j.entry_uses=Counter()
+        j.network=SimpleNamespace(entries={'entry'},geometries={'entry':PathGeometry([[0.,0.],[40.,0.]])})
+        coordinator=SimpleNamespace(regions={'zone':box(0.,-5.,20.,5.)},reservations={'zone':{'other':{}}})
+        j.runtime=SimpleNamespace(junction_coordinator=coordinator)
+        self.assertIsNone(j.entry([]))
+        coordinator.reservations.clear()
+        self.assertIsNotNone(j.entry([]))
+        car=dict(vehicle_id='other',type='VEHICLE',position_city_m=[18.,0.],heading_rad=0.,length_m=4.5,width_m=1.8,speed_m_s=0.)
+        self.assertIsNone(j.entry([car]))
+        car['position_city_m']=[35.,0.]
+        self.assertIsNotNone(j.entry([car]))
+
     def test_128_slot_configuration_still_fits_bounded_worker_protocol(self):
         config=cyclic_traffic(self.payload,dict(self.options,vehicle_count=128))
         self.assertEqual(len(validated_missions(config)),128);self.assertLess(len(json.dumps(config).encode()),65536)

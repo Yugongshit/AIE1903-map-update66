@@ -149,9 +149,18 @@ class Journeys:
 
     def entry(self, actors):
         # Balance independent entry flows, subject to actual current safe space.
+        coordinator=self.runtime.junction_coordinator
+        car_bodies=[vehicle_footprint(a['position_city_m'],a['heading_rad'],a['length_m'],a['width_m'],margin=.3)
+                    for a in actors if a.get('type')=='VEHICLE']
         for lane in sorted(self.network.entries,key=lambda k:(self.entry_uses[k],k)):
             geom=self.network.geometries[lane];p=list(geom.point_at(6.));h=geom.project(p)[3]
             body=vehicle_footprint(p,h)
+            # Some crop-boundary portals lie inside a conflict region. Physical
+            # spawn spacing alone must not bypass an existing junction grant.
+            occupied_entry=any(body.intersects(region) and
+                (coordinator.reservations.get(zone) or any(other.intersects(region) for other in car_bodies))
+                for zone,region in coordinator.regions.items())
+            if occupied_entry:continue
             safe=True
             for actor in actors:
                 if math.dist(p,actor['position_city_m'])>50:continue

@@ -193,6 +193,12 @@ class JunctionTests(unittest.TestCase):
         yielded=other.update([actor('a',-10),actor('obstacle',11)],{'a':paths['a']},0.)
         self.assertIn('a',yielded)
 
+    def test_actor_already_inside_protects_its_movement_before_bodies_intersect(self):
+        paths={'a':[[0.,50.],[0.,-50.]],'b':[[-50.,0.],[50.,0.]]}
+        result=self.control.update([actor('a',0.,4.,-math.pi/2,speed=1.),actor('b',-10.)],paths,0.)
+        self.assertTrue(self.control.reservations['j']['a']['entered'])
+        self.assertIn('b',result)
+
     def test_second_visit_to_same_xy_does_not_reserve_the_road_between_visits(self):
         from map_update.simulation_path_geometry import PathGeometry
         from shapely.geometry import box
