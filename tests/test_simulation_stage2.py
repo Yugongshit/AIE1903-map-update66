@@ -86,6 +86,16 @@ class JunctionTests(unittest.TestCase):
                                  {'a': points['east'], 'b': points['north']}, 0.)
         self.assertEqual(len(yielded), 1)
 
+    def test_conflict_envelope_preserves_each_crossing_without_the_large_bounding_circle(self):
+        from map_update.simulation_network import junction_sites,merge_junction_regions
+        from shapely.geometry import Polygon,Point
+        points={'east':[[-30.,0.],[30.,0.]],'north_a':[[-5.,-20.],[-5.,20.]],'north_b':[[5.,-20.],[5.,20.]]}
+        zones=junction_sites([{'lanes':list(points)}],points,{k:[] for k in points},geometric_conflicts=True)
+        region=Polygon(merge_junction_regions(zones)[0]['boundary_city_m'])
+        self.assertTrue(region.covers(Point(-5.,0.).buffer(5.9)))
+        self.assertTrue(region.covers(Point(5.,0.).buffer(5.9)))
+        self.assertFalse(region.covers(Point(0.,9.)))
+
     def test_overlapping_reservations_merge_without_a_second_stop_line_inside(self):
         from map_update.simulation_network import merge_junction_regions
         zones=merge_junction_regions([self.zone, dict(junction_id='next', position_city_m=[15.,0.], radius_m=6.)])
@@ -96,6 +106,8 @@ class JunctionTests(unittest.TestCase):
         result=control.update([actor('a',5),actor('b',15,-10,math.pi/2)], paths, 1.)
         self.assertNotIn('a', result)
         self.assertIn('b', result)
+        short_storage=merge_junction_regions([self.zone,dict(self.zone,junction_id='short',position_city_m=[20.,0.])])
+        self.assertEqual(len(short_storage),1)
 
     def test_parked_external_body_does_not_block_a_nonintersecting_path(self):
         control=JunctionCoordinator([self.zone])
@@ -159,6 +171,19 @@ class JunctionTests(unittest.TestCase):
         self.assertIn('a',control.blockers['b']['waiting_for'])
         yielded=control.update([actor('a',35,speed=2),actor('b',-10)],paths,2.)
         self.assertNotIn('b',yielded)
+
+    def test_goal_just_beyond_exit_is_one_terminal_movement_not_zero_road_capacity(self):
+        paths={'a':[[-50.,0.],[8.,0.]],'b':[[-50.,0.],[8.,0.]]}
+        yielded=self.control.update([actor('a',-10),actor('b',-20)],paths,0.)
+        self.assertNotIn('a',yielded)
+        self.assertIn('a',self.control.reservations['j'])
+        yielded=self.control.update([actor('a',0,speed=2),actor('b',-10)],paths,1.)
+        self.assertIn('b',yielded)
+        self.assertTrue(self.control.blockers['b']['terminal_destination'])
+        # A real parked body beyond the centre goal still prevents admission.
+        other=JunctionCoordinator([self.zone])
+        yielded=other.update([actor('a',-10),actor('obstacle',11)],{'a':paths['a']},0.)
+        self.assertIn('a',yielded)
 
     def test_second_visit_to_same_xy_does_not_reserve_the_road_between_visits(self):
         from map_update.simulation_path_geometry import PathGeometry

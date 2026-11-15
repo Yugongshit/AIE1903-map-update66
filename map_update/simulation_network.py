@@ -89,6 +89,7 @@ def junction_sites(routes, points, graph, *, geometric_conflicts=False):
         radius=6.+max(math.dist(center,p) for p in group)
         result.append(dict(junction_id=f'junction-{len(result)+1}',position_city_m=center,radius_m=radius,
                            rule='synthetic_unsignalised_exclusive_reservation'))
+        if geometric_conflicts:result[-1]['boundary_city_m']=[list(p) for p in shapely.MultiPoint(group).convex_hull.buffer(6.).exterior.coords]
     return result
 
 
@@ -194,12 +195,13 @@ def merge_junction_regions(sites):
     unrelated road or parked ego and block the whole intersection forever.
     """
     from shapely.ops import unary_union
-    groups = [(Point(z['position_city_m']).buffer(z['radius_m']), [z['junction_id']]) for z in sites]
+    groups = [((Polygon(z['boundary_city_m']) if z.get('boundary_city_m') else Point(z['position_city_m']).buffer(z['radius_m'])), [z['junction_id']]) for z in sites]
     changed = True
     while changed:
         changed = False
         for i in range(len(groups)):
-            matches = [j for j in range(i+1, len(groups)) if groups[i][0].distance(groups[j][0]) < 7.]
+            # Passenger-car body plus the outlet gap and next stop-line margin.
+            matches = [j for j in range(i+1, len(groups)) if groups[i][0].distance(groups[j][0]) < 9.]
             if not matches:
                 continue
             members = [groups[i], *[groups[j] for j in matches]]
@@ -263,7 +265,7 @@ class JunctionCoordinator:
         for zone in self.sites:
             key=zone['junction_id'];center=zone['position_city_m'];radius=zone['radius_m'];region=self.regions[key]
             inside={k for k,a in cars.items() if math.dist(a['position_city_m'],center)<radius+a['length_m'] and bodies[k].intersects(region)}
-            approaches={};corridors={};movements={};exit_spaces={};exit_allowance={};exit_tails={}
+            approaches={};corridors={};movements={};exit_spaces={};exit_allowance={};exit_tails={};terminal_outlets=set()
             for identifier,path in paths.items():
                 own=cars[identifier]
                 if math.dist(own['position_city_m'],center)>=radius+24.:continue
@@ -293,6 +295,10 @@ class JunctionCoordinator:
                 if closed and end>length:
                     exit_pieces.append(substring(line,max(0.,exit_begin-length),min(length,end-length)))
                 exit_spaces[identifier]=unary_union(exit_pieces).buffer(own.get('width_m',2.)/2+.3)
+                if not closed and end>length:
+                    # A destination marks the centre, not the front of the car.
+                    goal_body=vehicle_footprint(path[-1],geom.heading_at(length),own['length_m'],own.get('width_m',2.),margin=.3)
+                    exit_spaces[identifier]=exit_spaces[identifier].union(goal_body)
                 at=lambda value:geom.point_at(value%length if closed else value)
                 heading_at=lambda value:geom.heading_at(value%length if closed else value)
                 movements[identifier]=(at(entry),at(leave),heading_at(entry),heading_at(leave))
@@ -313,6 +319,11 @@ class JunctionCoordinator:
                     if tails:limit=min(limit,min(tails)[0])
                     exit_allowance[identifier]=max(0.,limit-leave)
                     exit_tails[identifier]={v for s,v in tails if s<=limit+.01}
+                    # A short terminal journey is not a physically truncated
+                    # road. Permit one terminal movement with actual body
+                    # clearance; it must clear before another gets that slot.
+                    if not next_entries and length-leave<own['length_m']+2. and not tails:
+                        terminal_outlets.add(identifier)
             reservations=self.reservations.setdefault(key,{})
             for identifier,holder in list(reservations.items()):
                 if identifier in inside:holder['entered']=True
@@ -360,7 +371,8 @@ class JunctionCoordinator:
                 if identifier in exit_allowance:
                     reserved={k for k,h in reservations.items() if k!=identifier and same_outlet(identifier,h)}
                     remaining=exit_allowance[identifier]-sum(cars[k]['length_m']+2. for k in reserved)
-                    if remaining<cars[identifier]['length_m']+2.:
+                    limited=bool(reserved) if identifier in terminal_outlets else remaining<cars[identifier]['length_m']+2.
+                    if limited:
                         reservations.pop(identifier,None)
                         capacity_blocked[identifier]=reserved|exit_tails[identifier]
                         continue
@@ -379,7 +391,7 @@ class JunctionCoordinator:
                     waiting.update(capacity_blocked.get(identifier,()))
                     self.blockers[identifier]=dict(junction_id=key,waiting_for=sorted(waiting),
                         exit_blocked_by=sorted(exit_blocked[identifier]),exit_capacity_limited=identifier in capacity_blocked,
-                        exit_available_m=exit_allowance.get(identifier))
+                        exit_available_m=exit_allowance.get(identifier),terminal_destination=identifier in terminal_outlets)
             for pair in list(self.waiting):
                 if pair[0]==key and pair[1] not in approaches:self.waiting.pop(pair)
         return stopped
