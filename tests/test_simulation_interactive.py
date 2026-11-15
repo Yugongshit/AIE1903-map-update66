@@ -94,6 +94,12 @@ class InteractiveTests(unittest.TestCase):
         self.assertEqual(braking_actor(own,[own,obstacle],repeated)['vehicle_id'],'barrier')
         # A short remaining centreline must still protect the car's front body.
         self.assertIsNotNone(braking_actor(own,[own,obstacle],[[0.,0.],[.5,0.]]))
+        import json
+        case=json.loads((Path(__file__).resolve().parents[1]/'demo/simulation/validation/terminal-guard-case.json').read_text())
+        self.assertIsNone(case['previous_braking'])
+        detected=braking_actor(case['own'],[case['own'],case['obstacle']],case['route_points'])
+        self.assertEqual(detected['vehicle_id'],'construction-R14')
+        self.assertGreater(detected['distance_m'],4.)
 
     def setUp(self):
         self.native = patch('map_update.simulation_interactive._vehicle_class', return_value=Vehicle)
