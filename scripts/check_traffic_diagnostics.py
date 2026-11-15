@@ -43,8 +43,33 @@ def main():
             data = json.loads(Path(info.value.path()).read_text())
             encoded = json.dumps(data)
             check('Planning excludes debugging waits and generator futures', all(k not in encoded for k in ('wait_diagnostic', 'waiting_cycles', 'waiting_for', 'exit_lane', 'entry_lane', 'patrol_goals')))
+            # Hold a real pre-pause poll response, then deliver it after the
+            # control request. It must not restore the stale running status.
+            page.evaluate("""() => {
+              const original = window.fetch;
+              let hold = true;
+              window.fetch = async (...args) => {
+                const response = await original(...args);
+                if (hold && String(args[0]).includes('/api/interactive/state?')) {
+                  hold = false;
+                  await new Promise(resolve => window.releaseStalePoll = resolve);
+                }
+                return response;
+              };
+            }""")
+            page.wait_for_function('typeof window.releaseStalePoll === "function"', timeout=15000)
             page.evaluate('MAP_PLATFORM.interactiveControl("pause")')
             page.wait_for_function("!MAP_PLATFORM.interactive.room.playing && document.querySelector('#playback-note').textContent.includes('服务器暂停')", timeout=15000)
+            page.evaluate("""() => {
+              window.staleRunningSeen = false;
+              window.pauseMonitor = setInterval(() => {
+                if (MAP_PLATFORM.interactive.room.playing) window.staleRunningSeen = true;
+              }, 5);
+              window.releaseStalePoll();
+            }""")
+            page.wait_for_timeout(600)
+            page.evaluate('clearInterval(window.pauseMonitor)')
+            check('delayed pre-pause poll cannot restore running state', not page.evaluate('window.staleRunningSeen'))
             check('pause status is visible', '服务器暂停' in page.locator('#playback-note').inner_text())
             page.screenshot(path=str(args.out/'diagnostics.png'), full_page=True)
             check('no browser exceptions', not errors)
