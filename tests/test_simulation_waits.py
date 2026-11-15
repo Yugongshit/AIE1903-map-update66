@@ -4,6 +4,16 @@ from map_update.simulation_waits import TrafficWaits
 
 
 class TrafficWaitTests(unittest.TestCase):
+    def test_vehicle_pedestrian_mutual_wait_is_a_cycle(self):
+        monitor = TrafficWaits()
+        monitor.update([dict(vehicle_id='car', speed_m_s=0.)], {}, {},
+            {'car': {'vehicle_id': 'walker-8'}}, {}, 10., {'car': 'car1'})
+        walkers = [dict(event_id='walker-8', stationary_for_s=8., waiting_for=['car'])]
+        self.assertEqual(monitor.report(walkers)['waiting_cycles'], [['car', 'walker-8']])
+        self.assertEqual(monitor.report(walkers)['moving'], 0)
+        walkers[0]['stationary_for_s'] = 0.
+        self.assertEqual(monitor.report(walkers)['waiting_cycles'], [])
+
     def test_cycles_duration_and_replacement_identity(self):
         monitor = TrafficWaits()
         actors = [dict(vehicle_id=k, speed_m_s=0.) for k in ('a', 'b')]
@@ -39,3 +49,16 @@ class TrafficWaitTests(unittest.TestCase):
         self.assertEqual(row['reason'], 'tracking_without_progress')
         self.assertEqual(row['waiting_for'], [])
         self.assertEqual(row['target_speed_m_s'], 2.)
+
+    def test_brake_accelerator_oscillation_retains_a_timestamped_cause(self):
+        monitor = TrafficWaits()
+        actors = [dict(vehicle_id='a', speed_m_s=.1)]
+        ids = {'a': 'a1'}
+        monitor.update(actors, {'a': 'nearby_actor_braking'}, {}, {'a': {'vehicle_id': 'b'}}, {}, 0., ids)
+        row = monitor.update(actors, {}, {}, {}, {}, .1, ids)['a']
+        self.assertEqual(row['reason'], 'nearby_actor_braking')
+        self.assertEqual(row['waiting_for'], ['b'])
+        self.assertEqual(row['recent_stop_age_s'], .1)
+        row = monitor.update(actors, {}, {}, {}, {}, 1.1, ids)['a']
+        self.assertIsNone(row['recent_stop_reason'])
+        self.assertEqual(row['waiting_for'], [])

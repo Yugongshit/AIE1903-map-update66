@@ -53,8 +53,8 @@ class JourneyNetwork:
         self.exits=exits & viable;self.regular &= viable
         self.blocked=blocked;self.bounds=list(shapely.union_all([LineString(p) for p in self.points.values()]).bounds)
         self.length=sum(self.geometries[k].length for k in self.graph)
-        from .simulation_network import junction_sites
-        self.junctions=junction_sites([{'lanes':list(self.graph)}],self.points,self.graph)
+        from .simulation_network import junction_sites, merge_junction_regions
+        self.junctions=merge_junction_regions(junction_sites([{'lanes':list(self.graph)}],self.points,self.graph,geometric_conflicts=True))
         self.roads=[dict(lanes=[k],path=self.points[k],length=self.geometries[k].length) for k in self.graph]
 
     def trip(self, start, progress, rng, recent=(), actors=()):
@@ -87,17 +87,14 @@ class JourneyNetwork:
         route.reverse();length=self.geometries[goal].length
         return route,(length-5 if goal in self.exits else rng.uniform(max(8,length*.4),length-8))
 
-    def path(self, lanes, end):
-        points=[]
-        for key in lanes[:-1]:
-            for p in self.points[key]:
-                if not points or list(p)!=points[-1]:points.append(list(p))
+    def path(self, lanes, end, *, with_lane_ends=False):
+        from .simulation_path_geometry import join_source_centerlines
+        parts=[self.points[key] for key in lanes[:-1]]
         geom=self.geometries[lanes[-1]]
-        for d in range(math.ceil(end)):
-            p=list(geom.point_at(d))
-            if not points or p!=points[-1]:points.append(p)
-        points.append(list(geom.point_at(end)))
-        return points
+        last=[list(geom.point_at(d)) for d in range(math.ceil(end))]
+        last.append(list(geom.point_at(end)))
+        points,ends=join_source_centerlines([*parts,last])
+        return (points,ends[:-1]) if with_lane_ends else points
 
 
 def journey_traffic(payload, options):
@@ -140,17 +137,13 @@ class Journeys:
         from .simulation_traffic import CycleFollower
         rt=self.runtime;row=self.rows[key]
         lanes,end=self.network.trip(lane,progress,row['rng'],row['recent'],actors)
-        length=0.;lane_ends=[]
-        for i,k in enumerate(lanes[:-1]):
-            length+=self.network.geometries[k].length;lane_ends.append(length)
-            length+=math.dist(self.network.points[k][-1],self.network.points[lanes[i+1]][0])
+        path,lane_ends=self.network.path(lanes,end,with_lane_ends=True)
         row.update(lanes=lanes,end=end,lane_ends=lane_ends,recent=(row['recent']+[lanes[-1]])[-5:])
-        path=self.network.path(lanes,end)
         old=rt.controllers.get(key);distance=old.distance if old and hasattr(old,'distance') else 0.
         prior=rt.journey_paths.pop(key,None)
         if prior:
             rt.path_geometries.pop(id(prior),None);rt.junction_coordinator._path_geometry.pop(id(prior),None)
-        controller=CycleFollower(path,rt.missions[key]['cruise_speed_m_s'],closed=False);controller.distance=distance
+        controller=CycleFollower(path,rt.missions[key]['cruise_speed_m_s'],closed=False);controller.distance=distance;controller.last_s=progress
         rt.journey_paths[key]=path;rt.path_geometries[id(path)]=controller.geometry;rt.controllers[key]=controller
         rt.missions[key]['goal_scenario_m']=path[-1];rt.missions[key]['patrol_goals_scenario_m']=[path[-1]]
 
@@ -173,7 +166,7 @@ class Journeys:
         for key,row in self.rows.items():
             if rt.modes[key]!='ai' or key in rt.lane_changes.active:continue
             own=cars[key];controller=rt.controllers[key];geom=controller.geometry
-            lateral,progress,_,heading=geom.project(own['position_city_m'])
+            lateral,progress,_,heading=controller.project_pose(own['position_city_m'])
             if lateral>2.5 or abs(_angle(own['heading_rad']-heading))>math.pi/2:continue
             # Record source lanes actually reached, not merely intended routes.
             current=row['lanes'][min(len(row['lanes'])-1,bisect_right(row['lane_ends'],progress))]

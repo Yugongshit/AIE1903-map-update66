@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from map_update.simulation_bridge import feature_sha256
 from map_update.simulation_interactive import (InteractiveRuntime, IDS, actor_state,
@@ -20,6 +20,9 @@ class Vehicle:
         self.id, self.position, self.heading_theta = name, list(position), heading
         self.velocity, self.speed, self.action = [0., 0.], 0., [0., 0.]
         self.after_calls = 0
+        self.heading = [1., 0.]
+        self.body = SimpleNamespace(getMass=lambda: 1100.)
+        self.system = Mock()
 
     def set_velocity(self, value):
         self.velocity = list(value)
@@ -82,6 +85,14 @@ def scene():
 
 
 class InteractiveTests(unittest.TestCase):
+    def test_end_of_route_repeated_points_keep_physical_near_field_guard(self):
+        own=dict(vehicle_id='P1',native_object_id='P1',position_city_m=[0.,0.],heading_rad=0.,
+                 speed_m_s=.2,length_m=4.5,width_m=1.8)
+        obstacle=dict(own,vehicle_id='barrier',native_object_id='barrier',position_city_m=[4.,0.],length_m=1.)
+        repeated=[[0.,0.]]*21
+        self.assertIsNone(braking_actor(own,[own],repeated))
+        self.assertEqual(braking_actor(own,[own,obstacle],repeated)['vehicle_id'],'barrier')
+
     def setUp(self):
         self.native = patch('map_update.simulation_interactive._vehicle_class', return_value=Vehicle)
         self.native.start()

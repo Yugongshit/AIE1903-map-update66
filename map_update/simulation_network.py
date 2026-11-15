@@ -46,7 +46,7 @@ def source_cycles(payload, expanded=False):
     return sorted(candidates,key=lambda c:(c['distance'],c['length'],c['lanes'])),occupied,points,graph
 
 
-def junction_sites(routes, points, graph):
+def junction_sites(routes, points, graph, *, geometric_conflicts=False):
     used={lane for r in routes for lane in r['lanes']}
     incoming={lane:[] for lane in used}
     for lane in used:
@@ -56,6 +56,26 @@ def junction_sites(routes, points, graph):
     for lane in sorted(used):
         if len(incoming[lane])>1:positions.append(points[lane][0])
         if len([t for t in graph[lane] if t in used])>1:positions.append(points[lane][-1])
+    if geometric_conflicts:
+        # Crossing connectors need a shared reservation even when their graph
+        # nodes are distinct. Topological split/merge points alone leave the
+        # middle of a large junction unprotected (opposing turns can deadlock).
+        import shapely
+        keys = sorted(used)
+        lines = [LineString(points[k]) for k in keys]
+        tree = shapely.STRtree(lines)
+        for i, line in enumerate(lines):
+            for j in sorted(tree.query(line, predicate='intersects')):
+                if j <= i:
+                    continue
+                overlap = line.intersection(lines[j])
+                hits = [overlap] if overlap.geom_type == 'Point' else list(overlap.geoms) if overlap.geom_type == 'MultiPoint' else []
+                for hit in hits:
+                    p = list(hit.coords[0])
+                    # An ordinary end-to-start connection is not a conflict.
+                    if all(min(math.dist(p, points[key][end]) for end in (0, -1)) < .25 for key in (keys[i], keys[j])):
+                        continue
+                    positions.append(p)
     # Overlapping approach envelopes are one conservative reservation zone.
     groups=[]
     for p in positions:
@@ -167,79 +187,199 @@ def crossing_sites(features, paths, occupied, count, seed):
     return [dict(c,pedestrian_id=f'walker-W{i+1}') for i,c in enumerate(selected)]
 
 
-class JunctionCoordinator:
-    """One approach head at a time, using present positions and source routes.
+def merge_junction_regions(sites):
+    """Merge envelopes too close to hold a vehicle safely between reservations.
 
-    No signal timings are inferred from the dataset. External cars are physical
-    occupants but receive no commands from this background traffic controller.
+    Keep a polygon for entry/exit tests; a large enclosing circle can capture an
+    unrelated road or parked ego and block the whole intersection forever.
+    """
+    from shapely.ops import unary_union
+    groups = [(Point(z['position_city_m']).buffer(z['radius_m']), [z['junction_id']]) for z in sites]
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(groups)):
+            matches = [j for j in range(i+1, len(groups)) if groups[i][0].distance(groups[j][0]) < 7.]
+            if not matches:
+                continue
+            members = [groups[i], *[groups[j] for j in matches]]
+            groups[i] = (unary_union([g for g, _ in members]).convex_hull, [k for _, ids in members for k in ids])
+            for j in reversed(matches): groups.pop(j)
+            changed = True
+            break
+    result = []
+    for polygon, ids in groups:
+        center = list(polygon.centroid.coords[0])
+        result.append(dict(junction_id=ids[0], position_city_m=center,
+            radius_m=max(math.dist(center, p) for p in polygon.exterior.coords),
+            boundary_city_m=[list(p) for p in polygon.exterior.coords], merged_junction_ids=ids,
+            rule='synthetic_unsignalised_conflict_reservation'))
+    return result
+
+
+class JunctionCoordinator:
+    """Background reservations over source conflict regions, with actual entry lines.
+
+    This is a synthetic traffic rule, not inferred traffic lights or ego Planning.
+    Present external bodies block only paths they physically intersect.
     """
     def __init__(self, sites):
         self.sites=sites;self.holders={};self.waiting={};self.passes=0;self.yield_ticks=0
-        self._path_geometry={}
-        self.blockers={}
+        self._path_geometry={};self.blockers={};self.reservations={}
+        self.regions={z['junction_id']: Polygon(z['boundary_city_m']) if z.get('boundary_city_m')
+                      else Point(z['position_city_m']).buffer(z['radius_m']) for z in sites}
 
-    def update(self, actors, paths, time_s):
+    def release_actor(self, identifier):
+        """A reused control slot must not inherit its retired actor's grant."""
+        for key, reservations in self.reservations.items():
+            reservations.pop(identifier,None)
+            if self.holders.get(key,{}).get('vehicle_id')==identifier:
+                self.holders.pop(key,None)
+        self.waiting={pair:stamp for pair,stamp in self.waiting.items() if pair[1]!=identifier}
+        self.blockers.pop(identifier,None)
+
+    def update(self, actors, paths, time_s, *, own_projections=None):
+        from shapely.ops import substring
+        from .simulation_path_geometry import PathGeometry
         cars={a['vehicle_id']:a for a in actors if a.get('type')=='VEHICLE'}
-        stopped={}
-        self.blockers={}
-        projections={}
+        bodies={k:vehicle_footprint(a['position_city_m'],a['heading_rad'],a['length_m'],a.get('width_m',2.),margin=.3) for k,a in cars.items()}
+        stopped={};self.blockers={};projections={}
+        own_projections=own_projections or {}
         def project(identifier,path):
             key=(identifier,id(path))
-            if key not in projections:projections[key]=self._path_geometry[id(path)][2].project(cars[identifier]['position_city_m'])
+            if key not in projections:
+                projections[key]=own_projections[identifier] if identifier in own_projections and paths.get(identifier) is path else self._path_geometry[id(path)][2].project(cars[identifier]['position_city_m'])
             return projections[key]
         for path in paths.values():
-            if id(path) not in self._path_geometry:
-                from .simulation_path_geometry import PathGeometry
-                geom=PathGeometry(path)
-                self._path_geometry[id(path)]=(geom.length,{z['junction_id']:geom.project(z['position_city_m']) for z in self.sites},geom)
+            if id(path) in self._path_geometry:continue
+            geom=PathGeometry(path);line=LineString(path);targets={}
+            for key,region in self.regions.items():
+                intervals=geom.region_intervals(region)
+                if math.dist(path[0],path[-1])<.01 and len(intervals)>1 and intervals[0][0]<.01 and intervals[-1][1]>geom.length-.01:
+                    first,last=intervals[0],intervals[-1]
+                    intervals=[(last[0]-geom.length,first[1]),*intervals[1:-1],(last[0],geom.length+first[1])]
+                targets[key]=intervals
+            self._path_geometry[id(path)]=(geom.length,targets,geom,line)
         for zone in self.sites:
-            key=zone['junction_id'];center=zone['position_city_m'];radius=zone['radius_m']
-            inside={k for k,a in cars.items() if math.dist(a['position_city_m'],center)<radius+a['length_m']/2+.5}
-            approaches={}
+            key=zone['junction_id'];center=zone['position_city_m'];radius=zone['radius_m'];region=self.regions[key]
+            inside={k for k,a in cars.items() if math.dist(a['position_city_m'],center)<radius+a['length_m'] and bodies[k].intersects(region)}
+            approaches={};corridors={};movements={};exit_spaces={};exit_allowance={};exit_tails={}
             for identifier,path in paths.items():
                 own=cars[identifier]
                 if math.dist(own['position_city_m'],center)>=radius+24.:continue
-                length,targets,_=self._path_geometry[id(path)];lat,target,_,_=targets[key]
+                length,targets,geom,line=self._path_geometry[id(path)]
                 _,progress,_,_=project(identifier,path)
-                ahead=target-progress
-                if math.dist(path[0],path[-1])<.01:ahead%=length
-                if lat<=radius and -radius<ahead<radius+20. and math.dist(own['position_city_m'],center)<radius+24.:
-                    approaches[identifier]=ahead
-                    self.waiting.setdefault((key,identifier),time_s)
-            holder=self.holders.get(key)
-            if holder:
-                identifier=holder['vehicle_id']
+                intervals=targets[key]
+                # A car past the region's exit is departing, not approaching.
+                # Rear clearance belongs to the physical occupancy/release test.
+                upcoming=[(a,b) for a,b in intervals if b>progress]
+                if not upcoming and intervals and math.dist(path[0],path[-1])<.01:
+                    upcoming=[(a+length,b+length) for a,b in intervals]
+                if not upcoming:continue
+                entry,leave=upcoming[0];ahead=entry-progress
+                if ahead>=20.:continue
+                approaches[identifier]=ahead
+                self.waiting.setdefault((key,identifier),time_s)
+                # Include downstream clearing space, using current geometry only.
+                closed=math.dist(path[0],path[-1])<.01
+                end=leave+own['length_m']+2.
+                begin=max(0.,min(progress,entry)-own['length_m']/2)
+                pieces=[substring(line,begin,min(length,end))]
+                if closed and end>length:pieces.append(substring(line,0.,min(length,end-length)))
+                from shapely.ops import unary_union
+                corridors[identifier]=unary_union(pieces).buffer(own.get('width_m',2.)/2+.4)
+                exit_begin=max(0.,leave-own['length_m']/2)
+                exit_pieces=[substring(line,min(length,exit_begin),min(length,end))]
+                if closed and end>length:
+                    exit_pieces.append(substring(line,max(0.,exit_begin-length),min(length,end-length)))
+                exit_spaces[identifier]=unary_union(exit_pieces).buffer(own.get('width_m',2.)/2+.3)
+                at=lambda value:geom.point_at(value%length if closed else value)
+                heading_at=lambda value:geom.heading_at(value%length if closed else value)
+                movements[identifier]=(at(entry),at(leave),heading_at(entry),heading_at(leave))
+                # Reserve finite storage between this exit and the next stop
+                # line. An empty outlet is not a separate free slot for every
+                # car that is still traversing the junction.
+                if not closed and leave<length-.01:
+                    next_entries=[a for other,spans in targets.items() if other!=key
+                                  for a,b in spans if a>leave+.01]
+                    limit=min(length,leave+50.,min(next_entries)-2. if next_entries else length)
+                    outlet=substring(line,leave,max(leave,limit)).buffer(own.get('width_m',2.)/2+.3)
+                    tails=[]
+                    for other in cars:
+                        if other==identifier or not outlet.intersects(bodies[other]):continue
+                        lateral,s,_,heading=geom.project_near(cars[other]['position_city_m'],leave,window=50.)
+                        if s>leave and abs(_angle(cars[other]['heading_rad']-heading))<.6:
+                            tails.append((s-cars[other]['length_m']/2,other))
+                    if tails:limit=min(limit,min(tails)[0])
+                    exit_allowance[identifier]=max(0.,limit-leave)
+                    exit_tails[identifier]={v for s,v in tails if s<=limit+.01}
+            reservations=self.reservations.setdefault(key,{})
+            for identifier,holder in list(reservations.items()):
                 if identifier in inside:holder['entered']=True
-                if identifier not in cars or (holder['entered'] and identifier not in inside):
-                    self.passes+=int(holder['entered']);self.holders.pop(key);holder=None
-                elif not holder['entered'] and time_s-holder['since']>20.:
-                    self.holders.pop(key);holder=None
+                if identifier not in cars or (holder['entered'] and identifier not in inside) or (not holder['entered'] and time_s-holder['since']>20.):
+                    self.passes+=int(holder['entered']);reservations.pop(identifier)
+            def same_stream(identifier, holder):
+                # Same entry/exit stream can follow under IDM; independent
+                # streams can proceed only when their swept regions are disjoint.
+                a,b=movements[identifier],holder['movement']
+                return all(math.dist(a[i],b[i])<1. for i in (0,1)) and all(abs(_angle(a[i]-b[i]))<.2 for i in (2,3))
+            def compatible(identifier, holder):
+                return same_stream(identifier,holder) or not corridors[identifier].intersects(holder['corridor'])
+            def same_outlet(identifier, holder):
+                a,b=movements[identifier],holder['movement']
+                return math.dist(a[1],b[1])<1. and abs(_angle(a[3]-b[3]))<.2
+            occupancy={k:{v for v in inside if v!=k and corridors[k].intersects(bodies[v])
+                          and not (v in reservations and cars[v]['speed_m_s']>.3 and same_stream(k,reservations[v]))} for k in approaches}
+            # Do not admit a car into a junction with no downstream space for
+            # its body. Otherwise a stopped exit queue can spill into crossing
+            # streams and form a network-wide wait cycle. Current bodies only.
+            exit_blocked={k:{v for v in cars if v!=k and cars[v]['speed_m_s']<.3
+                            and exit_spaces[k].intersects(bodies[v])} for k in approaches}
+            for identifier in approaches:occupancy[identifier].update(exit_blocked[identifier])
             heads=[]
             for identifier,ahead in approaches.items():
-                own=cars[identifier];path=paths[identifier];progress=project(identifier,path)[1]
-                length=self._path_geometry[id(path)][0]
+                if identifier in inside or occupancy[identifier]:continue
+                path=paths[identifier];progress=project(identifier,path)[1];length=self._path_geometry[id(path)][0]
                 blocked=False
                 for other in approaches:
                     if other==identifier:continue
-                    lat,s,_,heading=project(other,path)
-                    delta=s-progress
+                    lat,s,_,heading=project(other,path);delta=s-progress
                     if math.dist(path[0],path[-1])<.01:delta%=length
                     if lat<1.5 and abs(_angle(cars[other]['heading_rad']-heading))<.6 and 0<delta<ahead:
                         blocked=True;break
                 if not blocked:heads.append(identifier)
-            if not holder and not inside and heads:
-                identifier=min(heads,key=lambda k:(self.waiting[(key,k)],approaches[k],k))
-                holder=dict(vehicle_id=identifier,since=time_s,entered=False);self.holders[key]=holder
+            # An unentered grant cannot survive a new queue head ahead of it.
+            # Otherwise the follower waits for its leader while that leader
+            # yields to the follower's stale reservation.
+            for identifier,holder in list(reservations.items()):
+                if not holder['entered'] and identifier not in heads:
+                    reservations.pop(identifier)
+            capacity_blocked={}
+            for identifier in sorted(heads,key=lambda k:(self.waiting[(key,k)],approaches[k],k)):
+                if identifier in reservations and reservations[identifier]['entered']:continue
+                if identifier in exit_allowance:
+                    reserved={k for k,h in reservations.items() if k!=identifier and same_outlet(identifier,h)}
+                    remaining=exit_allowance[identifier]-sum(cars[k]['length_m']+2. for k in reserved)
+                    if remaining<cars[identifier]['length_m']+2.:
+                        reservations.pop(identifier,None)
+                        capacity_blocked[identifier]=reserved|exit_tails[identifier]
+                        continue
+                if identifier in reservations:continue
+                if all(compatible(identifier,holder) for holder in reservations.values()):
+                    reservations[identifier]=dict(vehicle_id=identifier,since=time_s,entered=False,
+                        corridor=corridors[identifier],movement=movements[identifier])
+            if reservations:self.holders[key]=min(reservations.values(),key=lambda h:(h['since'],h['vehicle_id']))
+            else:self.holders.pop(key,None)
             for identifier,ahead in approaches.items():
-                # Reserve early, but brake at a speed-dependent approach line.
-                # Braking all applicants 20 m early can trap a vehicle inside
-                # the previous junction while it waits for the next one.
-                own = cars[identifier]
-                speed = max(0., own.get('speed_m_s', 0.))
-                stop_distance = radius + own['length_m']/2 + 2. + speed + speed*speed/(2*1.4)
-                if identifier not in inside and ahead <= stop_distance and (not holder or holder['vehicle_id']!=identifier):
+                own=cars[identifier];speed=max(0.,own.get('speed_m_s',0.))
+                stop_distance=own['length_m']/2+2.+speed+speed*speed/(2*1.4)
+                if identifier not in inside and ahead<=stop_distance and identifier not in reservations:
                     stopped[identifier]=key;self.yield_ticks+=1
-                    self.blockers[identifier]=dict(junction_id=key, waiting_for=sorted(inside | ({holder['vehicle_id']} if holder else set())))
+                    waiting=occupancy[identifier] | {k for k,h in reservations.items() if not compatible(identifier,h)}
+                    waiting.update(capacity_blocked.get(identifier,()))
+                    self.blockers[identifier]=dict(junction_id=key,waiting_for=sorted(waiting),
+                        exit_blocked_by=sorted(exit_blocked[identifier]),exit_capacity_limited=identifier in capacity_blocked,
+                        exit_available_m=exit_allowance.get(identifier))
             for pair in list(self.waiting):
                 if pair[0]==key and pair[1] not in approaches:self.waiting.pop(pair)
         return stopped

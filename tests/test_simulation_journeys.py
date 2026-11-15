@@ -57,6 +57,28 @@ class JourneyTests(unittest.TestCase):
         self.assertTrue(all(not n.graph[k] for k in n.exits))
         self.assertTrue(all(k in n.graph for k in n.entries))
 
+    def test_projection_stays_on_its_current_branch_near_an_opposing_return(self):
+        follower=CycleFollower([[0.,0.],[20.,0.],[20.,1.],[0.,1.]],2.,closed=False)
+        follower.last_s=10.
+        state=dict(position_runtime_m=[10.,.55],heading_rad=0.,speed_m_s=1.,wheelbase_m=2.5,max_steering_rad=.6)
+        follower(state)
+        self.assertEqual(follower.diagnostics()['status'],'tracking')
+        self.assertAlmostEqual(follower.diagnostics()['progress_m'],10.)
+        state['position_runtime_m']=[50.,.55]
+        follower(state)
+        self.assertEqual(follower.diagnostics()['status'],'stopped')
+
+    def test_aligned_overlapping_lane_tail_does_not_add_a_backward_seam(self):
+        from map_update.simulation_path_geometry import join_source_centerlines
+        parts=[[[0.,0.],[10.,0.]],[[7.,0.],[10.,0.]],[[10.,0.],[20.,0.]]]
+        points,ends=join_source_centerlines(parts)
+        self.assertEqual(points,[[0.,0.],[10.,0.],[20.,0.]])
+        self.assertEqual(ends,[10.,10.,20.])
+        self.assertEqual(parts[1],[[7.,0.],[10.,0.]])
+        # A real turn onto a different lateral lane must not be silently trimmed.
+        points,_=join_source_centerlines([parts[0],[[7.,3.],[20.,3.]]])
+        self.assertIn([7.,3.],points)
+
     def test_open_follower_brakes_at_end_without_wrapping_to_start(self):
         follower=CycleFollower([[0,0],[100,0]],2.,closed=False)
         state=dict(position_runtime_m=[99.9,0],heading_rad=0.,speed_m_s=1.,wheelbase_m=2.5,max_steering_rad=.6)

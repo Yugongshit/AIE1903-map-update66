@@ -150,16 +150,23 @@ class CycleFollower:
     def diagnostics(self):
         return deepcopy(self._diagnostics)
 
+    def project_pose(self, position):
+        return self.geometry.project(position) if self.last_s is None else self.geometry.project_near(
+            position,self.last_s,closed=self.closed)
+
     def __call__(self, state):
         at=lambda s: self.geometry.point_at(s%self.length if self.closed else min(self.length,max(0.,s)))
         position = state['position_runtime_m']
-        lateral, progress, _, tangent = self.geometry.project(position)
+        lateral, progress, _, tangent = self.project_pose(position)
         heading = state['heading_rad']
-        valid = lateral <= 2.5 and abs(_angle(heading-tangent)) < math.pi/2
+        heading_error = _angle(heading-tangent)
+        failure = 'off_route' if lateral>2.5 else 'opposing_route_tangent' if abs(heading_error)>=math.pi/2 else None
+        valid = failure is None
+        previous_progress = self.last_s
         if self.last_s is not None:
             delta = ((progress-self.last_s+self.length/2) % self.length-self.length/2) if self.closed else progress-self.last_s
             if abs(delta) > max(3., state['speed_m_s']*.3+1):
-                valid = False
+                valid = False; failure = 'discontinuous_projection'
             elif valid:
                 self.distance = max(0., self.distance + delta)
         if self.start_s is None:
@@ -168,7 +175,8 @@ class CycleFollower:
         upcoming = [list(at(progress+d)) for d in range(0, 41, 2)]
         self._diagnostics = dict(status='tracking' if valid else 'stopped',
             reason=None if valid else 'cycle_reentry_requires_forward_lane_pose', points=upcoming,
-            lateral_error_m=lateral, progress_m=progress, travelled_m=self.distance,
+            lateral_error_m=lateral, heading_error_rad=heading_error, tracking_failure=failure,
+            previous_progress_m=previous_progress, progress_m=progress, travelled_m=self.distance,
             completed_laps=int(self.distance/self.length) if self.closed else 0, length_m=self.length,
             goal_scenario_m=list(self.geometry.point_at( (self.start_s +
                 (int(self.distance/(self.length/2))+1)*self.length/2) % self.length)))

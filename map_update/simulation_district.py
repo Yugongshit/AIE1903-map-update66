@@ -1,7 +1,7 @@
 """Wider source-map traffic coverage; no invented roads or trained behavior claim."""
 import math
 import random
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import unary_union
 from .simulation_interactive_scenarios import vehicle_footprint
 from .simulation_planner import _angle
@@ -33,6 +33,7 @@ def density_spawns(routes, points, occupied, junctions, count, seed, *, parallel
     """
     rng=random.Random(f'{seed}:lane-density:spawns');lanes={};geometries={}
     fixed_count=len(occupied)
+    junction_areas=[Polygon(j['boundary_city_m']) if j.get('boundary_city_m') else Point(j['position_city_m']).buffer(j['radius_m']) for j in junctions]
     route_geometries=[PathGeometry(r['path']) for r in routes]
     for i,route in enumerate(routes):
         for key in route['lanes']:
@@ -47,7 +48,7 @@ def density_spawns(routes, points, occupied, junctions, count, seed, *, parallel
         key=min(available,key=lambda k:((lanes[k]['count']+1)/geometries[k].length,k))
         row=lanes[key];geom=geometries[key];s=row['remaining'].pop()
         pos=list(geom.point_at(s));heading=geom.project(pos)[3];shape=vehicle_footprint(pos,heading)
-        if any(math.dist(pos,j['position_city_m'])<j['radius_m']+8 for j in junctions):continue
+        if any(Point(pos).distance(area)<8 for area in junction_areas):continue
         clear=True
         for i,other in enumerate(occupied):
             gap=shape.distance(other)

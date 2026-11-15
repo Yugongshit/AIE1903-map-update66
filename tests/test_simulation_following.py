@@ -3,7 +3,7 @@ import math
 import unittest
 
 from map_update.simulation_following import (driver_parameters, current_leader,
-    idm_acceleration, acceleration_action)
+    idm_acceleration, acceleration_action, limit_background_brake)
 
 PATH = [[0.,0.],[100.,0.],[100.,100.],[0.,100.],[0.,0.]]
 
@@ -70,3 +70,21 @@ class FollowingTests(unittest.TestCase):
         self.assertEqual(acceleration_action(-4.,vehicle),-1.)
         self.assertEqual(acceleration_action(100.,vehicle),1.)
         self.assertEqual(vehicle.config,{'max_engine_force':1000.})
+
+
+class BrakeImpulseTests(unittest.TestCase):
+    def test_low_speed_brake_cannot_spend_more_than_current_momentum(self):
+        from types import SimpleNamespace
+        for speed in (0., .01, .2, 3., -.2):
+            impulses = {}
+            car = SimpleNamespace(velocity=[speed, 0.], heading=[1., 0.],
+                body=SimpleNamespace(getMass=lambda: 1100.),
+                system=SimpleNamespace(setBrake=lambda impulse, wheel: impulses.update({wheel: impulse})))
+            limit_background_brake(car, [0., -1.], .02, 5)
+            self.assertLessEqual(sum(impulses.values())*5, abs(speed)*1100.+1e-8)
+            self.assertLessEqual(sum(impulses.values())/.02/1100., 4.+1e-8)
+            self.assertEqual(car.velocity, [speed, 0.])
+
+    def test_accelerating_car_keeps_native_actuation(self):
+        from types import SimpleNamespace
+        limit_background_brake(SimpleNamespace(), [0., .3], .02, 5)

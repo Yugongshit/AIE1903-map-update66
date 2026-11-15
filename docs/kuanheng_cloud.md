@@ -8,9 +8,12 @@
 | Python | 独立 Python 3.11 环境；仓库 ScenarioNet 不支持 Python 3.12，Python 3.8 不满足当前 NumPy 版本 |
 | GPU/CPU/内存 | 截图可选 RTX 5090 ×1、24 核 CPU、32GB 主机内存；先用一个节点 |
 | CUDA | 若训练使用 RTX 5090，选择支持 Blackwell 的 PyTorch/CUDA 组合（例如 CUDA 12.8 或更新的兼容构建），实际执行 GPU 算子验证 |
-| 存储 | 创建/选择持久文件存储，挂载例如 `/ai/map-update`；仓库、数据、结果、检查点存这里，实际路径以平台为准 |
+| 存储左侧下拉 | 在用户截图中的 `1` / `data` 中推荐选 `data`；这是已有存储名称，容量与原有内容需在存储详情查看 |
+| 存储右侧文本框 | 填 `map_update`；左边已有 `/ai/`，不要重复输入前缀，完整挂载路径 `/ai/map_update` |
 | TensorBoard | 当前关闭；有真实训练日志后再开 |
-| 端口 | 平台需 8093；公网开放前配置平台认证和应用控制密钥，不直接暴露无认证控制接口 |
+| 端口名称 | `map-update` |
+| 内部端口号 | `8093` |
+| 外部端口号 | 首选 `8093`；若平台要求 NodePort 范围或提示占用，改填可用的 `30093`（仍须平台校验通过）；内部端口保持8093 |
 
 另一候选 `1.13.1-cuda11.4-py38` 的 PyTorch/CUDA/Python 过旧，不适合 RTX 5090 和当前依赖。所选镜像的 `py3` 不保证 Python 3.11，因此为仿真单独创建3.11环境；镜像标签本身也不证明GPU算子已经可用。
 
@@ -41,3 +44,20 @@ print(y.shape)
 仿真环境按 `requirements-simulation.txt` 安装，使用 Python 3.11；另执行 `python -m metadrive.pull_asset`。GPU 计算可用不等于 Panda3D 的 EGL 图形渲染可用，还需运行 `scripts/run_updated_simulation.py --offscreen` 验证；查看引擎日志确认渲染后端。开发工作台用 `python scripts/run_simulation_platform.py --port 8093 --no-browser`，跨容器访问需要 `--host 0.0.0.0` 和 `SIMULATION_CONTROL_KEY`，详见 `public_simulation.md`。
 
 当前物理步进和交通规则主要受 CPU 单进程性能影响；增加 GPU 不能解开循环等待。先验证单场景吞吐和内存，再用独立进程并行不同种子；从 2–4 个工作进程起量测，不能仅凭 24 核就开 24 份场景。所有结果注明仿真来源、种子、规则、耗时、碰撞与停滞指标。SUMO 对照及条件 VAE/Transformer 仍是后续候选，没有训练成果，研究对象为背景交通，不替代同学的 ego Planning。
+
+## 填完之后
+
+1. 只保留一个数据挂载和一条服务端口，不必点“添加文件存储”或“添加端口号”重复添加。当前已有存储时不必再新建一份。
+2. 提交创建后，等待运行状态就绪，再进入平台提供的终端。外部端口是否允许、是否占用由平台校验；截图没有给出允许范围，不能保证任意指定值可用。
+3. 确认 `ls -ld /ai/map_update` 能看到挂载目录，再把仓库克隆到 `/ai/map_update/AIE1903-map-update66`；不要清空已有存储。Python环境、模型缓存、结果和日志也放在持久盘。
+4. Python3.11环境内从仓库根目录安装 `requirements-simulation.txt`，再执行 `python -m metadrive.pull_asset`。系统镜像的Python版本可能不同，不能直接把依赖装进原PyTorch环境。
+5. 在实例环境中设置随机长字符串 `SIMULATION_CONTROL_KEY`（至少32字符，不发到聊天或GitHub），启动：
+
+```bash
+python scripts/run_simulation_platform.py --host 0.0.0.0 --port 8093 --no-browser
+```
+
+6. 先在实例终端用 `curl -f http://127.0.0.1:8093/api/config` 检查服务，再打开平台为这一端口提供的访问地址。浏览器不能使用 `0.0.0.0`，Mac上的 `127.0.0.1` 也不是云实例。优先使用平台有认证的HTTPS访问入口；若平台只提供公网IP/裸HTTP，按 `public_simulation.md` 配置HTTPS代理后再传送控制密钥。
+7. 在工作台“连接与房间设置”中，若直接打开的是云服务页面，“仿真服务器”留空；“房主启动密钥”填自己设置的 `SIMULATION_CONTROL_KEY`，点击连接，再启动场景。服务终端需要保持运行，不能把GitHub Pages静态地址当作运行中的云仿真后端。
+
+这里只指导配置，没有代用户在宽恒云创建实例、核验存储或部署。持久盘的容量/费用及平台端口协议以实际界面为准。

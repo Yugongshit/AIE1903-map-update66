@@ -73,6 +73,110 @@ class JunctionTests(unittest.TestCase):
                     'b':[[0,-50],[0,50],[50,50],[50,-50],[0,-50]]}
         self.control=JunctionCoordinator([self.zone])
 
+    def test_distinct_connector_nodes_share_the_geometric_crossing_reservation(self):
+        from map_update.simulation_network import junction_sites
+        points = {'east': [[-30, 0], [30, 0]], 'north': [[0, -30], [0, 30]]}
+        graph = {'east': [], 'north': []}
+        routes = [{'lanes': list(points)}]
+        self.assertEqual(junction_sites(routes, points, graph), [])
+        zones = junction_sites(routes, points, graph, geometric_conflicts=True)
+        self.assertEqual(len(zones), 1)
+        control = JunctionCoordinator(zones)
+        yielded = control.update([actor('a', -10), actor('b', 0, -10, math.pi/2)],
+                                 {'a': points['east'], 'b': points['north']}, 0.)
+        self.assertEqual(len(yielded), 1)
+
+    def test_overlapping_reservations_merge_without_a_second_stop_line_inside(self):
+        from map_update.simulation_network import merge_junction_regions
+        zones=merge_junction_regions([self.zone, dict(junction_id='next', position_city_m=[15.,0.], radius_m=6.)])
+        self.assertEqual(len(zones), 1)
+        control=JunctionCoordinator(zones)
+        paths={'a':[[-40.,0.],[50.,0.]], 'b':[[15.,-40.],[15.,40.]]}
+        control.update([actor('a',-10),actor('b',15,-25,math.pi/2)], paths, 0.)
+        result=control.update([actor('a',5),actor('b',15,-10,math.pi/2)], paths, 1.)
+        self.assertNotIn('a', result)
+        self.assertIn('b', result)
+
+    def test_parked_external_body_does_not_block_a_nonintersecting_path(self):
+        control=JunctionCoordinator([self.zone])
+        result=control.update([actor('a',-10), actor('ego',0,5)], {'a':[[-40.,0.],[40.,0.]]}, 0.)
+        self.assertNotIn('a',result)
+        self.assertEqual(control.holders['j']['vehicle_id'],'a')
+
+    def test_parallel_streams_and_same_stream_followers_can_share_a_region(self):
+        control=JunctionCoordinator([dict(self.zone,radius_m=12.)])
+        paths={'a':[[-50.,-4.],[50.,-4.]],'b':[[-50.,4.],[50.,4.]],'c':[[-50.,-4.],[50.,-4.]]}
+        result=control.update([actor('a',-15,-4),actor('b',-15,4),actor('c',-25,-4)],paths,0.)
+        self.assertNotIn('a',result);self.assertNotIn('b',result)
+        self.assertEqual(set(control.reservations['j']),{'a','b'})
+        control.update([actor('a',0,-4,speed=2),actor('b',0,4,speed=2),actor('c',-15,-4)],paths,1.)
+        self.assertIn('c',control.reservations['j'])
+
+    def test_retired_actor_cannot_keep_a_reservation_in_a_reused_slot(self):
+        self.control.update([actor('a',-10),actor('b',0,-10,math.pi/2)],self.paths,0.)
+        holder=self.control.holders['j']['vehicle_id']
+        self.control.release_actor(holder)
+        self.assertNotIn(holder,self.control.reservations['j'])
+        self.assertNotIn('j',self.control.holders)
+        self.assertFalse(any(pair[1]==holder for pair in self.control.waiting))
+
+    def test_pending_follower_grant_yields_to_a_new_physical_queue_head(self):
+        paths={'a':[[-50.,0.],[50.,0.]],'b':[[-50.,0.],[50.,0.]]}
+        self.control.update([actor('a',-20)],{'a':paths['a']},0.)
+        self.assertEqual(self.control.holders['j']['vehicle_id'],'a')
+        self.control.update([actor('a',-20),actor('b',-10)],paths,1.)
+        self.assertNotIn('a',self.control.reservations['j'])
+        self.assertIn('b',self.control.reservations['j'])
+
+    def test_departing_car_is_not_stopped_again_by_the_region_behind_it(self):
+        paths={'a':[[-50.,0.],[50.,0.]],'b':[[-50.,0.],[50.,0.]]}
+        self.control.update([actor('a',-10),actor('b',-20)],paths,0.)
+        self.control.update([actor('a',0),actor('b',-10)],paths,1.)
+        # Rear body has cleared x=6, but an extra half-length tolerance used
+        # to classify this departing car as an applicant blocked by its follower.
+        result=self.control.update([actor('a',8.65),actor('b',0)],paths,2.)
+        self.assertNotIn('a',result)
+        self.assertNotIn('a',self.control.reservations['j'])
+
+    def test_stopped_exit_queue_prevents_entry_but_does_not_stop_departure(self):
+        paths={'a':[[-50.,0.],[50.,0.]]}
+        yielded=self.control.update([actor('a',-10),actor('queue',10)],paths,0.)
+        self.assertIn('a',yielded)
+        self.assertEqual(self.control.blockers['a']['exit_blocked_by'],['queue'])
+        yielded=self.control.update([actor('a',-10),actor('queue',25)],paths,1.)
+        self.assertNotIn('a',yielded)
+        self.assertIn('a',self.control.reservations['j'])
+        yielded=self.control.update([actor('a',0),actor('queue',10)],paths,2.)
+        self.assertNotIn('a',yielded)
+
+    def test_pending_cars_cannot_share_the_same_finite_exit_storage(self):
+        control=JunctionCoordinator([self.zone,dict(self.zone,junction_id='next',position_city_m=[25.,0.])])
+        paths={'a':[[-50.,0.],[80.,0.]],'b':[[-50.,0.],[80.,0.]]}
+        control.update([actor('a',-10),actor('b',-20)],paths,0.)
+        yielded=control.update([actor('a',0,speed=2),actor('b',-10)],paths,1.)
+        self.assertIn('b',yielded)
+        self.assertTrue(control.blockers['b']['exit_capacity_limited'])
+        self.assertIn('a',control.blockers['b']['waiting_for'])
+        yielded=control.update([actor('a',35,speed=2),actor('b',-10)],paths,2.)
+        self.assertNotIn('b',yielded)
+
+    def test_second_visit_to_same_xy_does_not_reserve_the_road_between_visits(self):
+        from map_update.simulation_path_geometry import PathGeometry
+        from shapely.geometry import box
+        path=[[0.,10.],[0.,0.],[10.,0.],[10.,-20.],[-10.,-20.],[-10.,0.],[0.,0.],[10.,10.]]
+        geom=PathGeometry(path);region=box(-2.,-2.,2.,2.)
+        intervals=geom.region_intervals(region)
+        self.assertEqual(len(intervals),2)
+        self.assertEqual(intervals[0],(8.,12.))
+        self.assertAlmostEqual(intervals[1][0],88.)
+        self.assertAlmostEqual(intervals[1][1],90.+math.sqrt(8.))
+        self.assertAlmostEqual(geom.heading_at(90.),0.)
+        self.assertAlmostEqual(geom.project(geom.point_at(90.))[3],-math.pi/2)
+        zone=dict(junction_id='j',position_city_m=[0.,0.],radius_m=3.,boundary_city_m=list(region.exterior.coords))
+        control=JunctionCoordinator([zone])
+        result=control.update([actor('a',10.,-5.,-math.pi/2),actor('ego',0.)],{'a':path},0.)
+        self.assertNotIn('a',result)
+
     def test_only_one_approach_is_granted_and_occupied_external_car_blocks(self):
         actors=[actor('a',-10),actor('b',0,-10,math.pi/2)]
         yields=self.control.update(actors,self.paths,0.)

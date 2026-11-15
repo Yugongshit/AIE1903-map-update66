@@ -82,3 +82,21 @@ def acceleration_action(acceleration, vehicle):
     # about Bullet's achieved deceleration or tyre friction.
     scale = 4*config.get('max_engine_force', 1000.)/mass if acceleration >= 0 else 4.
     return max(-1., min(1., acceleration/max(.1, scale)))
+
+
+def limit_background_brake(vehicle, action, physics_dt, decision_repeat):
+    """Convert background brake demand to a per-wheel Bullet impulse.
+
+    Bullet's wheel brake is an impulse per physics substep, not a force. The
+    native fixed maximum can reverse a crawling car several times per decision.
+    Bound the total decision impulse by its current longitudinal momentum. No
+    pose/velocity is assigned and all contact response remains in Bullet.
+    """
+    if action[1] >= 0:
+        return
+    speed = abs(sum(v*h for v, h in zip(vehicle.velocity, vehicle.heading)))
+    mass = vehicle.body.getMass()
+    deceleration = min(4.*abs(action[1]), speed/(physics_dt*decision_repeat))
+    impulse = mass*deceleration*physics_dt/4.
+    for wheel in range(4):
+        vehicle.system.setBrake(impulse, wheel)

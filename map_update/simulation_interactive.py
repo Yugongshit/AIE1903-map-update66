@@ -194,7 +194,7 @@ def braking_actor(own, others, route_points=()):
     speed = own['speed_m_s']
     horizon = own['length_m']/2 + 1.5 + speed*1.0 + speed*speed/4.
     position = own['position_city_m']
-    if len(route_points) >= 2:
+    if len(route_points) >= 2 and _length(route_points) > 1e-6:
         progress = _project(position, route_points)[1]
         end = min(_length(route_points), progress+horizon)
         points = _slice(route_points, progress, end) if end > progress+1e-5 else []
@@ -333,6 +333,7 @@ class InteractiveRuntime:
     def replace_background_vehicle(self, identifier, position, heading, generation):
         """Retire a boundary-exiting actor and allocate a distinct new physical body."""
         if identifier=='ego' or self.modes[identifier]!='ai':raise ValueError('Only background AI slots can receive new actors')
+        self.junction_coordinator.release_actor(identifier)
         old=self.vehicles[identifier];cfg=deepcopy(old.config)
         self.env.engine.clear_objects([old.id],force_destroy=True)
         offset=self.metadata.get('old_origin_in_current_coordinate',[0.,0.])
@@ -419,7 +420,9 @@ class InteractiveRuntime:
         if self.journeys and self.journeys.update(actors,sim_time):actors=self.actors()
         self.lane_changes.update(self,actors,sim_time)
         paths={k:self.path_for(k) for k in self.ids[1:] if self.modes[k]=='ai' and self.path_for(k)}
-        yielding=self.junction_coordinator.update(actors,paths,sim_time) if self.junctions else {}
+        current_actors={a['vehicle_id']:a for a in actors}
+        own_projections={k:self.controllers[k].project_pose(current_actors[k]['position_city_m']) for k in paths if hasattr(self.controllers[k],'project_pose')}
+        yielding=self.junction_coordinator.update(actors,paths,sim_time,own_projections=own_projections) if self.junctions else {}
         use_idm = bool(self.traffic and self.traffic['following_model'] == 'idm' and self.cyclic_path)
         if use_idm:
             from .simulation_following import project_actors, current_leader, idm_acceleration, acceleration_action
@@ -479,6 +482,7 @@ class InteractiveRuntime:
                 if use_idm and self.missions[identifier].get('cycle_follower') and self.diagnostics[identifier]['status'] == 'tracking':
                     parameters = self.missions[identifier]['driver_parameters']
                     path = self.path_for(identifier)
+                    if identifier in own_projections:projections[id(path)][identifier]=own_projections[identifier]
                     leader = current_leader(own, actors, path, projections[id(path)])
                     acceleration = idm_acceleration(own['speed_m_s'],
                         self.diagnostics[identifier]['target_speed_m_s'], leader, parameters)
@@ -497,7 +501,8 @@ class InteractiveRuntime:
                 action=[action[0],-1.];self.reasons[identifier]='lane_change_merge_yield'
             if identifier in yielding and self.modes[identifier]=='ai':
                 action=[action[0],-1.]
-                self.reasons[identifier]='junction_yield'
+                blocker=self.junction_coordinator.blockers.get(identifier,{})
+                self.reasons[identifier]='junction_exit_blocked' if blocker.get('exit_blocked_by') or blocker.get('exit_capacity_limited') else 'junction_yield'
                 self.diagnostics[identifier]['junction_yield']=yielding[identifier]
             if self.population and self.population.activity and self.population.activity.stopping(identifier) and self.modes[identifier]=='ai':
                 action=[action[0],-1.];self.reasons[identifier]='synthetic_brief_stop'
@@ -512,9 +517,15 @@ class InteractiveRuntime:
                     self.reasons[identifier] = 'synthetic_scheduled_stop'
                     if 'following' in self.diagnostics.get(identifier, {}):
                         self.diagnostics[identifier]['following']['scheduled_stop_override'] = True
+            if self.journeys and identifier in self.journeys.waiting_entries and self.modes[identifier]=='ai':
+                action=[action[0],-1.]
+                self.reasons[identifier]='boundary_waiting_for_safe_entry'
             self.actions[identifier] = action
             if identifier != 'ego':
                 vehicle.before_step(action)
+                if self.modes[identifier] == 'ai':
+                    from .simulation_following import limit_background_brake
+                    limit_background_brake(vehicle, action, self.env.config['physics_world_step_size'], self.env.config['decision_repeat'])
         return self.actions['ego']
 
     def after_step(self):
@@ -602,7 +613,7 @@ class InteractiveRuntime:
                        heading=row['heading_rad'], length=row['length_m'], width=row['width_m'],
                        height=row['height_m'], static=row.get('type')!='PEDESTRIAN', source_scope=row.get('source_scope','full_scene_offline_prior'))
                   for row in actors if row['native_object_id'] not in native_ids]
-        return {'traffic_diagnostics': self.traffic_waits.report(), 'journeys':self.journeys.report() if self.journeys else None,
+        return {'traffic_diagnostics': self.traffic_waits.report([w.report() for w in self.population.walkers] if self.population else ()), 'journeys':self.journeys.report() if self.journeys else None,
                 'traffic_profile': 'synthetic_journeys_v1' if self.journeys else ('synthetic_network_v1' if self.traffic['route_mode']=='network' else 'synthetic_cycle_v1') if self.traffic else 'source_presets',
                 'population': self.population.report() if self.population else None,
                 'junction_control': dict(zone_count=len(self.junctions),passes=self.junction_coordinator.passes,yield_ticks=self.junction_coordinator.yield_ticks,rule='synthetic_unsignalised_reservation_not_real_signals'),

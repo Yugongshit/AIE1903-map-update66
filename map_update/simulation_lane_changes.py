@@ -136,7 +136,7 @@ class LaneChanges:
             if runtime.modes[key]!='ai':continue
             if active:
                 controller=runtime.controllers[key]
-                progress=controller.geometry.project(own['position_city_m'])[1]
+                progress=controller.project_pose(own['position_city_m'])[1]
                 if active['merge_start']-.5<progress<active['end']-5 and not target_gap_safe(own,actors,active['source_geometry']):
                     self.yielding.add(key)
                 if active['end']<progress<active['end']+10:

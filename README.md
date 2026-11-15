@@ -2,9 +2,9 @@
 
 当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
-**公网仿真工作台：** [直接打开地图审阅](https://yugongshit.github.io/AIE1903-map-update66/simulation/)，同伴无需安装依赖。五席位玩家／AI／外部 Planning 的实时交通通过独立 MetaDrive 服务器运行。[公网与服务器部署说明](docs/public_simulation.md)。
+**公网静态地图审阅：** [直接打开地图审阅](https://yugongshit.github.io/AIE1903-map-update66/simulation/)，同伴无需安装依赖。实时交通需要独立运行 MetaDrive 后端，目前没有已部署的公网实时仿真服务。当前以自动背景交通为重点，ego/P0 等待真实外部 Planning 并保持制动；人工驾驶与多人操作后置。[公网与服务器部署说明](docs/public_simulation.md)。
 
-**地图更新的下一步：** [贡献与实验方案](docs/map_update_contribution_plan.md) 区分参考更新、自主检测和实际写回，提出局部补丁、状态通行约束及固定 Planning 对照实验。该方案尚未实现新算法，实时接口也不代表同学的 Planning 已接入。
+**当前阶段与下一步：** 以 [CONTINUE_HERE.md](CONTINUE_HERE.md) 最新条目为准：阶段二优先修复持续交通停滞，之后完善状态估计/评估并接真实 Planning。局部补丁是[旧备选方案](docs/map_update_contribution_plan.md)，不作为默认研究方向。宽恒云逐项配置见[云平台说明](docs/kuanheng_cloud.md)。
 
 **地图更新 → 场景验证 → Planning：** 新增本地场景平台。选中场景后，在同一视图中查看道路结构与附着状态，切换原图/更新图、选择改动、旋转到车后、拖动时间轴，并导出当前帧的规划输入。[平台操作与 Planning 接口](docs/simulation_platform.md)。
 
@@ -12,12 +12,12 @@
 
 ```bash
 cd ~/Desktop/AIE1903-map-update66
-git pull --ff-only
+git pull --ff-only origin main
 conda activate aie1903-sim
-python scripts/run_simulation_platform.py
+python scripts/run_simulation_platform.py --port 8093
 ```
 
-浏览器自动打开 **http://127.0.0.1:8091/**。默认“地图审阅”显示源数据三维几何；点击“启动 MetaDrive”进入真实引擎画面，两种模式均提供视角与回放控制。原图/更新图使用同一场景的状态层，状态对象不会写入纯道路底图。
+浏览器自动打开 **http://127.0.0.1:8093/**。更新后停止旧服务、重新启动、强制刷新并关闭旧房间后重建。默认“地图审阅”显示源数据三维几何；点击“启动 MetaDrive”进入真实引擎画面，两种模式均提供视角与回放控制。原图/更新图使用同一场景的状态层，状态对象不会写入纯道路底图。
 
 场景卡片明确标注数据来源：**nuScenes** 有 23 个状态事件、全程 74 个关联实例，当前算法结构修改为 0；**Argoverse** 有 93 项已交付参考更新，对应 170 项仿真要素修改，缺少可用三维状态轨迹。两层联调 DEMO 将一项受控道路修改与同一个 nuScenes 场景的真实状态组合，单独标明来源，不计作算法检出。
 

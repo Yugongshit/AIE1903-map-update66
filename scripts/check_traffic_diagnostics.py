@@ -44,7 +44,7 @@ def main():
             encoded = json.dumps(data)
             check('Planning excludes debugging waits and generator futures', all(k not in encoded for k in ('wait_diagnostic', 'waiting_cycles', 'waiting_for', 'exit_lane', 'entry_lane', 'patrol_goals')))
             page.evaluate('MAP_PLATFORM.interactiveControl("pause")')
-            page.wait_for_function('!MAP_PLATFORM.interactive.room.playing')
+            page.wait_for_function("!MAP_PLATFORM.interactive.room.playing && document.querySelector('#playback-note').textContent.includes('服务器暂停')", timeout=15000)
             check('pause status is visible', '服务器暂停' in page.locator('#playback-note').inner_text())
             page.screenshot(path=str(args.out/'diagnostics.png'), full_page=True)
             check('no browser exceptions', not errors)

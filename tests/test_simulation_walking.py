@@ -59,7 +59,7 @@ class WalkingTests(unittest.TestCase):
 
     def test_head_on_walkers_pass_without_leaving_sidewalk(self):
         class Body:
-            def __init__(self, pos): self.pos=pos; self.velocity=[0,0]; self.heading=0.
+            def __init__(self, pos): self.pos=pos; self.velocity=[0,0]; self.heading=0.; self.body=SimpleNamespace(setActive=lambda value:None)
             def set_heading_theta(self, theta): self.heading=theta
             def set_velocity(self, direction, speed=0):
                 length=math.hypot(*direction)
@@ -82,6 +82,58 @@ class WalkingTests(unittest.TestCase):
             self.assertGreater(math.dist(walkers[0].position(),walkers[1].position()),.85)
         self.assertGreater(walkers[0].position()[0],2.)
         self.assertLess(walkers[1].position()[0],-2.)
+
+    def test_walking_command_wakes_a_sleeping_native_body(self):
+        try:
+            from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletBoxShape, BulletPlaneShape
+            from panda3d.core import Vec3, NodePath
+        except ImportError:
+            self.skipTest('native Panda3D is not installed')
+        world = BulletWorld(); world.setGravity(Vec3(0, 0, -9.81))
+        ground = BulletRigidBodyNode('ground'); ground.addShape(BulletPlaneShape(Vec3(0, 0, 1), 0))
+        world.attachRigidBody(ground)
+        body = BulletRigidBodyNode('walker'); body.setMass(70); body.setFriction(0)
+        body.addShape(BulletBoxShape(Vec3(.3, .3, .85)))
+        node = NodePath(body); node.setZ(.85); world.attachRigidBody(body)
+        for _ in range(250): world.doPhysics(.02, 1, .02)
+        self.assertFalse(body.isActive())
+        # This is the native failure: assigning velocity alone does not wake it.
+        body.setLinearVelocity(Vec3(1, 0, 0))
+        for _ in range(5): world.doPhysics(.02, 1, .02)
+        self.assertAlmostEqual(node.getX(), 0.)
+        def velocity(direction, speed=0):
+            size=max(1e-6, math.hypot(*direction))
+            body.setLinearVelocity(Vec3(direction[0]*speed/size, direction[1]*speed/size, body.getLinearVelocity().z))
+        w=Walker.__new__(Walker); w.identifier='walker-1'
+        w.obj=SimpleNamespace(body=body, set_velocity=velocity, set_heading_theta=lambda h:node.setH(math.degrees(h)))
+        w.position=lambda:list(node.getPos())[:2]; w.previous=w.position()
+        w.network=SimpleNamespace(points=[[0.,0.],[10.,0.]], crosswalks={},
+            motion_area=box(-20,-2,20,2), crossing_at=lambda pos:None)
+        w.blocked_since=None; w.speed=1.; w.wait_until=0.; w.route=[0,1]; w.target=1
+        w.detour=[]; w.distance=0.; w.crossing=None; w.crossing_distance=0.; w.approved_crossing=None
+        w.phase='resting'; w.crossings=0; w.visited_crosswalks=set()
+        w.advance(10., [])
+        for _ in range(5): world.doPhysics(.02, 1, .02)
+        self.assertTrue(body.isActive())
+        self.assertGreater(node.getX(), .05)
+        self.assertEqual(world.getNumRigidBodies(), 2)
+
+    def test_curb_retreat_requires_stopped_vehicle_and_clear_source_walkway(self):
+        w=Walker.__new__(Walker);w.identifier='walker-8';w.waiting_for=['car'];w.speed=1.
+        w.network=SimpleNamespace(points=[[0.,2.],[0.,-2.],[2.,0.]],
+            motion_area=box(-.5,-3.,.5,3.),crossing_at=lambda p:None)
+        car=dict(vehicle_id='car',type='VEHICLE',position_city_m=[2.,0.],
+            heading_rad=0.,length_m=2.,width_m=1.,speed_m_s=0.)
+        self.assertTrue(w.retreat_from_stopped_vehicle([0.,0.],[car]))
+        self.assertGreater(math.dist(w.detour[0],car['position_city_m']),2.5)
+        self.assertTrue(w.network.motion_area.covers(LineString([[0.,0.],*w.detour])))
+        w.network.points=[[0.,2.]]
+        approaching=dict(car,vehicle_id='approaching',position_city_m=[-4.,2.],speed_m_s=2.)
+        self.assertFalse(w.retreat_from_stopped_vehicle([0.,0.],[car,approaching]))
+        car['speed_m_s']=1.
+        self.assertFalse(w.retreat_from_stopped_vehicle([0.,0.],[car]))
+        car['speed_m_s']=0.;w.network.motion_area=box(-.5,-.5,.5,.5)
+        self.assertFalse(w.retreat_from_stopped_vehicle([0.,0.],[car]))
 
     def test_narrow_encounter_can_replan_without_crossing_the_other_person(self):
         n=self.network;position=[570.718302,1335.732496]

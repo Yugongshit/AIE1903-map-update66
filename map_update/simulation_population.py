@@ -34,6 +34,7 @@ class Walker:
         self.waiting_for=[]; self.stationary_since=0.; self.current_time_s=0.
         self.blocked_since = None; self.reroutes = 0; self.changed_destinations = 0
         self.stalled_for=0.;self.physics_replans=0;self.local_blockages=[]
+        self.vehicle_retreat=False;self.vehicle_retreats=0
         a = network.points[node]; b = network.points[self.route[1]]
         self.previous = list(a); self.corridor = Point(a).buffer(.8)
         offset = runtime.metadata.get('old_origin_in_current_coordinate', [0, 0])
@@ -66,6 +67,40 @@ class Walker:
                         self.waiting_for=[actor['vehicle_id']]; return False
         return True
 
+    def retreat_from_stopped_vehicle(self, pos, actors):
+        """Make room in source walkable space when a stopped car blocks the curb.
+
+        Use only current bodies. A short, collision-clear step away can let the
+        car finish clearing the crossing; do not waive the crossing gap check.
+        """
+        blockers=[a for a in actors if a['vehicle_id'] in self.waiting_for and
+                  a.get('type')=='VEHICLE' and a['speed_m_s']<.05]
+        if not blockers:return False
+        from shapely.affinity import translate
+        bodies=[]
+        duration=3./max(.1,self.speed)+2.
+        for actor in actors:
+            reach=actor['speed_m_s']*duration if actor.get('type')=='VEHICLE' and actor['speed_m_s']>.05 else 0.
+            if actor['vehicle_id']==self.identifier or math.dist(pos,actor['position_city_m'])>8+reach:continue
+            body=vehicle_footprint(actor['position_city_m'],actor['heading_rad'],actor['length_m'],actor['width_m'],margin=.15)
+            if reach:
+                end=translate(body,xoff=math.cos(actor['heading_rad'])*reach,yoff=math.sin(actor['heading_rad'])*reach)
+                body=unary_union([body,end]).convex_hull
+            bodies.append(body)
+        car=blockers[0];center=car['position_city_m'];candidates=[]
+        for point in self.network.points:
+            distance=math.dist(pos,point)
+            if not 1.<=distance<=3.:continue
+            if math.dist(point,center)<math.dist(pos,center)+.5:continue
+            path=LineString([pos,point])
+            if not self.network.motion_area.covers(path):continue
+            if any(path.buffer(.3).intersects(body) for body in bodies):continue
+            candidates.append((distance,list(point)))
+        if not candidates:return False
+        self.detour=[min(candidates,key=lambda row:row[0])[1]]
+        self.vehicle_retreat=True;self.vehicle_retreats=getattr(self,'vehicle_retreats',0)+1
+        return True
+
     def advance(self, time_s, actors):
         self.current_time_s=time_s; self.waiting_for=[]
         pos = self.position(); moved = math.dist(pos, self.previous)
@@ -81,7 +116,9 @@ class Walker:
         if crossing: self.crossing_distance += moved
         if time_s < self.wait_until:
             self.obj.set_velocity([0., 0.]); return
-        if self.detour and math.dist(pos, self.detour[0]) < .06: self.detour.pop(0)
+        if self.detour and math.dist(pos, self.detour[0]) < .06:
+            self.detour.pop(0)
+        if not self.detour:self.vehicle_retreat=False
         target = self.detour[0] if self.detour else self.network.points[self.route[self.target]]
         if not self.detour and math.dist(pos, target) < .06:
             self.target += 1
@@ -111,8 +148,10 @@ class Walker:
             self.stalled_for=0.;self.obj.set_velocity([0.,0.]);return
         upcoming = crossing or self.network.crossing_at(target)
         self.corridor = self.network.crosswalks[upcoming].buffer(.8) if upcoming else LineString([pos, target]).buffer(.8)
-        if upcoming and self.approved_crossing != upcoming:
+        if upcoming and self.approved_crossing != upcoming and not getattr(self,'vehicle_retreat',False):
             if not self.safe_crossing(upcoming, actors):
+                if time_s-self.stationary_since>=4.:
+                    self.retreat_from_stopped_vehicle(pos,actors)
                 self.phase = 'waiting_gap'; self.obj.set_velocity([0., 0.]); return
             self.approved_crossing = upcoming
         # Current-body local avoidance. No intention or future driver action access.
@@ -124,6 +163,11 @@ class Walker:
             if math.dist(pos, actor['position_city_m']) > 8: continue
             shape = vehicle_footprint(actor['position_city_m'], actor['heading_rad'], actor['length_m'], actor['width_m'], margin=.15)
             if swept.intersects(shape):
+                # A retreat may start within the conservative .45 m guard.
+                # Permit only increasing clearance with the actual .3 m half
+                # body plus the .15 m actor margin clear along the whole step.
+                retreat_clear=getattr(self,'vehicle_retreat',False) and shape.distance(Point(ahead))>shape.distance(Point(pos))+.01
+                if retreat_clear and not LineString([pos,ahead]).buffer(.3).intersects(shape):continue
                 self.waiting_for=[actor['vehicle_id']]
                 if self.blocked_since is None: self.blocked_since = time_s
                 if actor.get('type') == 'PEDESTRIAN' and time_s-self.blocked_since > 4+int(self.identifier.split('-')[-1])*3:
@@ -154,13 +198,18 @@ class Walker:
             self.phase = 'blocked_off_walkway'; self.obj.set_velocity([0., 0.]); return
         self.blocked_since = None
         self.phase = 'crossing' if crossing else ('passing' if self.detour else 'walking')
+        # Bullet's velocity setter does not wake a sleeping rigid body. A
+        # walker can sleep at a waypoint/rest, then ignore every renewed walk
+        # command. Wake on intentional motion; keep all physical contacts.
+        self.obj.body.setActive(True)
         self.obj.set_heading_theta(math.atan2(delta[1], delta[0]))
         self.obj.set_velocity(delta, min(self.speed, distance/.1))
 
     def report(self):
         return dict(event_id=self.identifier, kind='synthetic_pedestrian', object_id=self.identifier,
-            status=self.phase, stationary_for_s=round(max(0.,self.current_time_s-self.stationary_since),2),
+            status=self.phase, physics_active=bool(self.obj.body.isActive()), stationary_for_s=round(max(0.,self.current_time_s-self.stationary_since),2),
             waiting_for=list(self.waiting_for), completed_crossings=self.crossings, completed_trips=self.trips,
+            vehicle_retreats=getattr(self,'vehicle_retreats',0),
             physics_blockage_replans=self.physics_replans, walk_style=self.walk_style, travelled_m=round(self.distance, 2), reroutes=self.reroutes, changed_destinations=self.changed_destinations, distinct_crosswalks=len(self.visited_crosswalks), synthetic=True,
             execution_model='source_walkway_trips_rigid_body_velocity_servo_no_biomechanics')
 
