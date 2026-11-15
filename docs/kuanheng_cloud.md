@@ -55,7 +55,7 @@ print(y.shape)
 
 1. 只保留一个数据挂载和一条服务端口，不必点“添加文件存储”或“添加端口号”重复添加。当前已有存储时不必再新建一份。
 2. 提交创建后，等待运行状态就绪，再进入平台提供的终端。外部端口是否允许、是否占用由平台校验；截图没有给出允许范围，不能保证任意指定值可用。
-3. 确认 `ls -ld /ai/map_update` 能看到挂载目录，再把仓库克隆到 `/ai/map_update/AIE1903-map-update66`；不要清空已有存储。Python环境、模型缓存、结果和日志也放在持久盘。
+3. 确认 `ls -ld /ai/map_update` 能看到挂载目录，再把仓库克隆到 `/ai/map_update/AIE1903-map-update66`；若该目录已经是本仓库，进入目录执行 `git pull --ff-only origin main`，不要重复克隆或清空已有存储。Python环境、模型缓存、结果和日志也放在持久盘。
 4. Python3.11环境内从仓库根目录安装 `requirements-simulation.txt`，再执行 `python -m metadrive.pull_asset`。系统镜像的Python版本可能不同，不能直接把依赖装进原PyTorch环境。
 5. 在实例环境中设置随机长字符串 `SIMULATION_CONTROL_KEY`（至少32字符，不发到聊天或GitHub），启动：
 
