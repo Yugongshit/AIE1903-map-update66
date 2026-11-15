@@ -201,8 +201,14 @@ def braking_actor(own, others, route_points=()):
     else:
         heading = own['heading_rad']
         points = [position, [position[0]+horizon*math.cos(heading), position[1]+horizon*math.sin(heading)]]
-    if len(points) < 2:
-        return None
+    if len(points) < 2:points=[position]
+    # A route endpoint is a centre-position goal, not the front of the body.
+    # Keep the physical guard beyond a short/finished route, using the current
+    # heading only. This does not extend the driving route or move an actor.
+    remaining=horizon-(_length(points) if len(points)>=2 else 0.)
+    if remaining>1e-6:
+        heading=own['heading_rad']
+        points.append([points[-1][0]+remaining*math.cos(heading),points[-1][1]+remaining*math.sin(heading)])
     corridor = LineString(points).buffer(own['width_m']/2+.35, cap_style=2)
     for actor in others:
         if actor['native_object_id'] == own['native_object_id']:

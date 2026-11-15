@@ -59,6 +59,7 @@ def main():
             world_map_unchanged=original==feature_sha256(session.source_features),wire_bytes=len(json.dumps(cfg).encode()),
             all_actors_have_unique_identity=len({v.get('actor_instance_id',k) for k,v in state['vehicles'].items()})==len(state['vehicles']))
         report['initial_config_sha256']=feature_sha256(cfg)
+        report['last_collisions']={k:v['last_collision'] for k,v in state['vehicles'].items() if v['collision_event_count']}
         report['validation_scope']='physical_integrity_only_not_sustained_traffic_acceptance'
         last=trace[-1];window=[r for r in trace if r['time_s']>=last['time_s']-60]
         report['traffic_health']=dict(minimum_moving_last_60s=min(r['moving'] for r in window),

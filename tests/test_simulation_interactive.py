@@ -92,6 +92,8 @@ class InteractiveTests(unittest.TestCase):
         repeated=[[0.,0.]]*21
         self.assertIsNone(braking_actor(own,[own],repeated))
         self.assertEqual(braking_actor(own,[own,obstacle],repeated)['vehicle_id'],'barrier')
+        # A short remaining centreline must still protect the car's front body.
+        self.assertIsNotNone(braking_actor(own,[own,obstacle],[[0.,0.],[.5,0.]]))
 
     def setUp(self):
         self.native = patch('map_update.simulation_interactive._vehicle_class', return_value=Vehicle)
