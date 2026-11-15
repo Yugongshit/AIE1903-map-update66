@@ -372,9 +372,9 @@ class JunctionCoordinator:
             exit_blocked={k:{v for v in cars if v!=k and cars[v]['speed_m_s']<.3
                             and exit_spaces[k].intersects(bodies[v])} for k in approaches}
             for identifier in approaches:occupancy[identifier].update(exit_blocked[identifier])
-            queue_heads=[]
+            heads=[]
             for identifier,ahead in approaches.items():
-                if identifier in inside:continue
+                if identifier in inside or occupancy[identifier]:continue
                 path=paths[identifier];progress=project(identifier,path)[1];length=self._path_geometry[id(path)][0]
                 blocked=False
                 for other in approaches:
@@ -383,31 +383,16 @@ class JunctionCoordinator:
                     if math.dist(path[0],path[-1])<.01:delta%=length
                     if lat<1.5 and abs(_angle(cars[other]['heading_rad']-heading))<.6 and 0<delta<ahead:
                         blocked=True;break
-                if not blocked:queue_heads.append(identifier)
-            heads=[k for k in queue_heads if not occupancy[k]]
+                if not blocked:heads.append(identifier)
             # An unentered grant cannot survive a new queue head ahead of it.
             # Otherwise the follower waits for its leader while that leader
             # yields to the follower's stale reservation.
             for identifier,holder in list(reservations.items()):
                 if not holder['entered'] and identifier not in heads:
                     reservations.pop(identifier)
-            capacity_blocked={};fairness_blocked={}
-            priority={k:(self.waiting[(key,k)],approaches[k],k) for k in queue_heads}
-            # A compatible platoon must not keep extending its reservation in
-            # front of an older crossing request. Let entered cars drain, then
-            # serve the older queue head. An externally blocked/closed outlet
-            # must not freeze unrelated traffic while it has no usable gap.
-            aged=[k for k in queue_heads if time_s-self.waiting[(key,k)]>=10.
-                  and not exit_blocked[k]
-                  and (k not in exit_allowance or k in terminal_outlets or exit_allowance[k]>=cars[k]['length_m']+2.)
-                  and all(v in reservations and cars[v]['speed_m_s']>.3 for v in occupancy[k])]
+            capacity_blocked={}
             for identifier in sorted(heads,key=lambda k:(self.waiting[(key,k)],approaches[k],k)):
                 if identifier in reservations and reservations[identifier]['entered']:continue
-                older={k for k in aged if priority[k]<priority[identifier] and not compatible(identifier,
-                    dict(corridor=corridors[k],movement=movements[k]))}
-                if older:
-                    reservations.pop(identifier,None);fairness_blocked[identifier]=older
-                    continue
                 if identifier in exit_allowance:
                     reserved={k for k,h in reservations.items() if k!=identifier and same_outlet(identifier,h)}
                     remaining=exit_allowance[identifier]-sum(cars[k]['length_m']+2. for k in reserved)
@@ -429,7 +414,6 @@ class JunctionCoordinator:
                     stopped[identifier]=key;self.yield_ticks+=1
                     waiting=occupancy[identifier] | {k for k,h in reservations.items() if not compatible(identifier,h)}
                     waiting.update(capacity_blocked.get(identifier,()))
-                    waiting.update(fairness_blocked.get(identifier,()))
                     self.blockers[identifier]=dict(junction_id=key,waiting_for=sorted(waiting),
                         exit_blocked_by=sorted(exit_blocked[identifier]),exit_capacity_limited=identifier in capacity_blocked,
                         exit_available_m=exit_allowance.get(identifier),terminal_destination=identifier in terminal_outlets)

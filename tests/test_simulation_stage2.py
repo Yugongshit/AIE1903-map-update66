@@ -148,28 +148,6 @@ class JunctionTests(unittest.TestCase):
         self.assertNotIn('a',self.control.reservations['j'])
         self.assertIn('b',self.control.reservations['j'])
 
-    def test_aged_crossing_queue_gets_a_turn_before_new_compatible_followers(self):
-        paths={'a':[[-50.,0.],[50.,0.]],'b':[[-50.,0.],[50.,0.]],'c':[[0.,-50.],[0.,50.]]}
-        self.control.update([actor('a',-10),actor('c',0,-10,math.pi/2)],{k:paths[k] for k in ('a','c')},0.)
-        yielded=self.control.update([actor('a',0,speed=1),actor('b',-10),actor('c',0,-10,math.pi/2)],paths,11.)
-        self.assertNotIn('a',yielded)
-        self.assertIn('b',yielded)
-        self.assertIn('c',self.control.blockers['b']['waiting_for'])
-        self.assertNotIn('b',self.control.reservations['j'])
-        yielded=self.control.update([actor('a',20,speed=1),actor('b',-10),actor('c',0,-10,math.pi/2)],paths,12.)
-        self.assertNotIn('c',yielded)
-        self.assertIn('c',self.control.reservations['j'])
-        self.assertIn('b',yielded)
-
-    def test_aged_queue_with_blocked_outlet_does_not_hold_other_traffic(self):
-        paths={'a':[[-50.,0.],[50.,0.]],'b':[[-50.,0.],[50.,0.]],'c':[[0.,-50.],[0.,50.]]}
-        queue=actor('queue',0,10,math.pi/2)
-        self.control.update([actor('a',-10),actor('c',0,-10,math.pi/2),queue],{k:paths[k] for k in ('a','c')},0.)
-        yielded=self.control.update([actor('a',0,speed=1),actor('b',-10),actor('c',0,-10,math.pi/2),queue],paths,11.)
-        self.assertIn('c',yielded)
-        self.assertNotIn('b',yielded)
-        self.assertIn('b',self.control.reservations['j'])
-
     def test_departing_car_is_not_stopped_again_by_the_region_behind_it(self):
         paths={'a':[[-50.,0.],[50.,0.]],'b':[[-50.,0.],[50.,0.]]}
         self.control.update([actor('a',-10),actor('b',-20)],paths,0.)
