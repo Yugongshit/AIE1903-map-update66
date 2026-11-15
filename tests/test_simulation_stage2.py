@@ -123,6 +123,19 @@ class JunctionTests(unittest.TestCase):
         self.assertNotIn('a',result)
         self.assertEqual(control.holders['j']['vehicle_id'],'a')
 
+    def test_crossing_reopens_after_rear_clears_before_whole_region_exit(self):
+        from shapely.geometry import box
+        zone=dict(self.zone,radius_m=25.,boundary_city_m=list(box(-20.,-10.,20.,10.).exterior.coords))
+        control=JunctionCoordinator([zone])
+        paths={'a':[[-50.,0.],[50.,0.]],'b':[[0.,-50.],[0.,50.]]}
+        control.update([actor('a',-23),actor('b',0,-13,math.pi/2)],paths,0.)
+        yielded=control.update([actor('a',2.5,speed=1),actor('b',0,-13,math.pi/2)],paths,1.)
+        self.assertIn('b',yielded)  # Rear still occupies the crossing.
+        yielded=control.update([actor('a',6.,speed=1),actor('b',0,-13,math.pi/2)],paths,2.)
+        self.assertTrue(control.reservations['j']['a']['entered'])
+        self.assertNotIn('b',yielded)
+        self.assertIn('b',control.reservations['j'])
+
     def test_parallel_streams_and_same_stream_followers_can_share_a_region(self):
         control=JunctionCoordinator([dict(self.zone,radius_m=12.)])
         paths={'a':[[-50.,-4.],[50.,-4.]],'b':[[-50.,4.],[50.,4.]],'c':[[-50.,-4.],[50.,-4.]]}

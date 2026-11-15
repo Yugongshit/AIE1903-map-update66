@@ -305,7 +305,10 @@ class JunctionCoordinator:
                 # Include downstream clearing space, using current geometry only.
                 closed=math.dist(path[0],path[-1])<.01
                 end=leave+own['length_m']+2.
-                begin=max(0.,min(progress,entry)-own['length_m']/2)
+                # Release the already-traversed part of a large merged region.
+                # Keep the rear body and remaining movement protected; otherwise
+                # a car near a distant outlet still locks the crossing behind it.
+                begin=max(0.,progress-own['length_m']/2)
                 pieces=[substring(line,begin,min(length,end))]
                 if closed and end>length:pieces.append(substring(line,0.,min(length,end-length)))
                 from shapely.ops import unary_union
