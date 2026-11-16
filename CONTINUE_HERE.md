@@ -1,3 +1,18 @@
+# 最新可视化入口（2026-11-16：用户要求先看，再继续）
+
+新增单文件导出脚本 `scripts/build_recorded_viewer.py`。从可信ScenarioNet数据库导出独立HTML，内嵌本仓库Three.js及许可证、源地图几何、有效轨迹和当前信号状态计数，无CDN/HTTP服务依赖。支持旋转/缩放/平移、俯视/聚焦、车辆点击或原ID选择、播放/暂停/时间轴和多场景。车辆为标注尺寸方框，缺尺寸时为示意线框；道路为源矢量，不虚构城市建筑。
+
+`--report-root` 可叠加新版检查器的逐帧接管报告：核对场景/中央化物理地图哈希/各接管车起点的坐标平移一致性。只显示保存的接管帧范围，紫色测试轨迹与灰色原记录框同帧对照；旧报告无trace则不生成分支。接管显示Z沿用源记录，只是XY/航向可视化，不冒充完整反事实三维姿态。不是实时MetaDrive操作界面，也不是Planning观测接口。
+
+本地使用官方内置样例和本地测试报告验证：3项数据/对齐单测、12项离线浏览器检查通过（网络禁用后载入HTML内容，未请求外部资源；环境浏览器禁止file导航，因此本地通过set_content验证）。本地测试画面不是用户宽恒云三个新场景。原始新数据未传至Codex，应让用户在②root@ai生成最终HTML，再在①Mac通过scp下载并打开，不让用户启动旧网页/做端口映射。用户要求先查看，不继续扩展其它平台功能。
+
+远端生成命令：
+`/opt/map-update/venvs/simulation/bin/python scripts/build_recorded_viewer.py --database /ai/map_update/waymo/converted/v1.3.1-dev-first3 --report-root /ai/map_update/waymo/runs/recheck-20261116-190748 --out /ai/map_update/waymo/visualization/womd-review.html`
+
+输出拒绝覆盖已有文件。最新重跑根目录只有scene1/2的逐帧报告，scene0只能原记录回放。数据和生成HTML不提交GitHub；第一次只需传这一个构建脚本，不重装环境/重传408MB源码。构建器依赖源仓库已包含的 `map_update/vendor/three.min.js` 和 `three.LICENSE`。
+
+---
+
 # 最新接续（2026-11-16：宽恒云三个WOMD开发场景接管验证已通过）
 
 本条延续真实回放/逐车接管方向，不恢复随机交通优先级。用户已取得许可，将WOMD V1.3.1的首个training_20s分片下载并上传：75场景可解析，前三个场景各198帧，转换后位于宽恒云 `/ai/map_update/waymo/converted/v1.3.1-dev-first3`。数据哈希及用户回传结果见 `docs/recorded_takeover.md` 最新章节。Codex没有直接登录宽恒云；不要把用户回传输出写成Codex亲自执行。
