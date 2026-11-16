@@ -1,0 +1,110 @@
+{
+  "purpose": "validator_regression_not_new_real_data_evaluation",
+  "synthetic_fixture": "Bundled Waymo example SDC position/heading held at frame10 for frames0..30, velocity zero; remaining frames unchanged. Not an original real recording.",
+  "old_report_limitation": "The failed SDC branch was absent; last_saved_branch for old_stationary is the preceding two-actor branch.",
+  "tested_checker_sha256": "f9a9e8792bf33163cca45b30ded1947ae19dd8f00d6f490708526934a22c39de",
+  "runs": {
+    "old_stationary": {
+      "passed": false,
+      "failed_checks": null,
+      "error": null,
+      "last_saved_branch": {
+        "controlled": [
+          "332",
+          "333"
+        ],
+        "actions": null,
+        "initial_speed_m_s": null,
+        "deviation_from_log_m": {
+          "332": 16.163182760786622,
+          "333": 13.13756690194216
+        },
+        "displacement_from_start_m": null,
+        "background_max_position_error_m": 0.0
+      }
+    },
+    "fixed_stationary": {
+      "passed": true,
+      "failed_checks": null,
+      "error": null,
+      "last_saved_branch": {
+        "controlled": [
+          "1629"
+        ],
+        "actions": {
+          "1629": [
+            0.0,
+            0.3
+          ]
+        },
+        "initial_speed_m_s": {
+          "1629": 0.0
+        },
+        "deviation_from_log_m": {
+          "1629": 1.6076315937203465
+        },
+        "displacement_from_start_m": {
+          "1629": 1.6076315937203465
+        },
+        "background_max_position_error_m": 0.0
+      }
+    },
+    "zero_action_fault": {
+      "passed": false,
+      "failed_checks": [
+        "sdc_actor_external_action_changes_trajectory"
+      ],
+      "error": {
+        "type": "AssertionError",
+        "message": "sdc_actor_external_action_changes_trajectory"
+      },
+      "last_saved_branch": {
+        "controlled": [
+          "1629"
+        ],
+        "actions": {
+          "1629": [
+            0.0,
+            0.0
+          ]
+        },
+        "initial_speed_m_s": {
+          "1629": 0.0
+        },
+        "deviation_from_log_m": {
+          "1629": 0.003162859271512835
+        },
+        "displacement_from_start_m": {
+          "1629": 0.003162859271512835
+        },
+        "background_max_position_error_m": 0.0
+      }
+    },
+    "original_moving": {
+      "passed": true,
+      "failed_checks": null,
+      "error": null,
+      "last_saved_branch": {
+        "controlled": [
+          "1629"
+        ],
+        "actions": {
+          "1629": [
+            0.0,
+            -1.0
+          ]
+        },
+        "initial_speed_m_s": {
+          "1629": 13.528399026136285
+        },
+        "deviation_from_log_m": {
+          "1629": 16.637981499164535
+        },
+        "displacement_from_start_m": {
+          "1629": 8.324379341762759
+        },
+        "background_max_position_error_m": 0.0
+      }
+    }
+  }
+}

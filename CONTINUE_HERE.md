@@ -1,3 +1,19 @@
+# 最新接续（2026-11-16：WOMD已在宽恒云转换，修正静止采集车的接管验证）
+
+本条延续真实回放/逐车接管方向，不恢复随机交通优先级。用户已取得许可，将WOMD V1.3.1的首个training_20s分片下载并上传：75场景可解析，前三个场景各198帧，转换后位于宽恒云 `/ai/map_update/waymo/converted/v1.3.1-dev-first3`。数据哈希及用户回传结果见 `docs/recorded_takeover.md` 最新章节。Codex没有直接登录宽恒云；不要把用户回传输出写成Codex亲自执行。
+
+用户容易混淆终端：①Mac提示符huangziming…%；②算力SSH端口30205、root@ai；③存储SSH端口37226、root@explorer。以实际提示符/hostname为准，窗口标题曾残留root@ai但已退回Mac。存储端盘ID e62ebed7…与算力挂载盘ca0f2d2a…不同；首个分片已复制到算力的持久盘 `/ai/map_update/waymo/raw/v1.3.1/`，双方SHA256一致。不要再要求上传/转换原始数据。
+
+宽恒云现有：uv `/ai/map_update/tools/uv/bin/uv`；Python3.11 `/opt/map-update/python/cpython-3.11-linux-x86_64-gnu/bin/python3.11`；仿真环境 `/opt/map-update/venvs/simulation`；转换环境 `/opt/map-update/venvs/womd-convert`（TF CPU2.15.1/protobuf3.20.3/numpy1.26.4）。源码由Mac git archive上传解压到 `/opt/map-update/source-main`，无.git；MetaDrive assets0.4.3已安装。NFS解压Python曾Permission denied，本地/opt放运行工具；GitHub DNS曾失败，Mac可拉取后只上传改动文件。libGL等系统库已安装。
+
+用户回传：scene0=41600af30ab8cc55原生28项通过。scene1=2aa43fad083efbf3和scene2=eb073968f66914c7原回放/非采集车单双接管通过、背景误差0，但采集车固定刹车偏差断言失败；各有34/24行逐帧接触，不是独立碰撞次数。两场景不能改称通过，也未接真实Planning或网页。
+
+本轮修正 `scripts/check_recorded_takeover.py`：按当前速度选择测试刺激（>1m/s刹车，否则0.3油门）；仍要求偏离原轨迹>1cm，油门另要求实际位移>5cm，不降低/删除断言。失败分支现在也保存初速、动作、原轨迹路程、逐帧状态、偏差/接触和异常。静止合成夹具复现旧失败，新版通过，零动作故障注入仍失败；原官方运动样例也回归。不是两个新真实场景已经验证修复，仍需用户更新单文件重跑。8项相关单测通过；不声称本轮重跑整个旧回归套件。
+
+下一步：只传更新的验证脚本到宽恒云（无需重新打包408MB仓库）；批量重跑scene1/2读完整报告。确认状态后继续网页场景选择/原车ID接管，不再反复逐条问用户是否继续。
+
+---
+
 # 当前开发进度（2026-11-16：真实场景回放与逐车接管，覆盖旧随机交通优先级）
 
 本条覆盖下方旧阶段优先级。用户负责真实数据环境、地图、逐车接管/观测接口与验证；Planning、预测、控制算法由同学负责。暂不以随机交通生成/长期停滞修复为主线，旧证据保留，不宣称旧问题已解决。

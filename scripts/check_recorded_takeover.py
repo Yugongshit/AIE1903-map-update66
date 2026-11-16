@@ -20,6 +20,19 @@ def comparable(observation):
     return result
 
 
+def probe_actions(observation, keys):
+    """Test stimulus from current speed only; never a driving/planning policy."""
+    return {key: [0., -1. if math.hypot(*observation['objects'][key]['velocity_m_s']) > 1. else .3]
+            for key in keys}
+
+
+def check_result(report, name, condition):
+    if not condition:
+        report.setdefault('failed_checks', []).append(name)
+        raise AssertionError(name)
+    report['checks'].append(name)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--database', type=Path, required=True, help='Trusted pickle database only')
@@ -37,9 +50,7 @@ def main():
                   sample_source='user_selected_trusted_ScenarioNet_database', checks=[], branches=[],
                   input_sha256={p.name:sha256(p.read_bytes()).hexdigest() for p in sorted(args.database.glob('*.pkl'))})
     def check(name, condition):
-        if not condition:
-            raise AssertionError(name)
-        report['checks'].append(name)
+        check_result(report, name, condition)
     baseline = {}
     session = None
     try:
@@ -83,6 +94,17 @@ def main():
                           and all(session._valid(k, t) for t in range(10, 31))]
             check('moving_valid_vehicle_candidates_exist', len(candidates) >= count)
             keys = candidates[:count] if count else [session.sdc]
+            actions = probe_actions(before, keys)
+            branch = dict(controlled=keys, takeover_step=10, final_step=10, completed=False,
+                action_source='test_only_current_speed_brake_or_throttle_not_Planning', actions=actions,
+                initial_speed_m_s={k:math.hypot(*before['objects'][k]['velocity_m_s']) for k in keys},
+                initial_objects={k:deepcopy(before['objects'][k]) for k in keys},
+                original_final_objects={k:deepcopy(baseline[30]['objects'][k]) for k in keys},
+                original_path_length_m={k:sum(math.dist(baseline[t]['objects'][k]['position_m'],
+                    baseline[t+1]['objects'][k]['position_m']) for t in range(10,30)) for k in keys},
+                trace=[], contacts=[],
+                collision_interpretation='strict replay is nonreactive; no automatic planner fault attribution')
+            report['branches'].append(branch)
             session.takeover(keys)
             after = session.observe()
             for key in keys:
@@ -96,22 +118,32 @@ def main():
             try: session.return_to_replay(keys)
             except ValueError: pass
             else: raise AssertionError('live teleport back permitted')
-            max_error = 0.; contacts = []
+            max_error = 0.; contacts = branch['contacts']
             for _ in range(20):
-                observation = session.advance({k:[0.,-1.] for k in keys}, observation_step=session.step)
+                observation = session.advance(actions, observation_step=session.step)
+                branch['final_step'] = session.step
+                branch['trace'].append(dict(step=session.step,
+                    objects={k:deepcopy(observation['objects'][k]) for k in keys}))
                 max_error = max(max_error, session.replay_error())
                 contacts.extend(dict(step=session.step, actor=k, contacts=v)
                                 for k,v in session.contacts().items() if v)
+            deviation = {k:math.dist(observation['objects'][k]['position_m'],baseline[30]['objects'][k]['position_m']) for k in keys}
+            displacement = {k:math.dist(observation['objects'][k]['position_m'],before['objects'][k]['position_m']) for k in keys}
+            branch.update(completed=True, deviation_from_log_m=deviation,
+                          displacement_from_start_m=displacement, background_max_position_error_m=max_error)
+            # Evidence is persisted before assertions, including a failed SDC branch.
             check(f'{label}_physical_map_unchanged', feature_sha256(session.scenario['map_features']) == physical_map_hash)
             check(f'{label}_background_stays_strict_replay', max_error < .001)
-            deviation = {k:math.dist(observation['objects'][k]['position_m'],baseline[30]['objects'][k]['position_m']) for k in keys}
-            check(f'{label}_external_brake_changes_trajectory', all(v > .01 for v in deviation.values()))
-            report['branches'].append(dict(controlled=keys, takeover_step=10, final_step=30,
-                action_source='test_only_constant_brake_not_Planning', deviation_from_log_m=deviation,
-                background_max_position_error_m=max_error, contacts=contacts,
-                collision_interpretation='strict replay is nonreactive; no automatic planner fault attribution'))
+            check(f'{label}_external_action_changes_trajectory', all(v > .01 for v in deviation.values()))
+            throttle_keys = [k for k in keys if actions[k][1] > 0]
+            if throttle_keys:
+                check(f'{label}_low_speed_throttle_produces_motion',
+                      all(displacement[k] > .05 for k in throttle_keys))
             session.close(); session = None
         report['passed'] = True
+    except Exception as error:
+        report['error'] = dict(type=type(error).__name__, message=str(error))
+        raise
     finally:
         if session is not None: session.close()
         (args.out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
