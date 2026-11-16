@@ -1,5 +1,7 @@
 # 道路地图结构变更与状态事件
 
+**2026-11-16 新优先级：真实数据回放 → 原记录车辆接管 → Planning 验证。** 已有独立 Python 开发入口和 Waymo 官方转换样例验证；尚未接入网页或真实 Planning，样例不作为独立测试。见[接管入口与数据获取边界](docs/recorded_takeover.md)及最新接续记录。旧随机交通问题保留，暂不作为主线。
+
 当前版本使用 **main** 分支，包含地图处理应用、成员原始交付及 Planning 代码。网页发布在 `gh-pages`。
 
 **公网静态地图审阅：** [直接打开地图审阅](https://yugongshit.github.io/AIE1903-map-update66/simulation/)，同伴无需安装依赖。实时交通需要独立运行 MetaDrive 后端，目前没有已部署的公网实时仿真服务。当前以自动背景交通为重点，ego/P0 等待真实外部 Planning 并保持制动；人工驾驶与多人操作后置。[公网与服务器部署说明](docs/public_simulation.md)。

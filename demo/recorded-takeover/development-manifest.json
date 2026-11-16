@@ -1,0 +1,46 @@
+{
+  "schema": "recorded-scene-splits-1",
+  "source_url": "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-0.4.3/assets.zip",
+  "source_kind": "official_simulator_converted_examples_not_new_raw_WOMD_download",
+  "raw_womd_release": "unverified",
+  "development": [
+    {
+      "file": "sd_training.tfrecord-00000-of-01000_2a1e44d405a6833f.pkl",
+      "sha256": "c146db2e589caec1b5a943dfb28c63344d9620b54defb3dafc4b063ebbe10fc2",
+      "scene_id": "2a1e44d405a6833f",
+      "frames": 91,
+      "format": "MetaDrive v0.3.0.1",
+      "track_count": 211,
+      "map_feature_count": 358,
+      "signal_count": 8,
+      "source_group": "training.tfrecord-00000-of-01000"
+    },
+    {
+      "file": "sd_training.tfrecord-00000-of-01000_8a346109094cd5aa.pkl",
+      "sha256": "4e1d300106d8d4ad84ab48946398394a1645627967c25614e4ff4e17b1c7e7c5",
+      "scene_id": "8a346109094cd5aa",
+      "frames": 91,
+      "format": "MetaDrive v0.3.0.1",
+      "track_count": 115,
+      "map_feature_count": 640,
+      "signal_count": 19,
+      "source_group": "training.tfrecord-00000-of-01000"
+    },
+    {
+      "file": "sd_training.tfrecord-00000-of-01000_c403d5992cab9e0.pkl",
+      "sha256": "2570afc32e1396c3f7cab687a60cb54113d519969f560f9b9fa9cf0111961f83",
+      "scene_id": "c403d5992cab9e0",
+      "frames": 91,
+      "format": "MetaDrive v0.3.0.1",
+      "track_count": 138,
+      "map_feature_count": 378,
+      "signal_count": 8,
+      "source_group": "training.tfrecord-00000-of-01000"
+    }
+  ],
+  "validation": [],
+  "test": [],
+  "test_status": "not_selected_or_claimed_independent",
+  "split_rule": "Group source segment and nearby/overlapping recordings; never split adjacent frames. All bundled examples are development only. Freeze independently acquired scene IDs, source groups and hashes before evaluation.",
+  "license_status": "Dataset terms remain separate from code license; no dataset files redistributed in this repository."
+}

@@ -1,0 +1,272 @@
+{
+  "passed": true,
+  "purpose": "development_interface_check_not_Planning_evaluation",
+  "sample_source": "user_selected_trusted_ScenarioNet_database",
+  "checks": [
+    "all_valid_recorded_participants_present_each_frame",
+    "full_record_replay_position_error_below_1mm",
+    "record_end_stops_without_extra_tick",
+    "1_actor_branch_reconstructs_original_start",
+    "moving_valid_vehicle_candidates_exist",
+    "1_actor_332_identity_pose_velocity_continuity",
+    "rejected_batch_does_not_advance_clock",
+    "rejected_batch_does_not_advance_clock",
+    "1_actor_physical_map_unchanged",
+    "1_actor_background_stays_strict_replay",
+    "1_actor_external_brake_changes_trajectory",
+    "2_actor_branch_reconstructs_original_start",
+    "moving_valid_vehicle_candidates_exist",
+    "2_actor_332_identity_pose_velocity_continuity",
+    "2_actor_333_identity_pose_velocity_continuity",
+    "rejected_batch_does_not_advance_clock",
+    "rejected_batch_does_not_advance_clock",
+    "2_actor_physical_map_unchanged",
+    "2_actor_background_stays_strict_replay",
+    "2_actor_external_brake_changes_trajectory",
+    "sdc_actor_branch_reconstructs_original_start",
+    "moving_valid_vehicle_candidates_exist",
+    "sdc_actor_1629_identity_pose_velocity_continuity",
+    "rejected_batch_does_not_advance_clock",
+    "rejected_batch_does_not_advance_clock",
+    "sdc_actor_physical_map_unchanged",
+    "sdc_actor_background_stays_strict_replay",
+    "sdc_actor_external_brake_changes_trajectory"
+  ],
+  "branches": [
+    {
+      "controlled": [
+        "332"
+      ],
+      "takeover_step": 10,
+      "final_step": 30,
+      "action_source": "test_only_constant_brake_not_Planning",
+      "deviation_from_log_m": {
+        "332": 16.161692668145086
+      },
+      "background_max_position_error_m": 0.0,
+      "contacts": [],
+      "collision_interpretation": "strict replay is nonreactive; no automatic planner fault attribution"
+    },
+    {
+      "controlled": [
+        "332",
+        "333"
+      ],
+      "takeover_step": 10,
+      "final_step": 30,
+      "action_source": "test_only_constant_brake_not_Planning",
+      "deviation_from_log_m": {
+        "332": 16.161692668145086,
+        "333": 13.137574004015532
+      },
+      "background_max_position_error_m": 0.0,
+      "contacts": [
+        {
+          "step": 25,
+          "actor": "333",
+          "contacts": [
+            {
+              "object_id": "342",
+              "native_object_id": "5318e835-163d-4921-8e99-0db8cb8e1d02",
+              "mode": "recorded_replay",
+              "step": 25,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.09229779243469238
+            }
+          ]
+        },
+        {
+          "step": 25,
+          "actor": "342",
+          "contacts": [
+            {
+              "object_id": "333",
+              "native_object_id": "254ff3c0-d0c3-40d7-aa76-657110b3f776",
+              "mode": "external",
+              "step": 25,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.09229779243469238
+            }
+          ]
+        },
+        {
+          "step": 26,
+          "actor": "333",
+          "contacts": [
+            {
+              "object_id": "342",
+              "native_object_id": "5318e835-163d-4921-8e99-0db8cb8e1d02",
+              "mode": "recorded_replay",
+              "step": 26,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.17645956575870514
+            }
+          ]
+        },
+        {
+          "step": 26,
+          "actor": "342",
+          "contacts": [
+            {
+              "object_id": "333",
+              "native_object_id": "254ff3c0-d0c3-40d7-aa76-657110b3f776",
+              "mode": "external",
+              "step": 26,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.17645956575870514
+            }
+          ]
+        },
+        {
+          "step": 27,
+          "actor": "333",
+          "contacts": [
+            {
+              "object_id": "342",
+              "native_object_id": "5318e835-163d-4921-8e99-0db8cb8e1d02",
+              "mode": "recorded_replay",
+              "step": 27,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.1814306378364563
+            }
+          ]
+        },
+        {
+          "step": 27,
+          "actor": "342",
+          "contacts": [
+            {
+              "object_id": "333",
+              "native_object_id": "254ff3c0-d0c3-40d7-aa76-657110b3f776",
+              "mode": "external",
+              "step": 27,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.1814306378364563
+            }
+          ]
+        },
+        {
+          "step": 28,
+          "actor": "333",
+          "contacts": [
+            {
+              "object_id": "342",
+              "native_object_id": "5318e835-163d-4921-8e99-0db8cb8e1d02",
+              "mode": "recorded_replay",
+              "step": 28,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.14785832166671753
+            }
+          ]
+        },
+        {
+          "step": 28,
+          "actor": "342",
+          "contacts": [
+            {
+              "object_id": "333",
+              "native_object_id": "254ff3c0-d0c3-40d7-aa76-657110b3f776",
+              "mode": "external",
+              "step": 28,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.14785832166671753
+            }
+          ]
+        },
+        {
+          "step": 29,
+          "actor": "333",
+          "contacts": [
+            {
+              "object_id": "342",
+              "native_object_id": "5318e835-163d-4921-8e99-0db8cb8e1d02",
+              "mode": "recorded_replay",
+              "step": 29,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.05872266739606857
+            }
+          ]
+        },
+        {
+          "step": 29,
+          "actor": "342",
+          "contacts": [
+            {
+              "object_id": "333",
+              "native_object_id": "254ff3c0-d0c3-40d7-aa76-657110b3f776",
+              "mode": "external",
+              "step": 29,
+              "normal_impulse_ns": 0.0,
+              "distance_m": -0.05872266739606857
+            }
+          ]
+        },
+        {
+          "step": 30,
+          "actor": "333",
+          "contacts": [
+            {
+              "object_id": "342",
+              "native_object_id": "5318e835-163d-4921-8e99-0db8cb8e1d02",
+              "mode": "recorded_replay",
+              "step": 30,
+              "normal_impulse_ns": 113.33068656921387,
+              "distance_m": -0.03633841127157211
+            }
+          ]
+        },
+        {
+          "step": 30,
+          "actor": "342",
+          "contacts": [
+            {
+              "object_id": "333",
+              "native_object_id": "254ff3c0-d0c3-40d7-aa76-657110b3f776",
+              "mode": "external",
+              "step": 30,
+              "normal_impulse_ns": 113.33068656921387,
+              "distance_m": -0.03633841127157211
+            }
+          ]
+        }
+      ],
+      "collision_interpretation": "strict replay is nonreactive; no automatic planner fault attribution"
+    },
+    {
+      "controlled": [
+        "1629"
+      ],
+      "takeover_step": 10,
+      "final_step": 30,
+      "action_source": "test_only_constant_brake_not_Planning",
+      "deviation_from_log_m": {
+        "1629": 16.637981499164535
+      },
+      "background_max_position_error_m": 0.0,
+      "contacts": [],
+      "collision_interpretation": "strict replay is nonreactive; no automatic planner fault attribution"
+    }
+  ],
+  "input_sha256": {
+    "dataset_summary.pkl": "ee085d786c5887a481479794ec5d466328f11f8d3d115796e9ecf03fed2ecbd5",
+    "sd_training.tfrecord-00000-of-01000_2a1e44d405a6833f.pkl": "c146db2e589caec1b5a943dfb28c63344d9620b54defb3dafc4b063ebbe10fc2",
+    "sd_training.tfrecord-00000-of-01000_8a346109094cd5aa.pkl": "4e1d300106d8d4ad84ab48946398394a1645627967c25614e4ff4e17b1c7e7c5",
+    "sd_training.tfrecord-00000-of-01000_c403d5992cab9e0.pkl": "2570afc32e1396c3f7cab687a60cb54113d519969f560f9b9fa9cf0111961f83"
+  },
+  "scene_id": "2a1e44d405a6833f",
+  "length": 91,
+  "dataset": "waymo",
+  "scenario_format": "MetaDrive v0.3.0.1",
+  "physical_map_sha256": "273ef0eb21ad951b1157e525e3b0e3961d7167fbe77f27170cd5df6ad8afef96",
+  "baseline_max_position_error_m": 0.0,
+  "tested_code_sha256": {
+    "map_update/recorded_takeover.py": "71de40d417aed1c2fd3a00d7fe48cd843923264198eaa390fc2ab1dc3e8f1ebb",
+    "scripts/check_recorded_takeover.py": "1ed3d9b7fb7002991122a73b6824014e4b9221649b240742be8bccc419f24b67"
+  },
+  "base_commit": "e9d953fe30df36453480091da34274a916104290",
+  "runtime": {
+    "python": "3.11.18",
+    "metadrive": "0.4.3",
+    "execution": "Codex native CPU/Bullet; not Kuanheng cloud deployment"
+  }
+}
