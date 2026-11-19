@@ -10,6 +10,7 @@ import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from .recorded_takeover import action_batch
+from .evidence_intake import prepare_evidence, road_state_layer, require_identity
 from .simulation_bridge import feature_sha256, json_value
 
 
@@ -32,6 +33,8 @@ class RecordedService:
         self.history = deque(maxlen=history_frames)
         self.deadline = None
         self.revision = 0
+        self.evidence = {}
+        self.receipts = {}
         self.fault = None
         self._capture()
         self._record('open', self.snapshot())
@@ -48,6 +51,10 @@ class RecordedService:
     def _capture(self):
         self.revision += 1
         observation = self.session.observe()
+        layer = road_state_layer(self.evidence,
+                                 cutoff_ns=round(observation['simulation_time_s'] * 1_000_000_000),
+                                 coordinate_frame=observation['coordinate_frame'])
+        observation.update(road_state_version=feature_sha256(layer), road_states=layer)
         observation.update(session_id=self.session_id, scene_id=str(self.session.scenario['id']),
                            map_version=self.map_version,
                            state_version=f'{self.session_id}:{self.revision}')
@@ -77,6 +84,45 @@ class RecordedService:
             raise ValueError('State version mismatch')
         if type(body.get('observation_step')) is not int or body['observation_step'] != self.session.step:
             raise ValueError('Observation step must match the current frame')
+
+    def evidence_update(self, body):
+        allowed = {'submission_id', 'session_id', 'scene_id', 'map_version',
+                   'state_version', 'observation_step', 'time_basis', 'events'}
+        if set(body) - allowed:
+            raise ValueError('Unknown evidence envelope fields')
+        submission_id = body.get('submission_id')
+        require_identity(submission_id, 'submission_id')
+        fingerprint = feature_sha256(body)
+        if submission_id in self.receipts:
+            receipt = self.receipts[submission_id]
+            if receipt['fingerprint'] != fingerprint:
+                raise ValueError('submission_id already identifies different content')
+            return deepcopy(receipt['result'])
+        self._check(body)
+        if body.get('time_basis') != 'simulation_time_ns':
+            raise ValueError('Explicit simulation_time_ns time basis is required')
+        current = self.history[-1]
+        if body.get('scene_id') != current['scene_id']:
+            raise ValueError('Evidence scene_id mismatch')
+        candidate = prepare_evidence(
+            self.evidence, body.get('events'),
+            cutoff_ns=round(current['simulation_time_s'] * 1_000_000_000),
+            coordinate_frame=current['coordinate_frame'])
+        for event in candidate.values():
+            for alias in event.get('map_aliases', []):
+                if alias['map_element_id'] not in self.map:
+                    raise ValueError('Unknown map_element_id')
+        self._record('evidence_intent', body)
+        self.evidence = candidate
+        try:
+            self._capture()
+            result = dict(submission_id=submission_id, observation=self.snapshot())
+            self._record('evidence_accepted', result)
+        except Exception:
+            self.fault = self.fault or 'evidence_publish_failed'
+            raise
+        self.receipts[submission_id] = dict(fingerprint=fingerprint, result=deepcopy(result))
+        return result
 
     def takeover(self, body):
         self._check(body)
@@ -132,6 +178,11 @@ class RecordedService:
     def read(self, path):
         if path == '/observation':
             return self.snapshot()
+        if path == '/road-states':
+            current = self.snapshot()
+            return {key:current[key] for key in
+                    ('session_id', 'scene_id', 'step', 'simulation_time_s', 'map_version',
+                     'state_version', 'road_state_version', 'road_states', 'service_stopped')}
         if path == '/map':
             current = self.snapshot()
             return dict(session_id=self.session_id, scene_id=current['scene_id'],
@@ -181,7 +232,7 @@ class RecordedHandler(BaseHTTPRequestHandler):
             if not mutation:
                 result = self.server.service.read(self.path)
             else:
-                if self.path not in ('/takeover', '/advance'):
+                if self.path not in ('/takeover', '/advance', '/evidence'):
                     raise KeyError(self.path)
                 if self.headers.get('Transfer-Encoding'):
                     raise ValueError('Transfer-Encoding is unsupported')
@@ -191,7 +242,8 @@ class RecordedHandler(BaseHTTPRequestHandler):
                 body = json.loads(self.rfile.read(size))
                 if not isinstance(body, dict):
                     raise ValueError('Expected a JSON object')
-                method = getattr(self.server.service, self.path[1:])
+                method_name = 'evidence_update' if self.path == '/evidence' else self.path[1:]
+                method = getattr(self.server.service, method_name)
                 result = method(body)
             self._reply(200, result)
         except PermissionError as error:

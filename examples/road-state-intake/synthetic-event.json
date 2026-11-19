@@ -1,0 +1,25 @@
+{
+  "event_id": "synthetic-closure-1",
+  "source_object_id": "synthetic-cone-group-1",
+  "change_type": "temporary_lane_occupancy",
+  "map_layer": {"predicted_layer": "map_state_event"},
+  "reliability": {"status": "supported_conflict"},
+  "coordinate_reference": {"frame": "MetaDrive centralized scenario XY, metres", "units": "m"},
+  "score_semantics": "Synthetic integration-test quality score; uncalibrated and not a probability",
+  "unknown_fields": ["real_world_persistence"],
+  "map_aliases": [],
+  "ttl_s": 0.2,
+  "samples": [
+    {
+      "timestamp_ns": "0",
+      "observation": "supports_change",
+      "quality": 0.8,
+      "fully_observed": false,
+      "source_ids": ["synthetic-test-frame-0"],
+      "geometry_city": {
+        "type": "Polygon",
+        "coordinates": [[[0, 0], [2, 0], [2, 1], [0, 1], [0, 0]]]
+      }
+    }
+  ]
+}

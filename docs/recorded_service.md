@@ -30,12 +30,14 @@ python scripts/run_recorded_service.py \
 | 请求 | 行为 |
 |---|---|
 | GET /observation | 当前场景、会话、帧、记录时间、仿真时间、地图版本、状态版本、当前对象与信号 |
+| GET /road-states | 当前道路附着状态、来源、有效性及独立版本 |
+| POST /evidence | 原子接收道路状态证据并支持完全相同请求的幂等重试 |
 | GET /map | 首次获取静态地图，后续按 map_version 复用，坐标系同当前观测 |
 | GET /history | 最近已发生的有限状态窗口，最大帧为 through_step |
 | POST /takeover | 为 actor_ids 中的源车辆取得控制权，返回逐车 control_tokens 和新 observation |
 | POST /advance | 校验所有受控车的动作后统一推进一个0.1秒物理步 |
 
-两种 POST 均要求 session_id、map_version、state_version、observation_step，从最新 observation 原样复制。接管改变控制模式，即使帧号相同也生成新 state_version。旧快照不能继续提交。GET 不延长动作期限，也不推进物理。
+接管与动作 POST 均要求 session_id、map_version、state_version、observation_step，从最新 observation 原样复制。接管改变控制模式，即使帧号相同也生成新 state_version。旧快照不能继续提交。GET 不延长动作期限，也不推进物理。
 
 接管额外字段为 actor_ids 字符串列表。动作额外字段为 actions 和 control_tokens，两者的键必须恰好覆盖全部已接管车辆。actions 中每项沿用 [steering, throttle]，均为 [-1, 1] 内有限数值，负 throttle 表示制动。原记录阶段使用两个空字典推进。
 
@@ -87,7 +89,7 @@ events.jsonl 持久写入启动快照、接管意图和结果、动作意图与�
 
 ## 三类数据与上游接入约定
 
-以下是后续地图维护接入所需字段约定，当前HTTP服务只发布记录场景的静态地图、信号和参与者状态。道路附着状态的增删改接口及上游证据提交接口仍待实现。
+道路附着状态与上游证据接收已接入当前HTTP服务，详见 [道路状态接入文档](road_state_intake.md)。以下结构补丁和规划轨迹字段保留为后续约定。
 
 - 道路结构／规则补丁绑定 patch_id、base_map_version、对象ID、修改操作及前后几何，成功应用后发布新 map_version。
 - 道路附着状态绑定 event_id、道路或区域几何、valid_from、expires_at、解除依据及 evidence_ids，更新后发布独立 road_state_version。
@@ -104,4 +106,4 @@ python -m unittest discover -s tests -p 'test_recorded*.py' -v
 
 覆盖旧版本、旧帧、令牌冲突、完整动作批次、超时、有限历史、日志写入失败、部分物理失败和真实HTTP入口。原生检查还使用官方样例回放至第10帧，接管332与333，核验原实体和位姿连续性，推进至15帧并检查历史与持久日志。
 
-后续依次接入同学的轨迹与跟踪控制器、实时场景工作台、道路状态服务和地图输入配对实验。当前网页仍为此前离线审阅与旧平台，新服务提供API开发入口。
+后续接入真实上游数据、同学的轨迹与跟踪控制器、实时场景工作台、结构补丁在线发布和地图输入配对实验。当前网页仍为此前离线审阅与旧平台，新服务提供API开发入口。

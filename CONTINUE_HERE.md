@@ -1,3 +1,17 @@
+# 最新接续（2026-11-19：等待同学数据期间的道路状态接入准备）
+
+用户明确要求直接做代码准备，暂不处理宽恒云。基于366dd43的同步服务，新增 map_update/evidence_intake.py 与 POST /evidence、GET /road-states。上游道路状态证据经过场景、版本、坐标、仿真时间、来源、质量含义与几何校验后整批接受。未知或缺失不当作解除，显式时效产生stale，完整恢复证据产生cleared，复用原有state_events.py规则。
+
+观测新增road_states与road_state_version。接受证据会改变state_version，使同帧旧动作失效；旧帧历史保留当时状态。事件元数据和历史样本只读，更新以完整旧samples追加新观测。submission_id相同且请求完全相同时返回原收据，重试不会再次写入；收据有效范围是当前进程会话。日志落盘失败停止发布／冻结服务。
+
+合成输入样例位于 examples/road-state-intake/synthetic-event.json。明确使用simulation_time_ns和当前MetaDrive中央化XY坐标，真实数据到来后须做显式时空映射。接入说明与客户端示例见 docs/road_state_intake.md；原服务文档同步更新。接口要求上游已给出map_state_event及supported_conflict分类，质量分数含义由score_semantics说明，输出不称概率。
+
+验证：完整745项回归中744通过、1项原始场景fixture缺失跳过；新增10项证据接入测试全部通过，扩展的HTTP入口回归通过。
+
+本轮原生HTTP验证用MetaDrive官方开发样例加合成道路状态证据，接收并重试证据后，从第10帧双车接管推进到15帧，验证过期状态、3帧历史和持久日志。结果在 outputs/service-check-ad77d612/events.jsonl。真实同学数据、在线结构补丁、Planning轨迹跟踪及实时接管网页仍待接入。
+
+---
+
 # 最新接续（2026-11-19：记录场景同步 HTTP 服务）
 
 用户最新交接确认优先地图维护、真实记录回放、逐车接管、云端地图／状态服务及 Planning 验证。Planning 同学计划输出未来轨迹，目前尚未开始实现。轨迹需要接入跟踪控制器，具体格式和控制器责任待落实。

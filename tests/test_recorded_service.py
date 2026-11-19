@@ -136,6 +136,20 @@ class RecordedServiceTests(unittest.TestCase):
                 self.assertEqual(request('/advance', body)[1]['step'], 1)
                 self.assertEqual(request('/advance', body)[0], 409)
                 self.assertEqual(request('/observation')[1]['step'], 1)
+                event_path = Path(__file__).resolve().parents[1] / 'examples/road-state-intake/synthetic-event.json'
+                event = json.loads(event_path.read_text())
+                event['coordinate_reference']['frame'] = 'XY'
+                evidence = self.body(events=[event], scene_id='test-scene',
+                                     time_basis='simulation_time_ns', submission_id='http-evidence')
+                stale_action = self.body(actions={}, control_tokens={})
+                status, accepted = request('/evidence', evidence)
+                self.assertEqual(status, 200)
+                self.assertEqual(request('/evidence', evidence), (status, accepted))
+                layer = request('/road-states')[1]
+                self.assertEqual(len(layer['road_states']['features']), 1)
+                self.assertEqual(layer['road_state_version'],
+                                 request('/observation')[1]['road_state_version'])
+                self.assertEqual(request('/advance', stale_action)[0], 409)
             finally:
                 server.shutdown()
                 thread.join()
