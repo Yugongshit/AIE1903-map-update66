@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地图维护与场景接管工作台</title>
+<link rel="stylesheet" href="/recorded_workbench.css">
+<header>
+  <div><h1>地图维护与场景接管</h1><p id="connection">连接记录场景服务</p></div>
+  <form id="connect-form"><label>访问密钥 <input id="access-key" type="password" autocomplete="off" required></label><button>连接</button></form>
+</header>
+<main>
+  <section class="world">
+    <div class="toolbar">
+      <label>场景 <select id="scene"></select></label>
+      <label>原记录起始帧 <input id="start-step" type="number" value="0" min="0"></label>
+      <button id="open">新建原记录分支</button>
+      <button id="fit">全景</button><button id="top">俯视</button>
+    </div>
+    <div id="viewport"><div id="frame-info"></div><div id="legend">青色 原记录对象 · 紫色 外部控制 · 黄色 道路状态 · 橙色 规划意图</div></div>
+    <div class="toolbar">
+      <button id="step">推进一帧</button><button id="play">连续步进</button><button id="refresh">刷新状态</button>
+      <button id="resume">解除动作超时冻结</button>
+      <span id="status"></span>
+    </div>
+    <p class="note">画面使用源道路 XY 投影与当前状态框。拖动旋转，Shift＋拖动平移，滚轮缩放。外部控制后的运动属于反事实仿真。</p>
+    <div id="error" role="alert"></div>
+  </section>
+  <aside>
+    <section>
+      <h2>车辆与控制权</h2>
+      <label>按源 ID 搜索 <input id="actor-search" placeholder="车辆 ID"></label>
+      <div id="actors"></div>
+      <div class="row"><button id="select-all">选择当前车辆</button><button id="takeover">接管所选车辆</button></div>
+      <label>范围检查 <select id="coverage-policy"><option value="map_envelope">源地图包围范围</option><option value="source_lane_polygons">完整车身位于源车道多边形</option></select></label>
+      <label>观测权限 <select id="scope"><option value="global">理想全局状态</option><option value="radius">半径内理想状态</option></select></label>
+      <label>观测半径（米）<input id="radius" type="number" min="1" value="50"></label>
+      <h3>接线测试动作</h3>
+      <div class="row"><label>转向 <input id="steering" type="number" min="-1" max="1" step="0.1" value="0"></label><label>油门／制动 <input id="throttle" type="number" min="-1" max="1" step="0.1" value="-1"></label></div>
+      <p class="note">本页推进按钮向全部已接管车辆提交上述固定测试动作。连接真实 Planning 时停止本页步进，由协调客户端提交动作。</p>
+    </section>
+    <section>
+      <h2>地图与道路状态</h2>
+      <dl id="versions"></dl>
+      <label>导入 JSON <input id="payload-file" type="file" accept=".json,application/json"></label>
+      <label>数据内容 <textarea id="payload" rows="7" spellcheck="false" placeholder="粘贴道路状态 events 或地图 operations 与 provenance"></textarea></label>
+      <div class="row"><button id="evidence">提交道路状态证据</button><button id="structure-evidence">接收结构证据</button><button id="patch">发布地图补丁</button></div>
+      <label>历史地图版本 <select id="map-version"></select></label>
+      <button id="rollback">回滚为新版本</button>
+      <pre id="road-summary"></pre>
+    </section>
+    <section>
+      <h2>规划意图与实验</h2>
+      <label>规划车辆 <select id="plan-actor"></select></label>
+      <button id="submit-plan">提交上方 JSON 中的 plan</button>
+      <div class="row"><label>目标 X <input id="goal-x" type="number" step="any"></label><label>目标 Y <input id="goal-y" type="number" step="any"></label></div>
+      <button id="goal">检查并设置道路目标</button>
+      <pre id="task-result"></pre>
+      <button id="report">导出实验摘要</button>
+      <p class="note">规划轨迹是未来意图，实际状态由物理步进更新。轨迹跟踪通过外部控制器接口接入。</p>
+    </section>
+  </aside>
+</main>
+<script src="/three.min.js"></script>
+<script src="/recorded_workbench.js"></script>
+</html>

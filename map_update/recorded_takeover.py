@@ -6,6 +6,8 @@ ScenarioNet databases contain Python pickle files.
 """
 from copy import deepcopy
 import math
+from hashlib import sha256
+from pathlib import Path
 
 from .simulation_interactive import checked_action
 
@@ -43,6 +45,10 @@ class RecordedTakeoverSession:
         self.branch = None
         try:
             self.env.reset(seed=index)
+            from metadrive.scenario.utils import read_dataset_summary
+            _, lookup, mapping = read_dataset_summary(str(database))
+            source_file = Path(database) / mapping[lookup[index]] / lookup[index]
+            self.source_sha256 = sha256(source_file.read_bytes()).hexdigest()
             self.scenario = self.env.engine.data_manager.current_scenario
             self.sdc = str(self.scenario['metadata']['sdc_id'])
             points = [p for f in self.scenario['map_features'].values()

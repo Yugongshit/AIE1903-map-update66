@@ -80,4 +80,4 @@ python -m unittest discover -s tests -p 'test_recorded_service.py' -v
 
 测试覆盖整批失败、幂等重试、帧／坐标校验、证据来源、旧历史保护、未知与过期、显式解除、日志失败和HTTP入口。原生HTTP接线验证使用官方MetaDrive开发样例与合成道路状态证据，属于接口验证。
 
-基础地图结构补丁在线发布、真实上游数据适配和同学Planning联调仍是后续工作。
+基础地图结构补丁在线发布及显式坐标／时间适配工具已实现，见 [开发准备与验收](huang_ziming_preparation.md)。真实上游字段和同学Planning算法仍需联调。
