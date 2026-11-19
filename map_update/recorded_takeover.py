@@ -82,7 +82,10 @@ class RecordedTakeoverSession:
                              type=self.scenario['tracks'][key]['type'],
                              position_m=[float(v) for v in obj.position[:2]],
                              velocity_m_s=[float(v) for v in obj.velocity[:2]],
-                             heading_rad=float(obj.heading_theta),
+                             heading_rad=float(obj.heading_theta), valid=True,
+                             dimensions_m={name: float(getattr(obj, name.upper()))
+                                           if getattr(obj, name.upper(), None) is not None else None
+                                           for name in ('length', 'width', 'height')},
                              mode='external' if key in self.controlled else 'recorded_replay')
         signals = {}
         for key, light in self.scenario['dynamic_map_states'].items():
